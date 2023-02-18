@@ -36,9 +36,12 @@ function initComplexDw() {
     addLineWithEnds(
         new THREE.Vector3(  1., 10., 0.),
         new THREE.Vector3(  1.,-10., 0.))
-    // addLineWithEnds(
-    //     new THREE.Vector3( -1., 10., 0.),
-    //     new THREE.Vector3( -1.,-10., 0.))
+    addLineWithEnds(
+        new THREE.Vector3( 0., 0., 0.),
+        new THREE.Vector3(1.2, 0., 0.))
+    addLineWithEnds(
+        new THREE.Vector3(0., 0., 0.),
+        new THREE.Vector3(0., 1.2, 0.))
 
     let circlePoints = []
     for(let i = 0; i < 32; ++i) {

@@ -24,7 +24,7 @@
 
  */
 
-dwVisibilityPermissions = {
+pageParameters = {
     untransformed: false,
     final: false,
     complex: true,

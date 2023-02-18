@@ -129,8 +129,8 @@ function initCamera() {
         // event.preventDefault()
     })
 
-    let cameraLat = -TAU * .05
-    let cameraLon = TAU * .05
+    let cameraLat = -TAU * .065
+    let cameraLon = TAU * .065
     addToCameraLonLat = (changeX, changeY) => {
         let lonDiff = -.006 * changeX
         lonDiff = Math.sign(lonDiff) * (Math.min(Math.abs(lonDiff), 1.8))

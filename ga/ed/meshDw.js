@@ -69,8 +69,12 @@ function initStaticObj() {
     let texture
 
     function whenBothLoaded() {
+        if(geo === undefined)
+            console.error("you probably need to connect to the internet!")
+
         geo.scale(1.9, 1.9, 1.9)
         geo.rotateY(TAU * .5)
+        geo.translate(0.,-.1,0.)
         
         initialMeshData = geo.attributes
         

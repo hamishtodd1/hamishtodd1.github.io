@@ -3,7 +3,7 @@ uniform vec2 mouse;
 
 vec4 getChangedVertex(in vec4 initialVertex) {
     
-    Dq R = Dq(.28, 0.,0.,.2, 0.,0.,0.,  0.);
+    Dq R = Dq(.28, 0.,0.,0., .2,0.,0.,  1.);
 
     Plane myPlane = Plane(0.,1.,0.,0.);
 

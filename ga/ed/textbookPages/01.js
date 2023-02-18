@@ -1,0 +1,25 @@
+pageParameters = {
+    untransformed: true,
+    final: true,
+    complex: false,
+    euclidean: false,
+    infinity: true,
+    scalar: false,
+    vectorSpace: false //could have it
+}
+
+textareaValueDefault = `vec4 getChangedVertex(in vec4 initialVertex) {
+
+    //Dq example = Quat(0.,0.96,0.28,0.);
+    
+    //vec3 directionVector = vec3( 1.,1.,0. );
+    //apply( example, directionVector );
+    
+    //Dq i = Quat(1.,0.,0.,0.);
+    //Dq j = Quat(0.,1.,0.,0.);
+    //Dq k = Quat(0.,0.,1.,0.);
+
+    vec4 ret = initialVertex; //apply( i, initialVertex );
+    
+    return ret;
+}`

@@ -23,10 +23,11 @@ for i in range(1,99):
         num = '0' + num
 
     try:
-        infixFile = open( './' + num + '.html', 'r' )
+        infixFile = open( './' + num + '.js', 'r' )
     except FileNotFoundError:
         break
     else:
+        print(num)
         infix = infixFile.read()
 
         raw = prefix + '\n<script>\n' + infix + '\n</script>\n' + postfix
@@ -36,8 +37,8 @@ for i in range(1,99):
             '<link rel="stylesheet" href="',
             '<link rel="stylesheet" href="../')
         
-        output = open( num + 'G.html', 'w')
-        output.write(withRelativeLinks)
+        output = open( num + '.html', 'w+')
+        output.write( withRelativeLinks )
         output.close()
 
         print(num + " generated")

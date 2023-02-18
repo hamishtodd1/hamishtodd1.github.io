@@ -42,6 +42,7 @@ function initVec3s() {
                     // camera.scalesToChange.push(this.#boxLines[i][j].scale)
                 }
             }
+            
             // let self = this
             // camera.whenZoomChangeds.push((amt)=>{
                 // dashedLineMat.dashSize *= amt

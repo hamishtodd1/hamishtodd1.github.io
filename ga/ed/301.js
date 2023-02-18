@@ -290,7 +290,7 @@ function init301WithoutDeclarations(basisNames) {
             thisNormalized.copy(this).normalize()
 
             let quadreflection = newMv
-            quadreflection[15] = thisNormalized[7]
+            thisNormalized.selectGrade(4, quadreflection)
 
             let bireflection = newMv
             thisNormalized.selectGrade( 2, bireflection )

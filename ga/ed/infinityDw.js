@@ -30,7 +30,7 @@ function initInfinityDw()
     //and the labels for the directions
     let names = [`x`,`y`,`z`]
     for(let i = 0; i < 3; ++i) {
-        for(let j = 0; j < 2; ++j) {
+        for(let j = 0; j < 1; ++j) { //could have - ones as well
             let name = (j === 0 ? `+` : `-`) + names[i]
 
             let marker = text(name)

@@ -8,11 +8,13 @@ TODO
             Or could add "Quat". With ijk or xyz?
             And dual quaternion type with differently-named variables? =/
             Could call dual quaternion a "transform"
+        could try to be a bit more sophisticated with isGrabbedAndWoundBackward. When you grab identity and make it negative, it bounces
         minus sign with sandwich
         Only one appearance for each variable
             And injections go just before the line the caret is on
         One way of detecting whether a line only assigns to a variable is to see if any other variables are mentioned on it
         While you're changing stuff, annotations of all shit should be visible
+        "cycle colors" button
     Bugs
         Vectors are just broken with the animation on
         Probably worth checking over absolutely all e31 vs 13 shit
@@ -20,6 +22,9 @@ TODO
         Enter makes it so you can't ctrl+z
         the dual quaternion dragging takes account of duplicates. Point mention scalar should too, as should others
     GDC
+        When you grab from text display window, would be nice to see a thing that's where it thinks your cursor is
+        Make it so you can edit quats from the windows and it injects Quat() instead of Dq()
+        would be nice to have a different-colored line connecting you to your textareaManipulationDw
         Maybe the euclidean dw is the output window?
         Pointing at things in the initial window
         Pointing in the direction of the thing offscreen instead of just the frame
@@ -295,7 +300,7 @@ async function init( textareaValueDefault, hideInputAndOutputWindows = false) {
     initPoints()
     initPlanes()
     initFlecs()
-    initDqs()
+    initDqs() //could hide winding arrows
     initSkeletons()
 
     initMouseInteractions()
@@ -374,7 +379,7 @@ async function init( textareaValueDefault, hideInputAndOutputWindows = false) {
     compile(false)
     updateAppearanceVisibilitiesAndIndication()
 
-    setCaretPosition(390)
+    setCaretPosition(47)
     addToCameraLonLat(0., 0.)
     
     render()

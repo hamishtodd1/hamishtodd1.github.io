@@ -14,7 +14,7 @@ function initPlanes() {
     let iDw = dws.infinity
 
     let planeGeo = new THREE.CircleGeometry(1., 31)
-    let sphereGeo = new THREE.IcosahedronBufferGeometry(1., 5)
+    let sphereGeo = new THREE.IcosahedronBufferGeometry(.98, 5)
     let eNormWhenGrabbed = -1.
     let iNormWhenGrabbed = -1.
 

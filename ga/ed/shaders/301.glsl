@@ -11,40 +11,66 @@ struct Plane {
     float e0; float e1; float e2; float e3;
 };
 
+{
+    float x = 0; float y = 0; float z = 0; 
+    float w = 0;
+}
+
 struct Flec {
     float e0; float e1; float e2; float e3;
     float e021; float e013; float e032; float e123;
 };
 
 Dq Quat( in float x, in float y, in float z, in float w ) {
-    return Dq(w,  0.,0.,0., x,y,z,  0.);
+    return Dq(w,  0.,0.,0., z,y,x,  0.);
 }
 
-Dq Line( in float x, in float y, in float z) {
-    return Quat(x,y,z,0.);
+Dq Line( in float x, in float y, in float z, in float _e01, in float _e02, in float _e03) {
+    return Dq(0., _e01, _e02, _e03, z,y,x, 0. ); //SO NOTE: DIFFERENT XYZ ORDER FROM BARE DECLARATION OF DQ
+}
+
+Dq Translation( in float x, in float y, in float z, in float w ) {
+    return Dq(w,  0.,0.,0., x*.5,y*.5,z*.5,  0.);
 }
 
 
-
-//might be good to normalize afterwards
-Dq dqAdd(in Dq a, in Dq b) {
+Dq add(in Dq a, in Dq b) {
     return Dq( a.scalar+b.scalar, a.e01+b.e01, a.e02+b.e02, a.e03+b.e03, a.e12+b.e12, a.e31+b.e31, a.e23+b.e23, a.I+b.I );
 }
-Dq dqSub(in Dq a, in Dq b) {
+Dq sub(in Dq a, in Dq b) {
     return Dq( a.scalar-b.scalar, a.e01-b.e01, a.e02-b.e02, a.e03-b.e03, a.e12-b.e12, a.e31-b.e31, a.e23-b.e23, a.I-b.I );
 }
-Dq dqMultiplyScalar(in Dq a, in float b) {
+Dq mul(in Dq a, in float b) {
     return Dq( a.scalar * b, a.e01 * b, a.e02 * b, a.e03 * b, a.e12 * b, a.e31 * b, a.e23 * b, a.I * b );
 }
-// Dq reverse(in Dq a) {
-//     return Dq(a.scalar, -a.e01,-a.e02, -a.e03, -a.12, -a.e31, -a.e23, a.I );
-// }
-// void dqNormalize(inout Dq R) {
-//     float s = 1/sqrt((R.scalar*R.scalar + R.e12*R.e12 + R.e31*R.e31 + R.e23*R.e23));
-//     float d = (R.I*R.scalar - (R.e01*R.e23 + R.e02*R.e31 + R.e03*R.e12))*s*s;
-//     R = dqMultiplyScalar(R, s);
-//     R.e01 += R.e23*d; R.e02 += R.e31*d; R.e03 += R.e12*d; R.I -= R[0]*d;
-// }
+Dq mul(in float b, in Dq a) {
+    return Dq( a.scalar * b, a.e01 * b, a.e02 * b, a.e03 * b, a.e12 * b, a.e31 * b, a.e23 * b, a.I * b );
+}
+
+Plane add(in Plane a, in Plane b) {
+    return Plane( a.e0+b.e0, a.e1+b.e1, a.e2+b.e2, a.e3+b.e3 );
+}
+Plane sub(in Plane a, in Plane b) {
+    return Plane( a.e0-b.e0, a.e1-b.e1, a.e2-b.e2, a.e3-b.e3 );
+}
+Plane mul(in Plane a, in float b) {
+    return Plane( a.e0 * b, a.e1 * b, a.e2 * b, a.e3 * b );
+}
+Plane mul(in float b, in Plane a) {
+    return Plane( a.e0 * b, a.e1 * b, a.e2 * b, a.e3 * b );
+}
+
+Dq fastInverse(in Dq a) {
+    return Dq(a.scalar, -a.e01, -a.e02, -a.e03, -a.e12, -a.e31, -a.e23, a.I );
+}
+Dq normalizeQuat(inout Dq R) {
+    float s = 1./sqrt((R.scalar*R.scalar + R.e12*R.e12 + R.e31*R.e31 + R.e23*R.e23));
+    float d = (R.I*R.scalar - (R.e01*R.e23 + R.e02*R.e31 + R.e03*R.e12))*s*s;
+    R = mul(R, s);
+    R.e01 += R.e23*d; R.e02 += R.e31*d; R.e03 += R.e12*d; R.I -= R.scalar*d;
+
+    return R;
+}
 
 void planeToMv(in Plane p, out float[16] target) {
     for(int i = 0; i < 16; ++i)
@@ -54,22 +80,25 @@ void planeToMv(in Plane p, out float[16] target) {
     target[3] = p.e2;
     target[4] = p.e3;
 }
-void mvToPlane(in float[16] mv, out Plane target) {
-    target.e0 = mv[1];
-    target.e1 = mv[2];
-    target.e2 = mv[3];
-    target.e3 = mv[4];
+Plane mvToPlane(in float[16] mv) {
+    Plane ret;
+    ret.e0 = mv[1];
+    ret.e1 = mv[2];
+    ret.e2 = mv[3];
+    ret.e3 = mv[4];
+
+    return ret;
 }
 
-void mvFromVec(in vec3 v, out float[16] target) {
-    for(int i = 0; i < 16; ++i)
-        target[i] = 0.;
-    target[11] = v.z;
-    target[12] = v.y;
-    target[13] = v.x;
-    target[14] = 1.;
-}
-void mvFromVec(in vec4 v, out float[16] target) {
+// void vecToMv(in vec3 v, out float[16] target) {
+//     for(int i = 0; i < 16; ++i)
+//         target[i] = 0.;
+//     target[11] = v.z;
+//     target[12] = v.y;
+//     target[13] = v.x;
+//     target[14] = 0.;
+// }
+void vecToMv(in vec4 v, out float[16] target) {
     for(int i = 0; i < 16; ++i)
         target[i] = 0.;
     target[11] = v.z;
@@ -77,11 +106,13 @@ void mvFromVec(in vec4 v, out float[16] target) {
     target[13] = v.x;
     target[14] = v.w;
 }
-void vec4FromMv(in float[16] target, out vec4 v) {
-    v.z = target[11];
-    v.y = target[12];
-    v.x = target[13];
-    v.w = target[14];
+vec4 vec4FromMv(in float[16] target) {
+    vec4 ret;
+    ret.z = target[11];
+    ret.y = target[12];
+    ret.x = target[13];
+    ret.w = target[14];
+    return ret;
 }
 void dqToMv(in Dq ourDq, out float[16] target) {
     target[ 0] = ourDq.scalar;
@@ -91,15 +122,18 @@ void dqToMv(in Dq ourDq, out float[16] target) {
     target[11] = 0.;        target[12] = 0.;        target[13] = 0.;        target[14] = 0.;
     target[15] = ourDq.I;
 }
-void mvToDq(in float[16] mv, out Dq target) {
-    target.scalar= mv[ 0];
-    target.e01   = mv[ 5];
-    target.e02   = mv[ 6];
-    target.e03   = mv[ 7];
-    target.e12   = mv[ 8];
-    target.e31   = mv[ 9];
-    target.e23   = mv[10];
-    target.I = mv[15];
+Dq mvToDq(in float[16] mv) {
+    Dq ret;
+    ret.scalar= mv[ 0];
+    ret.e01   = mv[ 5];
+    ret.e02   = mv[ 6];
+    ret.e03   = mv[ 7];
+    ret.e12   = mv[ 8];
+    ret.e31   = mv[ 9];
+    ret.e23   = mv[10];
+    ret.I = mv[15];
+
+    return ret;
 }
 
 vec4 sandwichDqPoint(in Dq dq, in vec4 pt) {
@@ -107,14 +141,12 @@ vec4 sandwichDqPoint(in Dq dq, in vec4 pt) {
     dqToMv(dq,dqAsMv);
 
     float[16] ptAsMv;
-    mvFromVec(pt, ptAsMv);
+    vecToMv(pt, ptAsMv);
 
     float[16] retAsMv;
     sandwich(dqAsMv,ptAsMv,retAsMv);
     
-    vec4 ret;
-    vec4FromMv(retAsMv,ret);
-    return ret;
+    return vec4FromMv(retAsMv);
 }
 
 Dq sandwichDqDq(in Dq a, in Dq b) {
@@ -127,54 +159,58 @@ Dq sandwichDqDq(in Dq a, in Dq b) {
     float[16] retAsMv;
     sandwich(aAsMv, bAsMv, retAsMv);
     
-    Dq ret;
-    mvToDq(retAsMv,ret);
-    return ret;
+    return mvToDq(retAsMv);
 }
 
 Dq join(in vec4 a, in vec4 b) {
     float[16] aAsMv;
-    mvFromVec(a, aAsMv);
+    vecToMv(a, aAsMv);
     float[16] bAsMv;
-    mvFromVec(b, bAsMv);
+    vecToMv(b, bAsMv);
 
     float[16] retAsMv;
     join(aAsMv,bAsMv,retAsMv);
     
-    Dq ret;
-    mvToDq(retAsMv,ret);
-    return ret;
+    return mvToDq(retAsMv);
 }
 
 float sinc(in float a) {
     return a == 0. ? 1. : sin(a)/a;
 }
-void dqExp(in Dq B, out Dq target) {
-    float l = (B.e12*B.e12 + B.e31*B.e31 + B.e23*B.e23);  float m = (B.e01*B.e23 + B.e02*B.e31 + B.e03*B.e12);
-    float a = sqrt(l);                                    float b = m/l;
-    float c = cos(a);                                     float s = sinc(a); // if output is a translation, l=0, therefore c=1, s=0
+Dq dqExp(in Dq B) {
+    float linePartEuclideanNorm = (B.e12*B.e12 + B.e31*B.e31 + B.e23*B.e23);
+    if (linePartEuclideanNorm==0.)
+        return Dq(1., B.e01, B.e02, B.e03, 0., 0., 0., 0.);
+    float m = (B.e01*B.e23 + B.e02*B.e31 + B.e03*B.e12), a = sqrt(linePartEuclideanNorm), c = cos(a), s = sinc(a);
+    float t = (c-s)*m/linePartEuclideanNorm; //m is 0, c-s is 0
+    return Dq(c, s*B.e01 + t*B.e23, s*B.e02 + t*B.e31, s*B.e03 + t*B.e12, s*B.e12, s*B.e31, s*B.e23, m*s);
 
-    float t = b*(c-s); // 0 if translation
-
-    target =  Dq(
-        c,
-        s * B.e01 + t * B.e23,
-        s * B.e02 + t * B.e31,
-        s * B.e03 + t * B.e12,
-        s * B.e12,
-        s * B.e31,
-        s * B.e23,
-        s * m
-    );
+    //nneeds to be such that t == 0 and s == 1
 }
 
-Dq angleAndAxisVecToDq(in float angle, in vec3 axis) {
-    Dq axisDq = Dq(0., 0.,0.,0., angle * axis.z, angle * axis.y, angle * axis.x, 0.);
+Dq dqLog(in Dq m ) {
+    float a = 1./(1. - m.scalar*m.scalar);
+    float b = acos(m.scalar)*sqrt(a);
+    float c = a*m.I*(1. - m.scalar*b);
 
-    Dq ret;
-    dqExp(axisDq, ret);
-    return ret;
+    return Dq(
+        0.,
+        c*m.e23 + b*m.e01,
+        c*m.e31 + b*m.e02,
+        c*m.e12 + b*m.e03,
+        m.e12 * b, //if m.e11 == 1, m.e12, m.e31, m.e23 would all be 0 anyway
+        m.e31 * b,
+        m.e23 * b,
+        0. );
 }
+
+// Dq angleAndAxisVecToDq(in float angle, in vec3 axis) {
+//     Dq axisDq = Dq(0., 0.,0.,0., angle * axis.z, angle * axis.y, angle * axis.x, 0.);
+
+//     Dq ret;
+//     dqExp(axisDq, ret);
+//     return ret;
+// }
 
 //make sure to end with a newline!
 
@@ -248,29 +284,25 @@ vec4 meet(in Dq b, in Plane a) { //a dirty trick, swapping the arguments! This m
 
 Plane join(in vec4 a, in Dq b) {
     float[16] aAsMv;
-    mvFromVec(a, aAsMv);
+    vecToMv(a, aAsMv);
     float[16] bAsMv;
     dqToMv(b, bAsMv);
 
     float[16] retAsMv;
     join(aAsMv,bAsMv,retAsMv);
     
-    Plane ret;
-    mvToPlane(retAsMv,ret);
-    return ret;
+    return mvToPlane(retAsMv);
 }
 Plane join(in Dq a, in vec4 b) {
     float[16] aAsMv;
     dqToMv(a, aAsMv);
     float[16] bAsMv;
-    mvFromVec(b, bAsMv);
+    vecToMv(b, bAsMv);
 
     float[16] retAsMv;
     join(aAsMv,bAsMv,retAsMv);
     
-    Plane ret;
-    mvToPlane(retAsMv,ret);
-    return ret;
+    return mvToPlane(retAsMv);
 }
 
 
@@ -293,13 +325,116 @@ Plane join(in Dq a, in vec4 b) {
 //     return ret;
 // }
 
-vec3 applyQuat( in Dq m, in vec3 v ) {
+vec3 apply( in Dq m, in vec3 v ) {
     vec4 asVec4 = vec4(v,1.);
     vec4 retVec4 = sandwichDqPoint( m, asVec4 );
     return retVec4.xyz;
 }
-vec4 applyQuat( in Dq m, in vec4 p ) {
+vec4 apply( in Dq m, in vec4 p ) {
     return sandwichDqPoint( m, p );
 }
+
+//the transform goes first, the object second
+Dq apply( in Plane p, in Dq m) {
+    float[16] pAsMv;
+    planeToMv(p, pAsMv);
+
+    float[16] mAsMv;
+    dqToMv(m, mAsMv);
+
+    float[16] retAsMv;
+    sandwich(pAsMv, mAsMv, retAsMv);
+
+    return mvToDq(retAsMv);
+}
+Plane apply( in Dq m, in Plane p) {
+    float[16] pAsMv;
+    planeToMv(p, pAsMv);
+
+    float[16] mAsMv;
+    dqToMv(m, mAsMv);
+
+    float[16] retAsMv;
+    sandwich(mAsMv, pAsMv, retAsMv);
+
+    return mvToPlane(retAsMv);
+}
+
+Plane apply( in Plane p1, in Plane p2) {
+    float[16] p1AsMv;
+    planeToMv(p1, p1AsMv);
+
+    float[16] p2AsMv;
+    planeToMv(p2, p2AsMv);
+
+    float[16] retAsMv;
+    sandwich(p1AsMv, p2AsMv, retAsMv);
+
+    Plane ret = mvToPlane(retAsMv);
+    ret.e0 *= -.1;
+    ret.e1 *= -.1;
+    ret.e2 *= -.1;
+    ret.e3 *= -.1;
+
+    return ret;
+}
+
+Plane apply( in vec4 pt, in Plane p) {
+    float[16] pAsMv;
+    planeToMv(p, pAsMv);
+
+    float[16] ptAsMv;
+    vecToMv(pt, ptAsMv);
+
+    float[16] retAsMv;
+    sandwich(ptAsMv, pAsMv, retAsMv);
+
+    Plane ret = mvToPlane(retAsMv);
+    ret.e0 *= -.1;
+    ret.e1 *= -.1;
+    ret.e2 *= -.1;
+    ret.e3 *= -.1;
+
+    return ret;
+}
+
+vec4 apply( in Plane p, in vec4 pt) {
+    float[16] pAsMv;
+    planeToMv(p, pAsMv);
+
+    float[16] ptAsMv;
+    vecToMv(pt, ptAsMv);
+
+    float[16] retAsMv;
+    sandwich(pAsMv, ptAsMv, retAsMv);
+
+    vec4 ret = vec4FromMv(retAsMv);
+    ret.x *= -.1;
+    ret.y *= -.1;
+    ret.z *= -.1;
+    ret.w *= -.1;
+
+    return ret;
+}
+
+vec4 apply( in vec4 p1, in vec4 p2) {
+    float[16] p1AsMv;
+    vecToMv(p1, p1AsMv);
+
+    float[16] p2AsMv;
+    vecToMv(p2, p2AsMv);
+
+    float[16] retAsMv;
+    sandwich(p1AsMv, p2AsMv, retAsMv);
+
+    vec4 ret = vec4FromMv(retAsMv);
+    ret.x *= -.1;
+    ret.y *= -.1;
+    ret.z *= -.1;
+    ret.w *= -.1;
+
+    return ret;
+}
+
 
 `

@@ -142,7 +142,7 @@ async function initDws() {
             object3d.visible = false
             this.#scene.add(object3d)
 
-            if (!this.visible && dwVisibilityPermissions[keyOfProptInObject(this, dws)]) {
+            if (!this.visible && pageParameters[keyOfProptInObject(this, dws)]) {
                 this.visible = true
                 this.elem.style.display = ''
                 document.body.appendChild(this.elem)
@@ -158,9 +158,9 @@ async function initDws() {
             this.#scene.add(child)
 
             //surely only adding mention children should merit showing it?
-            // if (!this.visible && dwVisibilityPermissions[ keyOfProptInObject(this,dws) ]) {
+            // if (!this.visible && pageParameters[ keyOfProptInObject(this,dws) ]) {
             //     this.visible = true
-            //     this.elem.style.display = dwVisibilityPermissions[name] ? '' : 'none'
+            //     this.elem.style.display = pageParameters[name] ? '' : 'none'
             // }
         }
         removeNonMentionChild(child) {

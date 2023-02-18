@@ -60,6 +60,8 @@ function initInitialAndFinalDws() {
     const toVertexSuffix = toPointsPrefix + `
             vUv = uv;
             vec4 changedVertex = getChangedVertex(initialVertex);
+            if(changedVertex.w < 0.)
+                changedVertex *= -1.; //gl no likey. Hacky, try to understand it better, TODO
             gl_Position = projectionMatrix * viewMatrix * changedVertex;
         }`
     const initialMeshVertexShader = versionPrefix + toPointsPrefix + `
@@ -94,12 +96,13 @@ function initInitialAndFinalDws() {
         let finalMeshMat = new THREE.RawShaderMaterial({
             uniforms,
             vertexShader: versionPrefix + generalShaderPrefix + text + toVertexSuffix,
-            fragmentShader: finalFragmentShaderForVertex
+            fragmentShader: finalFragmentShaderForVertex,
+            side: THREE.DoubleSide
         })
         let initialMeshMat = new THREE.RawShaderMaterial({
             uniforms,
             vertexShader: initialMeshVertexShader,
-            fragmentShader: finalFragmentShaderForVertex
+            fragmentShader: finalFragmentShaderForVertex,
         })
 
         if(finalMesh!==null) {
@@ -116,5 +119,38 @@ function initInitialAndFinalDws() {
 
         initialMesh = new THREE.Mesh(geo, initialMeshMat)
         dws.untransformed.addNonMentionChild(initialMesh)
+
+        if (pageParameters.numExtraCows !== undefined ) {
+            let dqCoefs = [
+                `-0.79,-0.93,-1.04,0.93,-0.39,0.22,0.42,2.26`,
+                `-0.96,0.70,1.00,0.81,0.18,0.18,0.14,-2.44`,
+                `-0.52,1.22,-0.28,0.02,0.12,-0.55,0.64,-1.80`,
+            ]
+            for (let i = 0; i < pageParameters.numExtraCows; ++i) {
+
+                let standinText = `
+                    vec4 getChangedVertex(in vec4 initialVertex) {
+                        Dq transform = Dq(`+dqCoefs[i]+`);
+                        vec4 ret = apply(transform, initialVertex );
+                        return ret;
+                    }
+                `
+                let blendExampleMat = new THREE.RawShaderMaterial({
+                    uniforms,
+                    vertexShader: versionPrefix + generalShaderPrefix + standinText + toVertexSuffix,
+                    fragmentShader: finalFragmentShaderForVertex,
+                })
+
+                blendExampleMesh = new THREE.Mesh(geo, blendExampleMat)
+                dw.addNonMentionChild(blendExampleMesh)
+            }
+        }
+        // a = new Biv()
+        // for (i = 0; i < 6; ++i)
+        //     a[i] = 3. * (Math.random() - .5)
+        // b = a.exp()
+        // myStr = ``
+        // for (let i = 0; i < 8; ++i)
+        //     myStr += b[i].toFixed(2) + `,`
     }
 }

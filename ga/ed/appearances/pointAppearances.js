@@ -24,7 +24,9 @@ function initPoints() {
         asMv.fromVec4(asVec4)
 
         if (asVec4.w !== 0.) {
-            appearance.iDwPointMesh.position.set(0.,0.,0.)
+            appearance.iDwPointMesh.position.copy(OUT_OF_SIGHT_VECTOR3)
+            // appearance.iDwPointMesh.position.set(0., 0., 0.) //arguably makes more sense but is confusing
+
             appearance.eDwPointMesh.position.copy(asVec4).multiplyScalar(1. / asVec4.w)
             appearance.eDwPointMesh.scale.setScalar(1.)
             appearance.eDwPointMesh.scale.setScalar(.2 * camera.position.distanceTo(appearance.eDwPointMesh.position))
