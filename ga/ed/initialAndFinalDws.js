@@ -121,13 +121,17 @@ function initInitialAndFinalDws() {
         dws.untransformed.addNonMentionChild(initialMesh)
 
         if (pageParameters.numExtraCows !== undefined ) {
+            -0.79,-1.27,-1.22,1.24,-0.39,-0.22,0.42,1.63
+
+            -0.96,0.96,1.34,1.15,0.18,0.18,0.14,-0.61
+
             let dqCoefs = [
-                `-0.79,-0.93,-1.04,0.93,-0.39,0.22,0.42,2.26`,
-                `-0.96,0.70,1.00,0.81,0.18,0.18,0.14,-2.44`,
-                `-0.52,1.22,-0.28,0.02,0.12,-0.55,0.64,-1.80`,
+                `-0.79,-1.27,-1.22,1.24,-0.39,-0.22,0.42,1.63`,
+                `-0.96,0.96,1.34,1.15,0.18,0.18,0.14,-0.61`,
+                `-0.52,1.22,-0.28,0.02,0.12,-0.55,0.64,-1.80`, //probably unnormalized!
             ]
             for (let i = 0; i < pageParameters.numExtraCows; ++i) {
-
+                log("yo")
                 let standinText = `
                     vec4 getChangedVertex(in vec4 initialVertex) {
                         Dq transform = Dq(`+dqCoefs[i]+`);

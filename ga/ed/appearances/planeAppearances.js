@@ -2,6 +2,7 @@ function threejsPlaneTransformFromPlaneMv(mesh,mv) {
 
     let displayableVersion = mv.getDisplayableVersion(mv4)
     e123.projectOn(displayableVersion, mv0).toVector(mesh.position)
+    log(mesh.position)
 
     let planeOnOrigin = displayableVersion.projectOn(e123, mv0)
     let e3ToPlaneMotor = mul(planeOnOrigin, e3, mv2).sqrt(mv3)
@@ -39,7 +40,7 @@ function initPlanes() {
             appearance.sphereMesh.position.copy(OUT_OF_SIGHT_VECTOR3)
         }
         else {
-            //eDw part
+            //eDw part. Yes, this handles infinity
             threejsPlaneTransformFromPlaneMv(appearance.eDwPlaneMesh, planeMv)
 
             if( !planeMv.hasEuclideanPart() ) {
@@ -51,6 +52,19 @@ function initPlanes() {
                 appearance.iDwPlaneMesh.position.set(0., 0., 0.)
 
                 appearance.iDwPlaneMesh.quaternion.copy(appearance.eDwPlaneMesh.quaternion)
+                appearance.iDwPlaneMesh.position.set(0.,0.,0.)
+
+                // appearance.iDwPlaneMesh.position.copy(appearance.eDwPlaneMesh.position)
+                //TODO
+                // let currentLength = appearance.iDwPlaneMesh.position.length()
+                // if(currentLength !== 0.) {
+                //     //infinity gets sent to .02
+                //     //1 gets sent to .01
+                //     //.00001 gets sent to 0
+                //     // 1/(x
+                //     let newLength = Math.pow(0.1,)
+                //     appearance.iDwPlaneMesh.position.multiplyScalar()
+                // }
             }
         }
     }

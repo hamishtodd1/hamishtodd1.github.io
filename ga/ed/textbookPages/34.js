@@ -11,16 +11,12 @@ pageParameters = {
 
 textareaValueDefault = `vec4 getChangedVertex(in vec4 initialVertex) {
 
-    // Mixing in the identity
+    q1 = Quat( 0., 0.28, 0., -0.96 );
+    q2 = Quat(0.6, 0.,   0., -0.6  ); //Quat(0.,  0., 0.11,  0.99 );
 
-    Dq identity = Quat(0.,0.,0.,1.);
-    Dq control = Quat(0.,1.,0.,0.);
-    //Dq identityPlusControl = add(identity,control); //not normalized!
+    //float t = 1.;
+    //t = clamp(t,0.,1.);
+    //interpolated = add( mul(q1, t), mul(q2, 1.-t) );
 
-    //vec3 directionVector = vec3( 1.,1.,0. );
-    
-    //vec3 identityPlusControlApplied = apply( identityPlusControl, directionVector );
-    //directionVector; identityPlusControlApplied;
-
-    return apply( identity, initialVertex );
+    return apply( q1, initialVertex );
 }`

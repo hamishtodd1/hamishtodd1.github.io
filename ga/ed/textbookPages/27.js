@@ -1,7 +1,7 @@
 pageParameters = {
     untransformed: true,
     final: true,
-    complex: true,
+    complex: false,
     euclidean: true,
     infinity: true,
     scalar: true,
@@ -10,13 +10,18 @@ pageParameters = {
 
 textareaValueDefault = `vec4 getChangedVertex(in vec4 initialVertex) {
 
-    Plane skewedPlane = Plane(0.,1.,0.,1.);
-    Plane e0 = Plane(1.,0.,0.,0.);
+    // Translation = plane * plane
+
+    Plane skewedPlane = Plane(.5,1.2,.5,0.);
+    Plane planeAtInfinity = Plane(0.,0.,0.,1.);
     
-    float controlFloat = 1.;
-    Plane controlPlane = add(skewedPlane, mul(e0,controlFloat));
+    float controlFloat = 2.;
+    Plane myPlane = add(skewedPlane, mul(planeAtInfinity,controlFloat));
+    myPlane;
 
-    //Dq translation = mul(skewedPlane,controlPlane);
+    //Dq translation = mul(skewedPlane,myPlane);
 
-    return initialVertex;
+    vec4 ret = initialVertex;
+    //ret = apply(translation, initialVertex);
+    return ret;
 }`

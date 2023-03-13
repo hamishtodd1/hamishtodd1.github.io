@@ -21,7 +21,7 @@ vec4 getChangedVertex(in vec4 initialVertex) {
     vec4 myNormal = vec4( .2,0.,-1.,0.);
     mat4 myMat = mat4(1.,0.,0.,0.,0.,1.,0.,0.,0.,0.,1.,0.,0.,0.,0.,1.);
 
-    Plane myPlane = Plane(1.,1.,0.,0.);
+    Plane myPlane = Plane(1.,0.,0.,1.);
     Dq idealLine = Dq( 0.,  0.,1.,1.,  0.,0.,0.,  0.);
     Dq eucliLine = Dq( 0.,  0.,0.,0.,  0.,1.,1.,  0.);
 

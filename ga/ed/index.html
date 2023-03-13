@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>PVR Blade</title>
+    <title>Blade</title>
     <link rel="stylesheet" href="prism-monokai.css">
     <link rel="stylesheet" href="style.css">
 
@@ -14,7 +14,7 @@
         pageParameters = {
             untransformed: true,
             final: true,
-            complex: true,
+            complex: false,
             euclidean: true,
             infinity: true,
             scalar: true,
@@ -30,6 +30,7 @@
     <div id="errorBox"></div>
 
     <svg id="ourSvg" style="stroke-width:2" >
+        <circle id="textAreaMouseProxy" cx="-100" cy="-100" r="8" stroke="black" stroke-width="3" fill="white" />
     </svg>
     
     <canvas id="canvas3d"></canvas>

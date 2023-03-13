@@ -10,22 +10,19 @@ pageParameters = {
 
 textareaValueDefault = `vec4 getChangedVertex(in vec4 initialVertex) {
 
-    Plane e1 = Plane(0.,1.,0.,0.);
-    Plane parallelPlane = Plane(1.8,1.,0.,0.);
+    // Plane + plane at infinity = parallel plane
 
-    Plane midPlane = add(e1, parallelPlane);
-    //Plane otherMidPlane = sub(e1, parallelPlane);
+    Plane x = Plane(1.,0.,0.);
+    Plane parallelPlane = Plane(1.,0.,0.,1.8);
+
+    Plane midPlane = add(x, parallelPlane);
+    //Plane otherMidPlane = sub(x, parallelPlane);
     //otherMidPlane;
-
-    //Plane e0 = Plane(1.,0.,0.,0.);
-    //Plane e2 = Plane(0.,0.,1.,0.);
-    //Plane e3 = Plane(0.,0.,0.,1.);
-    //e0; e1; e2; e3;
 
     //float controlFloat = 1.;
     //Plane controlPlane = Plane(controlFloat,1.,0.,0.);
 
-    vec4 ret = apply(e1, initialVertex);
+    vec4 ret = apply(x, initialVertex);
     //ret;
     return ret;
 }`

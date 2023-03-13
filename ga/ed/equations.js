@@ -27,7 +27,7 @@
 pageParameters = {
     untransformed: false,
     final: false,
-    complex: true,
+    complex: false,
     euclidean: true,
     infinity: true,
     scalar: true,

@@ -114,6 +114,11 @@ function initMouseInteractions() {
             else if(grabbedDw !== null) {
                 dragOccurred = true
 
+                if(textareaGrabAddition[0] !== 0.) {
+                    textAreaMouseProxy.setAttribute('cx', event.clientX + textareaGrabAddition[0])
+                    textAreaMouseProxy.setAttribute('cy', event.clientY + textareaGrabAddition[1])
+                }
+
                 if (indicatedMention.variable.isUniform)
                     indicatedMention.appearance.updateStateFromDrag(grabbedDw) 
                 else if (indicatedMention.variable.isIn && initialMeshData !== null && initialMeshData.position !== undefined) {
@@ -191,7 +196,7 @@ function initMouseInteractions() {
         indicatedMention.appearance.onGrab(dw)
     }
 
-    document.addEventListener('mouseup',(event)=>{
+    document.addEventListener( 'mouseup', (event)=>{
         if (event.button === 2)
             rightClicking = false
             
@@ -206,6 +211,11 @@ function initMouseInteractions() {
         dragOccurred = false
         indicatedMention.appearance.onLetGo()
         updateOverride(null)
+
+        if(textareaGrabAddition[0] !== 0.) {
+            textAreaMouseProxy.setAttribute('cx', -100)
+            textAreaMouseProxy.setAttribute('cy', -100)
+        }
         
         if( !indicatedMention.variable.isUniform &&
             !indicatedMention.variable.isIn ) {

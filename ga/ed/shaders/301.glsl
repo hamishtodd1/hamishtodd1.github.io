@@ -7,14 +7,78 @@ struct Dq {
     float I;
 };
 
+//so you don't have to mention "Dq" early
+Dq q1;
+Dq q2;
+Dq interpolated;
+
 struct Plane {
-    float e0; float e1; float e2; float e3;
+    float e1; float e2; float e3;
+    float e0;
 };
 
-{
-    float x = 0; float y = 0; float z = 0; 
-    float w = 0;
-}
+// DualQuaternion {
+//     w;
+//     yz; zx; xy;
+//     dx; dy; dz;
+//     dxyz;
+// }
+
+// Flection {
+//     float x;   float y;   float z;
+//     float d;
+//     float xyz;
+//     float dyx; float dxz; float dz;
+// }
+
+// Multivector {
+//     w;
+
+//     x; y; z;
+//     d;
+
+//     yz; zx; xy;   dx; dy; dz;
+
+//     xyz;
+//     dyx; dxz; dz;
+    
+//     dxyz;
+// }
+
+// Point {
+//     float dzy; float dxz; float dyx;
+//     float xyz;
+// }
+
+// vec4 {
+//     float x; float y; float z;
+//     float w;
+// }
+
+// vec4 getPoint( in Flection F) {
+//     return vec4(
+//         F.dzy, F.dxz, F.dyx,
+//         F.xyz
+//     );
+// }
+
+// Plane {
+//     float x; float y; float z;
+//     float d;
+// }
+
+// mul( Plane( 0, 1, 0, 0), Plane( 0, 1, 0, 0) ) == Quat( 0, 0, 0, 1)
+
+// Quat {
+//     w = 0.77;
+//     x = 0; y = 0; z = 0;
+// }
+
+// vec4 restPosePosition;
+// float[4] weights;
+// Dq[4] bones; //previously: mat4[4] bones;
+
+// Plane transformedPlane = apply( myQuat, myPlane );
 
 struct Flec {
     float e0; float e1; float e2; float e3;
@@ -31,6 +95,10 @@ Dq Line( in float x, in float y, in float z, in float _e01, in float _e02, in fl
 
 Dq Translation( in float x, in float y, in float z, in float w ) {
     return Dq(w,  0.,0.,0., x*.5,y*.5,z*.5,  0.);
+}
+
+Dq reverse(in Dq a) {
+    return Dq( a.scalar, -a.e01, -a.e02, -a.e03, -a.e12, -a.e31, -a.e23, a.I );
 }
 
 
@@ -264,6 +332,8 @@ Dq mul(in Dq a, in Dq b) {
     ret.I = b.I * a.scalar + b.e23 * a.e01 + b.e31 * a.e02 + b.e12 * a.e03 + b.e03 * a.e12 + b.e02 * a.e31 + b.e01 * a.e23 + b.scalar * a.I;
     return ret;
 }
+
+
 //no plane*dq unless you have rotoreflections!
 vec4 meet(in Plane a, in Dq b) {
     vec4 ret;
@@ -436,5 +506,8 @@ vec4 apply( in vec4 p1, in vec4 p2) {
     return ret;
 }
 
+Dq div(in Dq a, in Dq b) {
+    return mul(a,fastInverse(b));
+}
 
 `

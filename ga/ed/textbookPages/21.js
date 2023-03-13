@@ -10,12 +10,14 @@ pageParameters = {
 
 textareaValueDefault = `vec4 getChangedVertex(in vec4 initialVertex) {
 
-    Plane e1 = Plane(0.,1.,0.,0.);
-    Plane e2 = Plane(0.,0.,1.,0.);
-    Plane e3 = Plane(0.,0.,0.,1.);
+    // Basis planes
 
-    //Plane midPlane = add(e1,e2);
-    //Plane otherMidPlane = sub(e1,e2);
+    Plane x = Plane(0.,1.,0.,0.);
+    Plane y = Plane(0.,0.,1.,0.);
+    Plane z = Plane(0.,0.,0.,1.);
+
+    //Plane midPlane = add(x,y);
+    //Plane otherMidPlane = sub(x,y);
 
     return initialVertex;
 }`

@@ -10,11 +10,13 @@ pageParameters = {
 
 textareaValueDefault = `vec4 getChangedVertex(in vec4 initialVertex) {
 
-    Plane e1 = Plane(0.,1.,0.,0.);
+    // Applying Reflections
+
+    Plane x = Plane(0.,1.,0.,0.);
 
     //Dq line = Line(1.,0.,1.,  0.,0.,0.);
-    //Dq transformed = apply(e1, line);
+    //Dq transformed = apply(x, line);
 
-    //return apply(e1, initialVertex);
+    //return apply(x, initialVertex);
     return initialVertex;
 }`

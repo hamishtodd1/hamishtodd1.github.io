@@ -18,10 +18,10 @@ function initInfinityDw()
     let exteriorMat = new THREE.MeshPhongMaterial({ transparent:true, opacity:.6, side:THREE.FrontSide})
     let interiorMat = new THREE.MeshPhongMaterial({ transparent:false, side:THREE.BackSide})
     let sphereGeo = new THREE.IcosahedronBufferGeometry(1., 5)
-    let theSphere = new THREE.Object3D()
-    theSphere.add(new THREE.Mesh(sphereGeo, exteriorMat), new THREE.Mesh(sphereGeo, interiorMat))
-    theSphere.scale.setScalar(INFINITY_RADIUS)
-    dw.addNonMentionChild(theSphere)
+    let skySphere = new THREE.Object3D()
+    skySphere.add(new THREE.Mesh(sphereGeo, exteriorMat), new THREE.Mesh(sphereGeo, interiorMat))
+    skySphere.scale.setScalar(INFINITY_RADIUS)
+    dw.addNonMentionChild(skySphere)
 
     let euclideanHider = new THREE.Mesh(sphereGeo, new THREE.MeshPhongMaterial({ color: 0x000000 }))
     euclideanHider.scale.setScalar(.1)
@@ -31,7 +31,7 @@ function initInfinityDw()
     let names = [`x`,`y`,`z`]
     for(let i = 0; i < 3; ++i) {
         for(let j = 0; j < 1; ++j) { //could have - ones as well
-            let name = (j === 0 ? `+` : `-`) + names[i]
+            let name = names[i]
 
             let marker = text(name)
             marker.position.setComponent(i,INFINITY_RADIUS * 1.1)

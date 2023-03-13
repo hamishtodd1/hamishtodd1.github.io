@@ -773,6 +773,9 @@ function init301WithoutDeclarations(basisNames) {
     mv6 = new Mv()
 
     dq0 = new Dq()
+    dq1 = new Dq()
+    dq2 = new Dq()
+    dq3 = new Dq()
     bv0 = new Biv()
 
 /*END*/}

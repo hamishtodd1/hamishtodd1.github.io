@@ -13,6 +13,11 @@
 
 	The "pair of overlapping planes" is very much a thing
 
+	Do you need orientation on planes and points?
+		Studs on pair of planes, when you geometric product, give you arc
+	Identity viz?
+		Pair of disks, with some thickness, that are touching each other, visible line between so you know there's a gap
+
 
 	Show:
 		You get rid of reflections two at a time

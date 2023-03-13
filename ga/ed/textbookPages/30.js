@@ -11,21 +11,19 @@ pageParameters = {
 
 textareaValueDefault = `vec4 getChangedVertex(in vec4 initialVertex) {
 
-    Plane e1 = Plane(0.,1.,0.,0.);
-    Plane e2 = Plane(0.,0.,1.,0.);
-    Dq e12 = meet(e1,e2);
+    // Point = Plane ^ line
 
-    //Plane e3 = Plane(0.,0.,0.,1.);
-    //vec4 intersectionPoint = meet(e3,e12);
+    Plane x = Plane(0.,1.,0.,0.);
+    Dq myLine = Line(0.,0.,1.,   0.,1.,0.);
+    
+    vec4 intersectionPoint = meet( x, myLine );
 
-    //float controlFloat = 1.;
-    //Plane parallelPlane = Plane(controlFloat,0.,0.,1.);
-    //vec4 parallelPlanesIntersection = meet(e12, parallelPlane);
+    //By the way, point+point = midpoint
 
     //vec4 pointA = vec4(0.,0.,0.,1.);
     //vec4 pointB = vec4(1.5,0.,0.,1.);
-    //vec4 pointsAdded = pointA + pointB; //w is not equal to 1!
-    //pointsAdded /= pointsAdded.w;
+    //vec4 pointsAdded = pointA + pointB; //w NOT equal to 1!
+    //pointsAdded /= pointsAdded.w; // w now equal to 1; "normalized"
 
     return initialVertex;
 }`

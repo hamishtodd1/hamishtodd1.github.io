@@ -12,22 +12,15 @@ pageParameters = {
 
 textareaValueDefault = `vec4 getChangedVertex(in vec4 initialVertex) {
 
-    // Dual Quaternion LERP and SLERP 
-
-    Dq start = Dq( -0.79,-0.93,-1.04,0.93,-0.39,0.22,0.42,2.26);
-    Dq end   = Dq( -0.96,0.70,1.00,0.81,0.18,0.18,0.14,-2.44); //both normalized
-
-    //Dq startInverse = fastInverse(start); //just flips minus signs, assumes normalized
-    //Dq startToEnd = mul(end,startInverse);
-    //startToEnd;
-
-    //Dq startToEndLogarithm = dqLog(startToEnd);
-    //startToEndLogarithm;
-
     float t = 0.5;
-    //Dq startToEndByT = dqExp( mul(t, startToEndLogarithm) );
-    //Dq slerp = mul( startToEndByT, start);
+    Dq start = Dq( -0.79,-1.27,-1.22,1.24,-0.39,-0.22,0.42,1.63);
+    Dq end   = Dq( -0.96,0.96,1.34,1.15,0.18,0.18,0.14,-0.61); //both normalized
 
-    vec4 ret = initialVertex;//apply( slerp, initialVertex );
-    return ret;
+    // SLERP 
+    Dq startToEnd = div(end,start);    
+    Dq startToEndAxis = dqLog(startToEnd);
+    Dq startToEndByAmountT = dqExp( mul(t, startToEndAxis) );
+    
+    vec4 initialVertexAtStart = apply( startToEndByAmountT, initialVertex );
+    return apply( toStart, initialVertexAtStart );
 }`

@@ -11,8 +11,6 @@ function initDqs() {
     let iDw = dws.infinity
     let cDw = dws.complex
 
-    let showWindingArrows = true
-
     let projectedOnOrigin = new Mv()
     let quatToOriginVersion = new Mv()
     let joinedWithOrigin = new Mv()
@@ -52,8 +50,9 @@ function initDqs() {
     let winder = new Dq()
     function updateWinderStartFromPlaneToBeIn(plane) {
         
-        let projected = ((mv2.fromVec(iDw.camera.position)).projectOn(plane, mv3))
-        projected.toVector(winderStart)
+        let projectedOnPlane = ((mv2.fromVec(iDw.camera.position)).projectOn(plane, mv3))
+        projectedOnPlane.toVector(winderStart)
+        winderStart.negate()
         if (winderStart.lengthSq() === 0.)
             winderStart.copy(iDw.camera.up).applyQuaternion(iDw.camera.quaternion)
 
@@ -110,12 +109,30 @@ function initDqs() {
     let ringGeo = new THREE.TorusGeometry(INFINITY_RADIUS, tubeRadius, 7, 62)
 
     let tipLength = tubeRadius * 4.
-    let arrowTipGeo = new THREE.CylinderGeometry(tubeRadius, tipLength, tipLength)
+    let arrowTipGeo = new THREE.CylinderGeometry(tubeRadius, tipLength, tipLength, 14)
     arrowTipGeo.translate(0., -tipLength / 2.,0.)
     arrowTipGeo.rotateX(-TAU / 4.)
 
     function squash(minusInfinityToInfinity) {
         return Math.atan(minusInfinityToInfinity) / (TAU / 4.)
+    }
+
+    {
+        // let booM = new THREE.MeshPhongMaterial({ color: 0xFF0000 })
+        // let boo = new THREE.Mesh(OurTubeGeo(theInfinityArc), booM)
+        // let booTip = new THREE.Mesh(arrowTipGeo, booM)
+        // iDw.addNonMentionChild(boo)
+        // iDw.addNonMentionChild(booTip)
+
+        // winderStart.set(0., 0., 0.)
+        // add(e02,e01,mv0)
+        // winderLog.fromMv(mv0).multiplyScalar(-.25)
+        // updateTubeGeo(boo.geometry, theInfinityArc)
+
+        // theInfinityArc.getPoint(.99, v1)
+        // theInfinityArc.getPoint(1., v2)
+        // booTip.position.copy(v2)
+        // booTip.lookAt(v1)
     }
 
     let displayedLineMv = new Mv()
@@ -416,53 +433,70 @@ function initDqs() {
 
             //winding
             {
-                if(eNormLinePart === 0. && (iNormLinePart === 0. || this.state[0] === 0.)) {
+                if (eNormLinePart !== 0.) {
+                    //Rotation or screw motion
+
+                    this.#windingMesh.position.set(0., 0., 0.)
+
+                    dq0.copy(this.state)
+                    dq0[1] = 0.; dq0[2] = 0.; dq0[3] = 0.; dq0[7] = 0.
+                    dq0.normalize()
+                    dq0.logarithm(rotationAxis)
+
+                    let rotationAxisMv = rotationAxis.toMv(mv0)
+
+                    let rotationPlane = mul(rotationAxis.toMv(mv0), e123, mv1)
+                    updateWinderStartFromPlaneToBeIn(rotationPlane)
+
+                    let orientedTransformDist = this.state[7] / eNormLinePart
+                    let iDwDistance = squash(orientedTransformDist)
+                    translationAxis.fromMv(mul(rotationAxisMv, I, mv0).normalize())
+                    translationAxis.multiplyScalar( INFINITY_RADIUS / 2. * iDwDistance )
+
+                    add(rotationAxis, translationAxis, winderLog)
+                }
+                else if (iNormLinePart === 0. && this.state[0] < 0.) {
+                    this.#windingMesh.position.set(0., 0., 0.)
+
+                    //Full 360
+                    dual(camera.mvs.pos,mv0)
+                    mv0[1] = 0.
+                    updateWinderStartFromPlaneToBeIn(mv0)
+                    join(camera.mvs.pos, e123, mv1).normalize()
+                    winderLog.fromMv(mv1)
+                    winderLog.multiplyScalar(Math.PI *.99)
+                }
+                else if (iNormLinePart !== 0. && this.state[0] !== 0. ) {
+                    //ordinary translation
+                    this.#windingMesh.position.set(0., 0., 0.)
+                    
+                    let planeIncludingLineAtInfinity = join(linePart, e123, mv0)
+                    updateWinderStartFromPlaneToBeIn(planeIncludingLineAtInfinity)
+
+                    winderLog.fromMv(mv0.copy(linePart).normalize())
+                    let orientedTransformDist = iNormLinePart / this.state[0]
+                    let iDwDistance = squash(orientedTransformDist)
+                    winderLog.multiplyScalar(INFINITY_RADIUS / 2. * iDwDistance)
+
+                    
+                    
+                    //the clever version
+                    // let planeFacingAtCamera = dual(mv5.fromDirectionVec( iDw.camera.position ),mv1)
+                    // let lineParallelToAxis = meet(planeFacingAtCamera, planeIncludingLineAtInfinity, mv2).normalize()
+                    // let linePartNormalized = mv3.copy(linePart).normalize().multiplyScalar( INFINITY_RADIUS )
+                    // add(linePartNormalized, lineParallelToAxis, mv4).normalize() //should have correct orientation
+                    // winderLog.fromMv(mv4).multiplyScalar(.5 * Math.atan(iNormLinePart / this.state[0]))
+                }
+                else {
+                    //maybe should handle identity situation? It's a full mobius?
                     this.#windingMesh.position.copy(OUT_OF_SIGHT_VECTOR3)
                     this.#windingMeshTip.position.copy(OUT_OF_SIGHT_VECTOR3)
                 }
-                else {
 
-                    if (eNormLinePart !== 0.) {
-                        this.#windingMesh.position.set(0., 0., 0.)
-    
-                        dq0.copy(this.state)
-                        dq0[1] = 0.; dq0[2] = 0.; dq0[3] = 0.; dq0[7] = 0.
-                        dq0.normalize()
-                        dq0.logarithm(rotationAxis)
-
-                        let rotationAxisMv = rotationAxis.toMv(mv0)
-    
-                        let rotationPlane = mul(rotationAxis.toMv(mv0), e123, mv1)
-                        updateWinderStartFromPlaneToBeIn(rotationPlane)
-
-                        let orientedTransformDist = this.state[7] / eNormLinePart
-                        let iDwDistance = squash(orientedTransformDist)
-                        translationAxis.fromMv(mul(rotationAxisMv, I, mv0).normalize())
-                        translationAxis.multiplyScalar( INFINITY_RADIUS / 2. * iDwDistance )
-
-                        add(rotationAxis, translationAxis, winderLog)
-                    }
-                    else if (this.state[0] !== 0.) {
-                        
-                        let planeIncludingLineAtInfinity = join(linePart, e123, mv0)
-                        updateWinderStartFromPlaneToBeIn(planeIncludingLineAtInfinity)
-    
-                        winderLog.fromMv(mv0.copy(linePart).normalize())
-                        let orientedTransformDist = iNormLinePart / this.state[0]
-                        let iDwDistance = squash(orientedTransformDist)
-                        winderLog.multiplyScalar(INFINITY_RADIUS / 2. * iDwDistance)
-                        
-                        //the clever version
-                        // let planeFacingAtCamera = dual(mv5.fromDirectionVec( iDw.camera.position ),mv1)
-                        // let lineParallelToAxis = meet(planeFacingAtCamera, planeIncludingLineAtInfinity, mv2).normalize()
-                        // let linePartNormalized = mv3.copy(linePart).normalize().multiplyScalar( INFINITY_RADIUS )
-                        // add(linePartNormalized, lineParallelToAxis, mv4).normalize() //should have correct orientation
-                        // winderLog.fromMv(mv4).multiplyScalar(.5 * Math.atan(iNormLinePart / this.state[0]))
-                    }
-
+                if (!this.#windingMesh.position.equals(OUT_OF_SIGHT_VECTOR3)) {
                     this.#windingMesh.position.set(0., 0., 0.)
                     updateTubeGeo(this.#windingMesh.geometry, theInfinityArc)
-
+    
                     theInfinityArc.getPoint(.99, v1)
                     theInfinityArc.getPoint(1., v2)
                     this.#windingMeshTip.position.copy(v2)

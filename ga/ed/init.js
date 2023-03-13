@@ -1,45 +1,45 @@
 /*
+
+*************************************************************************************
+******  RIGHT BEFORE: Text and window size! Big as possible! Mouse size too!   ******
+******  GESTURE at the windows people should look at!                          ******
+*************************************************************************************
+
 TODO
-    For Chris and Joan
-        Flections
-            Dotted line for the line part
-            Mobius and winding?
-        Errr, cooooould try to do everything without revealing the properties of the struct?
-            Or could add "Quat". With ijk or xyz?
-            And dual quaternion type with differently-named variables? =/
-            Could call dual quaternion a "transform"
-        could try to be a bit more sophisticated with isGrabbedAndWoundBackward. When you grab identity and make it negative, it bounces
-        minus sign with sandwich
-        Only one appearance for each variable
-            And injections go just before the line the caret is on
-        One way of detecting whether a line only assigns to a variable is to see if any other variables are mentioned on it
-        While you're changing stuff, annotations of all shit should be visible
-        "cycle colors" button
-    Bugs
-        Vectors are just broken with the animation on
-        Probably worth checking over absolutely all e31 vs 13 shit
-        Sort out duplicates. At least in the senses that you need the damn things
-        Enter makes it so you can't ctrl+z
-        the dual quaternion dragging takes account of duplicates. Point mention scalar should too, as should others
     GDC
-        When you grab from text display window, would be nice to see a thing that's where it thinks your cursor is
-        Make it so you can edit quats from the windows and it injects Quat() instead of Dq()
-        would be nice to have a different-colored line connecting you to your textareaManipulationDw
-        Maybe the euclidean dw is the output window?
+        Would be nice to have planes in iDw overlap correctly, eg small displacement
         Pointing at things in the initial window
-        Pointing in the direction of the thing offscreen instead of just the frame
-        Do you need orientation on planes and points?
-            Studs on pair of planes, when you geometric product, give you arc
-        Identity viz?
-            Pair of large-radius cylinders that are touching each other, tiny gap between
+        Euclidean dw stuff should appear in the final windows
+            Axes, so that you can tell the difference between mous-rotating cow vs applying quat to her?
         Better error reporting
             Highlight where it was but just put the words at the bottom
-        One variable = one appearance. Dqs are going silly with carat on one line and modifying it on another
-        For Chris and Joan, just don't modify on one line and do stuff on another
-        Try to detect which lines ASSIGN to a variable and which lines don't
+        Pointing in the direction of the thing offscreen instead of just the frame
+        Redo the handling of "visualizations from multiple places"
+            One way of detecting whether a line only assigns to a variable is to see if any other variables are mentioned on it
+            "const" detection
+            Distracting when it injects code
+            One variable = one appearance. Dqs are going silly with carat on one line and modifying it on another
+            A MAYBE SIMPLE thing to do would be: IF you are mouse editing a line FAR above the caret line, the injection is just above the caret line
+            Ugh that isn't simple. Maybe think of something simple.
+        Flections
+            Dotted line for the line part. Only in the thingy iDw
+            Mobius and winding?
+        While you're changing stuff, annotation lines of all shit should be visible
+        Maybe import some railroad track models so you can do the thing you want to do
+    "Someday" / for general release
         Better window hiding - they should grey out
             hide the output window when there's an error
-    "Someday"
+        Bugs
+            Vectors are just broken with the animation on
+            Probably worth checking over absolutely all e31 vs 13 shit
+            Sort out duplicates. At least in the senses that you need the damn things
+            Enter makes it so you can't ctrl+z
+            the dual quaternion dragging takes account of duplicates. Point mention scalar should too, as should others
+        minus sign with sandwich
+        Only one appearance for each variable. Ok MAYBE 2
+            And injections go just before the line the caret is on
+        could try to be a bit more sophisticated with isGrabbedAndWoundBackward
+            When you grab identity and make it negative, it bounces
         Attempt -briefly- to compile every second or so, send straight to output window?
             but flash up an error which fades out when (99% of the time) it's wrong
             Eh, this is for graphics programmers

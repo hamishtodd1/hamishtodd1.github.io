@@ -5,7 +5,7 @@ function initFloats() {
     
     let sDw = dws.scalar
 
-    let linearY = 1.2
+    let linearY = 0.//1.2
     let logarithmicY = -.9
     {
 
@@ -44,16 +44,16 @@ function initFloats() {
         linearAxis.position.y = linearY
         sDw.addNonMentionChild(linearAxis)
 
-        for (let i = -furthestMarkers; i <= furthestMarkers; ++i) {
-            let val = Math.pow(10, i)
-            let [marker, notch] = makeMarkedNotch(val.toString(), i, logarithmicY)
-            sDw.addNonMentionChild(marker)
-            sDw.addNonMentionChild(notch)
-        }
+        // for (let i = -furthestMarkers; i <= furthestMarkers; ++i) {
+        //     let val = Math.pow(10, i)
+        //     let [marker, notch] = makeMarkedNotch(val.toString(), i, logarithmicY)
+        //     sDw.addNonMentionChild(marker)
+        //     sDw.addNonMentionChild(notch)
+        // }
 
-        let logarithmicAxis = new THREE.Line(axisGeo, axisMat)
-        logarithmicAxis.position.y = logarithmicY
-        sDw.addNonMentionChild(logarithmicAxis)
+        // let logarithmicAxis = new THREE.Line(axisGeo, axisMat)
+        // logarithmicAxis.position.y = logarithmicY
+        // sDw.addNonMentionChild(logarithmicAxis)
     }
 
     //could make little disks going along the vector space's notches as a way of poking fun
@@ -64,25 +64,26 @@ function initFloats() {
 
     impartScalarMeshes = (appearance, mat) => {
         appearance.scalarMeshLinear = sDw.NewMesh(downwardPyramidGeo, mat)
-        appearance.scalarMeshLogarithmic = sDw.NewMesh(downwardPyramidGeo, mat)
-        appearance.meshes.push(appearance.scalarMeshLinear, appearance.scalarMeshLogarithmic)
+        appearance.meshes.push(appearance.scalarMeshLinear)
+        // appearance.scalarMeshLogarithmic = sDw.NewMesh(downwardPyramidGeo, mat)
+        // appearance.meshes.push(appearance.scalarMeshLogarithmic)
     }
 
     updateScalarMeshes = (appearance, scalar) => {
         appearance.scalarMeshLinear.position.set(scalar, linearY, 0.)
-        if (scalar === 0.)
-            appearance.scalarMeshLogarithmic.position.copy(OUT_OF_SIGHT_VECTOR3)
-        else {
-            let logarithmState = Math.log10(Math.abs(scalar))
-            appearance.scalarMeshLogarithmic.position.set(logarithmState, logarithmicY, 0.)
-        }
+        // if (scalar === 0.)
+        //     appearance.scalarMeshLogarithmic.position.copy(OUT_OF_SIGHT_VECTOR3)
+        // else {
+        //     let logarithmState = Math.log10(Math.abs(scalar))
+        //     appearance.scalarMeshLogarithmic.position.set(logarithmState, logarithmicY, 0.)
+        // }
     }
 
     getScalarMeshesPosition = (appearance, target) => {
-        let positionToUse = Math.abs(appearance.scalarMeshLinear.position.x) < camera2d.right ?
-            appearance.scalarMeshLinear.position :
-            appearance.scalarMeshLogarithmic.position
-        return target.copy(positionToUse)
+        // let positionToUse = Math.abs(appearance.scalarMeshLinear.position.x) < camera2d.right ?
+        //     appearance.scalarMeshLinear.position :
+        //     appearance.scalarMeshLogarithmic.position
+        return target.copy(appearance.scalarMeshLinear.position)
     }
 
     class floatAppearance extends Appearance {
