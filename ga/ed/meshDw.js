@@ -72,9 +72,9 @@ function initStaticObj() {
         if(geo === undefined)
             console.error("you probably need to connect to the internet!")
 
-        geo.scale(.16, .16, .16)
-        // geo.rotateY(TAU * .5)
-        geo.translate(0.,-1.,0.)
+        geo.scale(1.9, 1.9, 1.9)
+        geo.rotateY(TAU * .5)
+        geo.translate(0.,-.1,0.)
         
         initialMeshData = geo.attributes
         
@@ -107,11 +107,20 @@ function initStaticObj() {
             })
         }
 
-        textureLoader.load('data/CoffeeCup_texture.png', onTextureLoad, () => {}, () => {
-            textureLoader.load('https://hamishtodd1.github.io/ga/ed/data/CoffeeCup_texture.png', onTextureLoad)
+        textureLoader.load('data/spot_texture.png', onTextureLoad, () => {}, () => {
+            textureLoader.load('https://hamishtodd1.github.io/ga/ed/data/spot_texture.png', onTextureLoad)
         })
-        objLoader.load('data/CoffeeCup.obj', onGeoLoad, ()=>{}, () => {
-            objLoader.load('https://hamishtodd1.github.io/ga/ed/data/CoffeeCup.obj', onGeoLoad)
+        objLoader.load('data/spot_control_mesh.obj', onGeoLoad, ()=>{}, () => {
+            objLoader.load('https://hamishtodd1.github.io/ga/ed/data/spot_control_mesh.obj', onGeoLoad)
+        })
+
+        function onGlobeTextureLoad(gt) {
+            log("yo")
+        }
+        textureLoader.load('data/globe.png', onGlobeTextureLoad, () => { },()=>{
+            textureLoader.load('https://hamishtodd1.github.io/ga/ed/data/globe.png', onGlobeTextureLoad,()=>{},(err)=>{
+                log(err)
+            })
         })
     })
 

@@ -1,12 +1,13 @@
 /*
 
 *************************************************************************************
-******  RIGHT BEFORE: Text and window size! Big as possible! Mouse size too!   ******
+******  RIGHT BEFORE: Text and window and CURSOR size! Big as possible! Mouse size too!   ******
 ******  GESTURE at the windows people should look at!                          ******
 *************************************************************************************
 
 TODO
     GDC
+        Have a button that looks for the next “//” and removes it
         Would be nice to have planes in iDw overlap correctly, eg small displacement
         Pointing at things in the initial window
         Euclidean dw stuff should appear in the final windows

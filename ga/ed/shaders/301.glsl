@@ -8,9 +8,9 @@ struct Dq {
 };
 
 //so you don't have to mention "Dq" early
-Dq q1;
-Dq q2;
-Dq interpolated;
+// Dq q1;
+// Dq q2;
+// Dq interpolated; 
 
 struct Plane {
     float e1; float e2; float e3;
@@ -25,11 +25,15 @@ struct Plane {
 // }
 
 // Flection {
-//     float x;   float y;   float z;
-//     float d;
-//     float xyz;
-//     float dyx; float dxz; float dz;
+//     x;   y;   z;
+//     d;
+//     dzy; dxz; dyx;
+//     xyz;
 // }
+
+// vec4(0.,0.,0.,1.);
+
+// vec4(0.,0.,0.,0.);
 
 // Multivector {
 //     w;
@@ -50,9 +54,14 @@ struct Plane {
 //     float xyz;
 // }
 
-// vec4 {
-//     float x; float y; float z;
-//     float w;
+// Flection {
+//     Plane plane;
+//     vec4 point;
+// }
+
+// {
+//     x = 0; y = 0; z = 0.7;
+//     w = 0.7;
 // }
 
 // vec4 getPoint( in Flection F) {
@@ -508,6 +517,25 @@ vec4 apply( in vec4 p1, in vec4 p2) {
 
 Dq div(in Dq a, in Dq b) {
     return mul(a,fastInverse(b));
+}
+
+mat4 toMat4( in Dq dq ) {
+    float r44 = dq.e12*dq.e12;
+    float r55 = dq.e31*dq.e31;
+    float r66 = dq.e23*dq.e23;
+
+    float r45 = dq.e12*dq.e31;
+    float r46 = dq.e12*dq.e23;
+    float r56 = dq.e31*dq.e23;
+
+    float r04 = dq.scalar*dq.e12;
+    float r05 = dq.scalar*dq.e31; 
+    float r06 = dq.scalar*dq.e23;
+
+    return mat4(1. + 2.*(-r44-r55),      2.*( r04+r56),      2.*( r46-r05), 2.*( dq.e03*dq.e31-dq.e02*dq.e12-dq.scalar*dq.e01-dq.I*dq.e23),
+                     2.*( r56-r04), 1. + 2.*(-r44-r66),      2.*( r06+r45), 2.*( dq.e01*dq.e12-dq.e03*dq.e23-dq.scalar*dq.e02-dq.I*dq.e31),
+                     2.*( r05+r46),      2.*( r45-r06), 1. + 2.*(-r55-r66), 2.*( dq.e02*dq.e23-dq.e01*dq.e31-dq.scalar*dq.e03-dq.I*dq.e12),
+                     0.,0.,0.,1.);
 }
 
 `
