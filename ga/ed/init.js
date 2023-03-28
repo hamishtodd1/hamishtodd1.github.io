@@ -10,7 +10,7 @@ TODO
         Have a button that looks for the next “//” and removes it
         Would be nice to have planes in iDw overlap correctly, eg small displacement
         Pointing at things in the initial window
-        Euclidean dw stuff should appear in the final windows
+        Euclidean dw stuff should appear in the io windows
             Axes, so that you can tell the difference between mous-rotating cow vs applying quat to her?
         Better error reporting
             Highlight where it was but just put the words at the bottom
@@ -243,6 +243,7 @@ async function init( textareaValueDefault, hideInputAndOutputWindows = false) {
 
     let style = window.getComputedStyle(textarea)
     const lineHeight = parseInt(style.lineHeight)
+    log(lineHeight)
     window.lineHeight = lineHeight
     initSvgLines()
 
@@ -284,7 +285,6 @@ async function init( textareaValueDefault, hideInputAndOutputWindows = false) {
 
     // await initHalfplane()
 
-    await initVectorSpaceDw()
     initEuclideanDw()
     
     // initWeightsWindow()
@@ -293,6 +293,8 @@ async function init( textareaValueDefault, hideInputAndOutputWindows = false) {
     new Dw(`scalar`, false, camera2d)
     // dws.complex.elem.style.display = 'none'
     // dws.scalar.elem.style.display = 'none'
+
+    initVectorSpaceDw()
 
     initVec3s()
     initMat4s()

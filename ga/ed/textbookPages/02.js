@@ -5,18 +5,25 @@ pageParameters = {
     euclidean: false,
     infinity: true,
     scalar: true,
-    vectorSpace: false
+    vectorSpace: true
 }
 
+
 textareaValueDefault = `vec4 getChangedVertex(in vec4 initialVertex) {
-    
-    Dq example = Quat(0.,1.,0.,0.);
-    //Dq exampleNegated = Quat(0.,-1.,0.,0.);
-    //Dq exampleHalved = Quat(0., 0.5,0.,0.);
-    
-    //vec3 directionVector = vec3( 0.,2.,1.5 );
-    //vec3 transformed = apply( example, directionVector );
-    
-    vec4 ret = apply(example, initialVertex);
-    return ret;
+
+    // matrix LERP squashing and turning
+
+    Dq q1 = Quat( 0.,  0.85, 0., 0.53 ); //negate to go the other way
+    Dq q2 = Quat( 0., -0.85, 0., 0.53 );
+
+    float t = 0.;
+    t = clamp( t, 0., 1.);
+    Dq interpolated = add( q1, mul(t,sub(q2,q1)) );
+
+    //mat4 q1Mat = toMat4( q1 );
+    //mat4 q2Mat = toMat4( q2 );
+    //mat4 matsInterpolated = q1Mat + t * (q2Mat-q1Mat);
+
+    return apply( interpolated, initialVertex );
+    //return matsInterpolated * initialVertex;
 }`

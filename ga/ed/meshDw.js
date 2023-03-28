@@ -114,14 +114,19 @@ function initStaticObj() {
             objLoader.load('https://hamishtodd1.github.io/ga/ed/data/spot_control_mesh.obj', onGeoLoad)
         })
 
-        function onGlobeTextureLoad(gt) {
-            log("yo")
-        }
-        textureLoader.load('data/globe.png', onGlobeTextureLoad, () => { },()=>{
-            textureLoader.load('https://hamishtodd1.github.io/ga/ed/data/globe.png', onGlobeTextureLoad,()=>{},(err)=>{
-                log(err)
-            })
-        })
+        // function onGlobeLoad(obj) {
+        //     let geo = obj.children[0].geometry
+        //     geo.scale(0.05,0.05,0.05)
+        //     geo.rotateX(-TAU / 4.)
+        //     let globe = new THREE.Mesh(geo,new THREE.MeshPhongMaterial({ color: 0x75AA38 }))
+        //     globe.scale.multiplyScalar(.55)
+        //     dws.infinity.addNonMentionChild(globe)
+
+        //     let ocean = new THREE.Mesh(new THREE.SphereGeometry(globe.scale.x*.995, 64, 64), new THREE.MeshPhongMaterial({ color: 0x3B89D4 }))
+        //     dws.infinity.addNonMentionChild(ocean)
+            
+        // }
+        // objLoader.load('http://hamishtodd1.github.io/mixedReality/data/worldMap.obj', onGlobeLoad, () => { },()=>{})
     })
 
     // let promise = new Promise(resolve => {

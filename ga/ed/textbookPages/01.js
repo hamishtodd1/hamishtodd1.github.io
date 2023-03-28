@@ -4,22 +4,21 @@ pageParameters = {
     complex: false,
     euclidean: false,
     infinity: true,
-    scalar: false,
-    vectorSpace: false //could have it
+    scalar: true,
+    vectorSpace: false
 }
+
 
 textareaValueDefault = `vec4 getChangedVertex(in vec4 initialVertex) {
 
-    //Dq example = Quat(0.,0.96,0.28,0.);
-    
-    //vec3 directionVector = vec3( 1.,1.,0. );
-    //apply( example, directionVector );
-    
-    //Dq i = Quat(1.,0.,0.,0.);
-    //Dq j = Quat(0.,1.,0.,0.);
-    //Dq k = Quat(0.,0.,1.,0.);
+    // Quaternion LERP
 
-    vec4 ret = initialVertex; //apply( i, initialVertex );
-    
-    return ret;
+    Dq q1 = Quat( 0.,   -0.6, 0., 0.8  );
+    Dq q2 = Quat( 0.96,   0., 0., 0.28 );
+
+    //float t = 0.5;
+    //t = clamp(t,0.,1.);
+    //Dq qLerped = add( q1, mul(t,sub(q2,q1)) );
+
+    return apply( q1, initialVertex );
 }`

@@ -3,21 +3,20 @@ pageParameters = {
     final: true,
     complex: false,
     euclidean: true,
-    infinity: false,
-    scalar: false,
+    infinity: true,
+    scalar: true,
     vectorSpace: false
 }
 
+
 textareaValueDefault = `vec4 getChangedVertex(in vec4 initialVertex) {
 
-    Dq lineA = Quat(1.,0.,0.,0.); //Line(1.,0.,0.,  0.,0.,0.);
-    Dq lineB = Line(0.,1.,0.,  0.,0.,0.);
-    Dq aPlusB = add( lineA, lineB );
+    // Point = Plane ^ line
 
-    //Dq lineC = Line(1.,0.,0., 0.,1.,0.);
-    //lineA; lineC;
-    //Dq aPlusC = add(lineA,lineC);
+    Plane x = Plane(1.,0.,0.,0.);
+    Dq myLine = Line(0.,0.,1.,   0.,1.,0.);
+    
+    vec4 intersectionPoint = meet( x, myLine );
 
-    vec4 ret = apply( lineA, initialVertex );
-    return ret;
+    return initialVertex;
 }`

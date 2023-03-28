@@ -2,25 +2,23 @@ pageParameters = {
     untransformed: true,
     final: true,
     complex: false,
-    euclidean: true,
+    euclidean: false,
     infinity: true,
-    scalar: false,
+    scalar: true,
     vectorSpace: false
 }
 
 
 textareaValueDefault = `vec4 getChangedVertex(in vec4 initialVertex) {
 
-    // Line() uses "Plucker coordinates" to make Parallel lines
+    // The arse-swinging problem
 
-    q1 = Quat(1.,0.,0.,0.);
-    q2 = Quat(0.,1.,0.,0.);
-    Dq q1Plusq2 = add(q1,q2);
+    Dq q1 = Quat( 0., 0.2, 0., -0.97 );
+    Dq q2 = Quat( 0., 0.2, 0.,  0.97 );
 
-    //vec4 origin = vec4(0.,0.,0.,1.);
-    //Dq lineA = Line(1.,0.,0.,  0.,0.,0.);
-    //Dq lineB = Line(1.,0.,0.,  0.,1.,0.);
-    //Dq aPlusB = add( lineA, lineB );
+    float t = 0.;
+    t = clamp( t, 0., 1.);
+    Dq interpolated = add( q1, mul(t,sub(q2,q1)) );
 
-    return apply( q1Plusq2, initialVertex );
+    return apply( interpolated, initialVertex );
 }`

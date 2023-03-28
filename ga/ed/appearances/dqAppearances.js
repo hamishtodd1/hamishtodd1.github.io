@@ -46,8 +46,10 @@ function initDqs() {
 
     let winderLog = new Biv().set(0., 0., 0., 1., 1., 1.)
     let winderLogT = new Biv()
-    let winderStart = new THREE.Vector3().set(INFINITY_RADIUS / 3., 0., 0.) //have to initialize to something reasonable
+    winderRadius = INFINITY_RADIUS / 3.
+    let winderStart = new THREE.Vector3().set( winderRadius, 0., 0.) //have to initialize to something reasonable
     let winder = new Dq()
+
     function updateWinderStartFromPlaneToBeIn(plane) {
         
         let projectedOnPlane = ((mv2.fromVec(iDw.camera.position)).projectOn(plane, mv3))
@@ -56,8 +58,15 @@ function initDqs() {
         if (winderStart.lengthSq() === 0.)
             winderStart.copy(iDw.camera.up).applyQuaternion(iDw.camera.quaternion)
 
-        winderStart.setLength(INFINITY_RADIUS / 3.)
+        winderStart.setLength( winderRadius )
     }
+    // hackyAddition = 0.
+    // rehack = (addn) => {
+    //     hackyAddition += addn
+    //     camera.toUpdateAppearance.forEach((appearance) => {
+    //         appearance.updateMeshesFromState()
+    //     })
+    // }
     class InfinityArc extends THREE.Curve {
         getPoint(t, optionalTarget = new THREE.Vector3()) {
             
@@ -299,6 +308,8 @@ function initDqs() {
         }
 
         updateMeshesFromState() {
+
+            // log(this.variable.name,this.state)
 
             this.state.toMv(asMv)
 
@@ -560,5 +571,5 @@ function initDqs() {
         }
     }
     
-    new AppearanceType("Dq", 8, DqAppearance, getNewUniformDotValue, [ `scalar`, `e01`, `e02`, `e03`, `e12`, `e31`, `e23`, `I` ])
+    new AppearanceType("Dq", 8, DqAppearance, getNewUniformDotValue, [ `w`, `e01`, `e02`, `e03`, `e12`, `e31`, `e23`, `dxyz` ])
 }

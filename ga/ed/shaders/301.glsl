@@ -1,11 +1,13 @@
 glsl301 = `
 
 struct Dq {
-    float scalar;
+    float w;
     float e01; float e02; float e03;
     float e12; float e31; float e23;
-    float I;
+    float dxyz;
 };
+
+// Dq( 1.,     0.,1.,0., 0.,0.,0., 0. );
 
 //so you don't have to mention "Dq" early
 // Dq q1;
@@ -31,6 +33,11 @@ struct Plane {
 //     xyz;
 // }
 
+// vec4 {
+//     x = -1; y = 1; z = -1;
+//     w = 1;
+// }
+
 // vec4(0.,0.,0.,1.);
 
 // vec4(0.,0.,0.,0.);
@@ -54,9 +61,12 @@ struct Plane {
 //     float xyz;
 // }
 
-// Flection {
-//     Plane plane;
-//     vec4 point;
+// Flector f;
+// f.point *= -1; //invert
+
+// Flector {
+//     Plane plane; // x, y, z, d
+//     vec4 point;  // x, y, z, w
 // }
 
 // {
@@ -83,11 +93,13 @@ struct Plane {
 //     x = 0; y = 0; z = 0;
 // }
 
-// vec4 restPosePosition;
-// float[4] weights;
-// Dq[4] bones; //previously: mat4[4] bones;
+vec4 restPosePosition;
+Dq[4] bones; //previously: mat4[4] bones;
+float[4] weights;
 
 // Plane transformedPlane = apply( myQuat, myPlane );
+
+
 
 struct Flec {
     float e0; float e1; float e2; float e3;
@@ -107,21 +119,21 @@ Dq Translation( in float x, in float y, in float z, in float w ) {
 }
 
 Dq reverse(in Dq a) {
-    return Dq( a.scalar, -a.e01, -a.e02, -a.e03, -a.e12, -a.e31, -a.e23, a.I );
+    return Dq( a.w, -a.e01, -a.e02, -a.e03, -a.e12, -a.e31, -a.e23, a.dxyz );
 }
 
 
 Dq add(in Dq a, in Dq b) {
-    return Dq( a.scalar+b.scalar, a.e01+b.e01, a.e02+b.e02, a.e03+b.e03, a.e12+b.e12, a.e31+b.e31, a.e23+b.e23, a.I+b.I );
+    return Dq( a.w+b.w, a.e01+b.e01, a.e02+b.e02, a.e03+b.e03, a.e12+b.e12, a.e31+b.e31, a.e23+b.e23, a.dxyz+b.dxyz );
 }
 Dq sub(in Dq a, in Dq b) {
-    return Dq( a.scalar-b.scalar, a.e01-b.e01, a.e02-b.e02, a.e03-b.e03, a.e12-b.e12, a.e31-b.e31, a.e23-b.e23, a.I-b.I );
+    return Dq( a.w-b.w, a.e01-b.e01, a.e02-b.e02, a.e03-b.e03, a.e12-b.e12, a.e31-b.e31, a.e23-b.e23, a.dxyz-b.dxyz );
 }
 Dq mul(in Dq a, in float b) {
-    return Dq( a.scalar * b, a.e01 * b, a.e02 * b, a.e03 * b, a.e12 * b, a.e31 * b, a.e23 * b, a.I * b );
+    return Dq( a.w * b, a.e01 * b, a.e02 * b, a.e03 * b, a.e12 * b, a.e31 * b, a.e23 * b, a.dxyz * b );
 }
 Dq mul(in float b, in Dq a) {
-    return Dq( a.scalar * b, a.e01 * b, a.e02 * b, a.e03 * b, a.e12 * b, a.e31 * b, a.e23 * b, a.I * b );
+    return Dq( a.w * b, a.e01 * b, a.e02 * b, a.e03 * b, a.e12 * b, a.e31 * b, a.e23 * b, a.dxyz * b );
 }
 
 Plane add(in Plane a, in Plane b) {
@@ -138,13 +150,13 @@ Plane mul(in float b, in Plane a) {
 }
 
 Dq fastInverse(in Dq a) {
-    return Dq(a.scalar, -a.e01, -a.e02, -a.e03, -a.e12, -a.e31, -a.e23, a.I );
+    return Dq(a.w, -a.e01, -a.e02, -a.e03, -a.e12, -a.e31, -a.e23, a.dxyz );
 }
 Dq normalizeQuat(inout Dq R) {
-    float s = 1./sqrt((R.scalar*R.scalar + R.e12*R.e12 + R.e31*R.e31 + R.e23*R.e23));
-    float d = (R.I*R.scalar - (R.e01*R.e23 + R.e02*R.e31 + R.e03*R.e12))*s*s;
+    float s = 1./sqrt((R.w*R.w + R.e12*R.e12 + R.e31*R.e31 + R.e23*R.e23));
+    float d = (R.dxyz*R.w - (R.e01*R.e23 + R.e02*R.e31 + R.e03*R.e12))*s*s;
     R = mul(R, s);
-    R.e01 += R.e23*d; R.e02 += R.e31*d; R.e03 += R.e12*d; R.I -= R.scalar*d;
+    R.e01 += R.e23*d; R.e02 += R.e31*d; R.e03 += R.e12*d; R.dxyz -= R.w*d;
 
     return R;
 }
@@ -192,23 +204,23 @@ vec4 vec4FromMv(in float[16] target) {
     return ret;
 }
 void dqToMv(in Dq ourDq, out float[16] target) {
-    target[ 0] = ourDq.scalar;
+    target[ 0] = ourDq.w;
     target[ 1] = 0.;        target[ 2] = 0.;        target[ 3] = 0.;        target[ 4] = 0.;
     target[ 5] = ourDq.e01; target[ 6] = ourDq.e02; target[ 7] = ourDq.e03;
     target[ 8] = ourDq.e12; target[ 9] = ourDq.e31; target[10] = ourDq.e23;
     target[11] = 0.;        target[12] = 0.;        target[13] = 0.;        target[14] = 0.;
-    target[15] = ourDq.I;
+    target[15] = ourDq.dxyz;
 }
 Dq mvToDq(in float[16] mv) {
     Dq ret;
-    ret.scalar= mv[ 0];
+    ret.w= mv[ 0];
     ret.e01   = mv[ 5];
     ret.e02   = mv[ 6];
     ret.e03   = mv[ 7];
     ret.e12   = mv[ 8];
     ret.e31   = mv[ 9];
     ret.e23   = mv[10];
-    ret.I = mv[15];
+    ret.dxyz = mv[15];
 
     return ret;
 }
@@ -266,9 +278,9 @@ Dq dqExp(in Dq B) {
 }
 
 Dq dqLog(in Dq m ) {
-    float a = 1./(1. - m.scalar*m.scalar);
-    float b = acos(m.scalar)*sqrt(a);
-    float c = a*m.I*(1. - m.scalar*b);
+    float a = 1./(1. - m.w*m.w);
+    float b = acos(m.w)*sqrt(a);
+    float c = a*m.dxyz*(1. - m.w*b);
 
     return Dq(
         0.,
@@ -303,7 +315,7 @@ Dq meet(in Plane a, in Plane b) {
 }
 Dq mul(in Plane a, in Plane b) {
     Dq ret;
-    ret.scalar = b.e1 * a.e1 + b.e2 * a.e2 + b.e3 * a.e3;
+    ret.w = b.e1 * a.e1 + b.e2 * a.e2 + b.e3 * a.e3;
 
     ret.e01 = b.e1 * a.e0 - b.e0 * a.e1;
     ret.e02 = b.e2 * a.e0 - b.e0 * a.e2;
@@ -316,7 +328,7 @@ Dq mul(in Plane a, in Plane b) {
 }
 Dq mul(in vec4 a, in vec4 b) {
     Dq ret;
-    ret.scalar = -b.w * a.w;
+    ret.w = -b.w * a.w;
 
     ret.e01 = b.w * a.x - b.x * a.w;
     ret.e02 = b.w * a.y - b.y * a.w;
@@ -324,23 +336,48 @@ Dq mul(in vec4 a, in vec4 b) {
     return ret;
 }
 float norm(Dq a) {
-    return sqrt(a.scalar * a.scalar + a.e12 * a.e12 + a.e31 * a.e31 + a.e23 * a.e23);
+    return sqrt(a.w * a.w + a.e12 * a.e12 + a.e31 * a.e31 + a.e23 * a.e23);
 }
 Dq mul(in Dq a, in Dq b) {
     Dq ret;
-    ret.scalar = b.scalar * a.scalar - b.e12 * a.e12 - b.e31 * a.e31 - b.e23 * a.e23;
+    ret.w   = b.w   * a.w   - b.e12 * a.e12 - b.e31 * a.e31 - b.e23 * a.e23;
 
-    ret.e01 = b.e01 * a.scalar + b.scalar * a.e01 - b.e12 * a.e02 + b.e31 * a.e03 + b.e02 * a.e12 - b.e03 * a.e31 - b.I * a.e23 - b.e23 * a.I;
-    ret.e02 = b.e02 * a.scalar + b.e12 * a.e01 + b.scalar * a.e02 - b.e23 * a.e03 - b.e01 * a.e12 - b.I * a.e31 + b.e03 * a.e23 - b.e31 * a.I;
-    ret.e03 = b.e03 * a.scalar - b.e31 * a.e01 + b.e23 * a.e02 + b.scalar * a.e03 - b.I * a.e12 + b.e01 * a.e31 - b.e02 * a.e23 - b.e12 * a.I;
+    ret.e01 = b.e01 * a.w   + b.w   * a.e01 - b.e12 * a.e02 + b.e31 * a.e03 + b.e02 * a.e12 - b.e03 * a.e31 - b.dxyz * a.e23 - b.e23 * a.dxyz;
+    ret.e02 = b.e02 * a.w   + b.e12 * a.e01 + b.w   * a.e02 - b.e23 * a.e03 - b.e01 * a.e12 - b.dxyz * a.e31 + b.e03 * a.e23 - b.e31 * a.dxyz;
+    ret.e03 = b.e03 * a.w   - b.e31 * a.e01 + b.e23 * a.e02 + b.w   * a.e03 - b.dxyz * a.e12 + b.e01 * a.e31 - b.e02 * a.e23 - b.e12 * a.dxyz;
     
-    ret.e12 = b.e12 * a.scalar + b.scalar * a.e12 + b.e23 * a.e31 - b.e31 * a.e23;
-    ret.e31 = b.e31 * a.scalar - b.e23 * a.e12 + b.scalar * a.e31 + b.e12 * a.e23;
-    ret.e23 = b.e23 * a.scalar + b.e31 * a.e12 - b.e12 * a.e31 + b.scalar * a.e23;
+    ret.e12 = b.e12 * a.w   + b.w   * a.e12 + b.e23 * a.e31 - b.e31 * a.e23;
+    ret.e31 = b.e31 * a.w   - b.e23 * a.e12 + b.w   * a.e31 + b.e12 * a.e23;
+    ret.e23 = b.e23 * a.w   + b.e31 * a.e12 - b.e12 * a.e31 + b.w   * a.e23;
 
-    ret.I = b.I * a.scalar + b.e23 * a.e01 + b.e31 * a.e02 + b.e12 * a.e03 + b.e03 * a.e12 + b.e02 * a.e31 + b.e01 * a.e23 + b.scalar * a.I;
+    ret.dxyz = b.dxyz * a.w   + b.e23 * a.e01 + b.e31 * a.e02 + b.e12 * a.e03 + b.e03 * a.e12 + b.e02 * a.e31 + b.e01 * a.e23 + b.w   * a.dxyz;
     return ret;
 }
+
+// mat4 mul(in mat4 a, in mat4 b) {
+    
+//     m[  0 ] = a11 * b11 + a12 * b21 + a13 * b31 + a14 * b41;
+//     m[  4 ] = a11 * b12 + a12 * b22 + a13 * b32 + a14 * b42;
+//     m[  8 ] = a11 * b13 + a12 * b23 + a13 * b33 + a14 * b43;
+//     m[ 12 ] = a11 * b14 + a12 * b24 + a13 * b34 + a14 * b44;
+
+//     m[  1 ] = a21 * b11 + a22 * b21 + a23 * b31 + a24 * b41;
+//     m[  5 ] = a21 * b12 + a22 * b22 + a23 * b32 + a24 * b42;
+//     m[  9 ] = a21 * b13 + a22 * b23 + a23 * b33 + a24 * b43;
+//     m[ 13 ] = a21 * b14 + a22 * b24 + a23 * b34 + a24 * b44;
+
+//     m[  2 ] = a31 * b11 + a32 * b21 + a33 * b31 + a34 * b41;
+//     m[  6 ] = a31 * b12 + a32 * b22 + a33 * b32 + a34 * b42;
+//     m[ 10 ] = a31 * b13 + a32 * b23 + a33 * b33 + a34 * b43;
+//     m[ 14 ] = a31 * b14 + a32 * b24 + a33 * b34 + a34 * b44;
+
+//     m[  3 ] = a41 * b11 + a42 * b21 + a43 * b31 + a44 * b41;
+//     m[  7 ] = a41 * b12 + a42 * b22 + a43 * b32 + a44 * b42;
+//     m[ 11 ] = a41 * b13 + a42 * b23 + a43 * b33 + a44 * b43;
+//     m[ 15 ] = a41 * b14 + a42 * b24 + a43 * b34 + a44 * b44;
+// }
+
+// mul( Plane( 1, 0, 0, 0), Plane( 0, 0, 1, 0) ) == Quat( 0, 1, 0, 0)
 
 
 //no plane*dq unless you have rotoreflections!
@@ -528,13 +565,13 @@ mat4 toMat4( in Dq dq ) {
     float r46 = dq.e12*dq.e23;
     float r56 = dq.e31*dq.e23;
 
-    float r04 = dq.scalar*dq.e12;
-    float r05 = dq.scalar*dq.e31; 
-    float r06 = dq.scalar*dq.e23;
+    float r04 = dq.w*dq.e12;
+    float r05 = dq.w*dq.e31; 
+    float r06 = dq.w*dq.e23;
 
-    return mat4(1. + 2.*(-r44-r55),      2.*( r04+r56),      2.*( r46-r05), 2.*( dq.e03*dq.e31-dq.e02*dq.e12-dq.scalar*dq.e01-dq.I*dq.e23),
-                     2.*( r56-r04), 1. + 2.*(-r44-r66),      2.*( r06+r45), 2.*( dq.e01*dq.e12-dq.e03*dq.e23-dq.scalar*dq.e02-dq.I*dq.e31),
-                     2.*( r05+r46),      2.*( r45-r06), 1. + 2.*(-r55-r66), 2.*( dq.e02*dq.e23-dq.e01*dq.e31-dq.scalar*dq.e03-dq.I*dq.e12),
+    return mat4(1. + 2.*(-r44-r55),      2.*( r04+r56),      2.*( r46-r05), 2.*( dq.e03*dq.e31-dq.e02*dq.e12-dq.w*dq.e01-dq.dxyz*dq.e23),
+                     2.*( r56-r04), 1. + 2.*(-r44-r66),      2.*( r06+r45), 2.*( dq.e01*dq.e12-dq.e03*dq.e23-dq.w*dq.e02-dq.dxyz*dq.e31),
+                     2.*( r05+r46),      2.*( r45-r06), 1. + 2.*(-r55-r66), 2.*( dq.e02*dq.e23-dq.e01*dq.e31-dq.w*dq.e03-dq.dxyz*dq.e12),
                      0.,0.,0.,1.);
 }
 

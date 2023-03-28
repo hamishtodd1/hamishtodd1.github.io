@@ -11,18 +11,16 @@ pageParameters = {
 
 textareaValueDefault = `vec4 getChangedVertex(in vec4 initialVertex) {
 
-    // Rotations and Translations from Exponential
+    // a bit of identity, a bit of screw
+    float identityAmount = 0.;
+    float screwAmount = 0.;
 
-    //float rotationAmount = 1.; //Radians
-    //Dq rotationAxisLine = Line(1.,0.,0., 0.,1.,0.); //better be normalized!
-    //Dq scaledByHalfRotationAmount = mul( rotationAxisLine, rotationAmount / 2. );
-    //Dq rotation = dqExp(scaledByHalfRotationAmount);
+    float displacementFromOrigin = 0.;
+    Dq axis = Line(0.,1.,0.,  0.,0.,displacementFromOrigin);
 
-    //Dq translationAxisLine = Line(0.,0.,0., 0.,1.,0.);
-    //float translationAmount = 1.;
-    //Dq scaledByHalfTranslationAmount = mul( translationAxisLine, translationAmount / 2. );
-    //Dq translation = dqExp(scaledByHalfTranslationAmount);
+    Dq transform = axis;
+    transform.w = identityAmount;
+    transform.dxyz = screwAmount;
 
-    vec4 ret = apply( Quat(0.,0.,0.,1.), initialVertex );
-    return ret;
+    return apply( transform, initialVertex );
 }`

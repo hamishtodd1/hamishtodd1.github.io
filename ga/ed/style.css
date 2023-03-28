@@ -5,10 +5,10 @@ body {
 }
 
 :root {
-  --generalGap: 6px;
+  --generalGap: 15px;
 
-  --mentionDwHeight: 216px; /*136  or 102 or 180*/
-  --ioDwWidth: 290px; /*507  or 226 or 280*/
+  --mentionDwHeight: 200px; /*136  or 102 or 180*/
+  --ioDwWidth: 400px; /*507  or 226 or 280*/
 
   --dwAspect: 16/9;
   --mentionDwWidth: calc(var(--mentionDwHeight) * (var(--dwAspect)));
@@ -74,9 +74,9 @@ body {
 
 #textarea, #highlighting, #textMeasurer, #highlighting * {
   /* Also add text styles to highlighing tokens */
-  font-size: 12pt;
+  font-size: 15pt;
   font-family: monospace;
-  line-height: 16pt;
+  line-height: 18pt;
   tab-size: 4;
 }
 

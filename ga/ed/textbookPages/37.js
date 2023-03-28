@@ -3,7 +3,7 @@ pageParameters = {
     final: true,
     complex: false,
     euclidean: true,
-    infinity: true,
+    infinity: false,
     scalar: true,
     vectorSpace: false
 }
@@ -11,22 +11,20 @@ pageParameters = {
 
 textareaValueDefault = `vec4 getChangedVertex(in vec4 initialVertex) {
 
-    // Lines at Infinity
+    // Lines in Dual Quaternions
 
-    Dq lineA = Quat(1.,0.,0.,0.);
-    Dq lineB = Quat(0.,1.,0.,0.);
-    Dq aPlusB = add( lineA, lineB );
-    Dq aMinusB = sub( lineA, lineB );
-    lineA; lineB; aPlusB; aMinusB;
+    Dq lineA = Quat(1.,0.,0.,0.); //Line(1.,0.,0.,0.,0.,0.);
+    Dq lineB = Quat(0.,1.,0.,0.); //Line(0.,1.,0.,0.,0.,0.);
+    
+    //Dq lineC = Line(1.,0.,0.,0.,2.,0.);
+    //Dq lineD = Line(0.,0.,0.,0.,0.,1.);
+    
+    float t = 0.1;
+    t = clamp(t,0.,1.);
+    Dq from = lineA;
+    Dq to = lineB;
+    Dq interpolated = add( from, mul( t, sub(to, from) ) );
 
-    //Dq lineC = Line(1.,0.,0., 0.,1.,0.);
-    //lineA; lineC;
-    //Dq aPlusC  = add( lineA, lineC );
-    //Dq aMinusC = sub( lineA, lineC );
-    //aPlusC; aMinusC; lineA; lineC;
-
-    //Dq sumOfLinesAtInfinity = add(e01,e02);
-
-    vec4 ret = apply( lineA, initialVertex );
+    vec4 ret = apply( interpolated, initialVertex );
     return ret;
 }`

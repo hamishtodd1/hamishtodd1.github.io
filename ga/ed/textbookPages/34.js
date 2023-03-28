@@ -11,10 +11,12 @@ pageParameters = {
 
 textareaValueDefault = `vec4 getChangedVertex(in vec4 initialVertex) {
 
-    Dq q1 = Quat( 0., 0.96, 0., -0.28 );
-    Dq q2 = Quat(0.6, 0.,   0., 0.8  ); //Quat(0.,  0., 0.11,  0.99 );
+    // Quaternion LERP
 
-    //float t = 0.;
+    Dq q1 = Quat( 0.,   -0.43, 0., 0.9  );
+    Dq q2 = Quat( 0.96,    0., 0., 0.28 );
+
+    //float t = 0.5;
     //t = clamp(t,0.,1.);
     //Dq interpolated = add( q1, mul(t,sub(q2,q1)) );
 

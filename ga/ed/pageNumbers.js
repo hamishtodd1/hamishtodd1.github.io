@@ -4,9 +4,7 @@ function addToPageNumber(amt){
     let currentNumber = currentLocation.slice(characterNumber - 2, characterNumber)
     let newNumber = parseInt(currentNumber) + amt
     
-    if (newNumber <= 0 )
-        window.location.href = `file:///C:/hamishtodd1.github.io/ga/ed/index.html`
-    else {
+    if (newNumber > 0 ) {
         let newNumberString = newNumber >= 10 ? newNumber.toString() : `0` + newNumber.toString()
         window.location.href = 
             currentLocation.slice(0, characterNumber - 2) +

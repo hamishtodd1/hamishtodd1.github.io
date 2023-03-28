@@ -5,22 +5,26 @@ pageParameters = {
     euclidean: true,
     infinity: true,
     scalar: true,
-    vectorSpace: false,
-    numExtraCows: 2
+    vectorSpace: false
 }
 
 
 textareaValueDefault = `vec4 getChangedVertex(in vec4 initialVertex) {
 
-    float t = 0.5;
-    Dq start = Dq( -0.79,-1.27,-1.22,1.24,-0.39,-0.22,0.42,1.63);
-    Dq end   = Dq( -0.96,0.96,1.34,1.15,0.18,0.18,0.14,-0.61); //both normalized
+    // Euler angles
 
-    // SLERP 
-    Dq startToEnd = div(end,start);    
-    Dq startToEndAxis = dqLog(startToEnd);
-    Dq startToEndByAmountT = dqExp( mul(t, startToEndAxis) );
-    
-    vec4 initialVertexAtStart = apply( startToEndByAmountT, initialVertex );
-    return apply( toStart, initialVertexAtStart );
+    float yaw = 1.3;
+    float pitch = 2.1;
+    float roll = 1.9;
+    //Dq yz = Quat(1.,0.,0.,0.);
+    //Dq zx = Quat(0.,1.,0.,0.);
+    //Dq xy = Quat(0.,0.,1.,0.);
+    //Dq yawRotation   = dqExp( mul( zx,   yaw / 2. ) );
+    //Dq pitchRotation = dqExp( mul( yz, pitch / 2. ) );
+    //Dq rollRotation  = dqExp( mul( xy,  roll / 2. ) );
+    //Dq rotation = mul( rollRotation, mul(pitchRotation, yawRotation ) );
+    //rotation;
+
+    vec4 ret = apply( Quat(0.,0.,0.,1.), initialVertex );
+    return ret;
 }`

@@ -2,28 +2,26 @@ pageParameters = {
     untransformed: true,
     final: true,
     complex: false,
-    euclidean: false,
+    euclidean: true,
     infinity: true,
     scalar: true,
     vectorSpace: false
 }
 
+
 textareaValueDefault = `vec4 getChangedVertex(in vec4 initialVertex) {
 
-    Dq i = Quat(1.,0.,0.,0.);
-    Dq j = Quat(0.,1.,0.,0.);
-    //Dq iMultipliedByJ = mul(i,j);
-
-    //vec3 directionVector = vec3( 1.,1.,0. );
+    // factors affectig a dual quaternio
     
-    //vec3 iApplied              = apply( i,              directionVector );
-    //vec3 iAppliedThenJApplied  = apply( j,              iApplied );
-    //directionVector; iApplied; iAppliedThenJApplied;
-    //vec3 iMultipliedByJApplied = apply( iMultipliedByJ, directionVector );
-    //directionVector; iAppliedThenJApplied; iMultipliedByJApplied;
+    float identityAmount = 0.;
+    float screwiness = 0.;
+    float displacementFromOrigin = 0.;
 
-    //Dq jMultipliedByI = mul(j,i);
-    //jMultipliedByI; iMultipliedByJ;
+    Dq transform = Dq(
+        identityAmount,
+        0., 1., 0.,
+        0., 0., displacementFromOrigin,
+        screwiness);
 
-    return initialVertex;
+    return apply( transform, initialVertex );
 }`
