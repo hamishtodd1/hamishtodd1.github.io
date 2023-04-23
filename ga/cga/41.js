@@ -150,7 +150,8 @@ function init41WithoutDeclarations(basisNames) {
         }
 
         normalize() {
-            return this.multiplyScalar(1./this.norm())
+            let norm = this.norm()
+            return norm === 0.?this:this.multiplyScalar(1./norm)
         }
 
         mul(mv) {
@@ -244,6 +245,8 @@ function init41WithoutDeclarations(basisNames) {
 
         reverse(target) {
             reverse(this, target)
+
+            return target
         }
 
         selectGrade(grade, target) {
@@ -252,7 +255,7 @@ function init41WithoutDeclarations(basisNames) {
             else
                 target.copy(this)
 
-            for (let i = 0; i < 16; ++i) {
+            for (let i = 0; i < 32; ++i) {
                 if (indexGrades[i] !== grade)
                     target[i] = 0.
             }
@@ -368,6 +371,33 @@ function init41WithoutDeclarations(basisNames) {
     }
     window.Mv = Mv
 
+    {
+        function getPlusAndMinus(psi, psiPlus, psiMinus) {
+            //gamma0 is eMinus
+            eMinus.sandwich(psi, psiPlus)
+            psiMinus.copy(psiPlus).multiplyScalar(-1.)
+
+            psiPlus.addScaled(psi, 1.).multiplyScalar(.5)
+            psiMinus.addScaled(psi, 1.).multiplyScalar(.5)
+        }
+        let psiPlus = new Mv()
+        let psiMinus = new Mv()
+        let phiPlus = new Mv()
+        let phiMinus = new Mv()
+        let extra = new Mv()
+        let ourReversion = new Mv()
+        octonionMul = function (psi, phi, target) {
+            getPlusAndMinus(psi, psiPlus, psiMinus)
+            getPlusAndMinus(phi, phiPlus, phiMinus)
+
+            mul(psiPlus, phiPlus, target)
+            target.addScaled(phiMinus.reverse(ourReversion).mul(psiMinus, extra),1.)
+            target.addScaled(mul(phiMinus,psiPlus,extra),1.)
+            target.addScaled(psiMinus.mul(phiPlus.reverse(ourReversion), extra), 1.)
+            return target
+        }
+    }
+
     let indexGrades = [
         0,                    // CGA           4D HPGA
         1,1,1,1,1,            //sphere         3-plane
@@ -410,6 +440,10 @@ function init41WithoutDeclarations(basisNames) {
 
     e1Plus = mul(e1,ePlus)
     e1Minus = mul(e1, eMinus)
+    e12Plus = mul(e12, ePlus)
+    e12Minus = mul(e12, eMinus)
+    e1PlusMinus = mul(e1, ePlusMinus)
+    e2PlusMinus = mul(e2, ePlusMinus)
     nI = ePlus.add(eMinus, new Mv()) //like e0. It's a plane.
     nO = ePlus.sub(eMinus, new Mv())
     // nIDual = mul(nI, e123PlusMinus) //they're points, so only work for one space
@@ -419,6 +453,7 @@ function init41WithoutDeclarations(basisNames) {
     e01 = mul(nI, e1).multiplyScalar(.5)
     e02 = mul(nI, e2).multiplyScalar(.5)
     e03 = mul(nI, e3).multiplyScalar(.5)
+
 
     mv0 = new Mv()
     mv1 = new Mv()

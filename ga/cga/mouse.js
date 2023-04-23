@@ -63,6 +63,11 @@ function initMouse() {
     }, false)
 
     document.addEventListener('mouseup', function (event) {
+        if (clickedRect !== null) {
+            let [relX, relY] = getRels(event, clickedRect)
+            clickedRect.onLetGo(relX, relY)
+        }
+
         if(event.button === 0)
             clickedRect = null
         else if(event.button === 2)

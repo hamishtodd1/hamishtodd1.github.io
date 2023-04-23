@@ -1,4 +1,37 @@
 /*
+    When you have a rotation-and-scale, that's a rotation around a line in 3D followed by, well, a translation-and-scale around its dual line
+
+    The thing where it's flattened down on the plane is giving you the wrong impression
+    Stuff does not stay on that plane
+    New thought
+        There's the camera "volume" / n-plane
+            in the case of eg 1D CGA is a line
+            in the case of 2D CGA is a plane
+            Which you can skew around, maybe it always passes through nO pt(certainly if axes are through origin)
+                and the various things which pass through the point nI cut it at the lines/points you see
+                In particular the e0 plane will cut the camera volume, appearing as an n-1-plane
+                "true points" aside from origin will disappear, though hey, they were just camera positions?
+        There's the camera position, which for orthographic is a point at infinity
+            That's the points which square to 1
+            But you know, camera position, maybe it just doesn't matter?
+                It's a matter of convention that perspective contracts towards you. Weird cutoffs are allowed
+
+    Soooo, how would you make a camera system for 2D?
+        Without loss of generality we can say you can render the stuff in the unit circle
+        Obviously you'd make it so when you want it orthographic, you can be at any point at infinity
+            And you'd make it so you can rotate the world around the origin
+                That's scalars and e12 which can be made with (true) points at infinity or lines(planes) through origin
+            And you can translate your orthographic camera by translating the world to that sphere
+                That's scalars and lines through nI which can be made with lines(planes)
+
+        For perspective projection you just need dolly zoom
+        So in 2D, jyst
+        
+
+
+    Camera is a point at infinity, and these rotors "take it off the plane"
+
+
     vertex shader for the planes
 
     you really just want to show people the lines
@@ -109,7 +142,7 @@ function initColumn2d() {
         hyperbolic.camera.updateProjectionMatrix()
 
         let planesGeo = new THREE.CircleGeometry(1.,30)
-        let planesMat = new THREE.MeshPhongMaterial({ color: 0xFF00FF, side:THREE.DoubleSide })
+        let planesMat = new THREE.MeshPhongMaterial({ color: 0xFF0000, side:THREE.DoubleSide })
         var gridPlanes = new THREE.InstancedMesh(planesGeo, planesMat, gridCount)
 
         //in this space, the y plane is ePlus
@@ -127,46 +160,115 @@ function initColumn2d() {
         hyperbolic.scene.add(gridPlanes)
     }
 
-    {
-        ptPair = mul(ePlus, e1)
-        // mul(e1, nI, ptPair)
-        // e01.add(e02,ptPair)q
-        // meet(e2,nO,ptPair) //the interesting one
-        // ptPair.copy(e01)
-        var ptPairLineMesh = new THREE.Mesh(cylGeo, new THREE.MeshBasicMaterial({ color: 0x00FF00 }))
+    let justAxis = new Mv()
+    function spinorViz(spinor, col) {
+        var ptPairLineMesh = new THREE.Mesh(cylGeo, new THREE.MeshBasicMaterial({ color: col }))
         ptPairLineMesh.matrixAutoUpdate = false
-        hyperbolic.scene.add(ptPairLineMesh)
 
-        //you also want a point pair on the plane
-        //you want this effect where they cross
-
-        hyperbolicOrigin.projectOn(mul(e1, nI), mv0).log("projection")
-        
-        let ptPairPtsMat = new THREE.MeshBasicMaterial({ color: 0x00FF00 })
+        let ptPairPtsMat = new THREE.MeshBasicMaterial({ color: col })
         var ptPairPtsSphereMeshes = [
             new THREE.Mesh(pointGeo, ptPairPtsMat),
             new THREE.Mesh(pointGeo, ptPairPtsMat)
         ]
-        hyperbolic.scene.add(ptPairPtsSphereMeshes[0])
-        hyperbolic.scene.add(ptPairPtsSphereMeshes[1])
-        var ptPairPtsFloorMeshes = [
-            new THREE.Mesh(pointGeo, ptPairPtsMat),
-            new THREE.Mesh(pointGeo, ptPairPtsMat)
-        ]
-        conformal.scene.add(ptPairPtsFloorMeshes[0])
-        conformal.scene.add(ptPairPtsFloorMeshes[1])
+        // var ptPairPtsFloorMeshes = [
+        //     new THREE.Mesh(pointGeo, ptPairPtsMat),
+        //     new THREE.Mesh(pointGeo, ptPairPtsMat)
+        // ]
+        // conformal.scene.add(ptPairPtsFloorMeshes[0])
+        // conformal.scene.add(ptPairPtsFloorMeshes[1])
 
-        let indicator = new THREE.Mesh(pointGeo)
-        hyperbolic.scene.add(indicator)
+        conformal.scene.add(ptPairPtsSphereMeshes[0])
+        conformal.scene.add(ptPairPtsSphereMeshes[1])
+        hyperbolic.scene.add(ptPairLineMesh)
 
-        function applyToGrid(rotor) {
-            gridMvs.forEach((gmv) => {
-                rotor.sandwich(gmv, mv1)
-                gmv.copy(mv1)
-            })
+        updateFunctions.push(() => {
+            spinor.selectGrade(2, justAxis)
+
+            lineMvToCylGeoMatrix(justAxis, ptPairLineMesh.matrix)
+
+            ptPairPtPosition(justAxis, true, ptPairPtsSphereMeshes[0].position)
+            ptPairPtPosition(justAxis, false, ptPairPtsSphereMeshes[1].position)
+
+            //sphereToPlane(ptPairPtsSphereMeshes[0].position, ptPairPtsFloorMeshes[0].position)
+            //sphereToPlane(ptPairPtsSphereMeshes[1].position, ptPairPtsFloorMeshes[1].position)
+        })
+    }
+
+    let controlPtPair = e01.add(e02,new Mv())
+    let mouseControlledPtPair = controlPtPair
+
+    {
+        let mouseControlledPtPair1 = null
+        spinorViz(controlPtPair, 0x00FF00)
+
+        // let mouseControlledPtPair1 = mul(ePlus, e2)
+        // let mouseControlledPtPair2 = mul(e1, e2)
+        // var octonionResultPtPair = mul(e1, e2)
+        // spinorViz(mouseControlledPtPair1, 0xFF0000)
+        // spinorViz(mouseControlledPtPair2, 0x0000FF)
+        // spinorViz(octonionResultPtPair, 0x00FFFF)
+        // updateFunctions.push(() => {
+        //     octonionMul(mouseControlledPtPair1, mouseControlledPtPair2, octonionResultPtPair)
+        // })
+
+        let cameraUp = new THREE.Vector3()
+        let rightwardVec = new THREE.Vector3()
+        function getMousePt(x,y,target) {
+            cameraUp.set(0., 1., 0.).applyQuaternion(hyperbolic.camera.quaternion)
+            cameraUp.normalize()
+
+            rightwardVec.crossVectors(cameraUp, hyperbolic.camera.position).normalize()
+            v1.set(0., 0., 0.)
+            v1.addScaledVector(cameraUp, 4. * y)
+            v1.addScaledVector(rightwardVec, 4. * x)
+            v1.addScaledVector(v2.copy(hyperbolic.camera.position).sub(v1).setLength(.97),1.)
+
+            positionVectorToHyperbolicGrade3(v1, target)
+
+            return target
         }
 
+        
+        let dualJoin = new Mv()
+        let dualP = new Mv()
+        let dualQ = new Mv()
+        let startPt = new Mv()
+        let currentPt = new Mv()
+        hyperbolic.onClick = (x, y) => {
+            getMousePt(x,y,startPt)
+            if (mouseControlledPtPair1 !== null)
+                mouseControlledPtPair = mouseControlledPtPair === mouseControlledPtPair1 ? mouseControlledPtPair2 : mouseControlledPtPair1
+        }
 
+        function join(p, q, target) {
+            return mul(
+                meet(
+                    mul(p, pss, dualP),
+                    mul(q, pss, dualQ),
+                    dualJoin), pss,
+                target )
+        }
+        hyperbolic.onDrag = (x, y) => {
+            getMousePt(x,y,currentPt)
+            
+            join(startPt, currentPt, mouseControlledPtPair)
+        }
+    }
+
+    {
+        // mul(e1, nI, controlPtPair)
+        // e01.add(e02,controlPtPair)q
+        // meet(e2,nO,controlPtPair) //the interesting one
+        // controlPtPair.copy(e01)
+        
+        function applyToGrid(rotor) {
+            gridMvs.forEach((gmv) => {
+                gmv.applyRotor(rotor)
+            })
+            addedPoints.forEach((ap)=>{
+                ap.mv.applyRotor(rotor)
+            })
+        }
 
 
         {
@@ -187,19 +289,19 @@ function initColumn2d() {
 
             // log(ourPss.getFirstNonzeroIndex())
             bindButton(`i`, () => { }, ``, () => {
-                mul(ptPair, ourPss, mv0).naieveAxisToRotor(-.01)
+                mul(controlPtPair, ourPss, mv0).naieveAxisToRotor(-.01)
                 applyToGrid(mv0)
             })
             bindButton(`k`, () => { }, ``, () => {
-                mul(ptPair, ourPss, mv0).naieveAxisToRotor(.01)
+                mul(controlPtPair, ourPss, mv0).naieveAxisToRotor(.01)
                 applyToGrid(mv0)
             })
             bindButton( `j`, () => {}, ``, () => {
-                mv0.copy(ptPair).naieveAxisToRotor(.01)
+                mv0.copy(controlPtPair).naieveAxisToRotor(.01)
                 applyToGrid(mv0 )
             })
             bindButton(`l`, () => { }, ``, () => {
-                mv0.copy(ptPair).naieveAxisToRotor(-.01)
+                mv0.copy(controlPtPair).naieveAxisToRotor(-.01)
                 applyToGrid(mv0)
             })
             
@@ -210,26 +312,121 @@ function initColumn2d() {
         }
     }
 
+    let pss = mul(e12, ePlusMinus)
+
     {
         let floorGeo = new THREE.CircleGeometry(9999.)
         floorGeo.rotateX(TAU / 4.)
-        let floorPlane = new THREE.Mesh(floorGeo, new THREE.MeshBasicMaterial({ color: 0xFF0000, side: THREE.DoubleSide }))
+        let floorPlane = new THREE.Mesh(floorGeo, new THREE.MeshBasicMaterial({ color: 0xFF8000, side: THREE.DoubleSide }))
         floorPlane.position.y = -1.01
-        conformal.scene.add(floorPlane)
+        hyperbolic.scene.add(floorPlane)
 
         conformal.camera.position.set(0., 1., 0.)
         conformal.camera.lookAt(0., -1., 0.)
 
         let dragPoint = null
-        conformal.onClick = (x, y) => {
-            dragPoint = new THREE.Mesh(pointGeo,new THREE.MeshBasicMaterial({color:0x0000FF}))
-            dragPoint.position.set(x / dwDimension * 8., -1., -y / dwDimension * 8.)
-            addedPoints.push(dragPoint)
-            conformal.scene.add(dragPoint)
+        //maybe
+        let pointBasedOrigin = mul(e12, eMinus, mv0).multiplyScalar(-1.).add( hyperbolicOrigin, new Mv()).normalize()
+        updateFunctions.push(()=>{
+            addedPoints.forEach((ap)=>{
+                hyperbolicGrade3ToPositionVector(ap.mv, ap.position)
+            })
+        })
+        function xyToPointBasedPoint(x,y,target) {
+            mul(e1, ePlusMinus, mv0).multiplyScalar( y * 8.)
+            mul(e2, ePlusMinus, mv1).multiplyScalar(-x * 8.)
+            mv0.add(mv1, mv2)
+            // mv2.add(hyperbolicOrigin, target)
+            if (Math.abs(x) < 1.2 && Math.abs(y) < 1.2 )
+                mv2.add(pointBasedOrigin, target)
+            else
+                target.copy(mv2)
+
+            target.normalize()
+            return target
         }
-        conformal.onDrag = (x, y) => {
-            dragPoint.position.set(x / dwDimension * 8., -1., -y / dwDimension * 8.)
+
+        //to check if join works
+        // {
+        //     let startPoint = new Mv()
+        //     conformal.onClick = (x,y)=>{
+        //         xyToPointBasedPoint(x, y, startPoint).normalize()
+        //     }
+        //     conformal.onDrag = (x,y)=>{
+        //         xyToPointBasedPoint(x, y, mv0).normalize()
+
+        //         //geometric antiproduct? eg mul by pss first
+
+
+        //         mul(mv0,startPoint,mv1)
+        //         mul(mv1,pss,mv2).log()
+        //         ptPair.copy(mv2)
+        //         ptPair[0] = 0.
+        //         ptPair.normalize()
+        //     }
+        // }
+
+        //old version, dunno what it did
+        if(false)
+        {
+            conformal.onClick = (x, y) => {
+                dragPoint = new THREE.Mesh(pointGeo,new THREE.MeshBasicMaterial({color:0x0000FF}))
+                dragPoint.mv = new Mv()
+                conformal.scene.add(dragPoint)
+                addedPoints.push(dragPoint)
+
+                xyToPointBasedPoint(x, y, dragPoint.mv)
+            }
+            conformal.onDrag = (x, y) => {
+                xyToPointBasedPoint(x, y, dragPoint.mv)
+            }
         }
+
+        //
+        // if(false)
+        {
+            let gridWhenGrabbed = Array(gridMvs.length)
+            gridMvs.forEach((gmv, i) => {
+                gridWhenGrabbed[i] = new Mv()
+            })
+
+            let mouseDownMv = new Mv()
+            conformal.onClick = (x, y) => {
+                gridMvs.forEach((gmv, i) => {
+                    gridWhenGrabbed[i].copy(gmv)
+                })
+
+                xyToPointBasedPoint(x * 99999., y * 99999., mouseDownMv)
+                xyToPointBasedPoint(x, y, mouseDownMv)
+
+                // xyToPointBasedPoint(x, y, mv0)
+                // mouseDownMv.copy(mv0).addScaled(pointBasedOrigin,-1.)
+
+                // join2d(mv0, pointBasedOrigin, ptPair)
+            }
+            conformal.onDrag = (x, y) => {
+                xyToPointBasedPoint(x, y, mv0)
+                // join2d(mouseDownMv, mv0, ptPair)
+
+                // xyToPointBasedPoint(x * 99999., y * 99999., mouseDownMv)
+
+                // mv0.log("current")
+                // mouseDownMv.log("mouseDo")
+                mul(mv0, mouseDownMv, mv1)//.naieveSqrt()
+                
+                gridMvs.forEach((gmv, i) => {
+                    gmv.copy(gridWhenGrabbed[i])
+                    gmv.applyRotor(mv1)
+                })
+
+                mv1[0] = 0.
+                ptPair.copy(mv1).normalize()
+                
+                // mul(mv1, pss, ptPair) //this is the join of the point
+            }
+        }
+
+        
 
         let gridLinesVertexShader = `
                 uniform vec3 axisBivector;
@@ -256,14 +453,15 @@ function initColumn2d() {
                     vec4 myQuat = vec4( sin(angle/2.) * axisBivector, cos(angle/2.) );
                     //could have the amount you go out be a cutoff to get rid of that gap
                     vec3 onSphere = applyQuatToVec(myQuat, initialVec);
+                    //so that's a circle, somewhere on the sphere
  
-                    vec3 projectionPoint = vec3(0.,1.,0.);
-                    vec3 projectionDirection = -projectionPoint;
-                    vec3 ppToOnSphere = onSphere - projectionPoint;
+                    vec3 projectionOrigin = vec3(0.,1.,0.);
+                    vec3 projectionDirection = -projectionOrigin;
+                    vec3 ppToOnSphere = onSphere - projectionOrigin;
                     float amountAlongProjectionDirection = dot(ppToOnSphere, projectionDirection);
                     //you want that to be 2
                     float inflationFactor = 2. / amountAlongProjectionDirection;
-                    vec3 projected = projectionPoint + ppToOnSphere * inflationFactor;
+                    vec3 projected = projectionOrigin + ppToOnSphere * inflationFactor;
                     vec4 transformedPosition = vec4(projected,1.);
 
                     // vec4 transformedPosition = vec4(onSphere,1.);
@@ -315,6 +513,14 @@ function initColumn2d() {
 
         //don't forget the interesting discovery that if you're just intersecting these planes, it's Lengyel's result
     }
+    function positionVectorToHyperbolicGrade3(vec, target) {
+        target.copy(zeroMv)
+        target.addScaled(e2PlusMinus, -vec.x)
+        target.addScaled(e12Minus, vec.y)
+        target.addScaled(e1PlusMinus, -vec.z)
+        target.addScaled(e12Plus, 1.)
+        return target
+    }
 
     function hyperbolicGrade3ToPositionVector(mv, target) {
         target.set(
@@ -358,9 +564,9 @@ function initColumn2d() {
     let midPoint = new THREE.Vector3()
     let directionToMoveInMv = new Mv()
     let directionToMoveInVec = new THREE.Vector3()
-    function ptPairPtPosition(mv, positive, target) {
+    ptPairPtPosition = (mv, positive, target) => {
         getPositionVector(mv, midPoint)
-        let distanceToSurface = Math.sqrt(1. - midPoint.lengthSq())
+        let distanceToSurface = diskInUnitSphereRadius(midPoint)
 
         meet(mv, eMinus, directionToMoveInMv)
         hyperbolicGrade3ToPositionVector(directionToMoveInMv, directionToMoveInVec)
@@ -388,8 +594,8 @@ function initColumn2d() {
     }
 
     let debugPt = new THREE.Mesh(pointGeo)
-    hyperbolic.scene.add(debugPt)
     let debugPt2 = new THREE.Mesh(pointGeo)
+    hyperbolic.scene.add(debugPt)
     hyperbolic.scene.add(debugPt2)
     let diskCenter = new THREE.Vector3()
     updateFunctions.push(() => {
@@ -419,11 +625,11 @@ function initColumn2d() {
                 }
 
                 //on the plane
-                {
-                    let lookPlaneIntersectionWithE12OnPlane = meet(e12OnPlane, nO, mv1)
-                    hyperbolicGrade3ToPositionVector(lookPlaneIntersectionWithE12OnPlane, v3)
-                    planeToSphere(v3, uniforms.initialVec.value)
-                }
+                // {
+                //     let lookPlaneIntersectionWithE12OnPlane = meet(e12OnPlane, nO, mv1)
+                //     hyperbolicGrade3ToPositionVector(lookPlaneIntersectionWithE12OnPlane, v3)
+                //     planeToSphere(v3, uniforms.initialVec.value)
+                // }
 
                 //on the sphere
                 {
@@ -433,24 +639,13 @@ function initColumn2d() {
                 }
 
                 //on the plane
-                {
-                    //uniforms.initialVec.value is assumed to already be on the sphere
-                    uniforms.axisBivector.value.addVectors(uniforms.initialVec.value,yUnit).normalize()
-                }
+                // {
+                //     //uniforms.initialVec.value is assumed to already be on the sphere
+                //     uniforms.axisBivector.value.addVectors(uniforms.initialVec.value,yUnit).normalize()
+                // }
             }
         })
         gridPlanes.instanceMatrix.needsUpdate = true
         // gridLines.instanceMatrix.needsUpdate = true
-
-
-        {
-            lineMvToCylGeoMatrix(ptPair, ptPairLineMesh.matrix)
-
-            ptPairPtPosition(ptPair, true, ptPairPtsSphereMeshes[0].position)
-            ptPairPtPosition(ptPair,false, ptPairPtsSphereMeshes[1].position)
-
-            sphereToPlane(ptPairPtsSphereMeshes[0].position, ptPairPtsFloorMeshes[0].position)
-            sphereToPlane(ptPairPtsSphereMeshes[1].position, ptPairPtsFloorMeshes[1].position)
-        }
     })
 }

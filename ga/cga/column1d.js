@@ -16,11 +16,18 @@ function initColumn1d() {
     let spineMv = new Mv()
     mul(e1, nI, spineMv)
 
+    let freeAxisDual = new Mv()
+
     {
-        function applyToGrid(rotor) {
+        function applyToEverything(rotor) {
             gridMvs.forEach((gmv) => {
                 rotor.sandwich(gmv, mv1)
                 gmv.copy(mv1)
+            })
+
+            freeAxes.forEach(fa=>{
+                rotor.sandwich(fa, mv1)
+                fa.copy(mv1)
             })
         }
 
@@ -36,17 +43,17 @@ function initColumn1d() {
         let buttonsArr = [`ArrowUp`, `ArrowDown`, `ArrowLeft`, `ArrowRight`, `PageDown`,`PageUp`]
         buttonsArr.forEach((button,i)=> {
             bindButton(button, () => { }, ``, () => {
-                applyToGrid(rotorsArr[i])
+                applyToEverything(rotorsArr[i])
             })
         })
 
         bindButton(",", () => { }, ``, () => {
             mv0.copy(freeAxis).naieveAxisToRotor(.01)
-            applyToGrid(mv0)
+            applyToEverything(mv0)
         })
         bindButton(".", () => { }, ``, () => {
             mv0.copy(freeAxis).naieveAxisToRotor(-.01)
-            applyToGrid(mv0)
+            applyToEverything(mv0)
         })
 
         //this breaks the planes because it's not attacking the rotor
@@ -105,10 +112,11 @@ function initColumn1d() {
         }
     }
 
+    let diagonalClippingPlanesDist = 99.
+    let nIClippingPlane = new THREE.Plane(new THREE.Vector3(0., 1., -1.), diagonalClippingPlanesDist)
+    let ourNoClippingPlane = new THREE.Plane(new THREE.Vector3(), diagonalClippingPlanesDist)
     let bottomClippingPlane = new THREE.Plane(new THREE.Vector3(0.,1.,0.),0.)
-    let nIClippingPlane = new THREE.Plane(new THREE.Vector3(0., 1., -1.), .01)
     // let nOClippingPlane = new THREE.Plane(new THREE.Vector3(0., 1.,-1.), .01) //set to a big number to set more back planes
-    let ourNoClippingPlane = new THREE.Plane(new THREE.Vector3(), .01)
     let topClippingPlane = new THREE.Plane(new THREE.Vector3(0., -1., 0.), coneTopRadius)
     
     let unitHeightCylGeo = CylinderBufferGeometryUncentered(tubeRadius, 1., 8, 1, true)
@@ -142,9 +150,11 @@ function initColumn1d() {
             gridMvs[i] = new Mv()
             ourTranslation.sandwich(e1, gridMvs[i])
         }
-        // gridMvs.push(ePlus.clone())
-        // gridMvs.push(ePlus.clone().sub(nI))
-        // gridMvs.push(ePlus.clone().add(nO))
+        // gridMvs.push(freeAxisDual) //an interesting thing to have
+        // gridMvs.push(ePlus.clone().normalize())
+        // gridMvs.push(ePlus.clone().sub(nI).normalize())
+        // gridMvs.push(ePlus.clone().add(nO).normalize())
+        gridMvs.push(nI.clone())
         var gridCount = gridMvs.length
 
         let rectMat = new THREE.MeshPhongMaterial({
@@ -231,20 +241,56 @@ function initColumn1d() {
         let eye = createEye()
         ambient.scene.add(eye)
         
-        var freeAxis = AxisAndBall()
-        freeAxis.copy(e1Plus)
+        var freeAxes = []
+        for(let i = 0; i < 2; ++i)
+            freeAxes[i] = AxisAndBall()
+        freeAxes[0].copy(e1Plus).addScaled(e1Minus, 1.).addScaled(ePlusMinus,3.6)
+        freeAxes[0].normalize().multiplyScalar(2.)
+        freeAxes[1].copy(e1Plus)
+        // freeAxis.copy(e1Minus)
+
+        let mulAxis = AxisAndBall()
+        updateFunctions.push(()=>{
+            mul(freeAxes[0], freeAxes[1], mulAxis)
+        })
+
+        var freeAxis = freeAxes[0]
         function setFreeAxis(x,y) {
-            freeAxis.copy(ePlusMinus)
-                .multiplyScalar(hyperbolicFov * x)
-                .addScaled(e1Minus, hyperbolicFov*y)
+            freeAxis.copy(zeroMv)
+                .addScaled(ePlusMinus,hyperbolicFov * x)
+                .addScaled(e1Minus,   hyperbolicFov*y)
             if (Math.abs(x) < .5 && Math.abs(y) < .5)
                 freeAxis.addScaled(e1Plus, 1.)
+            
+            let snapRadius = .1
+            for(let i = 0; i < 32; ++i) {
+                if (Math.abs(freeAxis[i] -  0.) < snapRadius)
+                    freeAxis[i] = 0.
+                if (Math.abs(freeAxis[i] -  1.) < snapRadius)
+                    freeAxis[i] = 1.
+                if (Math.abs(freeAxis[i] - -1.) < snapRadius)
+                    freeAxis[i] = -1.
+                if (Math.abs(freeAxis[i] - -2.) < snapRadius)
+                    freeAxis[i] = -2.
+                if (Math.abs(freeAxis[i] -  2.) < snapRadius)
+                    freeAxis[i] = 2.
+            }
+            freeAxis.normalize()
+
+            mul(freeAxis, ourPss, freeAxisDual)
+            //then we were going to have something about multiplying them. Which will def get you a spinor
+            //But where? Will it be a camera transform of some kind?
         }
         hyperbolic.onClick = (x, y) => {
-            setFreeAxis(x,y)
+            let distSq0 = sq(freeAxes[0].ePlusMinus() / hyperbolicFov - x ) + sq(freeAxes[0].e1Minus() / hyperbolicFov - y)
+            let distSq1 = sq(freeAxes[1].ePlusMinus() / hyperbolicFov - x ) + sq(freeAxes[1].e1Minus() / hyperbolicFov - y)
+            log(distSq0, distSq1)
+            freeAxis = distSq0 < distSq1 ? freeAxes[0] : freeAxes[1]
+
+            setFreeAxis( x, y )
         }
         hyperbolic.onDrag = (x,y)=>{
-            setFreeAxis(x,y)
+            setFreeAxis( x, y )
         }
 
         // let eye2 = createEye()
@@ -281,13 +327,20 @@ function initColumn1d() {
         conformal.camera.updateProjectionMatrix()
         conformal.camera.rotation.x = TAU / 8. //???
 
-        let nOLine = new THREE.Mesh(cylGeo,new THREE.MeshBasicMaterial({color:0xFF0000}))
+        let nOLine = new THREE.Mesh(cylGeo,new THREE.MeshBasicMaterial({color:0xFF8000}))
         nOLine.matrixAutoUpdate = false
         conformal.scene.add(nOLine)
 
         conformal.updateCamera = () => {
             getNoDirectionVector(v1)
             conformal.camera.lookAt(v1)
+        }
+
+        conformal.onClick = (x,y)=>{
+            log("yo")
+        }
+        conformal.onDrag = (x,y) => {
+            log("yaaa")
         }
 
         updateFunctions.push(()=>{
@@ -305,15 +358,36 @@ function initColumn1d() {
             ourNoClippingPlane.normal.multiplyScalar(-1.)
         })
 
-        let gridPointsMat = new THREE.MeshBasicMaterial({ color: 0x0000FF })
-        var gridPoints = new THREE.InstancedMesh(pointGeo, gridPointsMat, gridCount)
-        conformal.scene.add(gridPoints)
+        let floorGridPointsMat = new THREE.MeshBasicMaterial({ color: 0x0000FF })
+        var floorGridPoints = new THREE.InstancedMesh(pointGeo, floorGridPointsMat, gridCount)
+        conformal.scene.add(floorGridPoints)
+        let circleGridPointsMat = new THREE.MeshBasicMaterial({ color: 0xFF0000 })
+        var circleGridPoints = new THREE.InstancedMesh(pointGeo, circleGridPointsMat, gridCount*2)
+        hyperbolic.scene.add(circleGridPoints)
     }
 
     function planeMvToNormalVector(planeMv, target) {
         return target.set(planeMv.e1(), planeMv.eMinus(), -planeMv.ePlus())
     }
 
+    // let midPoint = new THREE.Vector3()
+    // let directionToMoveInMv = new Mv()
+    // let directionToMoveInVec = new THREE.Vector3()
+    // function ptPairPtPosition(mv, positive, target) {
+    //     getPositionVector(mv, midPoint)
+    //     let distanceToSurface = Math.sqrt(1. - midPoint.lengthSq())
+
+    
+
+    //     meet(mv, eMinus, directionToMoveInMv)
+    //     hyperbolicGrade3ToPositionVector(directionToMoveInMv, directionToMoveInVec)
+
+    //     target.copy(midPoint).addScaledVector(directionToMoveInVec, distanceToSurface * (positive ? 1. : -1.))
+    //     return target
+    // }
+
+    let cylinderPosition = new THREE.Vector3()
+    let cylinderDirection = new THREE.Vector3()
     updateFunctions.push(() => {
         gridMvs.forEach((gmv, i) => {
             {
@@ -327,12 +401,12 @@ function initColumn1d() {
                 m1.identity()
 
                 meet(gmv, eMinus, mv1).normalize()
-                ambientLineMvToUnitVecDirection(mv1, v1).multiplyScalar(100.)
-                setRotationallySymmetricMatrix(v1.x, v1.y, v1.z, m1)
+                ambientLineMvToUnitVecDirection(mv1, cylinderDirection).multiplyScalar(100.)
+                setRotationallySymmetricMatrix(cylinderDirection.x, cylinderDirection.y, cylinderDirection.z, m1)
 
                 hyperbolicOrigin.projectOn(gmv, mv2).normalize()
-                ambientLineMvToUnitVecDirection(mv2, v1)
-                m1.setPosition(mv2.ePlusMinus() / mv2.e1Plus(), 1., mv2.e1Minus() / mv2.e1Plus())
+                cylinderPosition.set(mv2.ePlusMinus() / mv2.e1Plus(), 1., mv2.e1Minus() / mv2.e1Plus())
+                m1.setPosition(cylinderPosition)
 
                 gridLines.setMatrixAt(i, m1)
             }
@@ -343,11 +417,32 @@ function initColumn1d() {
                 ambientLineMvToUnitVecDirection(mv0, v1)
                 v1.multiplyScalar(1./v1.y) //or maybe it could be related to look direction
                 m1.identity().setPosition(v1)
-                gridPoints.setMatrixAt(i,m1)
+                floorGridPoints.setMatrixAt(i, m1)
+
+                //for the point pair
+                cylinderPosition.y = 0.
+                let midPointToHorosphereDist = diskInUnitSphereRadius(cylinderPosition)
+                cylinderPosition.y = 1.
+                if (isNaN(midPointToHorosphereDist)) {
+                    m1.setPosition(999.,999.,999.)
+                    circleGridPoints.setMatrixAt(i + gridCount, m1)
+                    circleGridPoints.setMatrixAt(i, m1)
+                }
+                else {
+                    cylinderDirection.setLength(midPointToHorosphereDist)
+
+                    v1.copy(cylinderPosition).add(cylinderDirection)
+                    m1.setPosition(v1)
+                    circleGridPoints.setMatrixAt(i + gridCount, m1)
+                    v1.copy(cylinderPosition).addScaledVector(cylinderDirection, -1.)
+                    m1.setPosition(v1)
+                    circleGridPoints.setMatrixAt(i, m1)
+                }
             }
         })
         gridPlanes.instanceMatrix.needsUpdate = true
         gridLines.instanceMatrix.needsUpdate = true
-        gridPoints.instanceMatrix.needsUpdate = true
+        floorGridPoints.instanceMatrix.needsUpdate = true
+        circleGridPoints.instanceMatrix.needsUpdate = true
     })
 }

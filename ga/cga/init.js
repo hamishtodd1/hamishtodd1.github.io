@@ -11,6 +11,7 @@
     CGA, true points square to 0, flat points to -1 I suppose
     Yeah, he really is taking the dual, taking the gp, then dualizing back
 
+    
 
     //you're better off imagining the eye, prior to the transform, as being a point on e2Plus
     
@@ -43,6 +44,8 @@
             slicing
             perspectiving
         
+        A way to visualize covectors would make this worth a damn
+            Another way Lengyel may be onto something is how he can explain the transpose inverse thing
         Computer graphics practitioners will have a rigorous foundation for
             Join formulae (but you could just ignore orientations)
             The rigorous way to extract distances from transformations (but you could just copypaste our iNorm)
@@ -77,6 +80,10 @@
                     hyperbolic (around points at infinity)
                     And we can have any combination of parabolic and the other two
 */
+
+function diskInUnitSphereRadius(center) {
+    return Math.sqrt(1. - center.lengthSq())
+}
 
 async function init() {
     
@@ -143,8 +150,9 @@ async function init() {
         elem
         camera
         haveChildrenOfLowerWindow
-        onClick = () => { }
-        onDrag = () => { }
+        onClick = () => {}
+        onDrag = () => {}
+        onLetGo = () => {}
         onRightClick = () => { }
         onRightDrag = () => { }
 
