@@ -72,7 +72,10 @@ class OrbitControls extends THREE.EventDispatcher {
 		this.keys = { LEFT: 'ArrowLeft', UP: 'ArrowUp', RIGHT: 'ArrowRight', BOTTOM: 'ArrowDown' };
 
 		// Mouse buttons
-		this.mouseButtons = { LEFT: THREE.MOUSE.ROTATE, MIDDLE: THREE.MOUSE.DOLLY, RIGHT: THREE.MOUSE.PAN };
+		this.mouseButtons = { 
+			LEFT: null, 
+			MIDDLE: null, 
+			RIGHT: THREE.MOUSE.ROTATE };
 
 		// Touch fingers
 		this.touches = { ONE: THREE.TOUCH.ROTATE, TWO: THREE.TOUCH.DOLLY_PAN };
@@ -292,7 +295,7 @@ class OrbitControls extends THREE.EventDispatcher {
 
 			scope.domElement.removeEventListener( 'pointerdown', onPointerDown );
 			scope.domElement.removeEventListener( 'pointercancel', onPointerUp );
-			scope.domElement.removeEventListener( 'wheel', onMouseWheel );
+			// scope.domElement.removeEventListener( 'wheel', onMouseWheel );
 
 			scope.domElement.removeEventListener( 'pointermove', onPointerMove );
 			scope.domElement.removeEventListener( 'pointerup', onPointerUp );
@@ -1179,7 +1182,7 @@ class OrbitControls extends THREE.EventDispatcher {
 
 		}
 
-		function onContextMenu( event ) {
+		function onContextMenu(event) {
 
 			if ( scope.enabled === false ) return;
 
@@ -1239,7 +1242,7 @@ class OrbitControls extends THREE.EventDispatcher {
 
 		scope.domElement.addEventListener( 'pointerdown', onPointerDown );
 		scope.domElement.addEventListener( 'pointercancel', onPointerUp );
-		scope.domElement.addEventListener( 'wheel', onMouseWheel, { passive: false } );
+		// scope.domElement.addEventListener( 'wheel', onMouseWheel, { passive: false } );
 
 		// force an update at start
 
@@ -1248,4 +1251,3 @@ class OrbitControls extends THREE.EventDispatcher {
 	}
 
 }
-
