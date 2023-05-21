@@ -1,10 +1,22 @@
-function initEga() {
+function initEgaWithoutDeclarations() {
 
-    class Line extends GeneralVector {
+    smallerInLarger.Ega = {
+        Dq: new Uint8Array([0, 5, 6, 7, 8, 9, 10, 15]), //so, Ega to Dq
+        Plane: new Uint8Array([1, 2, 3, 4]), //e0, e1, e2, e3!
+        Line: new Uint8Array([5, 6, 7, 8, 9, 10]),
+        Point: new Uint8Array([13, 12, 11, 14]), //xyzw
+        // Study: new Uint8Array([0, 15])
+    }
+    smallerInLarger.Dq = {
+        Line: new Uint8Array([1,2,3,4,5,6]),
+        // Study: new Uint8Array([0, 7])
+    }
+
+    class Line extends Multivector {
         static get size() { return 6 }
 
         constructor() {
-            return super(6)
+            super(6)
         }
 
         exp(target) {
@@ -12,10 +24,21 @@ function initEga() {
                 target = new Dq()
 
             let l = (this[3] * this[3] + this[4] * this[4] + this[5] * this[5])
-            if (l == 0.)
-                return target.set(1, this[0], this[1], this[2], 0., 0., 0., 0.)
-            let m = (this[0] * this[5] + this[1] * this[4] + this[2] * this[3]), a = Math.sqrt(l), c = Math.cos(a), s = Math.sin(a) / a, t = m / l * (c - s)
-            return target.set(c, s * this[0] + t * this[5], s * this[1] + t * this[4], s * this[2] + t * this[3], s * this[3], s * this[4], s * this[5], m * s)
+            let angle = sqrt(l)
+            let sincAngle = angle == 0. ? 1. : sin(angle) / angle
+            let cosAngle = sqrt(1. - sincAngle * sincAngle * l) //Simon had a formula but it assumed smaller range
+            
+            let m = (this[0] * this[5] + this[1] * this[4] + this[2] * this[3])
+            let t = m * (cosAngle - sincAngle) / l
+            return target.set(
+                cosAngle, 
+                sincAngle * this[0] + t * this[5], 
+                sincAngle * this[1] + t * this[4], 
+                sincAngle * this[2] + t * this[3], 
+                sincAngle * this[3], 
+                sincAngle * this[4], 
+                sincAngle * this[5], 
+                m * sincAngle)
         }
 
         distanceToPoint(pt) {
@@ -28,41 +51,129 @@ function initEga() {
     }
     window.Line = Line
 
-    class Dq extends GeneralVector {
+    // class Pt extends Multivector {
+    //     static get size() { return 4 }
+
+    //     constructor() {
+    //         super(4)
+    //     }
+
+    //     normalize() {
+    //         let factor = this[14] === 0. ? Math.sqrt(sq(this[0]) + sq(this[1]) + sq(this[2]) ) : this[14]
+    //         this.multiplyScalar(1./factor)
+    //         return this
+    //     }
+
+    //     fromVec3(v) {
+    //         this.point(v.x, v.y, v.z, 1.)
+    //         return this
+    //     }
+    //     fromNormalVec3(v) {
+    //         this.point(v.x, v.y, v.z, 0.)
+    //         return this
+    //     }
+
+    //     toVec3(target) {
+    //         if (this[14] === 0.)
+    //             console.error("ideal point cannot be converted to vec3")
+
+    //         target.z = this[11] / this[14]
+    //         target.y = this[12] / this[14]
+    //         target.x = this[13] / this[14]
+
+    //         return target
+    //     }
+
+    //     fromEga(ega) {
+    //         this[0] = ega[13]; this[1] = ega[12]; this[2] = ega[11];
+    //         this[3] = ega[14]
+    //         return this
+    //     }
+    //     toEga(ega) {
+    //         if (ega === undefined)
+    //             ega = new Ega()
+
+    //         ega.copy(zeroEga)
+
+    //         ega[13] = this[0]; ega[12] = this[1]; ega[11] = this[2];
+    //         ega[14] = this[3]
+
+    //         return ega
+    //     }
+    // }
+
+    class Dq extends Multivector {
         static get size() { return 8 }
 
         constructor() {
-            return super(8)
+            super(8)
         }
 
-        sandwich(egaToBeSandwiched, target) {
-            if (target === undefined)
-                target = new Ega()
+        logarithm(r) {
+            // if (r[0] == 1.) 
+            //     return bivector(r[1], r[2], r[3], 0., 0., 0.);
+            // let a = 1. / (1. - r[0] * r[0])  // inv squared length. -infinity   if translation,   
+            // let b = acos(r[0]) * sqrt(a)       // rotation scale      -infinity*0 if translation, we want to be 1
+            // let c = r[7] * a * (1. - r[0] * b) // translation scale   -infinity*0*(1-1*1) if translation, we want to be 0
+            // return bivector(
+            //     c * r[6] + b * r[1],
+            //     c * r[5] + b * r[2],
+            //     c * r[4] + b * r[3],
+            //     b * r[4],
+            //     b * r[5],
+            //     b * r[6])
 
-            this.toEga(localEga4)
-            localEga4.sandwich( egaToBeSandwiched, target )
+                
+            // You want to compress the entire branch into the sinc, that'd be nice. But you seemingly can't
+            let aReciprocal = 1. - r[0]*r[0]                                        //0 if translation          s is cos, 1-s*s is sin
+            let b = 1. / sinc( Math.acos(r[0]) )                                    //1 if translation
+            let c = r[7] * (1. - r[0] * b) * (r[0]==1.?1.:1./aReciprocal)    //0 if translation. By leaving branch to the last minute, MAYBE it's known to be 0 ASAP
+            return bivector(
+                c * r[6] + b * r[1],
+                c * r[5] + b * r[2],
+                c * r[4] + b * r[3],
+                b * r[4],
+                b * r[5],
+                b * r[6])
+        }
+
+        //aliasing allowed
+        reverse(target) {
+            target.copy(this)
+            target[1] *= -1.; target[2] *= -1.; target[3] *= -1.; target[4] *= -1.; target[5] *= -1.; target[6] *= -1.;
             return target
         }
 
-        fromEga(ega) {
-            this[0] = ega[0]
-            this[1] = ega[5]; this[2] = ega[6]; this[3] = ega[7];
-            this[4] = ega[8]; this[5] = ega[9]; this[6] = ega[10];
-            this[7] = ega[15]
+        //these could be in generalVector
+        append(dq) {
+            let temp = this.mul(dq, newDq)
+            this.copy(temp)
             return this
         }
-        toEga(ega) {
-            if(ega === undefined)
-                ega = new Ega()
+        prepend(dq) {
+            let temp = dq.mul(this, newDq)
+            this.copy(temp)
+            return this
+        }
 
-            ega.copy(zeroEga)
+        sandwich(toBeSandwiched, target) {
+            let thisEga = this.toEga(newEga)
 
-            ega[ 0] = this[0]
-            ega[ 5] = this[1]; ega[ 6] = this[2]; ega[ 7] = this[3]
-            ega[ 8] = this[4]; ega[ 9] = this[5]; ega[10] = this[6]
-            ega[15] = this[7]
+            if (toBeSandwiched.constructor === Ega) {
+                if (target === undefined)
+                    target = new Ega()
 
-            return ega
+                thisEga.sandwich(toBeSandwiched, target)
+            }
+            else {
+                if (target === undefined)
+                    target = new Dq()
+
+                let operandEga = toBeSandwiched.toEga(newEga)
+                let targetEga = thisEga.sandwich(operandEga, newEga)
+                target.convert(targetEga)
+            }
+            return target
         }
 
         translator(x,y,z) {
@@ -121,8 +232,7 @@ function initEga() {
         }
 
         normalize() {
-            this.getNormalization(localDq0)
-            return this.copy(localDq0)
+            return this.copy( this.getNormalization(newDq) )
         }
 
         sqrt(target) {
@@ -155,6 +265,8 @@ function initEga() {
             //the quaternion part is only affected by the quaternion parts
 
             target[7] = b[7] * this[0] + b[6] * this[1] + b[5] * this[2] + b[4] * this[3] + b[3] * this[4] + b[2] * this[5] + b[1] * this[6] + b[0] * this[7]
+
+            return target
         }
 
         getReverse(target) {
@@ -163,15 +275,10 @@ function initEga() {
                 target[i] *= -1.
         }
 
-        reverseSelf() {
-            this.getReverse(localDq0)
-            this.copy(localDq0)
-        }
-
         fromMat4(mat) {
             mat.decompose(v1, q1, v2)
-            let asMv = newMv.fromPosQuat(v1, q1)
-            this.fromMv(asMv)
+            let asEga = newEga.fromPosQuat(v1, q1)
+            asEga.convert(this)
             return this
         }
 
@@ -200,10 +307,10 @@ function initEga() {
         }
 
         fromPosQuat(p, q) {
-            let asMv = newMv
-            this.toMv(asMv)
-            asMv.fromPosQuat(p, q)
-            this.fromMv(asMv)
+            let asEga = newEga
+            this.convert(asEga)
+            asEga.fromPosQuat(p, q)
+            asEga.covert(this)
             return this
         }
     }
@@ -225,14 +332,80 @@ function initEga() {
         return new Dq().translator(x,y,z)
     }
 
-    class Ega extends GeneralVector {
+    class Ega extends Multivector {
         static get size() { return 16 }
 
         constructor() {
-            return super(16)
+            super(16)
+        }
+
+        separationRatio(that, target) {
+            let thatReverse = that.reverse(newEga)
+            return this.mul(thatReverse, target)
+        }
+
+        //UNTESTED
+        // orientationTo(that) {
+        //     let ratio = this.separationRatio(that, newEga)
+        //     let g = Math.abs(this.grade() - that.grade())
+
+        //     let angleNumeratorSq = ratio.selectGrade(g + 2, newEga).eNormSquared()
+            
+        //     //distance
+        //     //2 plane plane: [0]                        0
+        //     //3 plane line:  something about the                   
+        //     //4 plane point: [15]                       4
+        //     //4 line line:   [15] or [0] if noAngle     4 or 0
+        //     //5 line point:  meaningless
+        //     //6 point point: [0]                        0
+
+        //     //angle
+        //     //2 plane plane: [0]
+        //     //3 plane line:  [14]?
+        //     //4 line line:   [0]
+        // }
+
+        angleTo(that) {
+            let ratio = this.separationRatio(that, newEga)
+            let g = Math.abs(this.grade() - that.grade())
+            
+            let angleNumeratorSq   = ratio.selectGrade(g + 2, newEga).eNormSquared()
+            let angleDenominatorSq = ratio.selectGrade(    g, newEga).eNormSquared()
+            
+            if(angleDenominatorSq === 0.)
+                return TAU / 4. * Math.sign(angleNumeratorSq) //is it actually possible for this to be negative?
+            else {
+                let determiner = angleNumeratorSq / angleDenominatorSq
+                return Math.atan(Math.sign(determiner) * Math.sqrt(Math.abs(determiner)))
+            }
+        }
+
+        distanceTo(that) {
+            let ratio = this.separationRatio(that, newEga)
+            let g = Math.abs(this.grade() - that.grade())
+            
+            let angleNumeratorSq = ratio.selectGrade(g + 2, newEga).eNormSquared()
+
+            let noAngle = 0. === angleNumeratorSq
+            let h = noAngle ? g : g + 2
+
+            //impossible to be negative
+            let distanceNumeratorSq   = ratio.selectGrade(h + 2, newEga).iNormSquared()
+            let distanceDenominatorSq = ratio.selectGrade(    h, newEga).eNormSquared()
+            
+            return Math.sqrt(distanceNumeratorSq / distanceDenominatorSq)
+        }
+
+        //maybe minus signs belong
+        iNormSquared() {
+            return this[15] * this[15] + this[13] * this[13] + this[12] * this[12] + this[11] * this[11] + this[7] * this[7] + this[6] * this[6] + this[5] * this[5] + this[1] * this[1]
+        }
+        eNormSquared() {
+            return this[0] * this[0] + this[2] * this[2] + this[3] * this[3] + this[4] * this[4] + this[8] * this[8] + this[9] * this[9] + this[10] * this[10] + this[14] * this[14]
         }
 
         //now THAT'S a join! Except it has a SHITTY LITTLE MINUS SIGN
+        //Potentially meanse pga/cga connection needs work
         // join( b, target ) {
         //     if (target === undefined)
         //         target = new Ega()
@@ -246,29 +419,6 @@ function initEga() {
         //     eo.meet(bCga, cga3)
         //     return cga2.join(cga3,cga0).join(e0123c).toEga(target)
         // }
-
-        join(b,target) {
-            if (target === undefined)
-                target = new Ega()
-
-            target[15] = 1 * (this[15] * b[15]);
-            target[14] = -1 * (this[14] * -1 * b[15] + this[15] * b[14] * -1);
-            target[13] = -1 * (this[13] * -1 * b[15] + this[15] * b[13] * -1);
-            target[12] = -1 * (this[12] * -1 * b[15] + this[15] * b[12] * -1);
-            target[11] = -1 * (this[11] * -1 * b[15] + this[15] * b[11] * -1);
-            target[10] = 1 * (this[10] * b[15] + this[13] * -1 * b[14] * -1 - this[14] * -1 * b[13] * -1 + this[15] * b[10]);
-            target[9] = 1 * (this[9] * b[15] + this[12] * -1 * b[14] * -1 - this[14] * -1 * b[12] * -1 + this[15] * b[9]);
-            target[8] = 1 * (this[8] * b[15] + this[11] * -1 * b[14] * -1 - this[14] * -1 * b[11] * -1 + this[15] * b[8]);
-            target[7] = 1 * (this[7] * b[15] + this[12] * -1 * b[13] * -1 - this[13] * -1 * b[12] * -1 + this[15] * b[7]);
-            target[6] = 1 * (this[6] * b[15] - this[11] * -1 * b[13] * -1 + this[13] * -1 * b[11] * -1 + this[15] * b[6]);
-            target[5] = 1 * (this[5] * b[15] + this[11] * -1 * b[12] * -1 - this[12] * -1 * b[11] * -1 + this[15] * b[5]);
-            target[4] = 1 * (this[4] * b[15] - this[7] * b[14] * -1 + this[9] * b[13] * -1 - this[10] * b[12] * -1 - this[12] * -1 * b[10] + this[13] * -1 * b[9] - this[14] * -1 * b[7] + this[15] * b[4]);
-            target[3] = 1 * (this[3] * b[15] - this[6] * b[14] * -1 - this[8] * b[13] * -1 + this[10] * b[11] * -1 + this[11] * -1 * b[10] - this[13] * -1 * b[8] - this[14] * -1 * b[6] + this[15] * b[3]);
-            target[2] = 1 * (this[2] * b[15] - this[5] * b[14] * -1 + this[8] * b[12] * -1 - this[9] * b[11] * -1 - this[11] * -1 * b[9] + this[12] * -1 * b[8] - this[14] * -1 * b[5] + this[15] * b[2]);
-            target[1] = 1 * (this[1] * b[15] + this[5] * b[13] * -1 + this[6] * b[12] * -1 + this[7] * b[11] * -1 + this[11] * -1 * b[7] + this[12] * -1 * b[6] + this[13] * -1 * b[5] + this[15] * b[1]);
-            target[0] = 1 * (this[0] * b[15] + this[1] * b[14] * -1 + this[2] * b[13] * -1 + this[3] * b[12] * -1 + this[4] * b[11] * -1 + this[5] * b[10] + this[6] * b[9] + this[7] * b[8] + this[8] * b[7] + this[9] * b[6] + this[10] * b[5] - this[11] * -1 * b[4] - this[12] * -1 * b[3] - this[13] * -1 * b[2] - this[14] * -1 * b[1] + this[15] * b[0]);
-            return target;
-        }
 
         toQuaternion(target) {
             console.error("this might be wrong, check the 31 vs 13")
@@ -302,12 +452,6 @@ function initEga() {
             return this
         }
 
-        eNormSquared() {
-            this.reverse( localEga0 )
-            this.mul( localEga0, localEga1)
-            return localEga1[0]
-        }
-
         eNorm() {
             return Math.sqrt(this.eNormSquared())
         }
@@ -323,15 +467,6 @@ function initEga() {
             return v
         }
 
-        pointFromVec3(v) {
-            this.point(v.x,v.y,v.z,1.)
-            return this
-        }
-        pointFromNormalVec3(v) {
-            this.point(v.x, v.y, v.z, 0.)
-            return this
-        }
-
         point(x, y, z, w) {
             this.copy(zeroEga)
             if (w === undefined)
@@ -341,6 +476,15 @@ function initEga() {
             this[12] = y //because e01 e02 e03 is a translation along x, y and z, no minus sign here
             this[11] = z
 
+            return this
+        }
+
+        pointFromVec3(v) {
+            this.point(v.x,v.y,v.z,1.)
+            return this
+        }
+        pointFromNormalVec3(v) {
+            this.point(v.x, v.y, v.z, 0.)
             return this
         }
 
@@ -366,154 +510,69 @@ function initEga() {
         }
 
         sandwich(egaToBeSandwiched, target) {
-            if (target === undefined)
-                target = new Ega()
-
-            this.reverse(localEga0)
-
-            this.mul(egaToBeSandwiched, localEga1)
-            localEga1.mul(localEga0, target)
-
-            // let ks = egaToBeSandwiched.grade() * this.grade()
-            // if (ks % 2 === 0)
-            //     target.multiplyScalar(-1.)
-
-            return target
+            return sandwich(this, egaToBeSandwiched, target)
         }
 
         //aliasing allowed
         reverse(target) {
-            if (target === undefined)
-                target = new Ega()
-
-            target[ 0] = this[0]
-
-            target[ 1] = this[1]
-            target[ 2] = this[2]
-            target[ 3] = this[3]
-            target[ 4] = this[4]
-
-            target[ 5] = -this[5]
-            target[ 6] = -this[6]
-            target[ 7] = -this[7]
-            target[ 8] = -this[8]
-            target[ 9] = -this[9]
-            target[10] = -this[10]
-
-            target[11] = -this[11]
-            target[12] = -this[12]
-            target[13] = -this[13]
-            target[14] = -this[14]
-
-            target[15] = this[15]
-
-            return target
+            return reverse(this, target)
         }
 
         meet(b, target) {
-            if (target === undefined)
-                target = new Ega()
-
-            target[ 0] = b[ 0] * this[ 0];
-            target[ 1] = b[ 1] * this[ 0] + b[ 0] * this[ 1];
-            target[ 2] = b[ 2] * this[ 0] + b[ 0] * this[ 2];
-            target[ 3] = b[ 3] * this[ 0] + b[ 0] * this[ 3];
-            target[ 4] = b[ 4] * this[ 0] + b[ 0] * this[ 4];
-            target[ 5] = b[ 5] * this[ 0] + b[ 2] * this[ 1] - b[ 1] * this[ 2] + b[ 0] * this[ 5];
-            target[ 6] = b[ 6] * this[ 0] + b[ 3] * this[ 1] - b[ 1] * this[ 3] + b[ 0] * this[ 6];
-            target[ 7] = b[ 7] * this[ 0] + b[ 4] * this[ 1] - b[ 1] * this[ 4] + b[ 0] * this[ 7];
-            target[ 8] = b[ 8] * this[ 0] + b[ 3] * this[ 2] - b[ 2] * this[ 3] + b[ 0] * this[ 8];
-            target[ 9] = b[ 9] * this[ 0] - b[ 4] * this[ 2] + b[ 2] * this[ 4] + b[ 0] * this[ 9];
-            target[10] = b[10] * this[ 0] + b[ 4] * this[ 3] - b[ 3] * this[ 4] + b[ 0] * this[10];
-            target[11] = b[11] * this[ 0] - b[ 8] * this[ 1] + b[ 6] * this[ 2] - b[ 5] * this[ 3] - b[ 3] * this[ 5] + b[ 2] * this[ 6] - b[ 1] * this[ 8] + b[ 0] * this[11];
-            target[12] = b[12] * this[ 0] - b[ 9] * this[ 1] - b[ 7] * this[ 2] + b[ 5] * this[ 4] + b[ 4] * this[ 5] - b[ 2] * this[ 7] - b[ 1] * this[ 9] + b[ 0] * this[12];
-            target[13] = b[13] * this[ 0] - b[10] * this[ 1] + b[ 7] * this[ 3] - b[ 6] * this[ 4] - b[ 4] * this[ 6] + b[ 3] * this[ 7] - b[ 1] * this[10] + b[ 0] * this[13];
-            target[14] = b[14] * this[ 0] + b[10] * this[ 2] + b[ 9] * this[ 3] + b[ 8] * this[ 4] + b[ 4] * this[ 8] + b[ 3] * this[ 9] + b[ 2] * this[10] + b[ 0] * this[14];
-            target[15] = b[15] * this[ 0] + b[14] * this[ 1] + b[13] * this[ 2] + b[12] * this[ 3] + b[11] * this[ 4] + b[10] * this[ 5] + b[ 9] * this[ 6] + b[ 8] * this[ 7] + b[ 7] * this[ 8] + b[ 6] * this[ 9] + b[ 5] * this[10] - b[ 4] * this[11] - b[ 3] * this[12] - b[ 2] * this[13] - b[ 1] * this[14] + b[ 0] * this[15];
-            
-            return target;
+            return meet(this,b,target)
         }
 
         inner(b, target) {
-            if (target === undefined)
-                target = new Ega()
-
-            target[ 0] = b[ 0] * this[ 0] + b[ 2] * this[ 2] + b[ 3] * this[ 3] + b[ 4] * this[ 4] - b[ 8] * this[ 8] - b[ 9] * this[ 9] - b[10] * this[10] - b[14] * this[14];
-            target[ 1] = b[ 1] * this[ 0] + b[ 0] * this[ 1] - b[ 5] * this[ 2] - b[ 6] * this[ 3] - b[ 7] * this[ 4] + b[ 2] * this[ 5] + b[ 3] * this[ 6] + b[ 4] * this[ 7] + b[11] * this[ 8] + b[12] * this[ 9] + b[13] * this[10] + b[ 8] * this[11] + b[ 9] * this[12] + b[10] * this[13] + b[15] * this[14] - b[14] * this[15];
-            target[ 2] = b[ 2] * this[ 0] + b[ 0] * this[ 2] - b[ 8] * this[ 3] + b[ 9] * this[ 4] + b[ 3] * this[ 8] - b[ 4] * this[ 9] - b[14] * this[10] - b[10] * this[14];
-            target[ 3] = b[ 3] * this[ 0] + b[ 8] * this[ 2] + b[ 0] * this[ 3] - b[10] * this[ 4] - b[ 2] * this[ 8] - b[14] * this[ 9] + b[ 4] * this[10] - b[ 9] * this[14];
-            target[ 4] = b[ 4] * this[ 0] - b[ 9] * this[ 2] + b[10] * this[ 3] + b[ 0] * this[ 4] - b[14] * this[ 8] + b[ 2] * this[ 9] - b[ 3] * this[10] - b[ 8] * this[14];
-            target[ 5] = b[ 5] * this[ 0] - b[11] * this[ 3] + b[12] * this[ 4] + b[ 0] * this[ 5] - b[15] * this[10] - b[ 3] * this[11] + b[ 4] * this[12] - b[10] * this[15];
-            target[ 6] = b[ 6] * this[ 0] + b[11] * this[ 2] - b[13] * this[ 4] + b[ 0] * this[ 6] - b[15] * this[ 9] + b[ 2] * this[11] - b[ 4] * this[13] - b[ 9] * this[15];
-            target[ 7] = b[ 7] * this[ 0] - b[12] * this[ 2] + b[13] * this[ 3] + b[ 0] * this[ 7] - b[15] * this[ 8] - b[ 2] * this[12] + b[ 3] * this[13] - b[ 8] * this[15];
-            target[ 8] = b[ 8] * this[ 0] + b[14] * this[ 4] + b[ 0] * this[ 8] + b[ 4] * this[14];
-            target[ 9] = b[ 9] * this[ 0] + b[14] * this[ 3] + b[ 0] * this[ 9] + b[ 3] * this[14];
-            target[10] = b[10] * this[ 0] + b[14] * this[ 2] + b[ 0] * this[10] + b[ 2] * this[14];
-            target[11] = b[11] * this[ 0] + b[15] * this[ 4] + b[ 0] * this[11] - b[ 4] * this[15];
-            target[12] = b[12] * this[ 0] + b[15] * this[ 3] + b[ 0] * this[12] - b[ 3] * this[15];
-            target[13] = b[13] * this[ 0] + b[15] * this[ 2] + b[ 0] * this[13] - b[ 2] * this[15];
-            target[14] = b[14] * this[ 0] + b[ 0] * this[14];
-            target[15] = b[15] * this[ 0] + b[ 0] * this[15];
-            
-            return target;
+            return inner(this, b, target)
         }
 
         mul(b, target) {
-            if (target === undefined)
-                target = new Ega()
+            return mul(this, b, target)
+        }
 
-            target[ 0] = b[ 0] * this[ 0] + b[ 2] * this[ 2] + b[ 3] * this[ 3] + b[ 4] * this[ 4] - b[ 8] * this[ 8] - b[ 9] * this[ 9] - b[10] * this[10] - b[14] * this[14];
-
-            target[ 1] = b[ 1] * this[ 0] + b[ 0] * this[ 1] - b[ 5] * this[ 2] - b[ 6] * this[ 3] - b[ 7] * this[ 4] + b[ 2] * this[ 5] + b[ 3] * this[ 6] + b[ 4] * this[ 7] + b[11] * this[ 8] + b[12] * this[ 9] + b[13] * this[10] + b[ 8] * this[11] + b[ 9] * this[12] + b[10] * this[13] + b[15] * this[14] - b[14] * this[15];
-            target[ 2] = b[ 2] * this[ 0] + b[ 0] * this[ 2] - b[ 8] * this[ 3] + b[ 9] * this[ 4] + b[ 3] * this[ 8] - b[ 4] * this[ 9] - b[14] * this[10] - b[10] * this[14];
-            target[ 3] = b[ 3] * this[ 0] + b[ 8] * this[ 2] + b[ 0] * this[ 3] - b[10] * this[ 4] - b[ 2] * this[ 8] - b[14] * this[ 9] + b[ 4] * this[10] - b[ 9] * this[14];
-            target[ 4] = b[ 4] * this[ 0] - b[ 9] * this[ 2] + b[10] * this[ 3] + b[ 0] * this[ 4] - b[14] * this[ 8] + b[ 2] * this[ 9] - b[ 3] * this[10] - b[ 8] * this[14];
-
-            target[ 5] = b[ 5] * this[ 0] + b[ 2] * this[ 1] - b[ 1] * this[ 2] - b[11] * this[ 3] + b[12] * this[ 4] + b[ 0] * this[ 5] - b[ 8] * this[ 6] + b[ 9] * this[ 7] + b[ 6] * this[ 8] - b[ 7] * this[ 9] - b[15] * this[10] - b[ 3] * this[11] + b[ 4] * this[12] + b[14] * this[13] - b[13] * this[14] - b[10] * this[15];
-            target[ 6] = b[ 6] * this[ 0] + b[ 3] * this[ 1] + b[11] * this[ 2] - b[ 1] * this[ 3] - b[13] * this[ 4] + b[ 8] * this[ 5] + b[ 0] * this[ 6] - b[10] * this[ 7] - b[ 5] * this[ 8] - b[15] * this[ 9] + b[ 7] * this[10] + b[ 2] * this[11] + b[14] * this[12] - b[ 4] * this[13] - b[12] * this[14] - b[ 9] * this[15];
-            target[ 7] = b[ 7] * this[ 0] + b[ 4] * this[ 1] - b[12] * this[ 2] + b[13] * this[ 3] - b[ 1] * this[ 4] - b[ 9] * this[ 5] + b[10] * this[ 6] + b[ 0] * this[ 7] - b[15] * this[ 8] + b[ 5] * this[ 9] - b[ 6] * this[10] + b[14] * this[11] - b[ 2] * this[12] + b[ 3] * this[13] - b[11] * this[14] - b[ 8] * this[15];
-            target[ 8] = b[ 8] * this[ 0] + b[ 3] * this[ 2] - b[ 2] * this[ 3] + b[14] * this[ 4] + b[ 0] * this[ 8] + b[10] * this[ 9] - b[ 9] * this[10] + b[ 4] * this[14];
-            target[ 9] = b[ 9] * this[ 0] - b[ 4] * this[ 2] + b[14] * this[ 3] + b[ 2] * this[ 4] - b[10] * this[ 8] + b[ 0] * this[ 9] + b[ 8] * this[10] + b[ 3] * this[14];
-            target[10] = b[10] * this[ 0] + b[14] * this[ 2] + b[ 4] * this[ 3] - b[ 3] * this[ 4] + b[ 9] * this[ 8] - b[ 8] * this[ 9] + b[ 0] * this[10] + b[ 2] * this[14];
-
-            target[11] = b[11] * this[ 0] - b[ 8] * this[ 1] + b[ 6] * this[ 2] - b[ 5] * this[ 3] + b[15] * this[ 4] - b[ 3] * this[ 5] + b[ 2] * this[ 6] - b[14] * this[ 7] - b[ 1] * this[ 8] + b[13] * this[ 9] - b[12] * this[10] + b[ 0] * this[11] + b[10] * this[12] - b[ 9] * this[13] + b[ 7] * this[14] - b[ 4] * this[15];
-            target[12] = b[12] * this[ 0] - b[ 9] * this[ 1] - b[ 7] * this[ 2] + b[15] * this[ 3] + b[ 5] * this[ 4] + b[ 4] * this[ 5] - b[14] * this[ 6] - b[ 2] * this[ 7] - b[13] * this[ 8] - b[ 1] * this[ 9] + b[11] * this[10] - b[10] * this[11] + b[ 0] * this[12] + b[ 8] * this[13] + b[ 6] * this[14] - b[ 3] * this[15];
-            target[13] = b[13] * this[ 0] - b[10] * this[ 1] + b[15] * this[ 2] + b[ 7] * this[ 3] - b[ 6] * this[ 4] - b[14] * this[ 5] - b[ 4] * this[ 6] + b[ 3] * this[ 7] + b[12] * this[ 8] - b[11] * this[ 9] - b[ 1] * this[10] + b[ 9] * this[11] - b[ 8] * this[12] + b[ 0] * this[13] + b[ 5] * this[14] - b[ 2] * this[15];
-            target[14] = b[14] * this[ 0] + b[10] * this[ 2] + b[ 9] * this[ 3] + b[ 8] * this[ 4] + b[ 4] * this[ 8] + b[ 3] * this[ 9] + b[ 2] * this[10] + b[ 0] * this[14];
-
-            target[15] = b[15] * this[ 0] + b[14] * this[ 1] + b[13] * this[ 2] + b[12] * this[ 3] + b[11] * this[ 4] + b[10] * this[ 5] + b[ 9] * this[ 6] + b[ 8] * this[ 7] + b[ 7] * this[ 8] + b[ 6] * this[ 9] + b[ 5] * this[10] - b[ 4] * this[11] - b[ 3] * this[12] - b[ 2] * this[13] - b[ 1] * this[14] + b[ 0] * this[15];
-            
-            return target
+        join(b, target) {
+            return join(this, b, target)
         }
     }
     window.Ega = Ega
 
-    let dqMeshes = []
-    updateDqMeshes = ()=>{
-        dqMeshes.forEach((dqMesh) => { dqMesh.updateMat() })
-    }
-    class DqMesh extends THREE.Mesh {
-        constructor(geo,mat) {
-            super(geo,mat)
-            this.matrixAutoUpdate = false
-            this.dq = new Dq().copy(oneDq)
+    /*EXTRA FUNCTIONS ADDED HERE*/
 
-            dqMeshes.push(this)
+    {
+        let dqMeshes = []
+        let finalDq = new Dq()
+        class DqMesh extends THREE.Mesh {
+            
+            constructor(geo, mat) {
+                super(geo, mat)
+                this.matrixAutoUpdate = false
+                this.dq = new Dq().copy(oneDq)
+                this.dqParent = scene
+
+                dqMeshes.push(this)
+            }
+
+            onBeforeRender() {
+                finalDq.copy(oneDq)
+                this.prependTransform(finalDq)
+
+                finalDq.normalize()
+                finalDq.toMat4(this.matrix)
+            }
+
+            // getPosition(target) {
+
+            // }
+
+            prependTransform(target) {
+                target.prepend(this.dq)
+                if(this.dqParent !== scene)
+                    this.dqParent.prependTransform(target)
+                return target
+            }
         }
-
-        updateMat() {
-            this.dq.normalize(dq0)
-            this.dq.toMat4(this.matrix)
-        }
+        window.DqMesh = DqMesh
     }
-    window.DqMesh = DqMesh
-
-    let localDq0 = new Dq()
-    let localDq1 = new Dq()
-    let localDq2 = new Dq()
-    let localDq3 = new Dq()
-    let localDq4 = new Dq()
-    let localDq5 = new Dq()
 
     // Ega.onesWithMinus = []
     // Dq.onesWithMinus = []
@@ -574,16 +633,143 @@ function initEga() {
     ega5 = new Ega()
     ega6 = new Ega()
 
-    let localEga0 = new Ega()
-    let localEga1 = new Ega()
-    let localEga2 = new Ega()
-    let localEga3 = new Ega()
-    let localEga4 = new Ega()
-    let localEga5 = new Ega()
-    let localEga6 = new Ega()
-
     dq0 = new Dq()
     dq1 = new Dq()
     dq2 = new Dq()
     dq3 = new Dq()
+    
+/*END*/}
+
+function createVerboseSharedFunctions(createFunction) {
+
+    createFunction(`mul`, [`a`, `b`], `
+    target[ 0] = b[ 0] * a[ 0] + b[ 2] * a[ 2] + b[ 3] * a[ 3] + b[ 4] * a[ 4] - b[ 8] * a[ 8] - b[ 9] * a[ 9] - b[10] * a[10] - b[14] * a[14];
+
+    target[ 1] = b[ 1] * a[ 0] + b[ 0] * a[ 1] - b[ 5] * a[ 2] - b[ 6] * a[ 3] - b[ 7] * a[ 4] + b[ 2] * a[ 5] + b[ 3] * a[ 6] + b[ 4] * a[ 7] + b[11] * a[ 8] + b[12] * a[ 9] + b[13] * a[10] + b[ 8] * a[11] + b[ 9] * a[12] + b[10] * a[13] + b[15] * a[14] - b[14] * a[15];
+    target[ 2] = b[ 2] * a[ 0] + b[ 0] * a[ 2] - b[ 8] * a[ 3] + b[ 9] * a[ 4] + b[ 3] * a[ 8] - b[ 4] * a[ 9] - b[14] * a[10] - b[10] * a[14];
+    target[ 3] = b[ 3] * a[ 0] + b[ 8] * a[ 2] + b[ 0] * a[ 3] - b[10] * a[ 4] - b[ 2] * a[ 8] - b[14] * a[ 9] + b[ 4] * a[10] - b[ 9] * a[14];
+    target[ 4] = b[ 4] * a[ 0] - b[ 9] * a[ 2] + b[10] * a[ 3] + b[ 0] * a[ 4] - b[14] * a[ 8] + b[ 2] * a[ 9] - b[ 3] * a[10] - b[ 8] * a[14];
+
+    target[ 5] = b[ 5] * a[ 0] + b[ 2] * a[ 1] - b[ 1] * a[ 2] - b[11] * a[ 3] + b[12] * a[ 4] + b[ 0] * a[ 5] - b[ 8] * a[ 6] + b[ 9] * a[ 7] + b[ 6] * a[ 8] - b[ 7] * a[ 9] - b[15] * a[10] - b[ 3] * a[11] + b[ 4] * a[12] + b[14] * a[13] - b[13] * a[14] - b[10] * a[15];
+    target[ 6] = b[ 6] * a[ 0] + b[ 3] * a[ 1] + b[11] * a[ 2] - b[ 1] * a[ 3] - b[13] * a[ 4] + b[ 8] * a[ 5] + b[ 0] * a[ 6] - b[10] * a[ 7] - b[ 5] * a[ 8] - b[15] * a[ 9] + b[ 7] * a[10] + b[ 2] * a[11] + b[14] * a[12] - b[ 4] * a[13] - b[12] * a[14] - b[ 9] * a[15];
+    target[ 7] = b[ 7] * a[ 0] + b[ 4] * a[ 1] - b[12] * a[ 2] + b[13] * a[ 3] - b[ 1] * a[ 4] - b[ 9] * a[ 5] + b[10] * a[ 6] + b[ 0] * a[ 7] - b[15] * a[ 8] + b[ 5] * a[ 9] - b[ 6] * a[10] + b[14] * a[11] - b[ 2] * a[12] + b[ 3] * a[13] - b[11] * a[14] - b[ 8] * a[15];
+    target[ 8] = b[ 8] * a[ 0] + b[ 3] * a[ 2] - b[ 2] * a[ 3] + b[14] * a[ 4] + b[ 0] * a[ 8] + b[10] * a[ 9] - b[ 9] * a[10] + b[ 4] * a[14];
+    target[ 9] = b[ 9] * a[ 0] - b[ 4] * a[ 2] + b[14] * a[ 3] + b[ 2] * a[ 4] - b[10] * a[ 8] + b[ 0] * a[ 9] + b[ 8] * a[10] + b[ 3] * a[14];
+    target[10] = b[10] * a[ 0] + b[14] * a[ 2] + b[ 4] * a[ 3] - b[ 3] * a[ 4] + b[ 9] * a[ 8] - b[ 8] * a[ 9] + b[ 0] * a[10] + b[ 2] * a[14];
+
+    target[11] = b[11] * a[ 0] - b[ 8] * a[ 1] + b[ 6] * a[ 2] - b[ 5] * a[ 3] + b[15] * a[ 4] - b[ 3] * a[ 5] + b[ 2] * a[ 6] - b[14] * a[ 7] - b[ 1] * a[ 8] + b[13] * a[ 9] - b[12] * a[10] + b[ 0] * a[11] + b[10] * a[12] - b[ 9] * a[13] + b[ 7] * a[14] - b[ 4] * a[15];
+    target[12] = b[12] * a[ 0] - b[ 9] * a[ 1] - b[ 7] * a[ 2] + b[15] * a[ 3] + b[ 5] * a[ 4] + b[ 4] * a[ 5] - b[14] * a[ 6] - b[ 2] * a[ 7] - b[13] * a[ 8] - b[ 1] * a[ 9] + b[11] * a[10] - b[10] * a[11] + b[ 0] * a[12] + b[ 8] * a[13] + b[ 6] * a[14] - b[ 3] * a[15];
+    target[13] = b[13] * a[ 0] - b[10] * a[ 1] + b[15] * a[ 2] + b[ 7] * a[ 3] - b[ 6] * a[ 4] - b[14] * a[ 5] - b[ 4] * a[ 6] + b[ 3] * a[ 7] + b[12] * a[ 8] - b[11] * a[ 9] - b[ 1] * a[10] + b[ 9] * a[11] - b[ 8] * a[12] + b[ 0] * a[13] + b[ 5] * a[14] - b[ 2] * a[15];
+    target[14] = b[14] * a[ 0] + b[10] * a[ 2] + b[ 9] * a[ 3] + b[ 8] * a[ 4] + b[ 4] * a[ 8] + b[ 3] * a[ 9] + b[ 2] * a[10] + b[ 0] * a[14];
+
+    target[15] = b[15] * a[ 0] + b[14] * a[ 1] + b[13] * a[ 2] + b[12] * a[ 3] + b[11] * a[ 4] + b[10] * a[ 5] + b[ 9] * a[ 6] + b[ 8] * a[ 7] + b[ 7] * a[ 8] + b[ 6] * a[ 9] + b[ 5] * a[10] - b[ 4] * a[11] - b[ 3] * a[12] - b[ 2] * a[13] - b[ 1] * a[14] + b[ 0] * a[15];`)
+
+    createFunction(`meet`, [`a`, `b`], `
+    target[ 0] = b[ 0] * a[ 0];
+    target[ 1] = b[ 1] * a[ 0] + b[ 0] * a[ 1];
+    target[ 2] = b[ 2] * a[ 0] + b[ 0] * a[ 2];
+    target[ 3] = b[ 3] * a[ 0] + b[ 0] * a[ 3];
+    target[ 4] = b[ 4] * a[ 0] + b[ 0] * a[ 4];
+    target[ 5] = b[ 5] * a[ 0] + b[ 2] * a[ 1] - b[ 1] * a[ 2] + b[ 0] * a[ 5];
+    target[ 6] = b[ 6] * a[ 0] + b[ 3] * a[ 1] - b[ 1] * a[ 3] + b[ 0] * a[ 6];
+    target[ 7] = b[ 7] * a[ 0] + b[ 4] * a[ 1] - b[ 1] * a[ 4] + b[ 0] * a[ 7];
+    target[ 8] = b[ 8] * a[ 0] + b[ 3] * a[ 2] - b[ 2] * a[ 3] + b[ 0] * a[ 8];
+    target[ 9] = b[ 9] * a[ 0] - b[ 4] * a[ 2] + b[ 2] * a[ 4] + b[ 0] * a[ 9];
+    target[10] = b[10] * a[ 0] + b[ 4] * a[ 3] - b[ 3] * a[ 4] + b[ 0] * a[10];
+    target[11] = b[11] * a[ 0] - b[ 8] * a[ 1] + b[ 6] * a[ 2] - b[ 5] * a[ 3] - b[ 3] * a[ 5] + b[ 2] * a[ 6] - b[ 1] * a[ 8] + b[ 0] * a[11];
+    target[12] = b[12] * a[ 0] - b[ 9] * a[ 1] - b[ 7] * a[ 2] + b[ 5] * a[ 4] + b[ 4] * a[ 5] - b[ 2] * a[ 7] - b[ 1] * a[ 9] + b[ 0] * a[12];
+    target[13] = b[13] * a[ 0] - b[10] * a[ 1] + b[ 7] * a[ 3] - b[ 6] * a[ 4] - b[ 4] * a[ 6] + b[ 3] * a[ 7] - b[ 1] * a[10] + b[ 0] * a[13];
+    target[14] = b[14] * a[ 0] + b[10] * a[ 2] + b[ 9] * a[ 3] + b[ 8] * a[ 4] + b[ 4] * a[ 8] + b[ 3] * a[ 9] + b[ 2] * a[10] + b[ 0] * a[14];
+    target[15] = b[15] * a[ 0] + b[14] * a[ 1] + b[13] * a[ 2] + b[12] * a[ 3] + b[11] * a[ 4] + b[10] * a[ 5] + b[ 9] * a[ 6] + b[ 8] * a[ 7] + b[ 7] * a[ 8] + b[ 6] * a[ 9] + b[ 5] * a[10] - b[ 4] * a[11] - b[ 3] * a[12] - b[ 2] * a[13] - b[ 1] * a[14] + b[ 0] * a[15];`)
+
+    createFunction(`inner`, [`a`, `b`], `
+    target[ 0] = b[ 0] * a[ 0] + b[ 2] * a[ 2] + b[ 3] * a[ 3] + b[ 4] * a[ 4] - b[ 8] * a[ 8] - b[ 9] * a[ 9] - b[10] * a[10] - b[14] * a[14];
+    target[ 1] = b[ 1] * a[ 0] + b[ 0] * a[ 1] - b[ 5] * a[ 2] - b[ 6] * a[ 3] - b[ 7] * a[ 4] + b[ 2] * a[ 5] + b[ 3] * a[ 6] + b[ 4] * a[ 7] + b[11] * a[ 8] + b[12] * a[ 9] + b[13] * a[10] + b[ 8] * a[11] + b[ 9] * a[12] + b[10] * a[13] + b[15] * a[14] - b[14] * a[15];
+    target[ 2] = b[ 2] * a[ 0] + b[ 0] * a[ 2] - b[ 8] * a[ 3] + b[ 9] * a[ 4] + b[ 3] * a[ 8] - b[ 4] * a[ 9] - b[14] * a[10] - b[10] * a[14];
+    target[ 3] = b[ 3] * a[ 0] + b[ 8] * a[ 2] + b[ 0] * a[ 3] - b[10] * a[ 4] - b[ 2] * a[ 8] - b[14] * a[ 9] + b[ 4] * a[10] - b[ 9] * a[14];
+    target[ 4] = b[ 4] * a[ 0] - b[ 9] * a[ 2] + b[10] * a[ 3] + b[ 0] * a[ 4] - b[14] * a[ 8] + b[ 2] * a[ 9] - b[ 3] * a[10] - b[ 8] * a[14];
+    target[ 5] = b[ 5] * a[ 0] - b[11] * a[ 3] + b[12] * a[ 4] + b[ 0] * a[ 5] - b[15] * a[10] - b[ 3] * a[11] + b[ 4] * a[12] - b[10] * a[15];
+    target[ 6] = b[ 6] * a[ 0] + b[11] * a[ 2] - b[13] * a[ 4] + b[ 0] * a[ 6] - b[15] * a[ 9] + b[ 2] * a[11] - b[ 4] * a[13] - b[ 9] * a[15];
+    target[ 7] = b[ 7] * a[ 0] - b[12] * a[ 2] + b[13] * a[ 3] + b[ 0] * a[ 7] - b[15] * a[ 8] - b[ 2] * a[12] + b[ 3] * a[13] - b[ 8] * a[15];
+    target[ 8] = b[ 8] * a[ 0] + b[14] * a[ 4] + b[ 0] * a[ 8] + b[ 4] * a[14];
+    target[ 9] = b[ 9] * a[ 0] + b[14] * a[ 3] + b[ 0] * a[ 9] + b[ 3] * a[14];
+    target[10] = b[10] * a[ 0] + b[14] * a[ 2] + b[ 0] * a[10] + b[ 2] * a[14];
+    target[11] = b[11] * a[ 0] + b[15] * a[ 4] + b[ 0] * a[11] - b[ 4] * a[15];
+    target[12] = b[12] * a[ 0] + b[15] * a[ 3] + b[ 0] * a[12] - b[ 3] * a[15];
+    target[13] = b[13] * a[ 0] + b[15] * a[ 2] + b[ 0] * a[13] - b[ 2] * a[15];
+    target[14] = b[14] * a[ 0] + b[ 0] * a[14];
+    target[15] = b[15] * a[ 0] + b[ 0] * a[15];`)
+
+    createFunction(`join`, [`a`, `b`], `
+    target[15] = a[15] * b[15];
+    target[14] =-a[14] * b[15] - a[15] * b[14];
+    target[13] =-a[13] * b[15] - a[15] * b[13];
+    target[12] =-a[12] * b[15] - a[15] * b[12];
+    target[11] =-a[11] * b[15] - a[15] * b[11];
+    target[10] = a[10] * b[15] + a[13] * b[14] - a[14] * b[13] + a[15] * b[10];
+    target[ 9] = a[ 9] * b[15] + a[12] * b[14] - a[14] * b[12] + a[15] * b[ 9];
+    target[ 8] = a[ 8] * b[15] + a[11] * b[14] - a[14] * b[11] + a[15] * b[ 8];
+    target[ 7] = a[ 7] * b[15] + a[12] * b[13] - a[13] * b[12] + a[15] * b[ 7];
+    target[ 6] = a[ 6] * b[15] - a[11] * b[13] + a[13] * b[11] + a[15] * b[ 6];
+    target[ 5] = a[ 5] * b[15] + a[11] * b[12] - a[12] * b[11] + a[15] * b[ 5];
+    target[ 4] = a[ 4] * b[15] - a[ 7] * b[14] + a[ 9] * b[13] - a[10] * b[12] + a[12] * b[10] - a[13] * b[ 9] + a[14] * b[ 7] + a[15] * b[ 4];
+    target[ 3] = a[ 3] * b[15] - a[ 6] * b[14] - a[ 8] * b[13] + a[10] * b[11] - a[11] * b[10] + a[13] * b[ 8] + a[14] * b[ 6] + a[15] * b[ 3];
+    target[ 2] = a[ 2] * b[15] - a[ 5] * b[14] + a[ 8] * b[12] - a[ 9] * b[11] + a[11] * b[ 9] - a[12] * b[ 8] + a[14] * b[ 5] + a[15] * b[ 2];
+    target[ 1] = a[ 1] * b[15] + a[ 5] * b[13] + a[ 6] * b[12] + a[ 7] * b[11] - a[11] * b[ 7] - a[12] * b[ 6] - a[13] * b[ 5] + a[15] * b[ 1];
+    target[ 0] = a[ 0] * b[15] + a[ 1] * b[14] + a[ 2] * b[13] + a[ 3] * b[12] - a[ 4] * b[11] + a[ 5] * b[10] + a[ 6] * b[ 9] + a[ 7] * b[ 8]
+               + a[ 8] * b[ 7] + a[ 9] * b[ 6] + a[10] * b[ 5] + a[11] * b[ 4] + a[12] * b[ 3] + a[13] * b[ 2] + a[14] * b[ 1] + a[15] * b[ 0];`)
+    
+    createFunction(`reverse`, [`mv`], `
+    target[ 0] =  mv[ 0];
+                
+    target[ 1] =  mv[ 1];
+    target[ 2] =  mv[ 2];
+    target[ 3] =  mv[ 3];
+    target[ 4] =  mv[ 4];
+
+    target[ 5] = -mv[ 5];
+    target[ 6] = -mv[ 6];
+    target[ 7] = -mv[ 7];
+    target[ 8] = -mv[ 8];
+    target[ 9] = -mv[ 9];
+    target[10] = -mv[10];
+
+    target[11] = -mv[11];
+    target[12] = -mv[12];
+    target[13] = -mv[13];
+    target[14] = -mv[14];
+
+    target[15] =  mv[15];`)
+}
+
+function createNonVerboseSharedFunctions(createFunction) {
+    createFunction(`sandwich`, [`m`, `a`], `
+    float[16] mReverse = newEga;
+    reverse(m, mReverse);
+    
+    float[16] intermediate = newEga;
+    mul(m,a,intermediate); // TODO minus sign. Need that clifford conjugate thing
+
+    mul(intermediate,mReverse,target);`)
+
+    // createFunction(`eNormSquared`, [`a`], `
+    // float[16] rev = newMv;
+    // reverse(a, rev);
+    // float[16] studyNumber = newMv;
+    // mul(a, rev, studyNumber);
+    // return Math.abs(studyNumber[0]);`,
+    //     `float`)
+
+    // createFunction(`multiplyScalar`, [`inout float[16] a`, `in float scalar`], `
+    // for(int i = 0; i < 16; ++i) {
+    //     a[i] *= scalar;
+    // }`,
+    //     `void`)
+
+    // createFunction(`projectAOnB`, [`a`, `b`], `
+    // float[16] intermediate = newMv;
+    // inner(b, a, intermediate);
+    // float[16] inverse = newMv;
+    // invert(b,inverse);
+    // mul(intermediate, inverse, target);`)
 }

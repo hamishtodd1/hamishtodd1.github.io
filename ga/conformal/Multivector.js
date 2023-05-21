@@ -11,10 +11,56 @@ function getWhereThisWasCalledFrom(depth) {
     return splitByColons[0] + ":" + splitByColons[1]
 }
 
-class GeneralVector extends Float32Array {
+class Multivector extends Float32Array {
+
+    convert(target) {
+        let targetIsSmaller = this.constructor.size > target.constructor.size
+
+        if (targetIsSmaller) {
+            let conversion = smallerInLarger[this.constructor.name][target.constructor.name]
+            for(let i = 0; i < target.constructor.size; ++i)
+                target[i] = this[conversion[i]]
+        }
+        else {
+            let conversion = smallerInLarger[target.constructor.name][this.constructor.name]
+            for (let i = 0; i < target.constructor.size; ++i)
+                target[i] = 0.
+            for (let i = 0; i < this.constructor.size; ++i)
+                target[conversion[i]] = this[i]
+        }
+
+        return target
+    }
+
+    selectGrade( desiredGrade, target ) {
+        for (let i = 0; i < this.constructor.size; ++i) {
+            if(this.constructor.indexGrades[i] === desiredGrade)
+                target[i] = this[i]
+            else
+                target[i] = 0.
+        }
+
+        return target
+    }
+
+    grade() {
+        let grade = -1 //0 is grade -1!
+        for(let i = 0; i < this.constructor.size; ++i) {
+            if(this[i] !== 0.) {
+                let extraGrade = this.constructor.indexGrades[i]
+                if (grade === -1 || grade === extraGrade)
+                    grade = extraGrade
+                // else mixture
+            }
+        }
+
+        return grade
+    }
         
     set() {
-        return this.copy(arguments)
+        for (let i = 0, il = arguments.length; i < il; ++i)
+            this[i] = arguments[i]
+        return this
     }
 
     zero() {
@@ -40,16 +86,23 @@ class GeneralVector extends Float32Array {
         return this
     }
 
-    multiplyScalar(s) {
-        for (let i = 0; i < this.constructor.size; ++i)
-            this[i] *= s
+    multiplyScalar(s, target) {
+        if(target === undefined)
+            target = this
 
-        return this
+        for (let i = 0; i < this.constructor.size; ++i)
+            target[i] = s * this[i]
+
+        return target
     }
 
-    copy(a) {
+    copy(v) {
+
+        if (v.constructor !== this.constructor)
+            console.error("type error")
+
         for (let i = 0; i < this.constructor.size; ++i)
-            this[i] = a[i]
+            this[i] = v[i]
 
         return this
     }
@@ -62,19 +115,25 @@ class GeneralVector extends Float32Array {
         return cl
     }
 
-    equals(a) {
+    equals(v) {
+        if (v.constructor !== this.constructor)
+            console.error("type error")
+
         let ret = true
         for (let i = 0; i < this.constructor.size; ++i) {
-            if (this[i] !== a[i])
+            if (this[i] !== v[i])
                 ret = false
         }
         return ret
     }
 
-    approxEquals(a) {
+    approxEquals(v) {
+        if (v.constructor !== this.constructor)
+            console.error("type error")
+
         let doesEqual = true
         for (let i = 0; i < this.constructor.size; ++i) {
-            if (Math.abs(this[i] - a[i]) > .0001)
+            if (Math.abs(this[i] - v[i]) > .0001)
                 doesEqual = false
         }
         return doesEqual
@@ -87,51 +146,45 @@ class GeneralVector extends Float32Array {
         return this
     }
 
-    toArray(arr) {
+    toArray(arr, offset) {
+        if (offset === undefined)
+            offset = 0
+            
         for (let i = 0; i < this.constructor.size; ++i)
-            arr[i] = this[i]
+            arr[offset * this.constructor.size + i] = this[i]
 
         return arr
     }
 
-    // fromMv(mv) {
-    //     for (let i = 0; i < this.constructor.size; ++i)
-    //         this[i] = mv[this.constructor.mvOffsets[i]]
-
-    //     return this
-    // }
-
-    // toMv(target) {
-    //     if (target === undefined)
-    //         target = new Mv()
-            
-    //     target.zero()
-    //     for (let i = 0; i < this.constructor.size; ++i)
-    //         target[this.constructor.mvOffsets[i]] = this[i]
-
-    //     return target
-    // }
-
-    add(a,target) {
+    add(v,target) {
         if(target === undefined)
             target = new this.constructor()
 
+        if (v.constructor !== this.constructor)
+            console.error("type error")
+
         for(let i = 0; i < this.constructor.size; ++i)
-            target[i] = this[i] + a[i]
+            target[i] = this[i] + v[i]
         return target
     }
-    sub(a, target) {
+    sub(v, target) {
         if (target === undefined)
             target = new this.constructor()
 
+        if (v.constructor !== this.constructor)
+            console.error("type error")
+
         for (let i = 0; i < this.constructor.size; ++i)
-            target[i] = this[i] - a[i]
+            target[i] = this[i] - v[i]
         return target
     }
 
     addScaled(v, scale, target) { //want to add it to itself? Then specify itself!
         if(target === undefined)
             target = new this.constructor()
+        
+        if (v.constructor !== this.constructor)
+            console.error("type error")
 
         for (let i = 0; i < this.constructor.size; ++i)
             target[i] = this[i] + scale * v[i]
@@ -143,7 +196,7 @@ class GeneralVector extends Float32Array {
             numDecimalPlaces = 1
 
         let str = ""
-        for (let i = 0; i < this.constructor.basisNames.length; ++i) {
+        for (let i = 0; i < this.constructor.size; ++i) {
             if (Math.abs(this[i]) > 0.05) { // && this[i].toFixed() != 0) {
                 if (str !== "")
                     str += " + "

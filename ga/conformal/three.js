@@ -7040,7 +7040,7 @@
 			this.castShadow = false;
 			this.receiveShadow = false;
 
-			this.frustumCulled = true;
+			this.frustumCulled = false; //HAMISH: because threejs is silly when we fuck with matrices!
 			this.renderOrder = 0;
 
 			this.animations = [];
@@ -8359,6 +8359,10 @@
 				if ( currentValue && currentValue.isColor ) {
 
 					currentValue.set( newValue );
+
+				} else if ((currentValue && currentValue.isSpinor) && (newValue && newValue.isSpinor)) {
+
+					currentValue.copy(newValue);
 
 				} else if ( ( currentValue && currentValue.isVector3 ) && ( newValue && newValue.isVector3 ) ) {
 
@@ -13814,6 +13818,10 @@
 
 	const UniformsLib = {
 
+		phong2: {
+			spinor: { value: new Spinor() }
+		},
+
 		common: {
 
 			diffuse: { value: /*@__PURE__*/ new Color( 0xffffff ) },
@@ -14093,6 +14101,34 @@
 					shininess: { value: 30 }
 				}
 			] ),
+
+			vertexShader: ShaderChunk.meshphong_vert,
+			fragmentShader: ShaderChunk.meshphong_frag
+
+		},
+
+		phong2: {
+
+			uniforms: /*@__PURE__*/ mergeUniforms([
+				UniformsLib.phong2,
+
+				UniformsLib.common,
+				UniformsLib.specularmap,
+				UniformsLib.envmap,
+				UniformsLib.aomap,
+				UniformsLib.lightmap,
+				UniformsLib.emissivemap,
+				UniformsLib.bumpmap,
+				UniformsLib.normalmap,
+				UniformsLib.displacementmap,
+				UniformsLib.fog,
+				UniformsLib.lights,
+				{
+					emissive: { value: /*@__PURE__*/ new Color(0x000000) },
+					specular: { value: /*@__PURE__*/ new Color(0x111111) },
+					shininess: { value: 30 }
+				}
+			]),
 
 			vertexShader: ShaderChunk.meshphong_vert,
 			fragmentShader: ShaderChunk.meshphong_frag
@@ -18726,6 +18762,8 @@
 
 		const shader = gl.createShader( type );
 
+		if ( string.indexOf(`/*LOG THIS*/`) !== -1)
+			log(string)
 		gl.shaderSource( shader, string );
 		gl.compileShader( shader );
 
@@ -19117,7 +19155,7 @@
 
 	}
 
-	function WebGLProgram( renderer, cacheKey, parameters, bindingStates ) {
+	function WebGLProgram( renderer, cacheKey, parameters, bindingStates, injections ) {
 
 		// TODO Send this event to Three.js DevTools
 		// console.log( 'WebGLProgram', cacheKey );
@@ -19463,6 +19501,25 @@
 
 		}
 
+		if (injections !== undefined) {
+			
+			injections.forEach((injection) => {
+				let current = injection.type === `vertex` ? vertexShader : fragmentShader
+				let location = current.indexOf(injection.precedes)
+				let result = current.slice(0, location)
+					+ injection.str +
+					current.slice(location)
+
+				if (injection.str.indexOf(`/*LOG INCLUDES*/`) !== -1)
+					log(result)
+
+				if(injection.type === `vertex`)
+					vertexShader = result
+				else
+					fragmentShader = result
+			})
+		}
+
 		vertexShader = resolveIncludes( vertexShader );
 		vertexShader = replaceLightNums( vertexShader, parameters );
 		vertexShader = replaceClippingPlaneNums( vertexShader, parameters );
@@ -19505,13 +19562,13 @@
 
 		}
 
-		const vertexGlsl = versionString + prefixVertex + vertexShader;
+		const vertexGlsl   = versionString + prefixVertex   + vertexShader;
 		const fragmentGlsl = versionString + prefixFragment + fragmentShader;
 
 		// console.log( '*VERTEX*', vertexGlsl );
 		// console.log( '*FRAGMENT*', fragmentGlsl );
 
-		const glVertexShader = WebGLShader( gl, gl.VERTEX_SHADER, vertexGlsl );
+		const glVertexShader   = WebGLShader( gl, gl.VERTEX_SHADER,   vertexGlsl );
 		const glFragmentShader = WebGLShader( gl, gl.FRAGMENT_SHADER, fragmentGlsl );
 
 		gl.attachShader( program, glVertexShader );
@@ -19813,6 +19870,7 @@
 			MeshBasicMaterial: 'basic',
 			MeshLambertMaterial: 'lambert',
 			MeshPhongMaterial: 'phong',
+			MeshPhong2Material: 'phong2',
 			MeshToonMaterial: 'toon',
 			MeshStandardMaterial: 'physical',
 			MeshPhysicalMaterial: 'physical',
@@ -20319,7 +20377,7 @@
 
 		}
 
-		function acquireProgram( parameters, cacheKey ) {
+		function acquireProgram(parameters, cacheKey, injections ) {
 
 			let program;
 
@@ -20341,7 +20399,7 @@
 
 			if ( program === undefined ) {
 
-				program = new WebGLProgram( renderer, cacheKey, parameters, bindingStates );
+				program = new WebGLProgram( renderer, cacheKey, parameters, bindingStates, injections );
 				programs.push( program );
 
 			}
@@ -26600,6 +26658,11 @@
 				refreshUniformsCommon( uniforms, material );
 				refreshUniformsPhong( uniforms, material );
 
+			} else if ( material.isMeshPhong2Material ) {
+
+				refreshUniformsCommon( uniforms, material );
+				refreshUniformsPhong2( uniforms, material );
+
 			} else if ( material.isMeshStandardMaterial ) {
 
 				refreshUniformsCommon( uniforms, material );
@@ -26880,6 +26943,14 @@
 			uniforms.specular.value.copy( material.specular );
 			uniforms.shininess.value = Math.max( material.shininess, 1e-4 ); // to prevent pow( 0.0, 0.0 )
 
+		}
+
+		function refreshUniformsPhong2( uniforms, material ) {
+
+			uniforms.specular.value.copy( material.specular );
+			uniforms.shininess.value = Math.max( material.shininess, 1e-4 ); // to prevent pow( 0.0, 0.0 )
+
+			uniforms.spinor.value = material.spinor
 		}
 
 		function refreshUniformsToon( uniforms, material ) {
@@ -28889,7 +28960,7 @@
 
 					material.onBeforeCompile( parameters, _this );
 
-					program = programCache.acquireProgram( parameters, programCacheKey );
+					program = programCache.acquireProgram(parameters, programCacheKey, material.injections );
 					programs.set( programCacheKey, program );
 
 					materialProperties.uniforms = parameters.uniforms;
@@ -28940,7 +29011,10 @@
 				}
 
 				const progUniforms = program.getUniforms();
+				//progUniforms, and progUniforms.seq DOES have it! We want it to end up in uniformsList
 				const uniformsList = WebGLUniforms.seqWithValue( progUniforms.seq, uniforms );
+				//it's not getting into uniformsList because it's not in uniforms.
+				//it's not in uniforms because
 
 				materialProperties.currentProgram = program;
 				materialProperties.uniformsList = uniformsList;
@@ -29098,13 +29172,15 @@
 					program = getProgram( material, scene, object );
 
 				}
-
+				
 				let refreshProgram = false;
 				let refreshMaterial = false;
 				let refreshLights = false;
 
 				const p_uniforms = program.getUniforms(),
 					m_uniforms = materialProperties.uniforms;
+				//material has it, we want m_uniforms to have it but it doesn't have it
+				//materialProperties should have it
 
 				if ( state.useProgram( program.program ) ) {
 
@@ -29150,6 +29226,7 @@
 					// (shader material also gets them for the sake of genericity)
 
 					if ( material.isShaderMaterial ||
+						material.isMeshPhong2Material ||
 						material.isMeshPhongMaterial ||
 						material.isMeshToonMaterial ||
 						material.isMeshStandardMaterial ||
@@ -29167,6 +29244,7 @@
 					}
 
 					if ( material.isMeshPhongMaterial ||
+						material.isMeshPhong2Material ||
 						material.isMeshToonMaterial ||
 						material.isMeshLambertMaterial ||
 						material.isMeshBasicMaterial ||
@@ -29178,6 +29256,7 @@
 					}
 
 					if ( material.isMeshPhongMaterial ||
+						material.isMeshPhong2Material ||
 						material.isMeshToonMaterial ||
 						material.isMeshLambertMaterial ||
 						material.isMeshBasicMaterial ||
@@ -29349,6 +29428,7 @@
 			function materialNeedsLights( material ) {
 
 				return material.isMeshLambertMaterial || material.isMeshToonMaterial || material.isMeshPhongMaterial ||
+					material.isMeshPhong2Material ||
 					material.isMeshStandardMaterial || material.isShadowMaterial ||
 					( material.isShaderMaterial && material.lights === true );
 
@@ -38667,6 +38747,68 @@
 
 	}
 
+	class MeshPhong2Material extends Material {
+
+		constructor(parameters) {
+
+			super();
+
+			this.isMeshPhong2Material = true;
+
+			this.type = 'MeshPhong2Material';
+
+			this.color = new Color(0xffffff); // diffuse
+			this.specular = new Color(0x111111);
+			this.shininess = 30;
+
+			this.spinor = new Spinor();
+
+			this.map = null;
+
+			this.lightMap = null;
+			this.lightMapIntensity = 1.0;
+
+			this.aoMap = null;
+			this.aoMapIntensity = 1.0;
+
+			this.emissive = new Color(0x000000);
+			this.emissiveIntensity = 1.0;
+			this.emissiveMap = null;
+
+			this.bumpMap = null;
+			this.bumpScale = 1;
+
+			this.normalMap = null;
+			this.normalMapType = TangentSpaceNormalMap;
+			this.normalScale = new Vector2(1, 1);
+
+			this.displacementMap = null;
+			this.displacementScale = 1;
+			this.displacementBias = 0;
+
+			this.specularMap = null;
+
+			this.alphaMap = null;
+
+			this.envMap = null;
+			this.combine = MultiplyOperation;
+			this.reflectivity = 1;
+			this.refractionRatio = 0.98;
+
+			this.wireframe = false;
+			this.wireframeLinewidth = 1;
+			this.wireframeLinecap = 'round';
+			this.wireframeLinejoin = 'round';
+
+			this.flatShading = false;
+
+			this.fog = true;
+
+			this.setValues(parameters);
+
+		}
+	}
+
 	class MeshToonMaterial extends Material {
 
 		constructor( parameters ) {
@@ -43018,6 +43160,7 @@
 				MeshPhysicalMaterial,
 				MeshStandardMaterial,
 				MeshPhongMaterial,
+				MeshPhong2Material,
 				MeshToonMaterial,
 				MeshNormalMaterial,
 				MeshLambertMaterial,
@@ -51046,6 +51189,7 @@
 	exports.MeshMatcapMaterial = MeshMatcapMaterial;
 	exports.MeshNormalMaterial = MeshNormalMaterial;
 	exports.MeshPhongMaterial = MeshPhongMaterial;
+	exports.MeshPhong2Material = MeshPhong2Material;
 	exports.MeshPhysicalMaterial = MeshPhysicalMaterial;
 	exports.MeshStandardMaterial = MeshStandardMaterial;
 	exports.MeshToonMaterial = MeshToonMaterial;

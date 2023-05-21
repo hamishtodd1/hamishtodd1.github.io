@@ -22,18 +22,13 @@ const renderer = new THREE.WebGLRenderer({ antialias: true })
 const scene = new THREE.Scene()
 let mouse = null
 
+const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 100)
+
 const discreteViridis = [
 	{ hex: 0xFCE51E, color: new THREE.Color(0.984375, 0.89453125, 0.1171875) },
 	{ hex: 0x49BE54, color: new THREE.Color(0.28515625, 0.7421875, 0.328125) },
 	{ hex: 0x2A477A, color: new THREE.Color(0.1640625, 0.27734375, 0.4765625) },
 	{ hex: 0x340042, color: new THREE.Color(0.203125, 0., 0.2578125) }]
-
-const TAU = Math.PI * 2.
-const HS3 = Math.sqrt(3.) / 2.
-const PHI = (1. + Math.sqrt(5.)) / 2.
-
-var frameCount = 0
-const log = console.log
 
 var debugSphere = new THREE.Mesh(new THREE.SphereGeometry(.0431),new THREE.MeshBasicMaterial({color:0xCCCCCC}))
 scene.add(debugSphere)
@@ -55,4 +50,14 @@ THREE.Matrix4.prototype.log = function() {
 		str += (this.elements[index] < 0. ? `` : ` `) + this.elements[index].toFixed(1) + `, `
 	})
 	log(str)
+}
+
+function clamp(value, min, max) {
+	if (min !== null && value < min)
+		return min
+
+	if (max !== undefined && value > max)
+		return max
+
+	return value;
 }

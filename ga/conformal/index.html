@@ -13,32 +13,61 @@
 </head>
 
 <body>
+    <!-- <input type="text" id="textbox"><br><br> -->
 
-    <script src="GeneralVector.js"></script>
+    <script>
+        function sq(a) {
+            return a * a
+        }
+        const TAU = Math.PI * 2.
+        const HS3 = Math.sqrt(3.) / 2.
+        const PHI = (1. + Math.sqrt(5.)) / 2.
+        const smallerInLarger = {}
+
+        var frameDelta = 0.
+        var frameCount = 0
+        const log = console.log
+    </script>
+
+    <script src="Multivector.js"></script>
+    <script src="gaMeta.js"></script>
     <script src="cga.js"></script>
+    <script src="cga.glsl"></script>
+    <script>
+        initCga()
+    </script>
     <script src="ega.js"></script>
+    <script src="ega.glsl"></script>
+    <script src="cgaVizes.js"></script>
 
     <script src="three.js"></script>
     <script src="variables.js"></script>
     <script src="OrbitControls.js"></script>
     <script src="VRButton.js"></script>
     <script src="mouse.js"></script>
-    <script src="init.js"></script>
+    <script src="skinning.js"></script>
 
+    <script src="programming.js"></script>
 
     <script async src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"></script>
     
     <script>
-        initCga()
-        initEga()
-        
         let container = document.createElement('div')
         document.body.appendChild(container)
+        
+        initEga()
+        // initCgaVizes()
 
-        scene.background = new THREE.Color(0x808080)
+        initProgramming()
 
-        camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 100)
+        // initMouse()
+
+        // initSkinning()
+
+        scene.background = new THREE.Color(0x8F8F8F)
+
         camera.position.set(0, 1.6, 3.5)
+        // camera.position.z += 10.
 
         let orbitControls = new OrbitControls(camera, container)
         orbitControls.target.set(0, 1.6, 0)
@@ -103,12 +132,14 @@
             renderer.setSize(window.innerWidth, window.innerHeight)
         })
 
-        init()
-
         function render() {
+            let clockDelta = clock.getDelta()
+            frameDelta = clockDelta < .1 ? clockDelta : .1 //clamped because debugger pauses create weirdness
             ++frameCount
             
-            updateDqMeshes()
+            // updateDqMeshes()
+            // disorderedUpdate
+            updatePanel()
 
             renderer.render(scene, camera)
         }

@@ -22,36 +22,64 @@ function initMouse() {
         mouseRayOld.copy(mouseRay)
         mouseOrigin.join(mouseDirection, mouseRay)
 
-        workingPlaneIntersectionOld.copy(workingPlaneIntersection)
-        workingPlane.meet(mouseRay, workingPlaneIntersection)
-        workingPlaneIntersection.normalize()
+        mousePlanePositionOld.copy(mousePlanePosition)
+        workingPlane.meet(mouseRay, mousePlanePosition)
+        mousePlanePosition.normalize()
     }
     
     document.addEventListener('mousedown', function (event) {
+        if(event.button !== 0)
+            return
 
         updateRay(event)
-        workingPlaneIntersectionOld.copy(workingPlaneIntersection) //because we've just started
+        mousePlanePositionOld.copy(mousePlanePosition) //because we've just started
 
         let intersects = raycaster.intersectObjects(grabbables)
         if(intersects.length !== 0) {
             grabbed = intersects[0].object
-            grabbed.onClick()
         }
 
         event.preventDefault()
     }, false)
 
+    let angle = .3
+    let turnRight = new Dq().set(Math.cos( angle), 0., 0., 0., Math.sin( angle), 0., 0., 0.)
+    let turnLeft  = new Dq().set(Math.cos(-angle), 0., 0., 0., Math.sin(-angle), 0., 0., 0.)
+    document.addEventListener('wheel',function(event){
+        if (grabbed !== null) {
+            let mouseTurn = event.deltaY < 0 ? turnLeft : turnRight
+            //actually it's more like you're appending it in the place where its position is
+            //but it gets converted to a matrix so etc
+            grabbed.dq.append(mouseTurn)
+        }
+    })
+
+    let scaleMode = false
+    document.addEventListener(`mousedown`,function(event) {
+        if(event.button !== 1)
+            return
+
+        scaleMode = !scaleMode
+
+        event.preventDefault()
+    })
+
     let mouseMvmt = new Dq()
     let workingPlane = new Ega().copy(e3e)
-    let workingPlaneIntersection = new Ega()
-    let workingPlaneIntersectionOld = new Ega()
+    mousePlanePosition = new Ega()
+    mousePlanePositionOld = new Ega()
     function onMouseMove(event) {
         updateRay(event)
 
         if (grabbed !== null) {
-            mouseMvmt.fromEga(workingPlaneIntersection.mul(workingPlaneIntersectionOld, ega0)).sqrtSelf()
-            
-            grabbed.onMouseMove(mouseMvmt)
+            if (scaleMode) {
+                log("scaaaaale")
+            }
+            else {
+                mousePlanePosition.mul(mousePlanePositionOld, ega0).convert(mouseMvmt).sqrtSelf()
+                mouseMvmt.multiplyScalar(-1.) //because negative scalar part causes bizarre alternation! So, hack!
+                grabbed.dq.prepend(mouseMvmt)
+            }
         }
 
         event.preventDefault()
@@ -60,7 +88,12 @@ function initMouse() {
     document.addEventListener('mousemove', onMouseMove, false)
 
     document.addEventListener('mouseup', function (event) {
+        if (event.button !== 0)
+            return
+
         grabbed = null
+
+        event.preventDefault()
     })
 
     // updateMouseIntersections = () => {

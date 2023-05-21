@@ -1,60 +1,306 @@
 function initCga() {
 
-    class Cga extends GeneralVector {
+    smallerInLarger.Cga = {
+        Sphere: new Uint8Array([1, 2, 3, 4, 5]),
+        Circle: new Uint8Array([6, 7, 8, 9, 10, 11, 12, 13, 14, 15]),
+        Spinor: new Uint8Array([
+            0,
+            6, 7, 8, 9, 10, 11, 12, 13, 14, 15,
+            26, 27, 28, 29, 30
+        ])
+
+        //StudyCga! 
+
+        //if you want to go between cga and ega, even with the canonical basis...
+        //there are serious minus signs to think about
+        //seems like no matter what you do, there's negatives involved
+        //and REALLY you should think about the canonical clifford bundle
+    }
+    smallerInLarger.Spinor = {
+        Circle: new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
+    }
+
+    class Circle extends Multivector {
+        static get size() {return 10}
+
+        constructor() {
+            super(10)
+        }
+
+        exp ( target, scalarMultiple ) {
+            
+            if(target === undefined)
+                target = new Spinor()
+            
+            if(!target.isSpinor)
+                console.error("exp called with non-spinor target")
+
+            // debugger
+
+            this.multiplyScalar( (scalarMultiple === undefined?1.:scalarMultiple), multipliedCircle )
+
+            // B*B = S + Ti*ei*I
+            //6D study!
+            let S = -multipliedCircle[0] * multipliedCircle[0] - multipliedCircle[1] * multipliedCircle[1] - multipliedCircle[2] * multipliedCircle[2] + multipliedCircle[3] * multipliedCircle[3] - multipliedCircle[4] * multipliedCircle[4] - multipliedCircle[5] * multipliedCircle[5] + multipliedCircle[6] * multipliedCircle[6] - multipliedCircle[7] * multipliedCircle[7] + multipliedCircle[8] * multipliedCircle[8] + multipliedCircle[9] * multipliedCircle[9];
+            let [T1, T2, T3, T4, T5] = [
+                2 * (multipliedCircle[4] * multipliedCircle[9] - multipliedCircle[5] * multipliedCircle[8] + multipliedCircle[6] * multipliedCircle[7]), //e2345
+                2 * (multipliedCircle[1] * multipliedCircle[9] - multipliedCircle[2] * multipliedCircle[8] + multipliedCircle[3] * multipliedCircle[7]), //e1345
+                2 * (multipliedCircle[0] * multipliedCircle[9] - multipliedCircle[2] * multipliedCircle[6] + multipliedCircle[3] * multipliedCircle[5]), //e1245
+                2 * (multipliedCircle[0] * multipliedCircle[8] - multipliedCircle[1] * multipliedCircle[6] + multipliedCircle[3] * multipliedCircle[4]), //e1235
+                2 * (multipliedCircle[0] * multipliedCircle[7] - multipliedCircle[1] * multipliedCircle[5] + multipliedCircle[2] * multipliedCircle[4])  //e1234
+            ]
+
+            // Calculate the norms of the invariants
+            let Tsq = -T1 * T1 - T2 * T2 - T3 * T3 - T4 * T4 + T5 * T5
+            let norm = Math.sqrt(S * S - Tsq)
+
+            if(norm === 0.)
+                return target.set(1., 
+                    multipliedCircle[0], 
+                    multipliedCircle[1], 
+                    multipliedCircle[2], 
+                    multipliedCircle[3], 
+                    multipliedCircle[4], 
+                    multipliedCircle[5], 
+                    multipliedCircle[6], 
+                    multipliedCircle[7], 
+                    multipliedCircle[8], 
+                    multipliedCircle[9], 
+                    0., 0., 0., 0., 0.)
+
+            let sc = -0.5 / norm, lambdap = 0.5 * S + 0.5 * norm
+
+            let [lp, lm] = [Math.sqrt(Math.abs(lambdap)), Math.sqrt(-0.5 * S + 0.5 * norm)]
+            // The associated trig (depending on sign lambdap)
+            let [cp, sp] = 
+                lambdap > 0. ? [Math.cosh(lp), Math.sinh(lp) / lp] : 
+                lambdap < 0. ? [Math.cos( lp), Math.sin( lp) / lp] : [1., 1.]
+            let [cm, sm] = [Math.cos(lm), lm == 0. ? 1. : Math.sin(lm) / lm]
+            // Calculate the mixing factors alpha and beta_i.
+            let [cmsp, cpsm, spsm] = [cm * sp, cp * sm, sp * sm / 2.]
+            let D = cmsp - cpsm
+            let E = sc * D;
+            let [alpha, beta1, beta2, beta3, beta4, beta5] = [D * (0.5 - sc * S) + cpsm, E * T1, -E * T2, E * T3, -E * T4, -E * T5]
+            // Create the final rotor.
+            return target.set(
+                cp * cm,
+                (multipliedCircle[0] * alpha + multipliedCircle[7] * beta5 - multipliedCircle[8] * beta4 + multipliedCircle[9] * beta3),
+                (multipliedCircle[1] * alpha - multipliedCircle[5] * beta5 + multipliedCircle[6] * beta4 - multipliedCircle[9] * beta2),
+                (multipliedCircle[2] * alpha + multipliedCircle[4] * beta5 - multipliedCircle[6] * beta3 + multipliedCircle[8] * beta2),
+                (multipliedCircle[3] * alpha + multipliedCircle[4] * beta4 - multipliedCircle[5] * beta3 + multipliedCircle[7] * beta2),
+                (multipliedCircle[4] * alpha + multipliedCircle[2] * beta5 - multipliedCircle[3] * beta4 + multipliedCircle[9] * beta1),
+                (multipliedCircle[5] * alpha - multipliedCircle[1] * beta5 + multipliedCircle[3] * beta3 - multipliedCircle[8] * beta1),
+                (multipliedCircle[6] * alpha - multipliedCircle[1] * beta4 + multipliedCircle[2] * beta3 - multipliedCircle[7] * beta1),
+                (multipliedCircle[7] * alpha + multipliedCircle[0] * beta5 - multipliedCircle[3] * beta2 + multipliedCircle[6] * beta1),
+                (multipliedCircle[8] * alpha + multipliedCircle[0] * beta4 - multipliedCircle[2] * beta2 + multipliedCircle[5] * beta1),
+                (multipliedCircle[9] * alpha - multipliedCircle[0] * beta3 + multipliedCircle[1] * beta2 - multipliedCircle[4] * beta1),
+                spsm * T5, spsm * T4, spsm * T3, spsm * T2, spsm * T1
+            )
+        }
+    }
+    window.Circle = Circle
+    Circle.basisNames = [`12`, `13`, `1p`, `1m`, `23`, `2p`, `2m`, `3p`, `3m`, `pm`]
+    let multipliedCircle = new Circle()
+
+    //incidentally, this is elliptic pga
+    class Spinor extends Multivector {
+        static get size() { return 16 }
+
+        constructor() {
+            super(16)
+
+            this[0] = 1.
+
+            this.isSpinor = true
+        }
+
+        logarithm(R) {
+            // B*B = S + T*e1234
+            var S = R[0] * R[0] + R[11] * R[11] - R[12] * R[12] - R[13] * R[13] - R[14] * R[14] - R[15] * R[15] - 1
+            var [T1, T2, T3, T4, T5] = [
+                2 * R[0] * R[15],   //e2345
+                2 * R[0] * R[14],   //e1345
+                2 * R[0] * R[13],   //e1245
+                2 * R[0] * R[12],   //e1235
+                2 * R[0] * R[11],   //e1234
+            ]
+            var Tsq = -T1 * T1 - T2 * T2 - T3 * T3 - T4 * T4 + T5 * T5
+            var norm = Math.sqrt(S * S - Tsq)
+            if (norm == 0 && S == 0)   // at most a single translation
+                return bivector(R[1], R[2], R[3], R[4], R[5], R[6], R[7], R[8], R[9], R[10])
+            var lambdap = 0.5 * S + 0.5 * norm
+            // lm is always a rotation, lp can be boost, translation, rotation
+            var [lp, lm] = [Math.sqrt(Math.abs(lambdap)), Math.sqrt(-0.5 * S + 0.5 * norm)]
+            var theta2 = Math.atan2(lm, R[0])
+            var theta1 = lambdap < 0 ? Math.asin(lp / Math.cos(theta2)) : lambdap > 0 ? Math.atanh(lp / R[0]) : lp / R[0]
+            var [l1, l2] = [lp == 0 ? 0 : theta1 / lp, lm == 0 ? 0 : theta2 / lm]
+            var [A, B1, B2, B3, B4, B5] = [
+                (l1 - l2) * 0.5 * (1 + S / norm) + l2, -0.5 * T1 * (l1 - l2) / norm, -0.5 * T2 * (l1 - l2) / norm,
+                -0.5 * T3 * (l1 - l2) / norm, -0.5 * T4 * (l1 - l2) / norm, -0.5 * T5 * (l1 - l2) / norm,
+            ]
+            return bivector(
+                A * R[ 1] + B3 * R[10] + B4 * R[ 9] - B5 * R[ 8],
+                A * R[ 2] + B2 * R[10] - B4 * R[ 7] + B5 * R[ 6],
+                A * R[ 3] - B2 * R[ 9] - B3 * R[ 7] - B5 * R[ 5],
+                A * R[ 4] - B2 * R[ 8] - B3 * R[ 6] - B4 * R[ 5],
+                A * R[ 5] + B1 * R[10] + B4 * R[ 4] - B5 * R[ 3],
+                A * R[ 6] - B1 * R[ 9] + B3 * R[ 4] + B5 * R[ 2],
+                A * R[ 7] - B1 * R[ 8] + B3 * R[ 3] + B4 * R[ 2],
+                A * R[ 8] + B1 * R[ 7] + B2 * R[ 4] - B5 * R[ 1],
+                A * R[ 9] + B1 * R[ 6] + B2 * R[ 3] - B4 * R[ 1],
+                A * R[10] - B1 * R[ 5] - B2 * R[ 2] - B3 * R[ 1]
+            )
+        }
+    }
+    window.Spinor = Spinor
+    Spinor.basisNames = [
+        ``,
+        `12`, `13`, `1p`, `1m`, `23`, `2p`, `2m`, `3p`, `3m`, `pm`,  //line start is [6]
+        `123p`, `123m`, `12pm`, `13pm`, `23pm`]
+
+    class Sphere extends Multivector {
+        static get size() { return 5 }
+
+        constructor() {
+            super(5)
+        }
+    }
+    window.Sphere = Sphere
+    Sphere.basisNames = [`1`, `2`, `3`, `p`, `m`]
+
+    class Cga extends Multivector {
         static get size() { return 32 }
 
         constructor() {
-            return super(32)
+            super(32)
         }
 
-        fromPoga(poga) { //polar ga!
-            this.zero()
+        up(x,y,z) {
+            this.copy(zeroCga)
+
+            let xSquared = x * x + y * y + z * z
+            this[26] = -0.5 - 0.5 * xSquared // e123p
+            this[27] =  0.5 - 0.5 * xSquared // e123m
+            this[28] =  z
+            this[29] = -y
+            this[30] =  x
+
+            return this
+        }
+        down(targetVec3) {
+            if (targetVec3 === undefined)
+                targetVec3 = new THREE.Vector3()
+
+            let xSquaredDesired = -(this[26] + this[27])
+            let xSquaredCurrent = this[28] * this[28] + this[29] * this[29] + this[30] * this[30]
+            let factor = Math.sqrt( xSquaredDesired / xSquaredCurrent )
+            targetVec3.z =  this[28] * factor
+            targetVec3.y = -this[29] * factor
+            targetVec3.x =  this[30] * factor
+
+            return targetVec3
         }
 
+        sphereLineIntersection(line,target) {
+            if(target === undefined)
+                target = new Cga()
+
+            target[16] =  line[10] * this[1] - line[ 7] * this[2] + line[ 6] * this[3];
+            target[17] =  line[11] * this[1] - line[ 8] * this[2] + line[ 6] * this[4];
+            target[18] =  line[12] * this[1] - line[ 9] * this[2] + line[ 6] * this[5];
+            target[19] =  line[13] * this[1] - line[ 8] * this[3] + line[ 7] * this[4];
+            target[20] =  line[14] * this[1] - line[ 9] * this[3] + line[ 7] * this[5];
+            target[21] = -line[ 9] * this[4] + line[ 8] * this[5];
+            target[22] =  line[13] * this[2] - line[11] * this[3] + line[10] * this[4];
+            target[23] =  line[14] * this[2] - line[12] * this[3] + line[10] * this[5];
+            target[24] = -line[12] * this[4] + line[11] * this[5];
+            target[25] = -line[14] * this[4] + line[13] * this[5];
+            //the three short ones are e1pm, e2pm, e3pm. So makes sense they have one less (PGA has no epm)
+
+            return target
+        }
+
+        // fromPoga(poga) { //polar ga!
+        //     this.zero()
+        // }
+
+        //fuck this shit
+        // vec3 sphereLineIntersection(Biv line, Sphere sphere) {
+        //     //deffo line, not circle
+        //     //so line potentially has 6,7,8,9,10,11,12,13,14
+        //     //8=9=-e01, 11=12=-e02, 13=14=-e03
+        //     //6=
+        //     target[16] =  line.e23 * sphere.e1 + line.e31 * sphere.e2 + line.e12 * sphere.e3;
+        //     target[17] = -line.e02 * sphere.e1 + line.e01 * sphere.e2 + line.e12 * sphere.ep;
+        //     target[18] = -line.e02 * sphere.e1 + line.e01 * sphere.e2 + line.e12 * sphere.em;
+        //     target[19] = -line.e03 * sphere.e1 + line.e01 * sphere.e3 - line.e31 * sphere.ep;
+        //     target[20] = -line.e03 * sphere.e1 + line.e01 * sphere.e3 - line.e31 * sphere.em;
+        //     target[21] =  line.e01 * sphere.ep - line.e01 * sphere.em;
+        //     target[22] = -line.e03 * sphere.e2 + line.e02 * sphere.e3 + line.e23 * sphere.ep;
+        //     target[23] = -line.e03 * sphere.e2 + line.e02 * sphere.e3 + line.e23 * sphere.em;
+        //     target[24] =  line.e02 * sphere.ep - line.e02 * sphere.em;
+        //     target[25] =  line.e03 * sphere.ep - line.e03 * sphere.em;
+
+        //     //urgh and how to extract?
+        //     //Are you sure you need to extract? Both can be kinda relevant
+        //     //well what you really want is the distance from a point to the point pair
+
+        //     //would be kind of nice to have the oriented distance to them both
+        //     //surely hugo worked it out
+
+        //     //in principle you could have some "early indicator" from the above to rank the things
+
+        //     //ok, step 1 is square it to see if there's an intersection at all.
+        // }
+
+        //probably DO need these around since "convert" doesn't cross ega cga yet
         fromEga(ega) {
             this.zero()
 
             this[ 0] = ega[ 0]
 
             this[ 1] = ega[ 2]; this[ 2] = ega[ 3]; this[ 3] = ega[ 4]  //e1, e2, e3
-            this[ 6] = ega[ 8]; this[ 7] = ega[ 9]; this[10] = ega[10]  //12, 13, 23
+            this[ 6] = ega[ 8]; this[ 7] =-ega[ 9]; this[10] = ega[10]  //12, 13, 23
             this[16] = ega[14] //e123
 
             this[ 4] =  ega[ 1]; this[ 5] =  ega[ 1]; //e0 = ep+em
             this[ 8] = -ega[ 5]; this[ 9] = -ega[ 5]; //e01
-            this[11] = -ega[ 6]; this[11] = -ega[ 6]; //e02
-            this[13] = -ega[ 7]; this[13] = -ega[ 7]; //e03
+            this[11] = -ega[ 6]; this[12] = -ega[ 6]; //e02
+            this[13] = -ega[ 7]; this[14] = -ega[ 7]; //e03
 
-            this[17] = ega[11]; this[18] = ega[11]; //e012
-            this[22] = ega[13]; this[23] = ega[13]; //e023
-            this[19] = ega[12]; this[19] = ega[12]; //e013
+            this[17] = -ega[11]; this[18] = -ega[11]; //e012, but ega stores e021
+            this[19] =  ega[12]; this[20] =  ega[12]; //e013 stored by both!
+            this[22] = -ega[13]; this[23] = -ega[13]; //e023, but ega stores e032
 
             this[26] = -ega[15]; this[27] = -ega[15];
 
             return this
         }
 
-        toEga(ega) {
-            ega.zero()
+        toEga(target) {
+            if(target === undefined)
+                target = new Ega()
 
-            ega[ 0] =  this[ 0]
+            target.zero()
 
-            ega[ 2] =  this[ 1]; ega[ 3] =  this[ 2]; ega[ 4] =  this[ 3]  //e1, e2, e3
-            ega[ 8] =  this[ 6]; ega[ 9] =  this[ 7]; ega[10] =  this[10]  //12, 13, 23
-            ega[14] =  this[16] //e123
+            target[ 0] =  this[ 0]
 
-            ega[ 1] =  this[ 4]; ega[ 1] =  this[ 5]; //e0 = ep+em
-            ega[ 5] = -this[ 8]; ega[ 5] = -this[ 9]; //e01
-            ega[ 6] = -this[11]; ega[ 6] = -this[11]; //e02
-            ega[ 7] = -this[13]; ega[ 7] = -this[13]; //e03
+            target[ 2] =  this[ 1]; target[ 3] =  this[ 2]; target[ 4] =  this[ 3]  //e1, e2, e3
+            target[ 8] =  this[ 6]; target[ 9] =  this[ 7]; target[10] =  this[10]  //12, 13, 23
+            target[14] =  this[16] //e123
 
-            ega[11] =  this[17]; ega[11] =  this[18]; //e012
-            ega[13] =  this[22]; ega[13] =  this[23]; //e023
-            ega[12] =  this[19]; ega[12] =  this[19]; //e013
+            target[ 1] =  this[ 4]; target[ 1] =  this[ 5]; //e0 = ep+em
+            target[ 5] = -this[ 8]; target[ 5] = -this[ 9]; //e01
+            target[ 6] = -this[11]; target[ 6] = -this[11]; //e02
+            target[ 7] = -this[13]; target[ 7] = -this[13]; //e03
 
-            ega[15] = -this[26]; ega[15] = -this[27];
+            target[11] =  this[17]; target[11] =  this[18]; //e012
+            target[13] =  this[22]; target[13] =  this[23]; //e023
+            target[12] =  this[19]; target[12] =  this[19]; //e013
 
-            return ega
+            target[15] = -this[26]; target[15] = -this[27];
+
+            return target
         }
 
         sandwich(cgaToBeSandwiched, target) {
@@ -73,73 +319,48 @@ function initCga() {
             return target
         }
 
-        selectGrade(grade, target) {
-            target.copy(this)
-            for (let i = 0; i < this.constructor.size; ++i) {
-                if (this.constructor.indexGrades[i] !== grade)
-                    target[i] = 0.
-            }
-
-            return target
-        }
-
-        // hasGrade(grade) {
-        //     if (grade === 0)
-        //         return this[0] !== 0.
-        //     if (grade === 1)
-        //         return (this[1] !== 0. || this[2] !== 0. || this[3] !== 0. || this[4] !== 0.)
-        //     if (grade === 2)
-        //         return (this[5] !== 0. || this[6] !== 0. || this[7] !== 0. || this[8] !== 0. || this[9] !== 0. || this[10] !== 0.)
-        //     if (grade === 3)
-        //         return (this[11] !== 0. || this[12] !== 0. || this[13] !== 0. || this[14] !== 0.)
-        //     if (grade === 4)
-        //         return this[15] !== 0.
-        // }
-
-        // grade() {
-        //     for (let i = 0; i < 5; ++i) {
-        //         if (this.hasGrade(i))
-        //             return i
-        //     }
-        // }
-
         //aliasing allowed
         reverse(target) {
             if (target === undefined)
                 target = new Cga()
 
-            target[0] = cga[0];
-            target[1] = cga[1];
-            target[2] = cga[2];
-            target[3] = cga[3];
-            target[4] = cga[4];
-            target[5] = cga[5];
-            target[6] = -cga[6];
-            target[7] = -cga[7];
-            target[8] = -cga[8];
-            target[9] = -cga[9];
-            target[10] = -cga[10];
-            target[11] = -cga[11];
-            target[12] = -cga[12];
-            target[13] = -cga[13];
-            target[14] = -cga[14];
-            target[15] = -cga[15];
-            target[16] = -cga[16];
-            target[17] = -cga[17];
-            target[18] = -cga[18];
-            target[19] = -cga[19];
-            target[20] = -cga[20];
-            target[21] = -cga[21];
-            target[22] = -cga[22];
-            target[23] = -cga[23];
-            target[24] = -cga[24];
-            target[25] = -cga[25];
-            target[26] = cga[26];
-            target[27] = cga[27];
-            target[28] = cga[28];
-            target[29] = cga[29];
-            target[30] = cga[30];
-            target[31] = cga[31];
+            target[ 0] =  this[ 0];
+
+            target[ 1] =  this[ 1];
+            target[ 2] =  this[ 2];
+            target[ 3] =  this[ 3];
+            target[ 4] =  this[ 4];
+            target[ 5] =  this[ 5];
+
+            target[ 6] = -this[ 6];
+            target[ 7] = -this[ 7];
+            target[ 8] = -this[ 8];
+            target[ 9] = -this[ 9];
+            target[10] = -this[10];
+            target[11] = -this[11];
+            target[12] = -this[12];
+            target[13] = -this[13];
+            target[14] = -this[14];
+            target[15] = -this[15];
+
+            target[16] = -this[16];
+            target[17] = -this[17];
+            target[18] = -this[18];
+            target[19] = -this[19];
+            target[20] = -this[20];
+            target[21] = -this[21];
+            target[22] = -this[22];
+            target[23] = -this[23];
+            target[24] = -this[24];
+            target[25] = -this[25];
+            
+            target[26] =  this[26];
+            target[27] =  this[27];
+            target[28] =  this[28];
+            target[29] =  this[29];
+            target[30] =  this[30];
+
+            target[31] =  this[31];
             return target
         }
 
@@ -147,11 +368,13 @@ function initCga() {
             if (target === undefined)
                 target = new Cga()
             target[0] = b[0] * this[0];
+            
             target[1] = b[1] * this[0] + b[0] * this[1];
             target[2] = b[2] * this[0] + b[0] * this[2];
             target[3] = b[3] * this[0] + b[0] * this[3];
             target[4] = b[4] * this[0] + b[0] * this[4];
             target[5] = b[5] * this[0] + b[0] * this[5];
+            
             target[6] = b[6] * this[0] + b[2] * this[1] - b[1] * this[2] + b[0] * this[6];
             target[7] = b[7] * this[0] + b[3] * this[1] - b[1] * this[3] + b[0] * this[7];
             target[8] = b[8] * this[0] + b[4] * this[1] - b[1] * this[4] + b[0] * this[8];
@@ -162,6 +385,7 @@ function initCga() {
             target[13] = b[13] * this[0] + b[4] * this[3] - b[3] * this[4] + b[0] * this[13];
             target[14] = b[14] * this[0] + b[5] * this[3] - b[3] * this[5] + b[0] * this[14];
             target[15] = b[15] * this[0] + b[5] * this[4] - b[4] * this[5] + b[0] * this[15];
+            
             target[16] = b[16] * this[0] + b[10] * this[1] - b[7] * this[2] + b[6] * this[3] + b[3] * this[6] - b[2] * this[7] + b[1] * this[10] + b[0] * this[16];
             target[17] = b[17] * this[0] + b[11] * this[1] - b[8] * this[2] + b[6] * this[4] + b[4] * this[6] - b[2] * this[8] + b[1] * this[11] + b[0] * this[17];
             target[18] = b[18] * this[0] + b[12] * this[1] - b[9] * this[2] + b[6] * this[5] + b[5] * this[6] - b[2] * this[9] + b[1] * this[12] + b[0] * this[18];
@@ -172,11 +396,13 @@ function initCga() {
             target[23] = b[23] * this[0] + b[14] * this[2] - b[12] * this[3] + b[10] * this[5] + b[5] * this[10] - b[3] * this[12] + b[2] * this[14] + b[0] * this[23];
             target[24] = b[24] * this[0] + b[15] * this[2] - b[12] * this[4] + b[11] * this[5] + b[5] * this[11] - b[4] * this[12] + b[2] * this[15] + b[0] * this[24];
             target[25] = b[25] * this[0] + b[15] * this[3] - b[14] * this[4] + b[13] * this[5] + b[5] * this[13] - b[4] * this[14] + b[3] * this[15] + b[0] * this[25];
+            
             target[26] = b[26] * this[0] + b[22] * this[1] - b[19] * this[2] + b[17] * this[3] - b[16] * this[4] + b[13] * this[6] - b[11] * this[7] + b[10] * this[8] + b[8] * this[10] - b[7] * this[11] + b[6] * this[13] + b[4] * this[16] - b[3] * this[17] + b[2] * this[19] - b[1] * this[22] + b[0] * this[26];
             target[27] = b[27] * this[0] + b[23] * this[1] - b[20] * this[2] + b[18] * this[3] - b[16] * this[5] + b[14] * this[6] - b[12] * this[7] + b[10] * this[9] + b[9] * this[10] - b[7] * this[12] + b[6] * this[14] + b[5] * this[16] - b[3] * this[18] + b[2] * this[20] - b[1] * this[23] + b[0] * this[27];
             target[28] = b[28] * this[0] + b[24] * this[1] - b[21] * this[2] + b[18] * this[4] - b[17] * this[5] + b[15] * this[6] - b[12] * this[8] + b[11] * this[9] + b[9] * this[11] - b[8] * this[12] + b[6] * this[15] + b[5] * this[17] - b[4] * this[18] + b[2] * this[21] - b[1] * this[24] + b[0] * this[28];
             target[29] = b[29] * this[0] + b[25] * this[1] - b[21] * this[3] + b[20] * this[4] - b[19] * this[5] + b[15] * this[7] - b[14] * this[8] + b[13] * this[9] + b[9] * this[13] - b[8] * this[14] + b[7] * this[15] + b[5] * this[19] - b[4] * this[20] + b[3] * this[21] - b[1] * this[25] + b[0] * this[29];
             target[30] = b[30] * this[0] + b[25] * this[2] - b[24] * this[3] + b[23] * this[4] - b[22] * this[5] + b[15] * this[10] - b[14] * this[11] + b[13] * this[12] + b[12] * this[13] - b[11] * this[14] + b[10] * this[15] + b[5] * this[22] - b[4] * this[23] + b[3] * this[24] - b[2] * this[25] + b[0] * this[30];
+            
             target[31] = b[31] * this[0] + b[30] * this[1] - b[29] * this[2] + b[28] * this[3] - b[27] * this[4] + b[26] * this[5] + b[25] * this[6] - b[24] * this[7] + b[23] * this[8] - b[22] * this[9] + b[21] * this[10] - b[20] * this[11] + b[19] * this[12] + b[18] * this[13] - b[17] * this[14] + b[16] * this[15] + b[15] * this[16] - b[14] * this[17] + b[13] * this[18] + b[12] * this[19] - b[11] * this[20] + b[10] * this[21] - b[9] * this[22] + b[8] * this[23] - b[7] * this[24] + b[6] * this[25] + b[5] * this[26] - b[4] * this[27] + b[3] * this[28] - b[2] * this[29] + b[1] * this[30] + b[0] * this[31];
             return target;
         }
@@ -184,54 +410,54 @@ function initCga() {
         join(b, target) {
             if (target === undefined)
                 target = new Cga()
-            target[31] = 1 * (this[31] * b[31])
-            target[30] = 1 * (this[30] * b[31] + this[31] * b[30])
-            target[29] = -1 * (this[29] * -1 * b[31] + this[31] * b[29] * -1)
-            target[28] = 1 * (this[28] * b[31] + this[31] * b[28])
-            target[27] = -1 * (this[27] * -1 * b[31] + this[31] * b[27] * -1)
-            target[26] = 1 * (this[26] * b[31] + this[31] * b[26])
-            target[25] = 1 * (this[25] * b[31] + this[29] * -1 * b[30] - this[30] * b[29] * -1 + this[31] * b[25])
-            target[24] = -1 * (this[24] * -1 * b[31] + this[28] * b[30] - this[30] * b[28] + this[31] * b[24] * -1)
-            target[23] = 1 * (this[23] * b[31] + this[27] * -1 * b[30] - this[30] * b[27] * -1 + this[31] * b[23])
-            target[22] = -1 * (this[22] * -1 * b[31] + this[26] * b[30] - this[30] * b[26] + this[31] * b[22] * -1)
-            target[21] = 1 * (this[21] * b[31] + this[28] * b[29] * -1 - this[29] * -1 * b[28] + this[31] * b[21])
-            target[20] = -1 * (this[20] * -1 * b[31] + this[27] * -1 * b[29] * -1 - this[29] * -1 * b[27] * -1 + this[31] * b[20] * -1)
-            target[19] = 1 * (this[19] * b[31] + this[26] * b[29] * -1 - this[29] * -1 * b[26] + this[31] * b[19])
-            target[18] = 1 * (this[18] * b[31] + this[27] * -1 * b[28] - this[28] * b[27] * -1 + this[31] * b[18])
-            target[17] = -1 * (this[17] * -1 * b[31] + this[26] * b[28] - this[28] * b[26] + this[31] * b[17] * -1)
-            target[16] = 1 * (this[16] * b[31] + this[26] * b[27] * -1 - this[27] * -1 * b[26] + this[31] * b[16])
-            target[15] = 1 * (this[15] * b[31] + this[21] * b[30] - this[24] * -1 * b[29] * -1 + this[25] * b[28] + this[28] * b[25] - this[29] * -1 * b[24] * -1 + this[30] * b[21] + this[31] * b[15])
-            target[14] = -1 * (this[14] * -1 * b[31] + this[20] * -1 * b[30] - this[23] * b[29] * -1 + this[25] * b[27] * -1 + this[27] * -1 * b[25] - this[29] * -1 * b[23] + this[30] * b[20] * -1 + this[31] * b[14] * -1)
-            target[13] = 1 * (this[13] * b[31] + this[19] * b[30] - this[22] * -1 * b[29] * -1 + this[25] * b[26] + this[26] * b[25] - this[29] * -1 * b[22] * -1 + this[30] * b[19] + this[31] * b[13])
-            target[12] = 1 * (this[12] * b[31] + this[18] * b[30] - this[23] * b[28] + this[24] * -1 * b[27] * -1 + this[27] * -1 * b[24] * -1 - this[28] * b[23] + this[30] * b[18] + this[31] * b[12])
-            target[11] = -1 * (this[11] * -1 * b[31] + this[17] * -1 * b[30] - this[22] * -1 * b[28] + this[24] * -1 * b[26] + this[26] * b[24] * -1 - this[28] * b[22] * -1 + this[30] * b[17] * -1 + this[31] * b[11] * -1)
-            target[10] = 1 * (this[10] * b[31] + this[16] * b[30] - this[22] * -1 * b[27] * -1 + this[23] * b[26] + this[26] * b[23] - this[27] * -1 * b[22] * -1 + this[30] * b[16] + this[31] * b[10])
-            target[9] = -1 * (this[9] * -1 * b[31] + this[18] * b[29] * -1 - this[20] * -1 * b[28] + this[21] * b[27] * -1 + this[27] * -1 * b[21] - this[28] * b[20] * -1 + this[29] * -1 * b[18] + this[31] * b[9] * -1)
-            target[8] = 1 * (this[8] * b[31] + this[17] * -1 * b[29] * -1 - this[19] * b[28] + this[21] * b[26] + this[26] * b[21] - this[28] * b[19] + this[29] * -1 * b[17] * -1 + this[31] * b[8])
-            target[7] = -1 * (this[7] * -1 * b[31] + this[16] * b[29] * -1 - this[19] * b[27] * -1 + this[20] * -1 * b[26] + this[26] * b[20] * -1 - this[27] * -1 * b[19] + this[29] * -1 * b[16] + this[31] * b[7] * -1)
-            target[6] = 1 * (this[6] * b[31] + this[16] * b[28] - this[17] * -1 * b[27] * -1 + this[18] * b[26] + this[26] * b[18] - this[27] * -1 * b[17] * -1 + this[28] * b[16] + this[31] * b[6])
-            target[5] = 1 * (this[5] * b[31] + this[9] * -1 * b[30] - this[12] * b[29] * -1 + this[14] * -1 * b[28] - this[15] * b[27] * -1 + this[18] * b[25] - this[20] * -1 * b[24] * -1 + this[21] * b[23] + this[23] * b[21] - this[24] * -1 * b[20] * -1 + this[25] * b[18] + this[27] * -1 * b[15] - this[28] * b[14] * -1 + this[29] * -1 * b[12] - this[30] * b[9] * -1 + this[31] * b[5])
-            target[4] = -1 * (this[4] * -1 * b[31] + this[8] * b[30] - this[11] * -1 * b[29] * -1 + this[13] * b[28] - this[15] * b[26] + this[17] * -1 * b[25] - this[19] * b[24] * -1 + this[21] * b[22] * -1 + this[22] * -1 * b[21] - this[24] * -1 * b[19] + this[25] * b[17] * -1 + this[26] * b[15] - this[28] * b[13] + this[29] * -1 * b[11] * -1 - this[30] * b[8] + this[31] * b[4] * -1)
-            target[3] = 1 * (this[3] * b[31] + this[7] * -1 * b[30] - this[10] * b[29] * -1 + this[13] * b[27] * -1 - this[14] * -1 * b[26] + this[16] * b[25] - this[19] * b[23] + this[20] * -1 * b[22] * -1 + this[22] * -1 * b[20] * -1 - this[23] * b[19] + this[25] * b[16] + this[26] * b[14] * -1 - this[27] * -1 * b[13] + this[29] * -1 * b[10] - this[30] * b[7] * -1 + this[31] * b[3])
-            target[2] = -1 * (this[2] * -1 * b[31] + this[6] * b[30] - this[10] * b[28] + this[11] * -1 * b[27] * -1 - this[12] * b[26] + this[16] * b[24] * -1 - this[17] * -1 * b[23] + this[18] * b[22] * -1 + this[22] * -1 * b[18] - this[23] * b[17] * -1 + this[24] * -1 * b[16] + this[26] * b[12] - this[27] * -1 * b[11] * -1 + this[28] * b[10] - this[30] * b[6] + this[31] * b[2] * -1)
-            target[1] = 1 * (this[1] * b[31] + this[6] * b[29] * -1 - this[7] * -1 * b[28] + this[8] * b[27] * -1 - this[9] * -1 * b[26] + this[16] * b[21] - this[17] * -1 * b[20] * -1 + this[18] * b[19] + this[19] * b[18] - this[20] * -1 * b[17] * -1 + this[21] * b[16] + this[26] * b[9] * -1 - this[27] * -1 * b[8] + this[28] * b[7] * -1 - this[29] * -1 * b[6] + this[31] * b[1])
-            target[0] = 1 * (this[0] * b[31] + this[1] * b[30] - this[2] * -1 * b[29] * -1 + this[3] * b[28] - this[4] * -1 * b[27] * -1 + this[5] * b[26] + this[6] * b[25] - this[7] * -1 * b[24] * -1 + this[8] * b[23] - this[9] * -1 * b[22] * -1 + this[10] * b[21] - this[11] * -1 * b[20] * -1 + this[12] * b[19] + this[13] * b[18] - this[14] * -1 * b[17] * -1 + this[15] * b[16] + this[16] * b[15] - this[17] * -1 * b[14] * -1 + this[18] * b[13] + this[19] * b[12] - this[20] * -1 * b[11] * -1 + this[21] * b[10] - this[22] * -1 * b[9] * -1 + this[23] * b[8] - this[24] * -1 * b[7] * -1 + this[25] * b[6] + this[26] * b[5] - this[27] * -1 * b[4] * -1 + this[28] * b[3] - this[29] * -1 * b[2] * -1 + this[30] * b[1] + this[31] * b[0])
+            target[31] =  (this[31] * b[31])
+            target[30] =  (this[30] * b[31] + this[31] * b[30])
+            target[29] = -(this[29] * -1 * b[31] + this[31] * b[29] * -1)
+            target[28] =  (this[28] * b[31] + this[31] * b[28])
+            target[27] = -(this[27] * -1 * b[31] + this[31] * b[27] * -1)
+            target[26] =  (this[26] * b[31] + this[31] * b[26])
+            target[25] =  (this[25] * b[31] + this[29] * -1 * b[30] - this[30] * b[29] * -1 + this[31] * b[25])
+            target[24] = -(this[24] * -1 * b[31] + this[28] * b[30] - this[30] * b[28] + this[31] * b[24] * -1)
+            target[23] =  (this[23] * b[31] + this[27] * -1 * b[30] - this[30] * b[27] * -1 + this[31] * b[23])
+            target[22] = -(this[22] * -1 * b[31] + this[26] * b[30] - this[30] * b[26] + this[31] * b[22] * -1)
+            target[21] =  (this[21] * b[31] + this[28] * b[29] * -1 - this[29] * -1 * b[28] + this[31] * b[21])
+            target[20] = -(this[20] * -1 * b[31] + this[27] * -1 * b[29] * -1 - this[29] * -1 * b[27] * -1 + this[31] * b[20] * -1)
+            target[19] =  (this[19] * b[31] + this[26] * b[29] * -1 - this[29] * -1 * b[26] + this[31] * b[19])
+            target[18] =  (this[18] * b[31] + this[27] * -1 * b[28] - this[28] * b[27] * -1 + this[31] * b[18])
+            target[17] = -(this[17] * -1 * b[31] + this[26] * b[28] - this[28] * b[26] + this[31] * b[17] * -1)
+            target[16] =  (this[16] * b[31] + this[26] * b[27] * -1 - this[27] * -1 * b[26] + this[31] * b[16])
+            target[15] =  (this[15] * b[31] + this[21] * b[30] - this[24] * -1 * b[29] * -1 + this[25] * b[28] + this[28] * b[25] - this[29] * -1 * b[24] * -1 + this[30] * b[21] + this[31] * b[15])
+            target[14] = -(this[14] * -1 * b[31] + this[20] * -1 * b[30] - this[23] * b[29] * -1 + this[25] * b[27] * -1 + this[27] * -1 * b[25] - this[29] * -1 * b[23] + this[30] * b[20] * -1 + this[31] * b[14] * -1)
+            target[13] =  (this[13] * b[31] + this[19] * b[30] - this[22] * -1 * b[29] * -1 + this[25] * b[26] + this[26] * b[25] - this[29] * -1 * b[22] * -1 + this[30] * b[19] + this[31] * b[13])
+            target[12] =  (this[12] * b[31] + this[18] * b[30] - this[23] * b[28] + this[24] * -1 * b[27] * -1 + this[27] * -1 * b[24] * -1 - this[28] * b[23] + this[30] * b[18] + this[31] * b[12])
+            target[11] = -(this[11] * -1 * b[31] + this[17] * -1 * b[30] - this[22] * -1 * b[28] + this[24] * -1 * b[26] + this[26] * b[24] * -1 - this[28] * b[22] * -1 + this[30] * b[17] * -1 + this[31] * b[11] * -1)
+            target[10] =  (this[10] * b[31] + this[16] * b[30] - this[22] * -1 * b[27] * -1 + this[23] * b[26] + this[26] * b[23] - this[27] * -1 * b[22] * -1 + this[30] * b[16] + this[31] * b[10])
+            target[ 9] = -(this[9] * -1 * b[31] + this[18] * b[29] * -1 - this[20] * -1 * b[28] + this[21] * b[27] * -1 + this[27] * -1 * b[21] - this[28] * b[20] * -1 + this[29] * -1 * b[18] + this[31] * b[9] * -1)
+            target[ 8] =  (this[8] * b[31] + this[17] * -1 * b[29] * -1 - this[19] * b[28] + this[21] * b[26] + this[26] * b[21] - this[28] * b[19] + this[29] * -1 * b[17] * -1 + this[31] * b[8])
+            target[ 7] = -(this[7] * -1 * b[31] + this[16] * b[29] * -1 - this[19] * b[27] * -1 + this[20] * -1 * b[26] + this[26] * b[20] * -1 - this[27] * -1 * b[19] + this[29] * -1 * b[16] + this[31] * b[7] * -1)
+            target[ 6] =  (this[6] * b[31] + this[16] * b[28] - this[17] * -1 * b[27] * -1 + this[18] * b[26] + this[26] * b[18] - this[27] * -1 * b[17] * -1 + this[28] * b[16] + this[31] * b[6])
+            target[ 5] =  (this[5] * b[31] + this[9] * -1 * b[30] - this[12] * b[29] * -1 + this[14] * -1 * b[28] - this[15] * b[27] * -1 + this[18] * b[25] - this[20] * -1 * b[24] * -1 + this[21] * b[23] + this[23] * b[21] - this[24] * -1 * b[20] * -1 + this[25] * b[18] + this[27] * -1 * b[15] - this[28] * b[14] * -1 + this[29] * -1 * b[12] - this[30] * b[9] * -1 + this[31] * b[5])
+            target[ 4] = -(this[4] * -1 * b[31] + this[8] * b[30] - this[11] * -1 * b[29] * -1 + this[13] * b[28] - this[15] * b[26] + this[17] * -1 * b[25] - this[19] * b[24] * -1 + this[21] * b[22] * -1 + this[22] * -1 * b[21] - this[24] * -1 * b[19] + this[25] * b[17] * -1 + this[26] * b[15] - this[28] * b[13] + this[29] * -1 * b[11] * -1 - this[30] * b[8] + this[31] * b[4] * -1)
+            target[ 3] =  (this[3] * b[31] + this[7] * -1 * b[30] - this[10] * b[29] * -1 + this[13] * b[27] * -1 - this[14] * -1 * b[26] + this[16] * b[25] - this[19] * b[23] + this[20] * -1 * b[22] * -1 + this[22] * -1 * b[20] * -1 - this[23] * b[19] + this[25] * b[16] + this[26] * b[14] * -1 - this[27] * -1 * b[13] + this[29] * -1 * b[10] - this[30] * b[7] * -1 + this[31] * b[3])
+            target[ 2] = -(this[2] * -1 * b[31] + this[6] * b[30] - this[10] * b[28] + this[11] * -1 * b[27] * -1 - this[12] * b[26] + this[16] * b[24] * -1 - this[17] * -1 * b[23] + this[18] * b[22] * -1 + this[22] * -1 * b[18] - this[23] * b[17] * -1 + this[24] * -1 * b[16] + this[26] * b[12] - this[27] * -1 * b[11] * -1 + this[28] * b[10] - this[30] * b[6] + this[31] * b[2] * -1)
+            target[ 1] =  (this[1] * b[31] + this[6] * b[29] * -1 - this[7] * -1 * b[28] + this[8] * b[27] * -1 - this[9] * -1 * b[26] + this[16] * b[21] - this[17] * -1 * b[20] * -1 + this[18] * b[19] + this[19] * b[18] - this[20] * -1 * b[17] * -1 + this[21] * b[16] + this[26] * b[9] * -1 - this[27] * -1 * b[8] + this[28] * b[7] * -1 - this[29] * -1 * b[6] + this[31] * b[1])
+            target[ 0] =  (this[0] * b[31] + this[1] * b[30] - this[2] * -1 * b[29] * -1 + this[3] * b[28] - this[4] * -1 * b[27] * -1 + this[5] * b[26] + this[6] * b[25] - this[7] * -1 * b[24] * -1 + this[8] * b[23] - this[9] * -1 * b[22] * -1 + this[10] * b[21] - this[11] * -1 * b[20] * -1 + this[12] * b[19] + this[13] * b[18] - this[14] * -1 * b[17] * -1 + this[15] * b[16] + this[16] * b[15] - this[17] * -1 * b[14] * -1 + this[18] * b[13] + this[19] * b[12] - this[20] * -1 * b[11] * -1 + this[21] * b[10] - this[22] * -1 * b[9] * -1 + this[23] * b[8] - this[24] * -1 * b[7] * -1 + this[25] * b[6] + this[26] * b[5] - this[27] * -1 * b[4] * -1 + this[28] * b[3] - this[29] * -1 * b[2] * -1 + this[30] * b[1] + this[31] * b[0])
             return target;
         }
 
         inner(b, target) {
             if (target === undefined)
                 target = new Cga()
-            target[0] = b[0] * this[0] + b[1] * this[1] + b[2] * this[2] + b[3] * this[3] + b[4] * this[4] - b[5] * this[5] - b[6] * this[6] - b[7] * this[7] - b[8] * this[8] + b[9] * this[9] - b[10] * this[10] - b[11] * this[11] + b[12] * this[12] - b[13] * this[13] + b[14] * this[14] + b[15] * this[15] - b[16] * this[16] - b[17] * this[17] + b[18] * this[18] - b[19] * this[19] + b[20] * this[20] + b[21] * this[21] - b[22] * this[22] + b[23] * this[23] + b[24] * this[24] + b[25] * this[25] + b[26] * this[26] - b[27] * this[27] - b[28] * this[28] - b[29] * this[29] - b[30] * this[30] - b[31] * this[31];
-            target[1] = b[1] * this[0] + b[0] * this[1] - b[6] * this[2] - b[7] * this[3] - b[8] * this[4] + b[9] * this[5] + b[2] * this[6] + b[3] * this[7] + b[4] * this[8] - b[5] * this[9] - b[16] * this[10] - b[17] * this[11] + b[18] * this[12] - b[19] * this[13] + b[20] * this[14] + b[21] * this[15] - b[10] * this[16] - b[11] * this[17] + b[12] * this[18] - b[13] * this[19] + b[14] * this[20] + b[15] * this[21] + b[26] * this[22] - b[27] * this[23] - b[28] * this[24] - b[29] * this[25] - b[22] * this[26] + b[23] * this[27] + b[24] * this[28] + b[25] * this[29] - b[31] * this[30] - b[30] * this[31];
-            target[2] = b[2] * this[0] + b[6] * this[1] + b[0] * this[2] - b[10] * this[3] - b[11] * this[4] + b[12] * this[5] - b[1] * this[6] + b[16] * this[7] + b[17] * this[8] - b[18] * this[9] + b[3] * this[10] + b[4] * this[11] - b[5] * this[12] - b[22] * this[13] + b[23] * this[14] + b[24] * this[15] + b[7] * this[16] + b[8] * this[17] - b[9] * this[18] - b[26] * this[19] + b[27] * this[20] + b[28] * this[21] - b[13] * this[22] + b[14] * this[23] + b[15] * this[24] - b[30] * this[25] + b[19] * this[26] - b[20] * this[27] - b[21] * this[28] + b[31] * this[29] + b[25] * this[30] + b[29] * this[31];
-            target[3] = b[3] * this[0] + b[7] * this[1] + b[10] * this[2] + b[0] * this[3] - b[13] * this[4] + b[14] * this[5] - b[16] * this[6] - b[1] * this[7] + b[19] * this[8] - b[20] * this[9] - b[2] * this[10] + b[22] * this[11] - b[23] * this[12] + b[4] * this[13] - b[5] * this[14] + b[25] * this[15] - b[6] * this[16] + b[26] * this[17] - b[27] * this[18] + b[8] * this[19] - b[9] * this[20] + b[29] * this[21] + b[11] * this[22] - b[12] * this[23] + b[30] * this[24] + b[15] * this[25] - b[17] * this[26] + b[18] * this[27] - b[31] * this[28] - b[21] * this[29] - b[24] * this[30] - b[28] * this[31];
-            target[4] = b[4] * this[0] + b[8] * this[1] + b[11] * this[2] + b[13] * this[3] + b[0] * this[4] + b[15] * this[5] - b[17] * this[6] - b[19] * this[7] - b[1] * this[8] - b[21] * this[9] - b[22] * this[10] - b[2] * this[11] - b[24] * this[12] - b[3] * this[13] - b[25] * this[14] - b[5] * this[15] - b[26] * this[16] - b[6] * this[17] - b[28] * this[18] - b[7] * this[19] - b[29] * this[20] - b[9] * this[21] - b[10] * this[22] - b[30] * this[23] - b[12] * this[24] - b[14] * this[25] + b[16] * this[26] + b[31] * this[27] + b[18] * this[28] + b[20] * this[29] + b[23] * this[30] + b[27] * this[31];
-            target[5] = b[5] * this[0] + b[9] * this[1] + b[12] * this[2] + b[14] * this[3] + b[15] * this[4] + b[0] * this[5] - b[18] * this[6] - b[20] * this[7] - b[21] * this[8] - b[1] * this[9] - b[23] * this[10] - b[24] * this[11] - b[2] * this[12] - b[25] * this[13] - b[3] * this[14] - b[4] * this[15] - b[27] * this[16] - b[28] * this[17] - b[6] * this[18] - b[29] * this[19] - b[7] * this[20] - b[8] * this[21] - b[30] * this[22] - b[10] * this[23] - b[11] * this[24] - b[13] * this[25] + b[31] * this[26] + b[16] * this[27] + b[17] * this[28] + b[19] * this[29] + b[22] * this[30] + b[26] * this[31];
-            target[6] = b[6] * this[0] + b[16] * this[3] + b[17] * this[4] - b[18] * this[5] + b[0] * this[6] - b[26] * this[13] + b[27] * this[14] + b[28] * this[15] + b[3] * this[16] + b[4] * this[17] - b[5] * this[18] + b[31] * this[25] - b[13] * this[26] + b[14] * this[27] + b[15] * this[28] + b[25] * this[31];
-            target[7] = b[7] * this[0] - b[16] * this[2] + b[19] * this[4] - b[20] * this[5] + b[0] * this[7] + b[26] * this[11] - b[27] * this[12] + b[29] * this[15] - b[2] * this[16] + b[4] * this[19] - b[5] * this[20] - b[31] * this[24] + b[11] * this[26] - b[12] * this[27] + b[15] * this[29] - b[24] * this[31];
-            target[8] = b[8] * this[0] - b[17] * this[2] - b[19] * this[3] - b[21] * this[5] + b[0] * this[8] - b[26] * this[10] - b[28] * this[12] - b[29] * this[14] - b[2] * this[17] - b[3] * this[19] - b[5] * this[21] + b[31] * this[23] - b[10] * this[26] - b[12] * this[28] - b[14] * this[29] + b[23] * this[31];
-            target[9] = b[9] * this[0] - b[18] * this[2] - b[20] * this[3] - b[21] * this[4] + b[0] * this[9] - b[27] * this[10] - b[28] * this[11] - b[29] * this[13] - b[2] * this[18] - b[3] * this[20] - b[4] * this[21] + b[31] * this[22] - b[10] * this[27] - b[11] * this[28] - b[13] * this[29] + b[22] * this[31];
+            target[ 0] = b[0] * this[0] + b[1] * this[1] + b[2] * this[2] + b[3] * this[3] + b[4] * this[4] - b[5] * this[5] - b[6] * this[6] - b[7] * this[7] - b[8] * this[8] + b[9] * this[9] - b[10] * this[10] - b[11] * this[11] + b[12] * this[12] - b[13] * this[13] + b[14] * this[14] + b[15] * this[15] - b[16] * this[16] - b[17] * this[17] + b[18] * this[18] - b[19] * this[19] + b[20] * this[20] + b[21] * this[21] - b[22] * this[22] + b[23] * this[23] + b[24] * this[24] + b[25] * this[25] + b[26] * this[26] - b[27] * this[27] - b[28] * this[28] - b[29] * this[29] - b[30] * this[30] - b[31] * this[31];
+            target[ 1] = b[1] * this[0] + b[0] * this[1] - b[6] * this[2] - b[7] * this[3] - b[8] * this[4] + b[9] * this[5] + b[2] * this[6] + b[3] * this[7] + b[4] * this[8] - b[5] * this[9] - b[16] * this[10] - b[17] * this[11] + b[18] * this[12] - b[19] * this[13] + b[20] * this[14] + b[21] * this[15] - b[10] * this[16] - b[11] * this[17] + b[12] * this[18] - b[13] * this[19] + b[14] * this[20] + b[15] * this[21] + b[26] * this[22] - b[27] * this[23] - b[28] * this[24] - b[29] * this[25] - b[22] * this[26] + b[23] * this[27] + b[24] * this[28] + b[25] * this[29] - b[31] * this[30] - b[30] * this[31];
+            target[ 2] = b[2] * this[0] + b[6] * this[1] + b[0] * this[2] - b[10] * this[3] - b[11] * this[4] + b[12] * this[5] - b[1] * this[6] + b[16] * this[7] + b[17] * this[8] - b[18] * this[9] + b[3] * this[10] + b[4] * this[11] - b[5] * this[12] - b[22] * this[13] + b[23] * this[14] + b[24] * this[15] + b[7] * this[16] + b[8] * this[17] - b[9] * this[18] - b[26] * this[19] + b[27] * this[20] + b[28] * this[21] - b[13] * this[22] + b[14] * this[23] + b[15] * this[24] - b[30] * this[25] + b[19] * this[26] - b[20] * this[27] - b[21] * this[28] + b[31] * this[29] + b[25] * this[30] + b[29] * this[31];
+            target[ 3] = b[3] * this[0] + b[7] * this[1] + b[10] * this[2] + b[0] * this[3] - b[13] * this[4] + b[14] * this[5] - b[16] * this[6] - b[1] * this[7] + b[19] * this[8] - b[20] * this[9] - b[2] * this[10] + b[22] * this[11] - b[23] * this[12] + b[4] * this[13] - b[5] * this[14] + b[25] * this[15] - b[6] * this[16] + b[26] * this[17] - b[27] * this[18] + b[8] * this[19] - b[9] * this[20] + b[29] * this[21] + b[11] * this[22] - b[12] * this[23] + b[30] * this[24] + b[15] * this[25] - b[17] * this[26] + b[18] * this[27] - b[31] * this[28] - b[21] * this[29] - b[24] * this[30] - b[28] * this[31];
+            target[ 4] = b[4] * this[0] + b[8] * this[1] + b[11] * this[2] + b[13] * this[3] + b[0] * this[4] + b[15] * this[5] - b[17] * this[6] - b[19] * this[7] - b[1] * this[8] - b[21] * this[9] - b[22] * this[10] - b[2] * this[11] - b[24] * this[12] - b[3] * this[13] - b[25] * this[14] - b[5] * this[15] - b[26] * this[16] - b[6] * this[17] - b[28] * this[18] - b[7] * this[19] - b[29] * this[20] - b[9] * this[21] - b[10] * this[22] - b[30] * this[23] - b[12] * this[24] - b[14] * this[25] + b[16] * this[26] + b[31] * this[27] + b[18] * this[28] + b[20] * this[29] + b[23] * this[30] + b[27] * this[31];
+            target[ 5] = b[5] * this[0] + b[9] * this[1] + b[12] * this[2] + b[14] * this[3] + b[15] * this[4] + b[0] * this[5] - b[18] * this[6] - b[20] * this[7] - b[21] * this[8] - b[1] * this[9] - b[23] * this[10] - b[24] * this[11] - b[2] * this[12] - b[25] * this[13] - b[3] * this[14] - b[4] * this[15] - b[27] * this[16] - b[28] * this[17] - b[6] * this[18] - b[29] * this[19] - b[7] * this[20] - b[8] * this[21] - b[30] * this[22] - b[10] * this[23] - b[11] * this[24] - b[13] * this[25] + b[31] * this[26] + b[16] * this[27] + b[17] * this[28] + b[19] * this[29] + b[22] * this[30] + b[26] * this[31];
+            target[ 6] = b[6] * this[0] + b[16] * this[3] + b[17] * this[4] - b[18] * this[5] + b[0] * this[6] - b[26] * this[13] + b[27] * this[14] + b[28] * this[15] + b[3] * this[16] + b[4] * this[17] - b[5] * this[18] + b[31] * this[25] - b[13] * this[26] + b[14] * this[27] + b[15] * this[28] + b[25] * this[31];
+            target[ 7] = b[7] * this[0] - b[16] * this[2] + b[19] * this[4] - b[20] * this[5] + b[0] * this[7] + b[26] * this[11] - b[27] * this[12] + b[29] * this[15] - b[2] * this[16] + b[4] * this[19] - b[5] * this[20] - b[31] * this[24] + b[11] * this[26] - b[12] * this[27] + b[15] * this[29] - b[24] * this[31];
+            target[ 8] = b[8] * this[0] - b[17] * this[2] - b[19] * this[3] - b[21] * this[5] + b[0] * this[8] - b[26] * this[10] - b[28] * this[12] - b[29] * this[14] - b[2] * this[17] - b[3] * this[19] - b[5] * this[21] + b[31] * this[23] - b[10] * this[26] - b[12] * this[28] - b[14] * this[29] + b[23] * this[31];
+            target[ 9] = b[9] * this[0] - b[18] * this[2] - b[20] * this[3] - b[21] * this[4] + b[0] * this[9] - b[27] * this[10] - b[28] * this[11] - b[29] * this[13] - b[2] * this[18] - b[3] * this[20] - b[4] * this[21] + b[31] * this[22] - b[10] * this[27] - b[11] * this[28] - b[13] * this[29] + b[22] * this[31];
             target[10] = b[10] * this[0] + b[16] * this[1] + b[22] * this[4] - b[23] * this[5] - b[26] * this[8] + b[27] * this[9] + b[0] * this[10] + b[30] * this[15] + b[1] * this[16] + b[31] * this[21] + b[4] * this[22] - b[5] * this[23] - b[8] * this[26] + b[9] * this[27] + b[15] * this[30] + b[21] * this[31];
             target[11] = b[11] * this[0] + b[17] * this[1] - b[22] * this[3] - b[24] * this[5] + b[26] * this[7] + b[28] * this[9] + b[0] * this[11] - b[30] * this[14] + b[1] * this[17] - b[31] * this[20] - b[3] * this[22] - b[5] * this[24] + b[7] * this[26] + b[9] * this[28] - b[14] * this[30] - b[20] * this[31];
             target[12] = b[12] * this[0] + b[18] * this[1] - b[23] * this[3] - b[24] * this[4] + b[27] * this[7] + b[28] * this[8] + b[0] * this[12] - b[30] * this[13] + b[1] * this[18] - b[31] * this[19] - b[3] * this[23] - b[4] * this[24] + b[7] * this[27] + b[8] * this[28] - b[13] * this[30] - b[19] * this[31];
@@ -345,6 +571,7 @@ function initCga() {
         `123`, `12p`, `12m`, `13p`, `13m`, `1pm`, `23p`, `23m`, `2pm`, `3pm`,  //lines starts at [16]
         `123p`, `123m`, `12pm`, `13pm`, `23pm`,
         `I`]
+    
 
     Cga.indexGrades = [
         0,                    // CGA           4D HPGA
@@ -352,7 +579,7 @@ function initCga() {
         2,2,2,2,2,2,2,2,2,2,  //circle         plane
         3,3,3,3,3,3,3,3,3,3,  //point pair     line
         4,4,4,4,4,            //point          point
-        5
+        5   
     ]
 
     Cga.onesWithMinus
@@ -391,43 +618,53 @@ function initCga() {
     // log(allNames)
 
 
-    e1c = new Cga().fromFloatAndIndex(1., 1)
-    e2c = new Cga().fromFloatAndIndex(1., 2)
-    e3c = new Cga().fromFloatAndIndex(1., 3)
     ep = new Cga().fromFloatAndIndex(1., 4)
     em = new Cga().fromFloatAndIndex(1., 5) //not modelling, but minus
 
-    e12c = e1c.mul(e2c)
-    e23c = e2c.mul(e3c)
-    e13c = e1c.mul(e3c)
-    e123c = e12c.mul(e3c)
+    //pga things
+    {
+        e1c = new Cga().fromFloatAndIndex(1., 1)
+        e2c = new Cga().fromFloatAndIndex(1., 2)
+        e3c = new Cga().fromFloatAndIndex(1., 3)
+        e0c   = ep.add(em)
 
-    ep1 = ep.mul(e1c)
-    ep2 = ep.mul(e2c)
-    ep3 = ep.mul(e3c)
-    epm = ep.mul(em)
-    em1 = em.mul(e1c)
-    em2 = em.mul(e2c)
+        e12c  = e1c.mul(e2c)
+        e23c  = e2c.mul(e3c)
+        e13c  = e1c.mul(e3c)
+        
+        e01c  = e0c.mul(e1c)
+        e02c  = e0c.mul(e2c)
+        e03c  = e0c.mul(e3c)
+        
+        e123c = e12c.mul(e3c)
+        e012c = e0c.mul(e12c)
+        e023c = e0c.mul(e23c)
+        e013c = e0c.mul(e13c)
+        e031c = e03c.mul(e1c)
 
-    epm1 = epm.mul(e1c)
-    epm2 = epm.mul(e2c)
-    ep12 = ep.mul(e12c)
-    em12 = em.mul(e12c)
-    epm12 = epm.mul(e12c)
+        e0123c = e01c.mul(e23c)
+    }
+
+    //unit great circles
+    e1p = e1c.mul(ep)
+    e2p = e2c.mul(ep)
+    e3p = e3c.mul(ep)
 
     //alternative name is eo. Looks kinda cooler and we are doing lots of Conformal GA
+    //zero-radius-sphere at the origin
     eo = ep.sub(em).multiplyScalar(0.5)
+    
+    //scalings
+    epm = ep.mul(em)  //from infinity toward origin
+    e1m = e1c.mul(em) //from unit sphere pole to other unit sphere pole
+    e2m = e2c.mul(em)
+    e3m = e3c.mul(em)
 
-    e0c = ep.add(em)
-    e01c = e0c.mul(e1c)
-    e02c = e0c.mul(e2c)
-    e03c = e0c.mul(e3c)
-    e012c = e0c.mul(e12c)
-    e023c = e0c.mul(e23c)
-    e013c = e0c.mul(e13c)
-    e031c = e03c.mul(e1c)
-
-    e0123c = e01c.mul(e23c)
+    e123p = e123c.mul(ep) //conformal or rotate -> conformal-and-rotate
+    e123m = e123c.mul(em) //conformal or scale -> conformal-and-scale
+    e12pm = e12c.mul(epm)
+    e23pm = e23c.mul(epm)
+    e13pm = e13c.mul(epm)
 
     cga0 = new Cga()
     cga1 = new Cga()
