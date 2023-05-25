@@ -65,7 +65,7 @@ function initCgaVizes() {
 
     //vNormal
 
-    let sphereGeo = new THREE.IcosahedronGeometry(1.,11)
+    let sphereGeo = new THREE.IcosahedronGeometry(1., 4)
     // sphereGeo.translate(1.,0.,0.)
     class SphereViz extends THREE.Mesh {
         constructor() {
@@ -81,36 +81,19 @@ function initCgaVizes() {
     }
     window.SphereViz = SphereViz
 
-    let mrh = new SphereViz()
-    // mrh.sphere[4] = 1.
-    // log(mrh.sphere)
+    let mySphere = new SphereViz()
+    // mySphere.sphere[4] = 1.
+    // log(mySphere.sphere)
 
     //ep2 + e02
 
     
 
     let ourCircle = e1p.convert( new Circle() )
-    let startingPt = new Cga().up(0.,0.,0.)
-    let old = .1
     let multiple = .1
-    mrh.onBeforeRender = () => {
-        multiple = 1.5 + .001 * frameCount
-        
+    mySphere.onBeforeRender = () => {
+        multiple = .004 * frameCount
         ourCircle.exp(mat.spinor, multiple )
-        
-        old = debugSphere.position.x
-        mat.spinor.convert(new Cga()).sandwich(startingPt).down(debugSphere.position.set(0., 1., 0.))
-        if ((old < 0.) !== (debugSphere.position.x < 0.))
-            log("yo")
-        mat.spinor.log("spinor",5)
-
-
-        mrh.position.y = 100.
-
-        // debugSphere.position.set(0., 1., 0.)
-
-        // log(.001 * frameCount * TAU)
-        // mat.spinor.log()
     }
 
     // debugger
@@ -119,8 +102,72 @@ function initCgaVizes() {
 
     
 
-    // let otherMat = new THREE.MeshPhongMaterial({ color: 0x00FF00 })
-    // let foo = new THREE.Mesh(sphereGeo,otherMat)
-    // foo.position.y = 1.9
-    // scene.add(foo)
+    return
+
+    ppToVec3s = (pp, v1, v2) => {
+        //tortured appeal to hyperbolic PGA, but it should work
+        let imaginaryPtBetweenPts = e123p.projectOn(pp,cga0)
+        let directionTowardNullPt = em.meet(pp,cga1)
+
+        imaginaryPtBetweenPts.multiplyScalar( 1. / imaginaryPtBetweenPts[26] )
+        let currentEDistFromHyperbolicCenterSq = sq(imaginaryPtBetweenPts[27]) + sq(imaginaryPtBetweenPts[28]) + sq(imaginaryPtBetweenPts[29]) + sq(imaginaryPtBetweenPts[30])
+
+        directionTowardNullPt.multiplyScalar(Math.sqrt(
+            (1 - currentEDistFromHyperbolicCenterSq) / 
+            (sq(imaginaryPtBetweenPts[27]) + sq(imaginaryPtBetweenPts[28]) + sq(imaginaryPtBetweenPts[29]) + sq(imaginaryPtBetweenPts[30]))) )
+
+        imaginaryPtBetweenPts.add(directionTowardNullPt, cga2).down(v1)
+        imaginaryPtBetweenPts.sub(directionTowardNullPt, cga2).down(v2)
+    }
+
+    let pointGeo = new THREE.IcosahedronGeometry(.03,2)
+    let pointMat = new THREE.MeshPhongMaterial( { color:0x000000 } )
+    class PpViz extends THREE.Group {
+        constructor() {
+            super()
+
+            this.meshes = Array(2)
+            for(let i = 0; i < 2; ++i) {
+                this.meshes[i] = new THREE.Mesh(pointGeo, pointMat) //trivially instanceable
+                scene.add(this.meshes[i])
+            }
+
+            this.cga = new Cga()
+
+            this.meshes[0].onBeforeRender = () => {
+                ppToVec3s(this.cga, this.meshes[0].position, this.meshes[1].position)
+            }
+        }
+    }
+    window.PpViz = PpViz
+
+    let mrh = new PpViz()
+    ep.meet(e13c, mrh.cga)
+    // mrh.meshes[0].position.set(0.4, 1.6, 0.)
+    // mrh.meshes[1].position.set(0.7, 1.6, 0.)
+
+    // class PointViz extends THREE.Mesh {
+    //     constructor() {
+    //         super(pointGeo,pointMat)
+    //         scene.add(this)
+
+    //         this.cga = new Cga()
+    //     }
+
+    //     onBeforeRender() {
+    //         // ppToVec3s(this.cga, this.meshes[0].position, this.meshes[1].position)
+    //         cga0.fromEga(mousePlanePosition).meet(eo,this.cga)
+            
+    //         this.cga.down(this.position)
+    //         // log(this.cga)
+
+    //         //could use mouseRay as CGA, intersect it with the mouseplane
+
+    //         //just think of the lasenby formula as zero-radius circles dude
+    //     }
+    // }
+    // window.PointViz = PointViz
+
+    // let mrh = new PointViz()
+    // mrh.cga.up(.4,1.6,0.)
 }

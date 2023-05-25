@@ -109,6 +109,15 @@ function initEgaWithoutDeclarations() {
             super(8)
         }
 
+        ptToPt(x1,y1,z1,x2,y2,z2) {
+            this[0] = 1.
+            this[1] = (x2 - x1) * .5
+            this[2] = (y2 - y1) * .5
+            this[3] = (z2 - z1) * .5
+            this[4] = 0.; this[5] = 0.; this[6] = 0.; this[7] = 0.;
+            return this
+        }
+
         logarithm(r) {
             // if (r[0] == 1.) 
             //     return bivector(r[1], r[2], r[3], 0., 0., 0.);

@@ -175,28 +175,66 @@ function initCga() {
             super(32)
         }
 
-        up(x,y,z) {
-            this.copy(zeroCga)
+        projectOn(toBeProjectedOn, target) {
+            if (target === undefined)
+                target = new Cga()
 
-            let xSquared = x * x + y * y + z * z
-            this[26] = -0.5 - 0.5 * xSquared // e123p
-            this[27] =  0.5 - 0.5 * xSquared // e123m
-            this[28] =  z
-            this[29] = -y
-            this[30] =  x
+            this.inner(toBeProjectedOn, localCga0)
+            toBeProjectedOn.reverse(localCga1)
+            localCga0.mul(localCga1, target)
+
+            return target
+        }
+
+        //an interesting function intended for zero-radius spheres that also works for ordinary spheres
+        downSphere(targetVec3) {
+
+            if (targetVec3 === undefined)
+                targetVec3 = new THREE.Vector3()
+
+            let pp = this.meet(e0c, localCga0).dual(localCga1)
+            pp.toEga( ega6 ).pointToVec3(targetVec3)
+
+            return targetVec3
+        }
+
+        upPt(x,y,z) {
+            //heavy-duty version that can be used to verify the consistency of the below
+            // let cgaTranslator = localCga2.fromEga(dq0.ptToPt(0., 0., 0., x, y, z).convert(ega5))
+            // return cgaTranslator.sandwich(eOri, this)
+
+            this.zero()
+            let lengthSq = x * x + y * y + z * z
+            this[26] = .5*lengthSq + .5
+            this[27] = .5*lengthSq - .5
+
+            this[28] = -z
+            this[29] =  y
+            this[30] = -x
 
             return this
         }
         down(targetVec3) {
+
             if (targetVec3 === undefined)
                 targetVec3 = new THREE.Vector3()
 
-            let xSquaredDesired = -(this[26] + this[27])
-            let xSquaredCurrent = this[28] * this[28] + this[29] * this[29] + this[30] * this[30]
-            let factor = Math.sqrt( xSquaredDesired / xSquaredCurrent )
-            targetVec3.z =  this[28] * factor
-            targetVec3.y = -this[29] * factor
-            targetVec3.x =  this[30] * factor
+            let lambda = 1./(this[26]-this[27])
+
+            let _26 = lambda * this[26]; let _27 = lambda * this[27]; let _28 = lambda * this[28]; let _29 = lambda * this[29]; let _30 = lambda * this[30]
+
+            let lengthSqDesired = _26 + _27 //basically w right?
+            let lengthSqCurrent = _28 * _28 + _29 * _29 + _30 * _30
+            let ratio = lengthSqDesired / lengthSqCurrent
+            // if (lengthSqCurrent === 0. || ratio < 0.) {
+            //     console.error("unable to down, ratio is ", lengthSqDesired / xSquaredCurrent)
+            //     return targetVec3
+            // }
+
+            let factor = Math.sqrt( ratio )
+            targetVec3.z = -_28 * factor
+            targetVec3.y =  _29 * factor
+            targetVec3.x = -_30 * factor
 
             return targetVec3
         }
@@ -522,6 +560,10 @@ function initCga() {
             return target;
         }
 
+        innerSelfScalar() {
+            return this[0] * this[0] + this[1] * this[1] + this[2] * this[2] + this[3] * this[3] + this[4] * this[4] - this[5] * this[5] - this[6] * this[6] - this[7] * this[7] - this[8] * this[8] + this[9] * this[9] - this[10] * this[10] - this[11] * this[11] + this[12] * this[12] - this[13] * this[13] + this[14] * this[14] + this[15] * this[15] - this[16] * this[16] - this[17] * this[17] + this[18] * this[18] - this[19] * this[19] + this[20] * this[20] + this[21] * this[21] - this[22] * this[22] + this[23] * this[23] + this[24] * this[24] + this[25] * this[25] + this[26] * this[26] - this[27] * this[27] - this[28] * this[28] - this[29] * this[29] - this[30] * this[30] - this[31] * this[31]
+        }
+
         mul(b, target) {
             if (target === undefined)
                 target = new Cga()
@@ -653,6 +695,8 @@ function initCga() {
     //alternative name is eo. Looks kinda cooler and we are doing lots of Conformal GA
     //zero-radius-sphere at the origin
     eo = ep.sub(em).multiplyScalar(0.5)
+    eInf = e0c.dual()
+    eOri = eo.dual()
     
     //scalings
     epm = ep.mul(em)  //from infinity toward origin
@@ -681,8 +725,6 @@ function initCga() {
     let localCga4 = new Cga()
     let localCga5 = new Cga()
     let localCga6 = new Cga()
-
-    
 
     /*END*/
 }

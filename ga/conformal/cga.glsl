@@ -36,17 +36,19 @@ vec3 sandwichSpinorPoint(in float[16] spinor, in vec3 pointVec ) {
     //nonzero indices: 0,   6,7,8,9,10,11,12,13,14,15,    26,27,28,29,30
 
     // see "A Covariant approach to geometry". We're not bothering with the scalar factor
-    // x + 0.5(x^2)*(       n      ) - 0.5(     nBar    ) 
+    //so, because we're plane-based, when you dualize you get an extra minus sign
+    //So: !e0c is -e123p-e123m, check it!
+    // x + 0.5(x^2)*(    e_inf     ) - 0.5(   e_orig    )   //n is point at inf, 
     // x + 0.5(x^2)*(   !(ep+em)   ) - 0.5(  !(ep-em)   ) 
     // x + 0.5(x^2)*(-e123p - e123m) - 0.5(e123p - e123m)
     // x + e123p*(-0.5(x^2) -0.5)  +  e123m*(-0.5(x^2) + 0.5)
 
     float xSquared = pointVec.x*pointVec.x + pointVec.y*pointVec.y + pointVec.z*pointVec.z;
-    float point_26 = -0.5 - 0.5*xSquared; // e123p
-    float point_27 =  0.5 - 0.5*xSquared; // e123m
-    float point_28 =  pointVec.z;
-    float point_29 = -pointVec.y;
-    float point_30 =  pointVec.x;
+    float point_26 = .5*xSquared + .5; // e123p
+    float point_27 = .5*xSquared - .5; // e123m
+    float point_28 = -pointVec.z;
+    float point_29 =  pointVec.y;
+    float point_30 = -pointVec.x;
 
     float[16] inte; //intermediate. It's a spinor too
 
@@ -82,14 +84,17 @@ vec3 sandwichSpinorPoint(in float[16] spinor, in vec3 pointVec ) {
                  + sr[ 4] * inte[ 8] - sr[ 3] * inte[ 9] + sr[ 2] * inte[10] + sr[ 7] * inte[11] - sr[ 6] * inte[12] + sr[ 5] * inte[13] + sr[ 0] * inte[14] - sr[ 1] * inte[15];
     float ret_30 = sr[15] * inte[ 0] - sr[14] * inte[ 1] + sr[13] * inte[ 2] - sr[12] * inte[ 3] + sr[11] * inte[ 4] + sr[10] * inte[ 5] - sr[ 9] * inte[ 6] + sr[ 8] * inte[ 7]
                  + sr[ 7] * inte[ 8] - sr[ 6] * inte[ 9] + sr[ 5] * inte[10] - sr[ 4] * inte[11] + sr[ 3] * inte[12] - sr[ 2] * inte[13] + sr[ 1] * inte[14] + sr[ 0] * inte[15];
-    
-    float xSquaredDesired = -(ret_26+ret_27);
+
+    float lambda = 1./(ret_26-ret_27);
+    ret_26 *= lambda; ret_27 *= lambda; ret_28 *= lambda; ret_29 *= lambda; ret_30 *= lambda;
+     
+    float xSquaredDesired = ret_26+ret_27;
     float xSquaredCurrent = ret_28*ret_28 + ret_29*ret_29 + ret_30*ret_30;
     float factor = sqrt( xSquaredDesired / xSquaredCurrent );
     vec3 ret;
-    ret.z =  ret_28 * factor;
-    ret.y = -ret_29 * factor;
-    ret.x =  ret_30 * factor;
+    ret.z = -ret_28 * factor;
+    ret.y =  ret_29 * factor;
+    ret.x = -ret_30 * factor;
 
     return ret;
 }
