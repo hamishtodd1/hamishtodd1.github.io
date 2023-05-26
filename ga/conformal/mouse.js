@@ -1,6 +1,6 @@
 function initMouse() {
 
-    let mouseRay = new Ega()
+    mouseRay = new Ega()
     let mouseRayOld = new Ega()
 
     let raycaster = new THREE.Raycaster()

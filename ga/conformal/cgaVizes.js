@@ -20,9 +20,12 @@ function initCgaVizes() {
     //     return -b-sqrt( h );
     // }\n`
 
+    new THREE.TextureLoader().load(`data/bourke.jpg`,(tex)=>{
+        mat.map = tex
+        mat.needsUpdate = true
+    })
 
-
-    let mat = new THREE.MeshPhong2Material({ color: 0xFF0000, side: THREE.DoubleSide })
+    let mat = new THREE.MeshPhong2Material({ side: THREE.DoubleSide })
 
     mat.injections = [
         {
@@ -61,20 +64,16 @@ function initCgaVizes() {
             precedes: ``,
             str: `uniform float[16] spinor;\n`
         }
+        //vNormal
     ]
 
-    //vNormal
 
-    let sphereGeo = new THREE.IcosahedronGeometry(1., 4)
-    // sphereGeo.translate(1.,0.,0.)
+    let sphereGeo = new THREE.IcosahedronGeometry(1., 5)
     class SphereViz extends THREE.Mesh {
         constructor() {
             super(sphereGeo, mat)
             this.sphere = new Sphere()
-            
-            scene.add(this)
-
-            //do it in terms of position and scale, fuck it
+            // scene.add(this)
 
             //some kind of instancing would be better but not clear how to get your spinor in there
         }
@@ -92,32 +91,23 @@ function initCgaVizes() {
     let ourCircle = e1p.convert( new Circle() )
     let multiple = .1
     mySphere.onBeforeRender = () => {
-        multiple = .004 * frameCount
+        multiple = .001 * frameCount
         ourCircle.exp(mat.spinor, multiple )
     }
 
-    // debugger
-    // let test = ep1.convert(new Circle()).exp(new Spinor(), 0.126 * TAU)
-    // log(test.convert(new Cga()).sandwich(startingPt).down())
-
-    
-
-    return
-
     ppToVec3s = (pp, v1, v2) => {
         //tortured appeal to hyperbolic PGA, but it should work
-        let imaginaryPtBetweenPts = e123p.projectOn(pp,cga0)
         let directionTowardNullPt = em.meet(pp,cga1)
-
+        directionTowardNullPt.multiplyScalar( 1. / Math.sqrt(sq(directionTowardNullPt[27]) + sq(directionTowardNullPt[28]) + sq(directionTowardNullPt[29]) + sq(directionTowardNullPt[30])))
+        
+        let imaginaryPtBetweenPts = e123p.projectOn(pp,cga0)
         imaginaryPtBetweenPts.multiplyScalar( 1. / imaginaryPtBetweenPts[26] )
+        
         let currentEDistFromHyperbolicCenterSq = sq(imaginaryPtBetweenPts[27]) + sq(imaginaryPtBetweenPts[28]) + sq(imaginaryPtBetweenPts[29]) + sq(imaginaryPtBetweenPts[30])
+        directionTowardNullPt.multiplyScalar(Math.sqrt( (1. - currentEDistFromHyperbolicCenterSq) ) )
 
-        directionTowardNullPt.multiplyScalar(Math.sqrt(
-            (1 - currentEDistFromHyperbolicCenterSq) / 
-            (sq(imaginaryPtBetweenPts[27]) + sq(imaginaryPtBetweenPts[28]) + sq(imaginaryPtBetweenPts[29]) + sq(imaginaryPtBetweenPts[30]))) )
-
-        imaginaryPtBetweenPts.add(directionTowardNullPt, cga2).down(v1)
-        imaginaryPtBetweenPts.sub(directionTowardNullPt, cga2).down(v2)
+        imaginaryPtBetweenPts.add(directionTowardNullPt, cga2).downPt(v1)
+        imaginaryPtBetweenPts.sub(directionTowardNullPt, cga2).downPt(v2)
     }
 
     let pointGeo = new THREE.IcosahedronGeometry(.03,2)
@@ -158,7 +148,7 @@ function initCgaVizes() {
     //         // ppToVec3s(this.cga, this.meshes[0].position, this.meshes[1].position)
     //         cga0.fromEga(mousePlanePosition).meet(eo,this.cga)
             
-    //         this.cga.down(this.position)
+    //         this.cga.downPt(this.position)
     //         // log(this.cga)
 
     //         //could use mouseRay as CGA, intersect it with the mouseplane

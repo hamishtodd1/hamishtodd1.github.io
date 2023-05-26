@@ -214,27 +214,34 @@ function initCga() {
 
             return this
         }
-        down(targetVec3) {
+        downPt(targetVec3,hack) {
 
             if (targetVec3 === undefined)
                 targetVec3 = new THREE.Vector3()
 
-            let lambda = 1./(this[26]-this[27])
+            let lambda = 1./(this[26]-this[27]) //will be infinity if you're on plane at infinity
 
             let _26 = lambda * this[26]; let _27 = lambda * this[27]; let _28 = lambda * this[28]; let _29 = lambda * this[29]; let _30 = lambda * this[30]
 
             let lengthSqDesired = _26 + _27 //basically w right?
             let lengthSqCurrent = _28 * _28 + _29 * _29 + _30 * _30
-            let ratio = lengthSqDesired / lengthSqCurrent
-            // if (lengthSqCurrent === 0. || ratio < 0.) {
-            //     console.error("unable to down, ratio is ", lengthSqDesired / xSquaredCurrent)
-            //     return targetVec3
-            // }
 
-            let factor = Math.sqrt( ratio )
-            targetVec3.z = -_28 * factor
-            targetVec3.y =  _29 * factor
-            targetVec3.x = -_30 * factor
+            // if()
+
+            let factor = 0.
+            if ( lengthSqDesired !== 0.) {
+                if(lengthSqCurrent === 0.)
+                    factor = 1. //already what you want
+                else
+                    factor = Math.sign(lengthSqDesired) * Math.sign(lengthSqCurrent) * Math.sqrt( Math.abs(lengthSqDesired) / Math.abs(lengthSqCurrent) )
+                if(hack)
+                    // log( _26, _27, _28, _29, _30 )
+                    log( lengthSqCurrent, lengthSqDesired )
+            }
+            
+            targetVec3.z = -_28
+            targetVec3.y =  _29
+            targetVec3.x = -_30
 
             return targetVec3
         }
