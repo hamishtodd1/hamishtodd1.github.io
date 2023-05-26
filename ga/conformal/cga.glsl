@@ -90,6 +90,7 @@ vec3 sandwichSpinorPoint(in float[16] spinor, in vec3 pointVec ) {
      
     float xSquaredDesired = ret_26+ret_27;
     float xSquaredCurrent = ret_28*ret_28 + ret_29*ret_29 + ret_30*ret_30;
+    //in some mathematical sense you should probably give up at this stage. That's a scary prospect for a mesh tho
     float factor = sqrt( xSquaredDesired / xSquaredCurrent );
     vec3 ret;
     ret.z = -ret_28 * factor;

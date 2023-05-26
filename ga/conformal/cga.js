@@ -214,34 +214,28 @@ function initCga() {
 
             return this
         }
-        downPt(targetVec3,hack) {
+        downPt(targetVec3) {
 
             if (targetVec3 === undefined)
                 targetVec3 = new THREE.Vector3()
 
-            let lambda = 1./(this[26]-this[27]) //will be infinity if you're on plane at infinity
+            //if it's not null, or it's the point at infinity
+            targetVec3.set(999., 999., 999.)
 
-            let _26 = lambda * this[26]; let _27 = lambda * this[27]; let _28 = lambda * this[28]; let _29 = lambda * this[29]; let _30 = lambda * this[30]
+            if (this[26] - this[27] !== 0.) {
+                let lambda = 1. / (this[26] - this[27]) //will be infinity if you're on plane at infinity
 
-            let lengthSqDesired = _26 + _27 //basically w right?
-            let lengthSqCurrent = _28 * _28 + _29 * _29 + _30 * _30
+                let _26 = lambda * this[26]; let _27 = lambda * this[27]; let _28 = lambda * this[28]; let _29 = lambda * this[29]; let _30 = lambda * this[30]
 
-            // if()
-
-            let factor = 0.
-            if ( lengthSqDesired !== 0.) {
-                if(lengthSqCurrent === 0.)
-                    factor = 1. //already what you want
-                else
-                    factor = Math.sign(lengthSqDesired) * Math.sign(lengthSqCurrent) * Math.sqrt( Math.abs(lengthSqDesired) / Math.abs(lengthSqCurrent) )
-                if(hack)
-                    // log( _26, _27, _28, _29, _30 )
-                    log( lengthSqCurrent, lengthSqDesired )
+                let lengthSqDesired = _26 + _27
+                let lengthSqCurrent = _28 * _28 + _29 * _29 + _30 * _30
+                if (Math.abs(lengthSqCurrent - lengthSqDesired) < .01) {
+                    //null point
+                    targetVec3.z = -_28
+                    targetVec3.y =  _29
+                    targetVec3.x = -_30
+                }
             }
-            
-            targetVec3.z = -_28
-            targetVec3.y =  _29
-            targetVec3.x = -_30
 
             return targetVec3
         }

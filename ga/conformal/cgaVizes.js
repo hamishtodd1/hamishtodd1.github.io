@@ -73,7 +73,7 @@ function initCgaVizes() {
         constructor() {
             super(sphereGeo, mat)
             this.sphere = new Sphere()
-            // scene.add(this)
+            scene.add(this)
 
             //some kind of instancing would be better but not clear how to get your spinor in there
         }
@@ -86,16 +86,16 @@ function initCgaVizes() {
 
     //ep2 + e02
 
-    
-
     let ourCircle = e1p.convert( new Circle() )
     let multiple = .1
     mySphere.onBeforeRender = () => {
-        multiple = .001 * frameCount
+        multiple = .01 * frameCount
         ourCircle.exp(mat.spinor, multiple )
     }
+    
 
-    ppToVec3s = (pp, v1, v2) => {
+
+    ppToVec3s = (pp, vec3A, vec3B) => {
         //tortured appeal to hyperbolic PGA, but it should work
         let directionTowardNullPt = em.meet(pp,cga1)
         directionTowardNullPt.multiplyScalar( 1. / Math.sqrt(sq(directionTowardNullPt[27]) + sq(directionTowardNullPt[28]) + sq(directionTowardNullPt[29]) + sq(directionTowardNullPt[30])))
@@ -106,8 +106,10 @@ function initCgaVizes() {
         let currentEDistFromHyperbolicCenterSq = sq(imaginaryPtBetweenPts[27]) + sq(imaginaryPtBetweenPts[28]) + sq(imaginaryPtBetweenPts[29]) + sq(imaginaryPtBetweenPts[30])
         directionTowardNullPt.multiplyScalar(Math.sqrt( (1. - currentEDistFromHyperbolicCenterSq) ) )
 
-        imaginaryPtBetweenPts.add(directionTowardNullPt, cga2).downPt(v1)
-        imaginaryPtBetweenPts.sub(directionTowardNullPt, cga2).downPt(v2)
+        //yes, one of them 
+        imaginaryPtBetweenPts.add(directionTowardNullPt, cga2).downPt(vec3A)
+        // log(cga2)
+        imaginaryPtBetweenPts.sub(directionTowardNullPt, cga2).downPt(vec3B)
     }
 
     let pointGeo = new THREE.IcosahedronGeometry(.03,2)
@@ -125,7 +127,15 @@ function initCgaVizes() {
             this.cga = new Cga()
 
             this.meshes[0].onBeforeRender = () => {
-                ppToVec3s(this.cga, this.meshes[0].position, this.meshes[1].position)
+                cga1.fromEga(mouseRay).meet(e3c,cga0)
+                log(cga0)
+                ppToVec3s(cga0, this.meshes[0].position, this.meshes[1].position)
+                this.meshes[0].position.y*=-1.
+                this.meshes[1].position.y*=-1.
+                this.meshes[0].position.x*=-1.
+                this.meshes[1].position.x*=-1.
+
+                // ppToVec3s(this.cga, this.meshes[0].position, this.meshes[1].position)
             }
         }
     }
