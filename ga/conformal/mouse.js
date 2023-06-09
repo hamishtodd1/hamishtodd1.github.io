@@ -1,6 +1,7 @@
 function initMouse() {
 
     mouseRay = new Ega()
+    mouseRay.copy(e12e)
     let mouseRayOld = new Ega()
 
     let raycaster = new THREE.Raycaster()
@@ -76,7 +77,7 @@ function initMouse() {
                 log("scaaaaale")
             }
             else {
-                mousePlanePosition.mul(mousePlanePositionOld, ega0).convert(mouseMvmt).sqrtSelf()
+                mousePlanePosition.mul(mousePlanePositionOld, ega0).cast(mouseMvmt).sqrtSelf()
                 mouseMvmt.multiplyScalar(-1.) //because negative scalar part causes bizarre alternation! So, hack!
                 grabbed.dq.prepend(mouseMvmt)
             }

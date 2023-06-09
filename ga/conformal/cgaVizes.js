@@ -1,5 +1,8 @@
 /*
-
+    with the mouse, you do 2D CGA in a plane?
+        place circles that are point pairs
+        place spheres that are circles
+        place points that 
 
     Fullscreen quad plan:
         ALL fragment shaders both check against depth buffer and write to depth buffer
@@ -7,7 +10,8 @@
         Full screen quad, all the spheres/planes go in. Hmm, how to intersect generally though...
  */
 
-function initCgaVizes() {
+
+async function initCgaVizes() {
     //transparency wise, maybe if you get things in the right order it's ok, since they're spheres?
 
     // `float sphIntersect( in vec3 ro, in vec3 rd, in vec3 ce, float ra )
@@ -20,100 +24,82 @@ function initCgaVizes() {
     //     return -b-sqrt( h );
     // }\n`
 
-    new THREE.TextureLoader().load(`data/bourke.jpg`,(tex)=>{
-        mat.map = tex
-        mat.needsUpdate = true
+    let bourkeTexture = null
+    await new Promise((resolve) => {
+        new THREE.TextureLoader().load(`data/bourke.jpg`, (tex) => {
+            bourkeTexture = tex
+            resolve()
+        })
     })
 
-    let mat = new THREE.MeshPhong2Material({ side: THREE.DoubleSide })
-
-    mat.injections = [
-        {
-            type: `fragment`,
-            precedes: ``,
-            str: `uniform float mrh;\n`
-        },
-        {
-            type: `fragment`,
-            precedes: `}`,
-            str: `gl_FragColor.b = gl_FragColor.b;\n`
-        },
+    let sphereMatInjections = [
         {
             type: `vertex`,
             precedes: `	#include <project_vertex>`,
             str: `
                 transformed = sandwichSpinorPoint( spinor, transformed );
-
-                // float[16] testSpinor;
-                // testSpinor[0] = 1.;
-                // // testSpinor[2] = 0.96;
-                // vec3 testVec = vec3(1.,0.,0.);
-                // float testResult = (sandwichSpinorPoint( testSpinor, testVec )).x;
-
-                // transformed.y += testResult;
                 \n`,
             //` transformed.y += 0.; vNormal.x += 0.;\n`
         },
         {
             type: `vertex`,
             precedes: ``,
-            str: glslCga
-        },
-        {
-            type: `vertex`,
-            precedes: ``,
-            str: `uniform float[16] spinor;\n`
+            str: `uniform float[16] spinor;\n` + glslCga
         }
         //vNormal
     ]
 
-
     let sphereGeo = new THREE.IcosahedronGeometry(1., 5)
+    let renderedAsCga = new Cga()
     class SphereViz extends THREE.Mesh {
         constructor() {
-            super(sphereGeo, mat)
-            this.sphere = new Sphere()
-            scene.add(this)
+            
+            let mat = new THREE.MeshPhong2Material({ side: THREE.DoubleSide, map: bourkeTexture })
+            mat.injections = sphereMatInjections
 
-            //some kind of instancing would be better but not clear how to get your spinor in there
+            super( sphereGeo, mat )
+            scene.add(this)
+            
+            this.sphere = new Sphere()
+        }
+
+        onBeforeRender() {
+            let radius = this.sphere.getRadius()
+            if( radius < 0.001)
+                this.visible = false
+            else 
+            {
+                //need to do something in the radius zero situation
+                // if(radius < .01) {
+                // }
+                
+                this.sphere.cast(renderedAsCga)
+                this.visible = true
+                ep.spinorTo(renderedAsCga, this.material.spinor )
+            }
+        }
+
+        getMv() {
+            return this.sphere
         }
     }
     window.SphereViz = SphereViz
 
-    let mySphere = new SphereViz()
-    // mySphere.sphere[4] = 1.
-    // log(mySphere.sphere)
-
-    //ep2 + e02
-
-    let ourCircle = e1p.convert( new Circle() )
-    let multiple = .1
-    mySphere.onBeforeRender = () => {
-        multiple = .01 * frameCount
-        ourCircle.exp(mat.spinor, multiple )
-    }
-    
-
-
-    ppToVec3s = (pp, vec3A, vec3B) => {
-        //tortured appeal to hyperbolic PGA, but it should work
-        let directionTowardNullPt = em.meet(pp,cga1)
-        directionTowardNullPt.multiplyScalar( 1. / Math.sqrt(sq(directionTowardNullPt[27]) + sq(directionTowardNullPt[28]) + sq(directionTowardNullPt[29]) + sq(directionTowardNullPt[30])))
-        
-        let imaginaryPtBetweenPts = e123p.projectOn(pp,cga0)
-        imaginaryPtBetweenPts.multiplyScalar( 1. / imaginaryPtBetweenPts[26] )
-        
-        let currentEDistFromHyperbolicCenterSq = sq(imaginaryPtBetweenPts[27]) + sq(imaginaryPtBetweenPts[28]) + sq(imaginaryPtBetweenPts[29]) + sq(imaginaryPtBetweenPts[30])
-        directionTowardNullPt.multiplyScalar(Math.sqrt( (1. - currentEDistFromHyperbolicCenterSq) ) )
-
-        //yes, one of them 
-        imaginaryPtBetweenPts.add(directionTowardNullPt, cga2).downPt(vec3A)
-        // log(cga2)
-        imaginaryPtBetweenPts.sub(directionTowardNullPt, cga2).downPt(vec3B)
-    }
+    // let ourCircle = e1p.cast( new Circle() )
+    // let sphere1 = new SphereViz()
+    // e1c.cast( sphere1.sphere )
+    // let sphere2 = new SphereViz()
+    // // ep.cast( sphere2.sphere )
+    // ourCircle.exp(sphere2.material.spinor, .75 )
+    // e1c.add(ep, cga0).cast(sphere2.sphere)
 
     let pointGeo = new THREE.IcosahedronGeometry(.03,2)
     let pointMat = new THREE.MeshPhongMaterial( { color:0x000000 } )
+    let p1 = new Cga(); p2 = new Cga()
+    let ppVizes = []
+    updatePpVizes = () => {
+        ppVizes.forEach(ppv => ppv.onBeforeRender())
+    }
     class PpViz extends THREE.Group {
         constructor() {
             super()
@@ -125,49 +111,189 @@ function initCgaVizes() {
             }
 
             this.cga = new Cga()
+            ep.meet(e23c,this.cga)
 
-            this.meshes[0].onBeforeRender = () => {
-                cga1.fromEga(mouseRay).meet(e3c,cga0)
-                log(cga0)
-                ppToVec3s(cga0, this.meshes[0].position, this.meshes[1].position)
-                this.meshes[0].position.y*=-1.
-                this.meshes[1].position.y*=-1.
-                this.meshes[0].position.x*=-1.
-                this.meshes[1].position.x*=-1.
+            ppVizes.push(this)
+        }
 
-                // ppToVec3s(this.cga, this.meshes[0].position, this.meshes[1].position)
-            }
+        onBeforeRender() {
+            this.meshes[0].visible = this.visible
+            this.meshes[1].visible = this.visible
+
+            this.cga.ppToConformalPoints(p1, p2)
+            p1.downPt(this.meshes[0].position)
+            p2.downPt(this.meshes[1].position)
         }
     }
     window.PpViz = PpViz
 
-    let mrh = new PpViz()
-    ep.meet(e13c, mrh.cga)
-    // mrh.meshes[0].position.set(0.4, 1.6, 0.)
-    // mrh.meshes[1].position.set(0.7, 1.6, 0.)
+    class ConformalPointViz extends THREE.Mesh {
+        constructor() {
+            super(pointGeo,pointMat)
+            scene.add(this)
 
-    // class PointViz extends THREE.Mesh {
-    //     constructor() {
-    //         super(pointGeo,pointMat)
-    //         scene.add(this)
+            this.cga = new Cga()
+        }
 
-    //         this.cga = new Cga()
-    //     }
+        onBeforeRender() {
+            this.cga.downPt(this.position)  
+        }
 
-    //     onBeforeRender() {
-    //         // ppToVec3s(this.cga, this.meshes[0].position, this.meshes[1].position)
-    //         cga0.fromEga(mousePlanePosition).meet(eo,this.cga)
+        getMv() {
+            return this.cga
+        }
+    }
+    window.ConformalPointViz = ConformalPointViz
+
+    //could have a ring geometry, displace the things
+    let circleGeo = new THREE.PlaneGeometry(1.,1.,63,5)
+    circleGeo.translate(.5,.5,0.)
+    circleGeo.scale(TAU,TAU,0.)
+    let circleMat = new THREE.MeshPhong2Material({ side: THREE.DoubleSide, color: 0xFF0000 })
+
+    let rodrigues = `
+        vec3 rodrigues(in vec3 v, in vec3 axis, float angle) {
+            float cosAngle = cos(angle);
+            float sinAngle = sin(angle);
+            return v * cosAngle + cross(axis, v) * sinAngle + axis * dot(axis,v) * (1.-cosAngle);
+        }
+    `
+
+    //you wanna send a vertex to the correct place and rotate them out from there
+
+
+    circleMat.injections = [
+        {
+            type: `vertex`,
+            precedes: `	#include <project_vertex>`,
+            str: `
+                //spinor needs to take the z unit circle to the place the circle is
+                float majorAngle = transformed.x;
+                float minorAngle = transformed.y;
+                float minorRadius = .02;
+                
+                vec3 center = vec3( cos(majorAngle     ), sin(majorAngle     ), 0. );
+                vec3 helper = vec3( cos(majorAngle+.001), sin(majorAngle+.001), 0. );
+                center = sandwichSpinorPoint( spinor, center );
+                helper = sandwichSpinorPoint( spinor, helper );
+                
+                //if this doesn't work, just use lineloop
+                vec3 axis = normalize( helper - center );
+                vec3 randomV = vec3( 0.40832, 0.59745, 0.25505 );
+                vec3 displacer = cross( randomV, axis );
+                displacer = rodrigues( displacer, axis, minorAngle );
+                vNormal = normalize( displacer );
+                
+                transformed = minorRadius * vNormal + center;
+                \n`,
+            //` transformed.y += 0.; vNormal.x += 0.;\n`
+        },
+        {
+            type: `vertex`,
+            precedes: ``,
+            str: `uniform float[16] spinor;\n` + glslCga + rodrigues
+        }
+    ]
+
+    
+    let cgaCircles = [new Cga(), new Cga()]
+    let spinorVizes = []
+    //this should be one of the last things in the frame that you call, ideally it'd be onBeforeRender
+    updateSpinorVizes = ()=>{
+        spinorVizes.forEach(sv=>sv.onBeforeRender())
+    }
+    class SpinorViz extends THREE.Object3D {
+        constructor() {
+            super()
+            scene.add(this)
+
+            spinorVizes.push(this)
+
+            this.circleMeshes = Array(2)
+            this.circleMeshes[0] = new THREE.Mesh(circleGeo, circleMat)
+            this.add(this.circleMeshes[0])
+            this.circleMeshes[1] = new THREE.Mesh(circleGeo, circleMat)
+            this.add(this.circleMeshes[1])
+
+            this.spinor = new Spinor()
+            this.spinor[0] = 1.
+        }
+
+        getMv() {
+            return this.spinor
+        }
+
+        onBeforeRender() {
+            // let circles = this.spinor.cast(circle0).decompose(cgaCircles[0], cgaCircles[1])
+            // cgaCircles[0].log()
             
-    //         this.cga.downPt(this.position)
-    //         // log(this.cga)
+            // if(frameCount === 2)debugger
+            this.spinor.cast(cga0).selectGrade(2, cgaCircles[0])
+            cgaCircles[1].copy(zeroCga)
 
-    //         //could use mouseRay as CGA, intersect it with the mouseplane
+            for (let i = 0; i < 2; ++i)
+                this.circleMeshes[i].visible = this.visible && !cgaCircles[i].equals(zeroCga)
 
-    //         //just think of the lasenby formula as zero-radius circles dude
-    //     }
+            for (let i = 0; i < 2; ++i) {
+                if ( this.circleMeshes[i].visible ) {
+                    // if (frameCount === 2)
+                    //     debugger
+                    e3p.spinorTo(cgaCircles[i], this.circleMeshes[i].material.spinor )
+                    // log(this.circleMeshes[i].material.spinor)
+
+                    //decomposition doesn't work
+                    //sqrt doesn't give you the right thing
+                }
+            }
+
+            // delete circles
+        }
+    }
+    window.SpinorViz = SpinorViz
+
+    // let test = e12c.add(e3p).cast(circle0)
+    // log(test.decompose())
+    //need to do some work on decomposing
+    // return
+
+    let numPts = 200
+    let cps = Array(numPts)
+    let size = 1.9
+    let initials = Array(numPts)
+    for(let i = 0; i < numPts; ++i) {
+        cps[i] = new ConformalPointViz()
+        // cps[i].cga.upPt(  )
+        initials[i] = new THREE.Vector3(
+            size * (Math.random() - .5), 1.6 + 
+            size * (Math.random() - .5), 
+            size * (Math.random() - .5) )
+    }
+
+    let ourSpinorViz = new SpinorViz()
+    // e3p.addScaled(e03c, -3.5, cga0).cast(ourSpinorViz.spinor)
+    
+    // let ourAxis = new Circle()
+    // e3p.add(e12c,cga0).cast(ourAxis)
+    // e13c.cast(ourAxis)
+    // e12c.cast(ourAxis)
+    // e3p.cast(ourAxis)
+    
+    // let smallSphereAtHeadHeight = cga0.upPt(0., 1.6, 0.).dual().sub(e0c, cga1)
+    // smallSphereAtHeadHeight.meet(e1c, cga2).cast(ourAxis)
+    // smallSphereAtHeadHeight.meet(e1c, cga2).log()
+    // blankFunction = () => {
+    //     ourAxis.exp( ourSpinorViz.spinor, .015 * frameCount)
+
+    //     // for(let i = 0; i < numPts; ++i ){
+    //     //     cga1.upPt(initials[i])
+    //     //     ourSpinorViz.spinor.sandwichConformalPoint( cga1, cps[i].cga )
+    //     // }
     // }
-    // window.PointViz = PointViz
 
-    // let mrh = new PointViz()
-    // mrh.cga.up(.4,1.6,0.)
+    
+
+    //currently we want to try out that linked-circles idea
+
+    // let mySpinor = new SpinorViz()
+    // e2p.cast(mySpinor.spinor)
 }

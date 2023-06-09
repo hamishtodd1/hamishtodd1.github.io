@@ -13,7 +13,15 @@ function getWhereThisWasCalledFrom(depth) {
 
 class Multivector extends Float32Array {
 
-    convert(target) {
+    isZero() {
+        let ret = true
+        for (let i = 0; i < this.constructor.size; ++i)
+            if(this[i] !== 0.)
+                ret = false
+        return ret
+    }
+
+    cast(target) {
         let targetIsSmaller = this.constructor.size > target.constructor.size
 
         if (targetIsSmaller) {
@@ -32,7 +40,14 @@ class Multivector extends Float32Array {
         return target
     }
 
-    selectGrade( desiredGrade, target ) {
+    selectGrade(desiredGrade, target) {
+        if(target === undefined)
+            target = new this.constructor()
+
+        //coooould combine "conversion"
+        if (target.constructor.size !== this.constructor.size)
+            console.error("type error at " + getWhereThisWasCalledFrom())
+        
         for (let i = 0; i < this.constructor.size; ++i) {
             if(this.constructor.indexGrades[i] === desiredGrade)
                 target[i] = this[i]
@@ -58,6 +73,9 @@ class Multivector extends Float32Array {
     }
         
     set() {
+        if (arguments.length !== this.constructor.size)
+            console.error("type error at " + getWhereThisWasCalledFrom())
+
         for (let i = 0, il = arguments.length; i < il; ++i)
             this[i] = arguments[i]
         return this
@@ -97,6 +115,8 @@ class Multivector extends Float32Array {
     }
 
     copy(v) {
+        if (v.constructor.size !== this.constructor.size)
+            console.error("type error at " + getWhereThisWasCalledFrom())
 
         if (v.constructor !== this.constructor)
             console.error("type error")
@@ -116,8 +136,8 @@ class Multivector extends Float32Array {
     }
 
     equals(v) {
-        if (v.constructor !== this.constructor)
-            console.error("type error")
+        if (v.constructor.size !== this.constructor.size)
+            console.error("type error at " + getWhereThisWasCalledFrom())
 
         let ret = true
         for (let i = 0; i < this.constructor.size; ++i) {
@@ -128,6 +148,9 @@ class Multivector extends Float32Array {
     }
 
     approxEquals(v) {
+        if (v.constructor.size !== this.constructor.size)
+            console.error("type error at " + getWhereThisWasCalledFrom())
+
         if (v.constructor !== this.constructor)
             console.error("type error")
 
@@ -157,6 +180,9 @@ class Multivector extends Float32Array {
     }
 
     add(v,target) {
+        if (v.constructor.size !== this.constructor.size)
+            console.error("type error at " + getWhereThisWasCalledFrom())
+
         if(target === undefined)
             target = new this.constructor()
 
@@ -168,6 +194,9 @@ class Multivector extends Float32Array {
         return target
     }
     sub(v, target) {
+        if (v.constructor.size !== this.constructor.size)
+            console.error("type error at " + getWhereThisWasCalledFrom())
+
         if (target === undefined)
             target = new this.constructor()
 
@@ -179,9 +208,12 @@ class Multivector extends Float32Array {
         return target
     }
 
-    addScaled(v, scale, target) { //want to add it to itself? Then specify itself!
+    addScaled(v, scale, target) { //by default, applies to itself
+        if (v.constructor.size !== this.constructor.size)
+            console.error("type error at " + getWhereThisWasCalledFrom())
+
         if(target === undefined)
-            target = new this.constructor()
+            target = this
         
         if (v.constructor !== this.constructor)
             console.error("type error")
@@ -205,7 +237,8 @@ class Multivector extends Float32Array {
                 // if (this.constructor.onesWithMinus.indexOf(this.constructor.basisNames[i]) !== -1)
                 //     sign = -1.
 
-                str += (sign * this[i]).toFixed(numDecimalPlaces) + (i !== 0 ? "e" : "") + this.constructor.basisNames[i]
+                let basisName = this.constructor.basisNames[i]
+                str += (sign * this[i]).toFixed(numDecimalPlaces) + (basisName === `` ? "" : "e") + basisName
             }
         }
 

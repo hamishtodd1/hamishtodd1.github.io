@@ -20,12 +20,73 @@ function initCga() {
         Circle: new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
     }
 
+    //not actually a circle, really a bivector
     class Circle extends Multivector {
         static get size() {return 10}
 
         constructor() {
             super(10)
         }
+
+        //THIS ISN'T WORKING
+        decompose(targetCga1,targetCga2) {
+            if (targetCga1 === undefined)
+                targetCga1 = new Cga()
+            if (targetCga2 === undefined)
+                targetCga2 = new Cga()
+
+            // debugger
+            let thisCga = this.cast(localCga0)
+
+            if(thisCga.equals(zeroCga)) {
+                return [thisCga.cast(targetCga1) ]
+            }
+
+            let thisSq = thisCga.mul(thisCga,localCga1)
+            let iss = thisSq[0]
+
+            if( thisSq.equals(zeroCga) ) {
+                //null, so either a translation or 0. If translation, just give back that one axis!
+                return [this.cast(targetCga1) ]
+            }
+
+            let thisWedgeThis = thisCga.meet(thisCga, localCga2) //study number?
+            let twtSq = thisWedgeThis.innerSelfScalar() //twt.mul(twt) is for-sure scalar. Apparently.
+            let discriminant = sq(iss) - twtSq
+            if(discriminant < 0.)
+                console.error("negative discriminant")
+            else if(discriminant === 0.) {
+                //this "Inverse" you're about to calculate is not a proper inverse
+                //the solution is unique...?
+                console.error(`zero discriminant`)
+            }
+            else {
+                let rightPart = Math.sqrt(discriminant)
+
+                let thisInverse = thisCga.inverse(localCga3)
+
+                localCga0.copy(thisWedgeThis).multiplyScalar(.5)
+                let lambda1 = .5 * (iss + rightPart)
+                localCga0[0] += lambda1
+                localCga0.mul(thisInverse, targetCga1)
+
+                if (rightPart === 0.) {
+                    //solution was unique
+                    return [targetCga1]
+                }
+                else {
+                    localCga0.copy(thisWedgeThis).multiplyScalar(.5)
+                    let lambda2 = .5 * (iss - rightPart)
+                    localCga0[0] += lambda2
+                    localCga0.mul(thisInverse, targetCga2)
+
+                    return [targetCga1, targetCga2]
+                }
+            }
+        }
+
+        // e12+e34
+        // 
 
         exp ( target, scalarMultiple ) {
             
@@ -114,6 +175,118 @@ function initCga() {
             this.isSpinor = true
         }
 
+        reverse(target) {
+            if(target === undefined)    
+                target = new Spinor()
+
+            target[ 0] =  this[ 0]
+            
+            target[ 1] = -this[ 1]
+            target[ 2] = -this[ 2]
+            target[ 3] = -this[ 3]
+            target[ 4] = -this[ 4]
+            target[ 5] = -this[ 5]
+            target[ 6] = -this[ 6]
+            target[ 7] = -this[ 7]
+            target[ 8] = -this[ 8]
+            target[ 9] = -this[ 9]
+            target[10] = -this[10]
+            
+            target[11] =  this[11]
+            target[12] =  this[12]
+            target[13] =  this[13]
+            target[14] =  this[14]
+            target[15] =  this[15]
+
+            return target
+        }
+
+        sandwichConformalPoint(point, target) { //both are cga's
+            if(target === undefined)
+                target = new Cga()
+
+            let inte = localSpinor0
+            inte[ 0] = + point[26] * this[11] - point[27] * this[12] - point[28] * this[13] - point[29] * this[14] - point[30] * this[15];
+            
+            inte[ 1] = - point[26] * this[ 8] + point[27] * this[ 9] + point[28] * this[10] - point[30] * this[14] + point[29] * this[15];
+            inte[ 2] = + point[26] * this[ 6] - point[27] * this[ 7] + point[29] * this[10] + point[30] * this[13] - point[28] * this[15];
+            inte[ 3] = - point[26] * this[ 5] - point[28] * this[ 7] - point[29] * this[ 9] - point[30] * this[12] + point[27] * this[15];
+            inte[ 4] = - point[27] * this[ 5] - point[28] * this[ 6] - point[29] * this[ 8] - point[30] * this[11] + point[26] * this[15];
+            inte[ 5] = - point[26] * this[ 3] + point[27] * this[ 4] + point[30] * this[10] - point[29] * this[13] + point[28] * this[14];
+            inte[ 6] = + point[26] * this[ 2] + point[28] * this[ 4] - point[30] * this[ 9] + point[29] * this[12] - point[27] * this[14];
+            inte[ 7] = + point[27] * this[ 2] + point[28] * this[ 3] - point[30] * this[ 8] + point[29] * this[11] - point[26] * this[14];
+            inte[ 8] = - point[26] * this[ 1] + point[29] * this[ 4] + point[30] * this[ 7] - point[28] * this[12] + point[27] * this[13];
+            inte[ 9] = - point[27] * this[ 1] + point[29] * this[ 3] + point[30] * this[ 6] - point[28] * this[11] + point[26] * this[13];
+            inte[10] = - point[28] * this[ 1] - point[29] * this[ 2] - point[30] * this[ 5] + point[27] * this[11] - point[26] * this[12];
+            
+            inte[11] =   point[26] * this[ 0] + point[30] * this[ 4] - point[29] * this[ 7] + point[28] * this[ 9] - point[27] * this[10];
+            inte[12] =   point[27] * this[ 0] + point[30] * this[ 3] - point[29] * this[ 6] + point[28] * this[ 8] - point[26] * this[10];
+            inte[13] =   point[28] * this[ 0] - point[30] * this[ 2] + point[29] * this[ 5] - point[27] * this[ 8] + point[26] * this[ 9];
+            inte[14] =   point[29] * this[ 0] + point[30] * this[ 1] - point[28] * this[ 5] + point[27] * this[ 6] - point[26] * this[ 7];
+            inte[15] =   point[30] * this[ 0] - point[29] * this[ 1] + point[28] * this[ 2] - point[27] * this[ 3] + point[26] * this[ 4];
+
+            // debugger
+            let sr = this.reverse( localSpinor1 )
+
+            inte.cast(new Cga()).mul(sr.cast(new Cga()), target)
+            
+
+            // target.zero()
+
+            // target[26] = sr[11] * inte[ 0] + sr[ 8] * inte[ 1] - sr[ 6] * inte[ 2] + sr[ 5] * inte[ 3] + sr[15] * inte[ 4] + sr[ 3] * inte[ 5] - sr[ 2] * inte[ 6] - sr[14] * inte[ 7]
+            //            + sr[ 1] * inte[ 8] + sr[13] * inte[ 9] - sr[12] * inte[10] + sr[ 0] * inte[11] + sr[10] * inte[12] - sr[ 9] * inte[13] + sr[ 7] * inte[14] - sr[ 4] * inte[15];
+            // target[27] = sr[12] * inte[ 0] + sr[ 9] * inte[ 1] - sr[ 7] * inte[ 2] + sr[15] * inte[ 3] + sr[ 5] * inte[ 4] + sr[ 4] * inte[ 5] - sr[14] * inte[ 6] - sr[ 2] * inte[ 7]
+            //            + sr[13] * inte[ 8] + sr[ 1] * inte[ 9] - sr[11] * inte[10] + sr[10] * inte[11] + sr[ 0] * inte[12] - sr[ 8] * inte[13] + sr[ 6] * inte[14] - sr[ 3] * inte[15];
+            // // log( sr, inte )
+            // target[28] = sr[13] * inte[ 0] + sr[10] * inte[ 1] - sr[15] * inte[ 2] - sr[ 7] * inte[ 3] + sr[ 6] * inte[ 4] + sr[14] * inte[ 5] + sr[ 4] * inte[ 6] - sr[ 3] * inte[ 7]
+            //            - sr[12] * inte[ 8] + sr[11] * inte[ 9] + sr[ 1] * inte[10] - sr[ 9] * inte[11] + sr[ 8] * inte[12] + sr[ 0] * inte[13] - sr[ 5] * inte[14] + sr[ 2] * inte[15];
+            // target[29] = sr[14] * inte[ 0] + sr[15] * inte[ 1] + sr[10] * inte[ 2] - sr[ 9] * inte[ 3] + sr[ 8] * inte[ 4] - sr[13] * inte[ 5] + sr[12] * inte[ 6] - sr[11] * inte[ 7]
+            //            + sr[ 4] * inte[ 8] - sr[ 3] * inte[ 9] + sr[ 2] * inte[10] + sr[ 7] * inte[11] - sr[ 6] * inte[12] + sr[ 5] * inte[13] + sr[ 0] * inte[14] - sr[ 1] * inte[15];
+            // target[30] = sr[15] * inte[ 0] - sr[14] * inte[ 1] + sr[13] * inte[ 2] - sr[12] * inte[ 3] + sr[11] * inte[ 4] + sr[10] * inte[ 5] - sr[ 9] * inte[ 6] + sr[ 8] * inte[ 7]
+            //            + sr[ 7] * inte[ 8] - sr[ 6] * inte[ 9] + sr[ 5] * inte[10] - sr[ 4] * inte[11] + sr[ 3] * inte[12] - sr[ 2] * inte[13] + sr[ 1] * inte[14] + sr[ 0] * inte[15];    
+
+            return target
+        }
+
+        normalize(target) {
+            var S = this[0] * this[0] - this[10] * this[10] + this[11] * this[11] - this[12] * this[12] - this[13] * this[13] - this[14] * this[14] - this[15] * this[15] + this[1] * this[1]
+                  + this[2] * this[2] + this[3] * this[3] - this[4] * this[4] + this[5] * this[5] + this[6] * this[6] - this[7] * this[7] + this[8] * this[8] - this[9] * this[9];
+            var T1 = 2 * (this[0] * this[11] - this[10] * this[12] + this[13] * this[9] - this[14] * this[7] + this[15] * this[4] - this[1] * this[8] + this[2] * this[6] - this[3] * this[5]);
+            var T2 = 2 * (this[0] * this[12] - this[10] * this[11] + this[13] * this[8] - this[14] * this[6] + this[15] * this[3] - this[1] * this[9] + this[2] * this[7] - this[4] * this[5]);
+            var T3 = 2 * (this[0] * this[13] - this[10] * this[1] + this[11] * this[9] - this[12] * this[8] + this[14] * this[5] - this[15] * this[2] + this[3] * this[7] - this[4] * this[6]);
+            var T4 = 2 * (this[0] * this[14] - this[10] * this[2] - this[11] * this[7] + this[12] * this[6] - this[13] * this[5] + this[15] * this[1] + this[3] * this[9] - this[4] * this[8]);
+            var T5 = 2 * (this[0] * this[15] - this[10] * this[5] + this[11] * this[4] - this[12] * this[3] + this[13] * this[2] - this[14] * this[1] + this[6] * this[9] - this[7] * this[8]);
+            var TT = -T1 * T1 + T2 * T2 + T3 * T3 + T4 * T4 + T5 * T5;
+            var N = Math.sqrt(Math.sqrt(S * S + TT) + S), N2 = N * N;
+            var ND = 2 ** .5 * N / (N2 * N2 + TT);
+            var C = N2 * ND, [D1, D2, D3, D4, D5] = [-T1 * ND, -T2 * ND, -T3 * ND, -T4 * ND, -T5 * ND];
+            target.set(
+                C * this[0] + D1 * this[11] - D2 * this[12] - D3 * this[13] - D4 * this[14] - D5 * this[15],
+                C * this[1] - D1 * this[8] + D2 * this[9] + D3 * this[10] - D4 * this[15] + D5 * this[14],
+                C * this[2] + D1 * this[6] - D2 * this[7] + D3 * this[15] + D4 * this[10] - D5 * this[13],
+                C * this[3] - D1 * this[5] - D2 * this[15] - D3 * this[7] - D4 * this[9] + D5 * this[12],
+                C * this[4] - D1 * this[15] - D2 * this[5] - D3 * this[6] - D4 * this[8] + D5 * this[11],
+                C * this[5] - D1 * this[3] + D2 * this[4] - D3 * this[14] + D4 * this[13] + D5 * this[10],
+                C * this[6] + D1 * this[2] + D2 * this[14] + D3 * this[4] - D4 * this[12] - D5 * this[9],
+                C * this[7] + D1 * this[14] + D2 * this[2] + D3 * this[3] - D4 * this[11] - D5 * this[8],
+                C * this[8] - D1 * this[1] - D2 * this[13] + D3 * this[12] + D4 * this[4] + D5 * this[7],
+                C * this[9] - D1 * this[13] - D2 * this[1] + D3 * this[11] + D4 * this[3] + D5 * this[6],
+                C * this[10] + D1 * this[12] - D2 * this[11] - D3 * this[1] - D4 * this[2] - D5 * this[5],
+                C * this[11] + D1 * this[0] + D2 * this[10] - D3 * this[9] + D4 * this[7] - D5 * this[4],
+                C * this[12] + D1 * this[10] + D2 * this[0] - D3 * this[8] + D4 * this[6] - D5 * this[3],
+                C * this[13] - D1 * this[9] + D2 * this[8] + D3 * this[0] - D4 * this[5] + D5 * this[2],
+                C * this[14] + D1 * this[7] - D2 * this[6] + D3 * this[5] + D4 * this[0] - D5 * this[1],
+                C * this[15] - D1 * this[4] + D2 * this[3] - D3 * this[2] + D4 * this[1] + D5 * this[0])
+
+            return target
+        }
+
+        sqrt(target) {
+            this.normalize(localSpinor1)
+            localSpinor1[0] += 1.
+            return localSpinor1.normalize(target)
+        }
+
         logarithm(R) {
             // B*B = S + T*e1234
             var S = R[0] * R[0] + R[11] * R[11] - R[12] * R[12] - R[13] * R[13] - R[14] * R[14] - R[15] * R[15] - 1
@@ -157,6 +330,11 @@ function initCga() {
         ``,
         `12`, `13`, `1p`, `1m`, `23`, `2p`, `2m`, `3p`, `3m`, `pm`,  //line start is [6]
         `123p`, `123m`, `12pm`, `13pm`, `23pm`]
+    Spinor.indexGrades = [
+        0,                    // CGA           4D HPGA
+        2,2,2,2,2,2,2,2,2,2,  //circle         plane
+        4,4,4,4,4,            //point          point
+    ]
 
     class Sphere extends Multivector {
         static get size() { return 5 }
@@ -164,15 +342,97 @@ function initCga() {
         constructor() {
             super(5)
         }
+
+        //upSphere is a special case
+        fromCenterAndRadius(x,y,z,r) {
+            let infFactor = 0.5 * (sq(x) + sq(y) + sq(z) - sq(r))
+
+            this[0] = x
+            this[1] = y
+            this[2] = z
+            this[3] =  0.5 + infFactor
+            this[4] = -0.5 + infFactor
+
+            return this
+        }
+
+        getRadius() {
+            // gonna assume this thing was created by taking a sphere created this way:
+            // x + eo + thingy * eInf
+            // and then multiplied by alpha
+
+            let overallScalar = this[3] - this[4]
+            if(overallScalar === 0.)
+                return Infinity //because it's a plane
+            else {
+                let radiusSq = 2. * (this[3] + this[4]) / overallScalar - ((sq(this[0]) + sq(this[1]) + sq(this[2])) / sq(overallScalar))
+                return Math.sign(radiusSq) * Math.sqrt(Math.abs(radiusSq))
+            }
+        }
     }
     window.Sphere = Sphere
     Sphere.basisNames = [`1`, `2`, `3`, `p`, `m`]
+
+    // e1s = e1c.cast(new Sphere())
+    // e2s = e2c.cast(new Sphere())
+    // e3s = e3c.cast(new Sphere())
+    // eos = eo.cast(new Sphere())
+    // e0s = e1c.cast(new Sphere())
+
+    Sphere.indexGrades = [
+        1,1,1,1,1,
+    ]
 
     class Cga extends Multivector {
         static get size() { return 32 }
 
         constructor() {
             super(32)
+        }
+
+        flatPpToConformalPoint(target) {
+            this.ppToConformalPoints(localCga0, localCga1)
+            localCga0.downPt(v1); localCga1.downPt(v2)
+            return target.copy(v1.equals(outOfSightVec3) ? localCga1 : localCga0)
+        }
+
+        ppToConformalPoints(pAdd, pSub) {
+            //tortured appeal to hyperbolic PGA
+            let directionTowardNullPt = em.meet(this, cga1)
+            directionTowardNullPt.multiplyScalar(1. / Math.sqrt(sq(directionTowardNullPt[27]) + sq(directionTowardNullPt[28]) + sq(directionTowardNullPt[29]) + sq(directionTowardNullPt[30])))
+
+            let imaginaryPtBetweenPts = e123p.projectOn(this, cga0)
+            imaginaryPtBetweenPts.multiplyScalar(1. / imaginaryPtBetweenPts[26])
+
+            let currentEDistFromHyperbolicCenterSq = sq(imaginaryPtBetweenPts[27]) + sq(imaginaryPtBetweenPts[28]) + sq(imaginaryPtBetweenPts[29]) + sq(imaginaryPtBetweenPts[30])
+            directionTowardNullPt.multiplyScalar(Math.sqrt((1. - currentEDistFromHyperbolicCenterSq)))
+
+            imaginaryPtBetweenPts.add(directionTowardNullPt, pAdd)
+            if (pSub !== undefined)
+                imaginaryPtBetweenPts.sub(directionTowardNullPt, pSub)
+            return pAdd
+        }
+
+        spinorTo(b, target) {
+            let ratio = this.div(b, localCga5).cast(localSpinor0)
+            return ratio.sqrt(target) //sqrt normalizes. Twice.
+        }
+
+        div(b, target) {
+            if (target === undefined)
+                target = new Cga()
+
+            return this.mul(b.inverse(localCga6), target)
+        }
+
+        inverse(target) {
+            if (target === undefined)
+                target = new Cga()
+
+            this.reverse(target)
+            let factor = Math.abs(1. / this.innerSelfScalar())
+            target.multiplyScalar(factor)
+            return target
         }
 
         projectOn(toBeProjectedOn, target) {
@@ -198,29 +458,48 @@ function initCga() {
             return targetVec3
         }
 
+        upSphere(x, y, z) {
+            if (x.isVector3) {
+                z = x.z
+                y = x.y
+                x = x.x
+            }
+
+            localSphere0.fromCenterAndRadius(x,y,z,0.).cast(this)
+
+            return this
+        }
+
         upPt(x,y,z) {
             //heavy-duty version that can be used to verify the consistency of the below
-            // let cgaTranslator = localCga2.fromEga(dq0.ptToPt(0., 0., 0., x, y, z).convert(ega5))
+            // let cgaTranslator = localCga2.fromEga(dq0.ptToPt(0., 0., 0., x, y, z).cast(ega5))
             // return cgaTranslator.sandwich(eOri, this)
+
+            if (x.isVector3) {
+                z = x.z
+                y = x.y
+                x = x.x
+            }
 
             this.zero()
             let lengthSq = x * x + y * y + z * z
             this[26] = .5*lengthSq + .5
             this[27] = .5*lengthSq - .5
 
-            this[28] = -z
-            this[29] =  y
-            this[30] = -x
+            this[28] =  z
+            this[29] = -y
+            this[30] =  x
 
             return this
         }
-        downPt(targetVec3) {
+
+        downPt(targetVec3, doLog) {
 
             if (targetVec3 === undefined)
                 targetVec3 = new THREE.Vector3()
 
-            //if it's not null, or it's the point at infinity
-            targetVec3.set(999., 999., 999.)
+            //For if it's not null, or it's the point at infinity
+            targetVec3.copy(outOfSightVec3)
 
             if (this[26] - this[27] !== 0.) {
                 let lambda = 1. / (this[26] - this[27]) //will be infinity if you're on plane at infinity
@@ -229,11 +508,12 @@ function initCga() {
 
                 let lengthSqDesired = _26 + _27
                 let lengthSqCurrent = _28 * _28 + _29 * _29 + _30 * _30
-                if (Math.abs(lengthSqCurrent - lengthSqDesired) < .01) {
+                if (Math.abs(lengthSqCurrent - lengthSqDesired) < .01) 
+                {
                     //null point
-                    targetVec3.z = -_28
-                    targetVec3.y =  _29
-                    targetVec3.x = -_30
+                    targetVec3.z =  _28
+                    targetVec3.y = -_29
+                    targetVec3.x =  _30
                 }
             }
 
@@ -342,14 +622,14 @@ function initCga() {
             return target
         }
 
-        sandwich(cgaToBeSandwiched, target) {
+        sandwich(cgaToBeSandwiched, target, doLog) {
             if (target === undefined)
                 target = new Cga()
 
-            this.reverse(localCga0)
+            let sr = this.reverse(localCga0)
 
-            this.mul(cgaToBeSandwiched, localCga1)
-            localCga1.mul(localCga0, target)
+            let inte = this.mul(cgaToBeSandwiched, localCga1)
+            inte.mul(sr, target)
 
             // let ks = cgaToBeSandwiched.grade() * this.grade()
             // if (ks % 2 === 0)
@@ -674,6 +954,7 @@ function initCga() {
         e12c  = e1c.mul(e2c)
         e23c  = e2c.mul(e3c)
         e13c  = e1c.mul(e3c)
+        e31c  = e3c.mul(e1c)
         
         e01c  = e0c.mul(e1c)
         e02c  = e0c.mul(e2c)
@@ -685,7 +966,7 @@ function initCga() {
         e013c = e0c.mul(e13c)
         e031c = e03c.mul(e1c)
 
-        e0123c = e01c.mul(e23c)
+        e0123c = e01c.mul(e23c) // = e0c.dual()
     }
 
     //unit great circles
@@ -696,7 +977,7 @@ function initCga() {
     //alternative name is eo. Looks kinda cooler and we are doing lots of Conformal GA
     //zero-radius-sphere at the origin
     eo = ep.sub(em).multiplyScalar(0.5)
-    eInf = e0c.dual()
+    eInf = e0123c
     eOri = eo.dual()
     
     //scalings
@@ -726,6 +1007,28 @@ function initCga() {
     let localCga4 = new Cga()
     let localCga5 = new Cga()
     let localCga6 = new Cga()
+
+    let localSpinor0 = new Spinor()
+    let localSpinor1 = new Spinor()
+    let localSpinor2 = new Spinor()
+    spinor0 = new Spinor()
+    spinor1 = new Spinor()
+    spinor2 = new Spinor()
+    spinor3 = new Spinor()
+    spinor4 = new Spinor()
+
+    sphere0 = new Sphere()
+    sphere1 = new Sphere()
+    sphere2 = new Sphere()
+    circle0 = new Circle()
+    circle1 = new Circle()
+    circle2 = new Circle()
+    circle3 = new Circle()
+
+    oneSpinor = new Spinor()
+    oneSpinor[0] = 1.
+
+    let localSphere0 = new Sphere()
 
     /*END*/
 }

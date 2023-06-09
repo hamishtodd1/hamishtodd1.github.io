@@ -7,6 +7,8 @@ const zeroMatrix = new THREE.Matrix4().set(0., 0., 0., 0., 0., 0., 0., 0., 0., 0
 
 const clock = new THREE.Clock(true)
 
+const outOfSightVec3 = new THREE.Vector3(999.,999.,999.)
+
 const v1 = new THREE.Vector3()
 const v2 = new THREE.Vector3()
 const v3 = new THREE.Vector3()
@@ -32,7 +34,7 @@ const discreteViridis = [
 
 var debugSphere = new THREE.Mesh(new THREE.SphereGeometry(.0431),new THREE.MeshBasicMaterial({color:0xCCCCCC}))
 scene.add(debugSphere)
-debugSphere.position.set(999.,999.,999.)
+debugSphere.position.copy(outOfSightVec3)
 
 const grabbables = []
 

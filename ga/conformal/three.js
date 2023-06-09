@@ -26950,7 +26950,7 @@
 			uniforms.specular.value.copy( material.specular );
 			uniforms.shininess.value = Math.max( material.shininess, 1e-4 ); // to prevent pow( 0.0, 0.0 )
 
-			uniforms.spinor.value = material.spinor
+			uniforms.spinor.value.copy( material.spinor )
 		}
 
 		function refreshUniformsToon( uniforms, material ) {

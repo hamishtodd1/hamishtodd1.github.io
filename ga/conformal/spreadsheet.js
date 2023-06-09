@@ -1,4 +1,15 @@
 /*
+    Want it to be that AT ANY TIME you can grab ANY object and modify it
+        Or, create a new object
+    So the way it works:
+        You're always in drawing mode of some kind
+            If you click in space, and there's nothing you're clicking on,
+            by default it makes the thing you've currently got selected
+            If you were currently on a blank cell, it uses that
+            If you were currently on a cell containing a free thing, it uses that
+            But if currently on a cell defined by other things
+        You can select a new black cell
+
     Functions you want:
         Add 
         Subtract
@@ -22,15 +33,18 @@
     Could do it with little coloured squares to represent the colors of the mvs
  */
 
-function initProgramming() {
+function updatePanel(){}
 
-    let layerWidth = .01
+function initSpreadsheet() {
+
+    let layerWidth = .001
     let columns = 2
     let rows = 14
     
     let obj3d = new THREE.Object3D()
     obj3d.position.y = 1.6
     obj3d.position.x = -1.1
+    obj3d.position.z = .01
     // obj3d.scale.multiplyScalar(.3)
     scene.add(obj3d)
 
@@ -46,8 +60,8 @@ function initProgramming() {
     let selectionMat = new THREE.MeshBasicMaterial({ color: 0x222222 })
     let selectionBox = new THREE.InstancedMesh(unchangingUnitSquareGeometry, selectionMat, 4)
     obj3d.add(selectionBox)
-    let selectedColumn = 1
-    let selectedRow = 1
+    let selectedColumn = 0
+    let selectedRow = 2
     
     let gridMat = new THREE.MeshBasicMaterial({color:0xAAAAAA})
     let gridLinesVerticalNum   = columns + 1
@@ -59,6 +73,16 @@ function initProgramming() {
     let typeableSymbols = `abcdefghijklmnopqrstuvwxyz0123456789()*~/`
     let specialSymbols = `Σ√∧∨⋅`
     let specialStandin = `£#^&|`
+    function incrementSelection( increment, isRow ) {
+        let newVal = isRow ? selectedRow : selectedColumn
+        newVal += increment
+        newVal = clamp(newVal, 0, isRow?rows:columns - 1)
+
+        if(isRow)
+            selectCell( selectedColumn, newVal)
+        else
+            selectCell( newVal, selectedRow)
+    }
     document.addEventListener(`keydown`, (event)=>{
 
         let selectedCell = cells[selectedColumn][selectedRow]
@@ -66,20 +90,16 @@ function initProgramming() {
         //also "you're done entering into that box", so we finalize the string
         switch(event.key) {
             case `ArrowLeft`:
-                selectedColumn -= 1
-                selectedColumn = clamp(selectedColumn,0,columns-1)
+                incrementSelection(-1,false)
                 return
             case `ArrowRight`:
-                selectedColumn += 1
-                selectedColumn = clamp(selectedColumn,0,columns-1)
+                incrementSelection( 1,false)
                 return
             case `ArrowUp`:
-                selectedRow -= 1
-                selectedRow = clamp(selectedRow,0,rows-1)
+                incrementSelection(-1,true)
                 return
             case `ArrowDown`:
-                selectedRow += 1
-                selectedRow = clamp(selectedRow,0,rows-1)
+                incrementSelection( 1,true)
                 return
             default:
                 if ( typeableSymbols.indexOf(event.key) !== -1 )
@@ -89,9 +109,38 @@ function initProgramming() {
         }
     })
 
+    function selectCell(newColumn, newRow) {
+        cells[selectedColumn][selectedRow].setVizVisibility(false)
+        cells[selectedColumn][selectedRow].reparse()
+
+        selectedColumn = newColumn
+        selectedRow = newRow
+
+        cells[selectedColumn][selectedRow].setVizVisibility(true)
+    }
+
+    function inRect(posVec,rectPos,rectScale) {
+        let ret = 
+            rectPos.x-rectScale.x / 2. < posVec.x && posVec.x < rectPos.x+rectScale.x / 2. &&
+            rectPos.y-rectScale.y / 2. < posVec.y && posVec.y < rectPos.y+rectScale.y / 2.
+        return ret
+    }
+    document.addEventListener(`mousedown`, (event) => {
+        //first of all we do need the position of the "mouse"
+        mousePlanePosition.pointToVec3(v1)
+        obj3d.worldToLocal(v1)
+        
+        if (inRect(v1, bg.position, bg.scale) ) {
+            forEachCell((cell, column, row)=>{
+                if( inRect(v1, cell.position, cell.scale) )
+                    selectCell(column, row)
+            })
+        }
+    })
+
     function getCellPos(column, row) {
         let px = -bg.scale.x / 2. + cellWidth * (column + .5)
-        let py = bg.scale.y / 2. - cellHeight * (row + .5)
+        let py =  bg.scale.y / 2. - cellHeight * (row + .5)
 
         return [px,py]
     }
@@ -100,20 +149,49 @@ function initProgramming() {
     // Text in cell //
     //////////////////
 
+    //both of these matter to where the text appears
     let canvasVerticalResolution = 60
-    let canvasHorizontalResolution = 380
+    let canvasHorizontalResolution = 340
     //have to choose a max then stick to it, it's complicated to think about changing uvs at runtime
 
-    let cellGeo = unchangingUnitSquareGeometry.clone()
-    cellGeo.translate(.5, 0., 0.)
+    //enum: sorts-of-viz
+        const NO_VIZ_TYPE = 0
+        const SPHERE = 1
+        const SPINOR = 2
+        const vizTypes = [ NO_VIZ_TYPE, SPHERE, SPINOR ]
+        //want a mesh type, and a curve type
+    //no longer sorts-of-viz
+    let constructors = [ ()=>null, SphereViz, SpinorViz ]
 
-    class CellContents extends THREE.Mesh {
+    let numOfEachVizType = 90
+    let unusedVizes = Array(vizTypes.length)
+    for(let i = 0; i < vizTypes.length; ++i) {
+        unusedVizes[i] = Array(numOfEachVizType)
+        for (let j = 0; j < numOfEachVizType; ++j) {
+            if (i === 0)
+                unusedVizes[i][j] = null
+            else {
+                unusedVizes[i][j] = new constructors[i]()
+                unusedVizes[i][j].visible = false
+            }
+        }
+    }
+
+    let knownMultivectors = {
+        "e1":e1c, "e2":e2c, "e3":e3c,
+        "eo":eo, "ep":ep, // "e0": e0c, //yet to have a satisfying visualization of this
+        "e12": e12c, "e23": e23c, "e31": e31c, "e13": e13c, "e12": e12c,
+        "e01": e01c, "e02": e02c, "e03": e03c,
+        "e1p": e1p, "e2p": e2p, "e3p": e3p,
+    }
+
+    class Cell extends THREE.Mesh {
         constructor(column,row) {
             let canvas = document.createElement("canvas")
             let context = canvas.getContext("2d")
             let map = new THREE.CanvasTexture(canvas)
 
-            super(cellGeo, new THREE.MeshBasicMaterial({ map: map, transparent: true }))
+            super(unchangingUnitSquareGeometry, new THREE.MeshBasicMaterial({ map: map, transparent: true }))
             
             this.map = map
             this.context = context
@@ -126,29 +204,32 @@ function initProgramming() {
             obj3d.add(this)
 
             let [px, py] = getCellPos(column, row)
-            this.position.set(px - cellWidth / 2. + gridThickness / 2., py, 0.)
+            this.position.set(px, py, 0.)
+
+            this.viz = null
 
             //"Σ√A∧B∨⋅a*sβα" //if you want ǁ it gets a bit taller
             this.currentText = ``
+
+            this.setVizVisibility(false)
         }
 
-        append(char) {
-            this.currentText += char
+        setText(newText) {
+            this.currentText = newText
 
             let textHeight = this.canvas.height
             let fontFull = textHeight + "px monospace"
             this.context.font = fontFull
-            let textWidth = this.context.measureText(this.currentText).width
 
             this.context.font = fontFull
             this.context.textAlign = "left"
             this.context.textBaseline = "top"
 
-            // this.context.clearRect(
-            //     this.canvas.width  / 2 - textWidth  / 2 - backgroundMargin / 2,
-            //     this.canvas.height / 2 - textHeight / 2 - backgroundMargin / 2,
-            //     textWidth  + backgroundMargin,
-            //     textHeight + backgroundMargin)
+            // this.context.fillStyle = "#FF0000" //for debugging
+            this.context.clearRect(
+                0, 0,
+                this.canvas.width,
+                this.canvas.height )
 
             let textColor = "#000000"
             this.context.fillStyle = textColor
@@ -157,18 +238,73 @@ function initProgramming() {
             this.map.needsUpdate = true
             // log(this.canvas.width / this.canvas.height, this.scale)al
         }
+
+        append(suffix) {
+            this.setText(this.currentText+suffix)
+        }
+
+        reparse() {
+            let oldVizType = this.viz === null ? NO_VIZ_TYPE : constructors.indexOf(this.viz.constructor)
+            
+            let trimmed = this.currentText.trim()
+            let isMv = knownMultivectors[trimmed] !== undefined
+
+            if(!isMv)
+                return
+
+            let vizType = vizTypes[trimmed.length-1]
+
+            if (oldVizType !== vizType )  {
+                unusedVizes[oldVizType].push(this.viz)
+                this.viz = unusedVizes[vizType].pop()
+            }
+
+            //now give it the value
+            if(vizType !== NO_VIZ_TYPE) {
+                if (knownMultivectors[trimmed] !== undefined)
+                    knownMultivectors[trimmed].cast( this.viz.getMv() )
+                else
+                    this.viz.getMv().zero()
+            }
+        }
+
+        setVizVisibility(newVisibility) {
+            if(this.viz !== null)
+                this.viz.visible = newVisibility
+        }
     }
 
     let cells = Array(columns)
+    function forEachCell(func) {
+        for (let column = 0; column < columns; ++column) {
+            for (let row = 0; row < rows; ++row)
+                func(cells[column][row], column, row)
+        }
+    }
     for(let column = 0; column < columns; ++column) {
         cells[column] = Array(rows)
         for(let row = 0; row < rows; ++row) {
-            cells[column][row] = new CellContents(column,row)
+            cells[column][row] = new Cell(column,row)
         }
-    }    
+    }
+    
+    let initial = [
+        ["time","hello"],
+        ["mousePos"],
+        ["e1"],
+        ["e2"],
+        ["e3"],
+        ["ep"],
+        ["e23"],
+        ["A1 + B1"],
+    ]
 
-    cells[0][0].append(`e1`)
-    cells[0][1].append(`e2`)
+    initial.forEach( ( arr, i ) => {
+        arr.forEach( ( entry, j ) => {
+            cells[j][i].append(entry)
+            cells[j][i].reparse()
+        })
+    })
 
     /////////////////
     // update func //
@@ -176,6 +312,12 @@ function initProgramming() {
 
     let ourM = new THREE.Matrix4()
     updatePanel = () => {
+
+        // cells[0][0].setText( clock.getElapsedTime().toFixed(0) )
+        // cells[0][3].setText( mousePlanePosition[13].toFixed(2) )
+        // cells[0][4].setText( mousePlanePosition[12].toFixed(2) )
+
+        //appearance
         let xMin = -bg.scale.x / 2.
         for (let i = 0; i < gridLinesVerticalNum; ++i) {
             ourM.makeScale(gridThickness, bg.scale.y + gridThickness, 1.)
@@ -210,4 +352,6 @@ function initProgramming() {
             selectionBox.instanceMatrix.needsUpdate = true
         }
     }
+
+    selectCell(selectedColumn, selectedRow)
 }

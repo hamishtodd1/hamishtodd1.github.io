@@ -19,6 +19,16 @@ function initEgaWithoutDeclarations() {
             super(6)
         }
 
+        intersectPlane(plane, target) {
+            //plane and output point are mvs
+            target[11] = - plane[3] * this[0] + plane[2] * this[1] - plane[1] * this[3]
+            target[12] = + plane[4] * this[0] - plane[2] * this[2] - plane[1] * this[4]
+            target[13] = - plane[4] * this[1] + plane[3] * this[2] - plane[1] * this[5]
+            target[14] = + plane[4] * this[3] + plane[3] * this[4] + plane[2] * this[5]
+
+            return target
+        }
+
         exp(target) {
             if (target === undefined)
                 target = new Dq()
@@ -180,7 +190,7 @@ function initEgaWithoutDeclarations() {
 
                 let operandEga = toBeSandwiched.toEga(newEga)
                 let targetEga = thisEga.sandwich(operandEga, newEga)
-                target.convert(targetEga)
+                target.cast(targetEga)
             }
             return target
         }
@@ -287,7 +297,7 @@ function initEgaWithoutDeclarations() {
         fromMat4(mat) {
             mat.decompose(v1, q1, v2)
             let asEga = newEga.fromPosQuat(v1, q1)
-            asEga.convert(this)
+            asEga.cast(this)
             return this
         }
 
@@ -317,7 +327,7 @@ function initEgaWithoutDeclarations() {
 
         fromPosQuat(p, q) {
             let asEga = newEga
-            this.convert(asEga)
+            this.cast(asEga)
             asEga.fromPosQuat(p, q)
             asEga.covert(this)
             return this
@@ -498,12 +508,15 @@ function initEgaWithoutDeclarations() {
         }
 
         pointToVec3(target) {
+            if(target === undefined)
+                target = new THREE.Vector3()
             if(this[14] === 0.)
                 console.error("ideal point cannot be converted to vec3")
-
-            target.z = this[11] / this[14]
-            target.y = this[12] / this[14]
-            target.x = this[13] / this[14]
+            else {
+                target.z = this[11] / this[14]
+                target.y = this[12] / this[14]
+                target.x = this[13] / this[14]
+            }
 
             return target
         }
@@ -690,6 +703,17 @@ function createVerboseSharedFunctions(createFunction) {
     target[13] = b[13] * a[ 0] - b[10] * a[ 1] + b[ 7] * a[ 3] - b[ 6] * a[ 4] - b[ 4] * a[ 6] + b[ 3] * a[ 7] - b[ 1] * a[10] + b[ 0] * a[13];
     target[14] = b[14] * a[ 0] + b[10] * a[ 2] + b[ 9] * a[ 3] + b[ 8] * a[ 4] + b[ 4] * a[ 8] + b[ 3] * a[ 9] + b[ 2] * a[10] + b[ 0] * a[14];
     target[15] = b[15] * a[ 0] + b[14] * a[ 1] + b[13] * a[ 2] + b[12] * a[ 3] + b[11] * a[ 4] + b[10] * a[ 5] + b[ 9] * a[ 6] + b[ 8] * a[ 7] + b[ 7] * a[ 8] + b[ 6] * a[ 9] + b[ 5] * a[10] - b[ 4] * a[11] - b[ 3] * a[12] - b[ 2] * a[13] - b[ 1] * a[14] + b[ 0] * a[15];`)
+
+    //point-point join. Both 11,12,13,14
+    // line[10] =  + a[13] - b[13];
+    // line[ 9] =  + a[12] - b[12];
+    // line[ 8] =  + a[11] - b[11];
+    // line[ 7] =  + a[12] * b[13] - a[13] * b[12];
+    // line[ 6] =  - a[11] * b[13] + a[13] * b[11];
+    // line[ 5] =  + a[11] * b[12] - a[12] * b[11];
+
+    //"how they cross" scalar, for lines:
+    //  + b[10] * a[ 5] + b[ 9] * a[ 6] + b[ 8] * a[ 7] + b[ 7] * a[ 8] + b[ 6] * a[ 9] + b[ 5] * a[10];
 
     createFunction(`inner`, [`a`, `b`], `
     target[ 0] = b[ 0] * a[ 0] + b[ 2] * a[ 2] + b[ 3] * a[ 3] + b[ 4] * a[ 4] - b[ 8] * a[ 8] - b[ 9] * a[ 9] - b[10] * a[10] - b[14] * a[14];
