@@ -255,3 +255,4 @@ class Multivector extends Float32Array {
         console.log(str)
     }
 }
+

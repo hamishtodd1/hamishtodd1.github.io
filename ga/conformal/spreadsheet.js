@@ -9,33 +9,22 @@
             If you were currently on a cell containing a free thing, it uses that
             But if currently on a cell defined by other things
         You can select a new black cell
-
-    Functions you want:
-        Add 
-        Subtract
-        Sum over... integral? Differential?
-        Mul
-        Div. Or, Inverse, and multiply by that
-        Bracket I guess
-        Summation over a column
-        Join I guess
-        Dual?
-        Inner
-        Wedge
-        Subscript and superscript for exp and log and grade select
-        Norm... infinity norm?
-        Sqrt?
-        Numbers
-        acsin... arcos...
-        Reverse (which is shit in latex)
-        I mean, people expect no better in programming, no subscripts there
-
-    Could do it with little coloured squares to represent the colors of the mvs
  */
 
 function updatePanel(){}
 
 function initSpreadsheet() {
+
+    let initial = [
+        ["time", "hello"],
+        ["mousePos"],
+        ["e2"],
+        ["e3"],
+        ["e23"],
+        ["ep"],
+        ["A1 + B1"],
+        ["e2 + e3"],
+    ]
 
     let layerWidth = .001
     let columns = 2
@@ -60,8 +49,6 @@ function initSpreadsheet() {
     let selectionMat = new THREE.MeshBasicMaterial({ color: 0x222222 })
     let selectionBox = new THREE.InstancedMesh(unchangingUnitSquareGeometry, selectionMat, 4)
     obj3d.add(selectionBox)
-    let selectedColumn = 0
-    let selectedRow = 2
     
     let gridMat = new THREE.MeshBasicMaterial({color:0xAAAAAA})
     let gridLinesVerticalNum   = columns + 1
@@ -111,7 +98,7 @@ function initSpreadsheet() {
 
     function selectCell(newColumn, newRow) {
         cells[selectedColumn][selectedRow].setVizVisibility(false)
-        cells[selectedColumn][selectedRow].reparse()
+        compile( cells[selectedColumn][selectedRow] )
 
         selectedColumn = newColumn
         selectedRow = newRow
@@ -126,6 +113,9 @@ function initSpreadsheet() {
         return ret
     }
     document.addEventListener(`mousedown`, (event) => {
+        if (event.button !== 0)
+            return
+
         //first of all we do need the position of the "mouse"
         mousePlanePosition.pointToVec3(v1)
         obj3d.worldToLocal(v1)
@@ -153,37 +143,6 @@ function initSpreadsheet() {
     let canvasVerticalResolution = 60
     let canvasHorizontalResolution = 340
     //have to choose a max then stick to it, it's complicated to think about changing uvs at runtime
-
-    //enum: sorts-of-viz
-        const NO_VIZ_TYPE = 0
-        const SPHERE = 1
-        const SPINOR = 2
-        const vizTypes = [ NO_VIZ_TYPE, SPHERE, SPINOR ]
-        //want a mesh type, and a curve type
-    //no longer sorts-of-viz
-    let constructors = [ ()=>null, SphereViz, SpinorViz ]
-
-    let numOfEachVizType = 90
-    let unusedVizes = Array(vizTypes.length)
-    for(let i = 0; i < vizTypes.length; ++i) {
-        unusedVizes[i] = Array(numOfEachVizType)
-        for (let j = 0; j < numOfEachVizType; ++j) {
-            if (i === 0)
-                unusedVizes[i][j] = null
-            else {
-                unusedVizes[i][j] = new constructors[i]()
-                unusedVizes[i][j].visible = false
-            }
-        }
-    }
-
-    let knownMultivectors = {
-        "e1":e1c, "e2":e2c, "e3":e3c,
-        "eo":eo, "ep":ep, // "e0": e0c, //yet to have a satisfying visualization of this
-        "e12": e12c, "e23": e23c, "e31": e31c, "e13": e13c, "e12": e12c,
-        "e01": e01c, "e02": e02c, "e03": e03c,
-        "e1p": e1p, "e2p": e2p, "e3p": e3p,
-    }
 
     class Cell extends THREE.Mesh {
         constructor(column,row) {
@@ -243,31 +202,6 @@ function initSpreadsheet() {
             this.setText(this.currentText+suffix)
         }
 
-        reparse() {
-            let oldVizType = this.viz === null ? NO_VIZ_TYPE : constructors.indexOf(this.viz.constructor)
-            
-            let trimmed = this.currentText.trim()
-            let isMv = knownMultivectors[trimmed] !== undefined
-
-            if(!isMv)
-                return
-
-            let vizType = vizTypes[trimmed.length-1]
-
-            if (oldVizType !== vizType )  {
-                unusedVizes[oldVizType].push(this.viz)
-                this.viz = unusedVizes[vizType].pop()
-            }
-
-            //now give it the value
-            if(vizType !== NO_VIZ_TYPE) {
-                if (knownMultivectors[trimmed] !== undefined)
-                    knownMultivectors[trimmed].cast( this.viz.getMv() )
-                else
-                    this.viz.getMv().zero()
-            }
-        }
-
         setVizVisibility(newVisibility) {
             if(this.viz !== null)
                 this.viz.visible = newVisibility
@@ -287,22 +221,11 @@ function initSpreadsheet() {
             cells[column][row] = new Cell(column,row)
         }
     }
-    
-    let initial = [
-        ["time","hello"],
-        ["mousePos"],
-        ["e1"],
-        ["e2"],
-        ["e3"],
-        ["ep"],
-        ["e23"],
-        ["A1 + B1"],
-    ]
 
     initial.forEach( ( arr, i ) => {
         arr.forEach( ( entry, j ) => {
             cells[j][i].append(entry)
-            cells[j][i].reparse()
+            compile( cells[j][i] )
         })
     })
 
@@ -353,5 +276,7 @@ function initSpreadsheet() {
         }
     }
 
+    let selectedColumn = 0
+    let selectedRow = 7
     selectCell(selectedColumn, selectedRow)
 }

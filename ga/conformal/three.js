@@ -8360,7 +8360,7 @@
 
 					currentValue.set( newValue );
 
-				} else if ((currentValue && currentValue.isSpinor) && (newValue && newValue.isSpinor)) {
+				} else if ((currentValue && currentValue.isRotor) && (newValue && newValue.isRotor)) {
 
 					currentValue.copy(newValue);
 
@@ -13819,7 +13819,7 @@
 	const UniformsLib = {
 
 		phong2: {
-			spinor: { value: new Spinor() }
+			rotor: { value: new Rotor() }
 		},
 
 		common: {
@@ -26950,7 +26950,7 @@
 			uniforms.specular.value.copy( material.specular );
 			uniforms.shininess.value = Math.max( material.shininess, 1e-4 ); // to prevent pow( 0.0, 0.0 )
 
-			uniforms.spinor.value.copy( material.spinor )
+			uniforms.rotor.value.copy( material.rotor )
 		}
 
 		function refreshUniformsToon( uniforms, material ) {
@@ -38761,7 +38761,7 @@
 			this.specular = new Color(0x111111);
 			this.shininess = 30;
 
-			this.spinor = new Spinor();
+			this.rotor = new Rotor();
 
 			this.map = null;
 

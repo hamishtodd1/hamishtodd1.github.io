@@ -6,10 +6,12 @@ function initEgaWithoutDeclarations() {
         Line: new Uint8Array([5, 6, 7, 8, 9, 10]),
         Point: new Uint8Array([13, 12, 11, 14]), //xyzw
         // Study: new Uint8Array([0, 15])
+        Number: new Uint8Array([0])
     }
     smallerInLarger.Dq = {
         Line: new Uint8Array([1,2,3,4,5,6]),
         // Study: new Uint8Array([0, 7])
+        Number: new Uint8Array([0])
     }
 
     class Line extends Multivector {

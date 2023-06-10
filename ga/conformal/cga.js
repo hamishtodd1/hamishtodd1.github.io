@@ -3,11 +3,12 @@ function initCga() {
     smallerInLarger.Cga = {
         Sphere: new Uint8Array([1, 2, 3, 4, 5]),
         Circle: new Uint8Array([6, 7, 8, 9, 10, 11, 12, 13, 14, 15]),
-        Spinor: new Uint8Array([
+        Rotor: new Uint8Array([
             0,
             6, 7, 8, 9, 10, 11, 12, 13, 14, 15,
             26, 27, 28, 29, 30
-        ])
+        ]),
+        Number: new Uint8Array([0])
 
         //StudyCga! 
 
@@ -16,8 +17,9 @@ function initCga() {
         //seems like no matter what you do, there's negatives involved
         //and REALLY you should think about the canonical clifford bundle
     }
-    smallerInLarger.Spinor = {
-        Circle: new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
+    smallerInLarger.Rotor = {
+        Circle: new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]),
+        Number: new Uint8Array([0])
     }
 
     //not actually a circle, really a bivector
@@ -91,10 +93,10 @@ function initCga() {
         exp ( target, scalarMultiple ) {
             
             if(target === undefined)
-                target = new Spinor()
+                target = new Rotor()
             
-            if(!target.isSpinor)
-                console.error("exp called with non-spinor target")
+            if(!target.isRotor)
+                console.error("exp called with non-rotor target")
 
             // debugger
 
@@ -164,7 +166,7 @@ function initCga() {
     let multipliedCircle = new Circle()
 
     //incidentally, this is elliptic pga
-    class Spinor extends Multivector {
+    class Rotor extends Multivector {
         static get size() { return 16 }
 
         constructor() {
@@ -172,12 +174,12 @@ function initCga() {
 
             this[0] = 1.
 
-            this.isSpinor = true
+            this.isRotor = true
         }
 
         reverse(target) {
             if(target === undefined)    
-                target = new Spinor()
+                target = new Rotor()
 
             target[ 0] =  this[ 0]
             
@@ -205,7 +207,7 @@ function initCga() {
             if(target === undefined)
                 target = new Cga()
 
-            let inte = localSpinor0
+            let inte = localRotor0
             inte[ 0] = + point[26] * this[11] - point[27] * this[12] - point[28] * this[13] - point[29] * this[14] - point[30] * this[15];
             
             inte[ 1] = - point[26] * this[ 8] + point[27] * this[ 9] + point[28] * this[10] - point[30] * this[14] + point[29] * this[15];
@@ -226,7 +228,7 @@ function initCga() {
             inte[15] =   point[30] * this[ 0] - point[29] * this[ 1] + point[28] * this[ 2] - point[27] * this[ 3] + point[26] * this[ 4];
 
             // debugger
-            let sr = this.reverse( localSpinor1 )
+            let sr = this.reverse( localRotor1 )
 
             inte.cast(new Cga()).mul(sr.cast(new Cga()), target)
             
@@ -282,9 +284,9 @@ function initCga() {
         }
 
         sqrt(target) {
-            this.normalize(localSpinor1)
-            localSpinor1[0] += 1.
-            return localSpinor1.normalize(target)
+            this.normalize(localRotor1)
+            localRotor1[0] += 1.
+            return localRotor1.normalize(target)
         }
 
         logarithm(R) {
@@ -325,12 +327,12 @@ function initCga() {
             )
         }
     }
-    window.Spinor = Spinor
-    Spinor.basisNames = [
+    window.Rotor = Rotor
+    Rotor.basisNames = [
         ``,
         `12`, `13`, `1p`, `1m`, `23`, `2p`, `2m`, `3p`, `3m`, `pm`,  //line start is [6]
         `123p`, `123m`, `12pm`, `13pm`, `23pm`]
-    Spinor.indexGrades = [
+    Rotor.indexGrades = [
         0,                    // CGA           4D HPGA
         2,2,2,2,2,2,2,2,2,2,  //circle         plane
         4,4,4,4,4,            //point          point
@@ -413,8 +415,8 @@ function initCga() {
             return pAdd
         }
 
-        spinorTo(b, target) {
-            let ratio = this.div(b, localCga5).cast(localSpinor0)
+        rotorTo(b, target) {
+            let ratio = this.div(b, localCga5).cast(localRotor0)
             return ratio.sqrt(target) //sqrt normalizes. Twice.
         }
 
@@ -1008,14 +1010,14 @@ function initCga() {
     let localCga5 = new Cga()
     let localCga6 = new Cga()
 
-    let localSpinor0 = new Spinor()
-    let localSpinor1 = new Spinor()
-    let localSpinor2 = new Spinor()
-    spinor0 = new Spinor()
-    spinor1 = new Spinor()
-    spinor2 = new Spinor()
-    spinor3 = new Spinor()
-    spinor4 = new Spinor()
+    let localRotor0 = new Rotor()
+    let localRotor1 = new Rotor()
+    let localRotor2 = new Rotor()
+    rotor0 = new Rotor()
+    rotor1 = new Rotor()
+    rotor2 = new Rotor()
+    rotor3 = new Rotor()
+    rotor4 = new Rotor()
 
     sphere0 = new Sphere()
     sphere1 = new Sphere()
@@ -1025,8 +1027,8 @@ function initCga() {
     circle2 = new Circle()
     circle3 = new Circle()
 
-    oneSpinor = new Spinor()
-    oneSpinor[0] = 1.
+    oneRotor = new Rotor()
+    oneRotor[0] = 1.
 
     let localSphere0 = new Sphere()
 

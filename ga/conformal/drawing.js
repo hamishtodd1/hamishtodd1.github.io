@@ -108,7 +108,7 @@ function initDrawing () {
 
     document.addEventListener(`mousedown`, (event)=>{
         if(event.button === 0) {
-
+            
         }
     })
 

@@ -17,7 +17,8 @@ async function init() {
 
     await initCgaVizes()
 
-    initSpreadsheet()
+    initCompilation()
+    // initSpreadsheet()
 
     initMouse()
     initDrawing()
@@ -103,7 +104,7 @@ async function init() {
         // disorderedUpdate
         updatePanel()
         handleDrawing()
-        updateSpinorVizes()
+        updateRotorVizes()
         updatePpVizes()
 
         renderer.render(scene, camera)

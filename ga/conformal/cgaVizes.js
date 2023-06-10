@@ -37,14 +37,14 @@ async function initCgaVizes() {
             type: `vertex`,
             precedes: `	#include <project_vertex>`,
             str: `
-                transformed = sandwichSpinorPoint( spinor, transformed );
+                transformed = sandwichRotorPoint( rotor, transformed );
                 \n`,
             //` transformed.y += 0.; vNormal.x += 0.;\n`
         },
         {
             type: `vertex`,
             precedes: ``,
-            str: `uniform float[16] spinor;\n` + glslCga
+            str: `uniform float[16] rotor;\n` + glslCga
         }
         //vNormal
     ]
@@ -75,7 +75,7 @@ async function initCgaVizes() {
                 
                 this.sphere.cast(renderedAsCga)
                 this.visible = true
-                ep.spinorTo(renderedAsCga, this.material.spinor )
+                ep.rotorTo(renderedAsCga, this.material.rotor )
             }
         }
 
@@ -90,7 +90,7 @@ async function initCgaVizes() {
     // e1c.cast( sphere1.sphere )
     // let sphere2 = new SphereViz()
     // // ep.cast( sphere2.sphere )
-    // ourCircle.exp(sphere2.material.spinor, .75 )
+    // ourCircle.exp(sphere2.material.rotor, .75 )
     // e1c.add(ep, cga0).cast(sphere2.sphere)
 
     let pointGeo = new THREE.IcosahedronGeometry(.03,2)
@@ -167,15 +167,15 @@ async function initCgaVizes() {
             type: `vertex`,
             precedes: `	#include <project_vertex>`,
             str: `
-                //spinor needs to take the z unit circle to the place the circle is
+                //rotor needs to take the z unit circle to the place the circle is
                 float majorAngle = transformed.x;
                 float minorAngle = transformed.y;
                 float minorRadius = .02;
                 
                 vec3 center = vec3( cos(majorAngle     ), sin(majorAngle     ), 0. );
                 vec3 helper = vec3( cos(majorAngle+.001), sin(majorAngle+.001), 0. );
-                center = sandwichSpinorPoint( spinor, center );
-                helper = sandwichSpinorPoint( spinor, helper );
+                center = sandwichRotorPoint( rotor, center );
+                helper = sandwichRotorPoint( rotor, helper );
                 
                 //if this doesn't work, just use lineloop
                 vec3 axis = normalize( helper - center );
@@ -191,23 +191,23 @@ async function initCgaVizes() {
         {
             type: `vertex`,
             precedes: ``,
-            str: `uniform float[16] spinor;\n` + glslCga + rodrigues
+            str: `uniform float[16] rotor;\n` + glslCga + rodrigues
         }
     ]
 
     
     let cgaCircles = [new Cga(), new Cga()]
-    let spinorVizes = []
+    let rotorVizes = []
     //this should be one of the last things in the frame that you call, ideally it'd be onBeforeRender
-    updateSpinorVizes = ()=>{
-        spinorVizes.forEach(sv=>sv.onBeforeRender())
+    updateRotorVizes = ()=>{
+        rotorVizes.forEach(sv=>sv.onBeforeRender())
     }
-    class SpinorViz extends THREE.Object3D {
+    class RotorViz extends THREE.Object3D {
         constructor() {
             super()
             scene.add(this)
 
-            spinorVizes.push(this)
+            rotorVizes.push(this)
 
             this.circleMeshes = Array(2)
             this.circleMeshes[0] = new THREE.Mesh(circleGeo, circleMat)
@@ -215,20 +215,20 @@ async function initCgaVizes() {
             this.circleMeshes[1] = new THREE.Mesh(circleGeo, circleMat)
             this.add(this.circleMeshes[1])
 
-            this.spinor = new Spinor()
-            this.spinor[0] = 1.
+            this.rotor = new Rotor()
+            this.rotor[0] = 1.
         }
 
         getMv() {
-            return this.spinor
+            return this.rotor
         }
 
         onBeforeRender() {
-            // let circles = this.spinor.cast(circle0).decompose(cgaCircles[0], cgaCircles[1])
+            // let circles = this.rotor.cast(circle0).decompose(cgaCircles[0], cgaCircles[1])
             // cgaCircles[0].log()
             
             // if(frameCount === 2)debugger
-            this.spinor.cast(cga0).selectGrade(2, cgaCircles[0])
+            this.rotor.cast(cga0).selectGrade(2, cgaCircles[0])
             cgaCircles[1].copy(zeroCga)
 
             for (let i = 0; i < 2; ++i)
@@ -238,8 +238,8 @@ async function initCgaVizes() {
                 if ( this.circleMeshes[i].visible ) {
                     // if (frameCount === 2)
                     //     debugger
-                    e3p.spinorTo(cgaCircles[i], this.circleMeshes[i].material.spinor )
-                    // log(this.circleMeshes[i].material.spinor)
+                    e3p.rotorTo(cgaCircles[i], this.circleMeshes[i].material.rotor )
+                    // log(this.circleMeshes[i].material.rotor)
 
                     //decomposition doesn't work
                     //sqrt doesn't give you the right thing
@@ -249,7 +249,7 @@ async function initCgaVizes() {
             // delete circles
         }
     }
-    window.SpinorViz = SpinorViz
+    window.RotorViz = RotorViz
 
     // let test = e12c.add(e3p).cast(circle0)
     // log(test.decompose())
@@ -269,8 +269,8 @@ async function initCgaVizes() {
             size * (Math.random() - .5) )
     }
 
-    let ourSpinorViz = new SpinorViz()
-    // e3p.addScaled(e03c, -3.5, cga0).cast(ourSpinorViz.spinor)
+    let ourRotorViz = new RotorViz()
+    // e3p.addScaled(e03c, -3.5, cga0).cast(ourRotorViz.rotor)
     
     // let ourAxis = new Circle()
     // e3p.add(e12c,cga0).cast(ourAxis)
@@ -282,11 +282,11 @@ async function initCgaVizes() {
     // smallSphereAtHeadHeight.meet(e1c, cga2).cast(ourAxis)
     // smallSphereAtHeadHeight.meet(e1c, cga2).log()
     // blankFunction = () => {
-    //     ourAxis.exp( ourSpinorViz.spinor, .015 * frameCount)
+    //     ourAxis.exp( ourRotorViz.rotor, .015 * frameCount)
 
     //     // for(let i = 0; i < numPts; ++i ){
     //     //     cga1.upPt(initials[i])
-    //     //     ourSpinorViz.spinor.sandwichConformalPoint( cga1, cps[i].cga )
+    //     //     ourRotorViz.rotor.sandwichConformalPoint( cga1, cps[i].cga )
     //     // }
     // }
 
@@ -294,6 +294,6 @@ async function initCgaVizes() {
 
     //currently we want to try out that linked-circles idea
 
-    // let mySpinor = new SpinorViz()
-    // e2p.cast(mySpinor.spinor)
+    // let myRotor = new RotorViz()
+    // e2p.cast(myRotor.rotor)
 }
