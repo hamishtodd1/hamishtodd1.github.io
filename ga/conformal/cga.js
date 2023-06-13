@@ -392,6 +392,25 @@ function initCga() {
             super(32)
         }
 
+        exp(target) {
+            this.cast(localCircle0)
+            localCircle0.exp(localRotor0)
+            localRotor0.cast(target)
+            return target
+        }
+
+        selectGradeWithCga(cgaWithGrade,target) {
+            return this.selectGrade(cgaWithGrade[0], target)
+        }
+
+        //could try to do it properly for odd k
+        sqrt(target) {
+            this.cast(localRotor0)
+            localRotor0.sqrt(localRotor1)
+            localRotor1.cast(target)
+            return target
+        }
+
         flatPpToConformalPoint(target) {
             this.ppToConformalPoints(localCga0, localCga1)
             localCga0.downPt(v1); localCga1.downPt(v2)
@@ -432,7 +451,7 @@ function initCga() {
                 target = new Cga()
 
             this.reverse(target)
-            let factor = Math.abs(1. / this.innerSelfScalar())
+            let factor = Math.abs(1. / this.innerSelfScalar()) //so, potentially 0
             target.multiplyScalar(factor)
             return target
         }
@@ -907,7 +926,38 @@ function initCga() {
         5   
     ]
 
-    Cga.onesWithMinus
+    strToCga = (token, target) => {
+        let subscript = token.slice(1)
+
+        if (token === "I") {
+            target.fromFloatAndIndex(1., 31)
+            return true
+        }
+
+        if(token[0] !== `e`)
+            return false
+
+        let current = localCga0
+        target.fromFloatAndIndex( 1., 0 )
+        for(let i = 0, il = subscript.length; i < il; ++i) {
+            current.copy(target)
+
+            let nextMeet = 
+                subscript[i] === `1` ? e1c :
+                subscript[i] === `2` ? e2c :
+                subscript[i] === `3` ? e3c :
+                subscript[i] === `p` ? ep :
+                subscript[i] === `m` ? em :
+                subscript[i] === `0` ? e0c : null
+            
+            if(nextMeet === null)
+                return false
+            
+            current.meet(nextMeet, target)
+        }
+        
+        return true
+    }
 
     zeroCga = new Cga()
     oneCga = new Cga()
@@ -1018,6 +1068,10 @@ function initCga() {
     rotor2 = new Rotor()
     rotor3 = new Rotor()
     rotor4 = new Rotor()
+
+    let localCircle0 = new Circle()
+    let localCircle1 = new Circle()
+    let localCircle2 = new Circle()
 
     sphere0 = new Sphere()
     sphere1 = new Sphere()

@@ -4,6 +4,13 @@
         place spheres that are circles
         place points that 
 
+    better way of doing the circles
+    1. Take the meet of the circle with e0, getting, say, e012
+    2. Take the dual of that. e012's dual would be e03
+    3. That exponentiates, on the GPU, to a transform that does the whole circle
+    4. On CPU, project a point onto the circle. Probably e123 projected on. You need only one on there
+    5. (optional) could try to do the rounding. Remember there's the normal vector needed anyway
+
     Fullscreen quad plan:
         ALL fragment shaders both check against depth buffer and write to depth buffer
         gl.disable(gl.DEPTH_TEST) //because you're checking depth yourself!

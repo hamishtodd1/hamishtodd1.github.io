@@ -9,6 +9,11 @@
             If you were currently on a cell containing a free thing, it uses that
             But if currently on a cell defined by other things
         You can select a new black cell
+
+    Cells should get smaller and fade out when not visible
+        When you hover them with pointer, the things in them become visible
+            BUT the boxes themselves only re-inflate if you select
+        So, you're only looking at the definition of one of the things at a time
  */
 
 function updatePanel(){}
@@ -58,8 +63,8 @@ function initSpreadsheet() {
     obj3d.add(gridLinesVertical, gridLinesHorizontal)
 
     let typeableSymbols = `abcdefghijklmnopqrstuvwxyz0123456789()*~/`
-    let specialSymbols = `Σ√∧∨⋅`
-    let specialStandin = `£#^&|`
+    let specialSymbols = `∧∨·>` //Σ√
+    let specialStandin = `^&'→` //£#
     function incrementSelection( increment, isRow ) {
         let newVal = isRow ? selectedRow : selectedColumn
         newVal += increment
