@@ -8,7 +8,7 @@
     1. Take the meet of the circle with e0, getting, say, e012
     2. Take the dual of that. e012's dual would be e03
     3. That exponentiates, on the GPU, to a transform that does the whole circle
-    4. On CPU, project a point onto the circle. Probably e123 projected on. You need only one on there
+    4. On CPU, project a point onto the circle, that's your starting point
     5. (optional) could try to do the rounding. Remember there's the normal vector needed anyway
 
     Fullscreen quad plan:
@@ -72,7 +72,7 @@ async function initCgaVizes() {
 
         onBeforeRender() {
             let radius = this.sphere.getRadius()
-            if( radius < 0.001)
+            if( radius < 0.001 || this.sphere.isZero() )
                 this.visible = false
             else 
             {
@@ -82,6 +82,7 @@ async function initCgaVizes() {
                 
                 this.sphere.cast(renderedAsCga)
                 this.visible = true
+                
                 ep.rotorTo(renderedAsCga, this.material.rotor )
             }
         }
@@ -103,10 +104,6 @@ async function initCgaVizes() {
     let pointGeo = new THREE.IcosahedronGeometry(.03,2)
     let pointMat = new THREE.MeshPhongMaterial( { color:0x000000 } )
     let p1 = new Cga(); p2 = new Cga()
-    let ppVizes = []
-    updatePpVizes = () => {
-        ppVizes.forEach(ppv => ppv.onBeforeRender())
-    }
     class PpViz extends THREE.Group {
         constructor() {
             super()
@@ -120,7 +117,7 @@ async function initCgaVizes() {
             this.cga = new Cga()
             ep.meet(e23c,this.cga)
 
-            ppVizes.push(this)
+            obj3dsWithOnBeforeRenders.push(this)
         }
 
         onBeforeRender() {
@@ -198,23 +195,32 @@ async function initCgaVizes() {
         {
             type: `vertex`,
             precedes: ``,
-            str: `uniform float[16] rotor;\n` + glslCga + rodrigues
+            str: `uniform float[16] rotor;
+            \n` + glslCga + rodrigues
         }
     ]
 
-    
     let cgaCircles = [new Cga(), new Cga()]
-    let rotorVizes = []
     //this should be one of the last things in the frame that you call, ideally it'd be onBeforeRender
-    updateRotorVizes = ()=>{
-        rotorVizes.forEach(sv=>sv.onBeforeRender())
+    function attemptToFindTransform(starter, intended, target) {
+        let ratioCga = starter.mul(intended.reverse(cga0), cga1)
+        let ratioSquaresToZero = ratioCga.mul(ratioCga, cga2).isZero()
+        let ratioRotor = ratioCga.cast(rotor0)
+
+        if (ratioSquaresToZero || ratioRotor.isStudy() ) 
+            return false
+        else {
+            ratioRotor.sqrt(target)
+            return true
+        }
     }
+    let e2pTo3p = e3p.rotorTo(e2p, new Rotor())
     class RotorViz extends THREE.Object3D {
         constructor() {
             super()
             scene.add(this)
 
-            rotorVizes.push(this)
+            obj3dsWithOnBeforeRenders.push(this)
 
             this.circleMeshes = Array(2)
             this.circleMeshes[0] = new THREE.Mesh(circleGeo, circleMat)
@@ -231,29 +237,31 @@ async function initCgaVizes() {
         }
 
         onBeforeRender() {
+            //so, you were TRYING at some point to do proper "separation". For now just try to render the freaking circles
             // let circles = this.rotor.cast(circle0).decompose(cgaCircles[0], cgaCircles[1])
             // cgaCircles[0].log()
             
-            // if(frameCount === 2)debugger
             this.rotor.cast(cga0).selectGrade(2, cgaCircles[0])
-            cgaCircles[1].copy(zeroCga)
+            cgaCircles[1].copy(zeroCga) //because we're not using it at all yet
+            
+            this.circleMeshes.forEach((cm,i)=>{
 
-            for (let i = 0; i < 2; ++i)
-                this.circleMeshes[i].visible = this.visible && !cgaCircles[i].equals(zeroCga)
-
-            for (let i = 0; i < 2; ++i) {
-                if ( this.circleMeshes[i].visible ) {
-                    // if (frameCount === 2)
-                    //     debugger
-                    e3p.rotorTo(cgaCircles[i], this.circleMeshes[i].material.rotor )
-                    // log(this.circleMeshes[i].material.rotor)
-
-                    //decomposition doesn't work
-                    //sqrt doesn't give you the right thing
+                //yes, this is pretty hacky
+                
+                if (this.visible && !cgaCircles[i].isZero() ) {
+                    
+                    if (attemptToFindTransform(e3p, cgaCircles[i], this.circleMeshes[i].material.rotor) ) {
+                        cm.visible = true
+                        return
+                    }
+                    else if ( attemptToFindTransform(e2p, cgaCircles[i], rotor0 ) ) {
+                        e2pTo3p.mul( rotor0, this.circleMeshes[i].material.rotor )
+                        cm.visible = true
+                        return
+                    }
                 }
-            }
-
-            // delete circles
+                cm.visible = false
+            })
         }
     }
     window.RotorViz = RotorViz
@@ -276,12 +284,13 @@ async function initCgaVizes() {
             size * (Math.random() - .5) )
     }
 
-    let ourRotorViz = new RotorViz()
+    // let ourRotorViz = new RotorViz()
+    // e12c.cast(ourRotorViz.rotor)
     // e3p.addScaled(e03c, -3.5, cga0).cast(ourRotorViz.rotor)
     
     // let ourAxis = new Circle()
     // e3p.add(e12c,cga0).cast(ourAxis)
-    // e13c.cast(ourAxis)
+    // e3p.cast(ourAxis)
     // e12c.cast(ourAxis)
     // e3p.cast(ourAxis)
     
@@ -289,12 +298,12 @@ async function initCgaVizes() {
     // smallSphereAtHeadHeight.meet(e1c, cga2).cast(ourAxis)
     // smallSphereAtHeadHeight.meet(e1c, cga2).log()
     // blankFunction = () => {
-    //     ourAxis.exp( ourRotorViz.rotor, .015 * frameCount)
+    //     ourAxis.exp( ourRotorViz.rotor, .015 * frameCount )
 
-    //     // for(let i = 0; i < numPts; ++i ){
-    //     //     cga1.upPt(initials[i])
-    //     //     ourRotorViz.rotor.sandwichConformalPoint( cga1, cps[i].cga )
-    //     // }
+        // for(let i = 0; i < numPts; ++i ){
+        //     cga1.upPt(initials[i])
+        //     ourRotorViz.rotor.sandwichConformalPoint( cga1, cps[i].cga )
+        // }
     // }
 
     

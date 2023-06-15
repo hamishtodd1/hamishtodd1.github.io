@@ -26,23 +26,49 @@
 function initCompilation() {
 
     const tests = [
-        `2 + 3`, new Cga().fromFloatAndIndex(5, 0),
-        `(2 + 3) * 5`, new Cga().fromFloatAndIndex(25, 0),
-        `(e1 ∧ e2) ∧ e3`, e123c,
+        // `2 + 3`, new Cga().fromFloatAndIndex(5, 0),
+        // `(2 + 3) * 5`, new Cga().fromFloatAndIndex(25, 0),
+        // `(e1 ∧ e2) ∧ e3`, e123c,
     ]
+
+    let numLocalCgas = 32
+    let localCgas = Array(numLocalCgas)
+    for (let i = 0; i < numLocalCgas; ++i)
+        localCgas[i] = new Cga()
+    function putLocalCgasBack() {
+        while (stack.length !== 0)
+            localCgas.push(stack.pop())
+    }
+
+    const stack = []
 
     const potentialNameRegex = /^[a-zA-Z0-9]+$/
 
-    function evaluateExpression(expression, logLevel = 0) {
+    function reparseTokens(expression,logLevel) {
         expression = expression.replace(/\s/g, '')
         const tokens = tokenize(expression)
-        if(logLevel > 0)
+        if (logLevel > 0)
             log(tokens)
         const parsedTokens = parseTokens(tokens)
-        if(logLevel > 0)
+        if (logLevel > 0)
             log(parsedTokens)
-        // debugger
-        return evaluate(parsedTokens)
+
+        return parsedTokens
+    }
+
+    compile = ( expression, targetCga, logLevel = 0) => {
+
+        const parsedTokens = reparseTokens( expression, logLevel )
+            
+        evaluateToStack(parsedTokens)
+        if (stack.length !== 1)
+            return `malformed expression`
+        else {
+            let result = stack.pop()
+            targetCga.copy(result)
+            localCgas.push(result)
+            return ``
+        }
     }
 
     const specialSymbols = [`(`, `)`]
@@ -52,7 +78,7 @@ function initCompilation() {
             this.name = name
             this.numArgs = numArgs
             this.symbol = symbol || null
-            this.precedence = precedence || null
+            this.precedence = precedence || 0
 
             cgaMethods.push(this)
             if(this.symbol !== null)
@@ -149,7 +175,7 @@ function initCompilation() {
                     while (
                         operatorStack.length &&
                         operatorStack[operatorStack.length - 1] !== '(' &&
-                        (precedence[token] || 0) <= (precedence[operatorStack[operatorStack.length - 1]] || 0)
+                        token.precedence <= operatorStack[operatorStack.length - 1].precedence
                     ) {
                         outputQueue.push(operatorStack.pop())
                     }
@@ -167,11 +193,6 @@ function initCompilation() {
         return outputQueue
     }
 
-    let numLocalCgas = 32
-    let localCgas = Array(numLocalCgas)
-    for(let i = 0; i < numLocalCgas; ++i)
-        localCgas[i] = new Cga()
-
     // function popArrFromStack(n) {
     //     let arr = Array(n)
     //     for (let i = 0; i < n; ++i)
@@ -179,13 +200,15 @@ function initCompilation() {
     //     return arr
     // }
 
-    const stack = []
+    let alphabet = `ABCDEFGHIJKLMNOPQRSTUVWXYZ`
+
     //yes, we might want to put this in a shader
-    function evaluate(tokens) {
+    function evaluateToStack(tokens) {
+
         stack.length = 0
 
-        // debugger
-        tokens.forEach(token=> {
+        for(let i = 0, il = tokens.length; i < il; ++i ) {
+            let token = tokens[i]
 
             if ( !isNaN(parseInt(token[0])) ) {
 
@@ -196,8 +219,6 @@ function initCompilation() {
 
                 const operand2 = stack.pop()
                 const operand1 = stack.pop()
-                // if (operand1 === undefined)
-                //     debugger
                 stack.push( operand1[token.name]( operand2, localCgas.pop() ) )
                 localCgas.push(operand1,operand2)
 
@@ -209,10 +230,34 @@ function initCompilation() {
 
             } else if (potentialNameRegex.test(token)) {
 
-                let namedCga = localCgas.pop()
-                let isBlade = strToCga(token, namedCga)
-                if(isBlade)
-                    stack.push(namedCga)
+                let extraCga = localCgas.pop()
+                if (token === `time`) {
+                    extraCga.zero()
+                    extraCga[0] = clock.getElapsedTime() * .15
+                }
+                // else if(token === `mousePos`) {
+
+                // }
+                else if (/^[A-Z][0-9]+$/.test(token)) {
+                    //spreadsheet entry
+                    let column = alphabet.indexOf(token[0])
+                    let row = parseInt(token.slice(1)) - 1
+                    if (cells[column][row].viz === null ) {
+                        log(cells[column][row])
+                        putLocalCgasBack()
+                        break
+                    }
+
+                    cells[column][row].viz.getMv().cast(extraCga)
+                }
+                else if (!strToBasisCga(token, extraCga)) {
+
+                    //malformed expression
+                    putLocalCgasBack()
+                    break
+                }
+
+                stack.push(extraCga)
                     
                 //could also be row-and-column
 
@@ -222,81 +267,16 @@ function initCompilation() {
 
             if (localCgas.length === 0)
                 console.error("need more localCgas")
-        })
-
-        if(stack.length !== 1)
-            console.error("invalid expression")
-
-        return stack.pop()
+        }
     }
 
     //perform tests
     for(let i = 0, il = tests.length / 2; i < il; ++i) {
-        const result = evaluateExpression(tests[i*2], 0)
+        const result = compile(tests[i*2], cga0, 0)
         if(!result.equals(tests[i*2+1])) {
             console.error("test failed, logging intermediate stuff")
-            const result = evaluateExpression(tests[i * 2], 1)
+            const result = compile(tests[i * 2], cga0, 1)
             log(result)
-        }
-    }
-}
-
-function _initCompilation() {
-
-    //enum: sorts-of-viz
-    const NO_VIZ_TYPE = 0
-    const SPHERE = 1
-    const SPINOR = 2
-    const vizTypes = [NO_VIZ_TYPE, SPHERE, SPINOR]
-    //want a mesh type, and a curve type
-    //no longer sorts-of-viz
-    let constructors = [() => null, SphereViz, RotorViz]
-
-    let numOfEachVizType = 90
-    let unusedVizes = Array(vizTypes.length)
-    for (let i = 0; i < vizTypes.length; ++i) {
-        unusedVizes[i] = Array(numOfEachVizType)
-        for (let j = 0; j < numOfEachVizType; ++j) {
-            if (i === 0)
-                unusedVizes[i][j] = null
-            else {
-                unusedVizes[i][j] = new constructors[i]()
-                unusedVizes[i][j].visible = false
-            }
-        }
-    }
-
-    let knownMultivectors = {
-        "e1": e1c, "e2": e2c, "e3": e3c,
-        "eo": eo, "ep": ep, // "e0": e0c, //yet to have a satisfying visualization of this
-        "e12": e12c, "e23": e23c, "e31": e31c, "e13": e13c, "e12": e12c,
-        "e01": e01c, "e02": e02c, "e03": e03c,
-        "e1p": e1p, "e2p": e2p, "e3p": e3p,
-    }
-
-    // parse into AST... parse out again
-
-    // class Ast {
-
-    // }
-
-    compile = (cell) => {
-        let oldVizType = cell.viz === null ? NO_VIZ_TYPE : constructors.indexOf(cell.viz.constructor)
-
-        let trimmed = cell.currentText.trim()
-        let vizType = knownMultivectors[trimmed] === undefined ? NO_VIZ_TYPE : vizTypes[trimmed.length - 1]
-
-        if (oldVizType !== vizType) {
-            unusedVizes[oldVizType].push(cell.viz)
-            cell.viz = unusedVizes[vizType].pop()
-        }
-
-        //now give it the value
-        if (vizType !== NO_VIZ_TYPE) {
-            if (knownMultivectors[trimmed] !== undefined)
-                knownMultivectors[trimmed].cast(cell.viz.getMv())
-            else
-                cell.viz.getMv().zero()
         }
     }
 }

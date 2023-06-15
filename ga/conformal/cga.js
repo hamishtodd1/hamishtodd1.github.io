@@ -87,10 +87,8 @@ function initCga() {
             }
         }
 
-        // e12+e34
-        // 
-
-        exp ( target, scalarMultiple ) {
+        // should have target last
+        exp ( target, angleOrDistance ) {
             
             if(target === undefined)
                 target = new Rotor()
@@ -100,11 +98,15 @@ function initCga() {
 
             // debugger
 
-            this.multiplyScalar( (scalarMultiple === undefined?1.:scalarMultiple), multipliedCircle )
+            this.multiplyScalar( (angleOrDistance === undefined?1.:angleOrDistance*.5), multipliedCircle )
 
             // B*B = S + Ti*ei*I
             //6D study!
-            let S = -multipliedCircle[0] * multipliedCircle[0] - multipliedCircle[1] * multipliedCircle[1] - multipliedCircle[2] * multipliedCircle[2] + multipliedCircle[3] * multipliedCircle[3] - multipliedCircle[4] * multipliedCircle[4] - multipliedCircle[5] * multipliedCircle[5] + multipliedCircle[6] * multipliedCircle[6] - multipliedCircle[7] * multipliedCircle[7] + multipliedCircle[8] * multipliedCircle[8] + multipliedCircle[9] * multipliedCircle[9];
+            let S = -multipliedCircle[0] * multipliedCircle[0] - multipliedCircle[1] * multipliedCircle[1] 
+                    -multipliedCircle[2] * multipliedCircle[2] + multipliedCircle[3] * multipliedCircle[3] 
+                    -multipliedCircle[4] * multipliedCircle[4] - multipliedCircle[5] * multipliedCircle[5]
+                    +multipliedCircle[6] * multipliedCircle[6] - multipliedCircle[7] * multipliedCircle[7]
+                    +multipliedCircle[8] * multipliedCircle[8] + multipliedCircle[9] * multipliedCircle[9];
             let [T1, T2, T3, T4, T5] = [
                 2 * (multipliedCircle[4] * multipliedCircle[9] - multipliedCircle[5] * multipliedCircle[8] + multipliedCircle[6] * multipliedCircle[7]), //e2345
                 2 * (multipliedCircle[1] * multipliedCircle[9] - multipliedCircle[2] * multipliedCircle[8] + multipliedCircle[3] * multipliedCircle[7]), //e1345
@@ -175,6 +177,26 @@ function initCga() {
             this[0] = 1.
 
             this.isRotor = true
+        }
+
+        mul(b, target) {
+            if (target === undefined)
+                target = new Rotor()
+
+            this.cast(localCga0)
+            b.cast(localCga1)
+            localCga0.mul(localCga1, localCga2).cast(target)
+
+            return target
+        }
+
+        isStudy() {
+            let has2 = false
+            let has4 = false
+            for (let i =  1; i < 11; ++i) if (this[i] !== 0.) has2 = true
+            for (let i = 11; i < 16; ++i) if (this[i] !== 0.) has4 = true
+
+            return has4 && !has2
         }
 
         reverse(target) {
@@ -251,17 +273,23 @@ function initCga() {
         }
 
         normalize(target) {
-            var S = this[0] * this[0] - this[10] * this[10] + this[11] * this[11] - this[12] * this[12] - this[13] * this[13] - this[14] * this[14] - this[15] * this[15] + this[1] * this[1]
+            if(target === undefined)
+                target = new Rotor()
+
+            let S = this[0] * this[0] - this[10] * this[10] + this[11] * this[11] - this[12] * this[12] - this[13] * this[13] - this[14] * this[14] - this[15] * this[15] + this[1] * this[1]
                   + this[2] * this[2] + this[3] * this[3] - this[4] * this[4] + this[5] * this[5] + this[6] * this[6] - this[7] * this[7] + this[8] * this[8] - this[9] * this[9];
-            var T1 = 2 * (this[0] * this[11] - this[10] * this[12] + this[13] * this[9] - this[14] * this[7] + this[15] * this[4] - this[1] * this[8] + this[2] * this[6] - this[3] * this[5]);
-            var T2 = 2 * (this[0] * this[12] - this[10] * this[11] + this[13] * this[8] - this[14] * this[6] + this[15] * this[3] - this[1] * this[9] + this[2] * this[7] - this[4] * this[5]);
-            var T3 = 2 * (this[0] * this[13] - this[10] * this[1] + this[11] * this[9] - this[12] * this[8] + this[14] * this[5] - this[15] * this[2] + this[3] * this[7] - this[4] * this[6]);
-            var T4 = 2 * (this[0] * this[14] - this[10] * this[2] - this[11] * this[7] + this[12] * this[6] - this[13] * this[5] + this[15] * this[1] + this[3] * this[9] - this[4] * this[8]);
-            var T5 = 2 * (this[0] * this[15] - this[10] * this[5] + this[11] * this[4] - this[12] * this[3] + this[13] * this[2] - this[14] * this[1] + this[6] * this[9] - this[7] * this[8]);
-            var TT = -T1 * T1 + T2 * T2 + T3 * T3 + T4 * T4 + T5 * T5;
-            var N = Math.sqrt(Math.sqrt(S * S + TT) + S), N2 = N * N;
-            var ND = 2 ** .5 * N / (N2 * N2 + TT);
-            var C = N2 * ND, [D1, D2, D3, D4, D5] = [-T1 * ND, -T2 * ND, -T3 * ND, -T4 * ND, -T5 * ND];
+            let T1 = 2. * (this[0] * this[11] - this[10] * this[12] + this[13] * this[9] - this[14] * this[7] + this[15] * this[4] - this[1] * this[8] + this[2] * this[6] - this[3] * this[5]);
+            let T2 = 2. * (this[0] * this[12] - this[10] * this[11] + this[13] * this[8] - this[14] * this[6] + this[15] * this[3] - this[1] * this[9] + this[2] * this[7] - this[4] * this[5]);
+            let T3 = 2. * (this[0] * this[13] - this[10] * this[1] + this[11] * this[9] - this[12] * this[8] + this[14] * this[5] - this[15] * this[2] + this[3] * this[7] - this[4] * this[6]);
+            let T4 = 2. * (this[0] * this[14] - this[10] * this[2] - this[11] * this[7] + this[12] * this[6] - this[13] * this[5] + this[15] * this[1] + this[3] * this[9] - this[4] * this[8]);
+            let T5 = 2. * (this[0] * this[15] - this[10] * this[5] + this[11] * this[4] - this[12] * this[3] + this[13] * this[2] - this[14] * this[1] + this[6] * this[9] - this[7] * this[8]);
+            let TT = -T1 * T1 + T2 * T2 + T3 * T3 + T4 * T4 + T5 * T5;
+            // console.error(S, S * S + TT, TT)
+            let N = Math.sqrt( S + Math.sqrt(S * S + TT) )
+            let N2 = N * N;
+            // console.error(N2 * N2 + TT)
+            let ND = Math.SQRT2 * N / (N2 * N2 + TT);
+            let C = N2 * ND, [D1, D2, D3, D4, D5] = [-T1 * ND, -T2 * ND, -T3 * ND, -T4 * ND, -T5 * ND];
             target.set(
                 C * this[0] + D1 * this[11] - D2 * this[12] - D3 * this[13] - D4 * this[14] - D5 * this[15],
                 C * this[1] - D1 * this[8] + D2 * this[9] + D3 * this[10] - D4 * this[15] + D5 * this[14],
@@ -392,6 +420,19 @@ function initCga() {
             super(32)
         }
 
+        //currently we just care about sphere, or rotor, or anything else
+        getType() {
+            if(this.isZero())
+                return -1
+
+            for(let i = 0; i < 32; ++i) {
+                if( this[i] !== 0. ) {
+                    if (Cga.indexGrades[i] % 2)
+                        mightBeRotor = false
+                }
+            }
+        }
+
         exp(target) {
             this.cast(localCircle0)
             localCircle0.exp(localRotor0)
@@ -435,8 +476,8 @@ function initCga() {
         }
 
         rotorTo(b, target) {
-            let ratio = this.div(b, localCga5).cast(localRotor0)
-            return ratio.sqrt(target) //sqrt normalizes. Twice.
+            let ratioCga = b.mul(this.reverse(localCga6), localCga5)
+            return ratioCga.cast(localRotor0).sqrt(target) //sqrt normalizes
         }
 
         div(b, target) {
@@ -926,7 +967,7 @@ function initCga() {
         5   
     ]
 
-    strToCga = (token, target) => {
+    strToBasisCga = (token, target) => {
         let subscript = token.slice(1)
 
         if (token === "I") {

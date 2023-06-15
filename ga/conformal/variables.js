@@ -7,6 +7,8 @@ const zeroMatrix = new THREE.Matrix4().set(0., 0., 0., 0., 0., 0., 0., 0., 0., 0
 
 const clock = new THREE.Clock(true)
 
+const obj3dsWithOnBeforeRenders = []
+
 const outOfSightVec3 = new THREE.Vector3(999.,999.,999.)
 
 const v1 = new THREE.Vector3()
@@ -37,6 +39,7 @@ scene.add(debugSphere)
 debugSphere.position.copy(outOfSightVec3)
 
 const grabbables = []
+const cells = []
 
 THREE.Matrix4.prototype.log = function() {
 	let order = [
@@ -62,4 +65,8 @@ function clamp(value, min, max) {
 		return max
 
 	return value;
+}
+
+function isString(myVar) {
+	return typeof myVar === 'string' || myVar instanceof String
 }

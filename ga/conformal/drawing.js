@@ -27,6 +27,9 @@ function initDrawing () {
             changeDrawingMode(1)
     })
 
+    //there's an argument to be made: when you move the mouse around,
+    //you should be seeing an infinitely long line stabbing the plane
+
     let drawingPp = new PpViz()
     drawingPp.visible = false
     let drawingCp = new ConformalPointViz()
@@ -112,6 +115,6 @@ function initDrawing () {
         }
     })
 
-    let drawingMode = 1
+    let drawingMode = 4
     logDrawingMode()
 }

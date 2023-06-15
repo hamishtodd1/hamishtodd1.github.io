@@ -5,6 +5,72 @@
 glslCga = `
 #define TAU 6.28318530718
 
+void exponentiate( in float[16] spinorContainingAxis, in float angleOrDistance, out float[16] target ) {
+
+    float[10] axis; 
+    float scalarMultiple = angleOrDistance * .5;
+    for( int i = 0; i < 10; ++i )
+        axis[i] = spinorContainingAxis[i+1] * scalarMultiple;
+
+    // B*B = S + Ti*ei*I
+    //6D study!
+    float S = -axis[0] * axis[0] - axis[1] * axis[1] 
+              -axis[2] * axis[2] + axis[3] * axis[3] 
+              -axis[4] * axis[4] - axis[5] * axis[5] 
+              +axis[6] * axis[6] - axis[7] * axis[7]
+              +axis[8] * axis[8] + axis[9] * axis[9];
+    
+    float T1 = 2. * (axis[4] * axis[9] - axis[5] * axis[8] + axis[6] * axis[7]); //e2345
+    float T2 = 2. * (axis[1] * axis[9] - axis[2] * axis[8] + axis[3] * axis[7]); //e1345
+    float T3 = 2. * (axis[0] * axis[9] - axis[2] * axis[6] + axis[3] * axis[5]); //e1245
+    float T4 = 2. * (axis[0] * axis[8] - axis[1] * axis[6] + axis[3] * axis[4]); //e1235
+    float T5 = 2. * (axis[0] * axis[7] - axis[1] * axis[5] + axis[2] * axis[4]); //e1234
+
+    // Calculate the norms of the invariants
+    float Tsq = -T1 * T1 - T2 * T2 - T3 * T3 - T4 * T4 + T5 * T5;
+    float norm = sqrt(S * S - Tsq); // is this just extracting the number above...?
+
+    if(norm == 0.) {
+        target[ 0] = 1.;
+        target[ 1] = axis[0]; target[ 2] = axis[1]; target[ 3] = axis[2]; target[ 4] = axis[3]; target[ 5] = axis[4]; 
+        target[ 6] = axis[5]; target[ 7] = axis[6]; target[ 8] = axis[7]; target[ 9] = axis[8]; target[10] = axis[9];
+        target[11] = 0.; target[12] = 0.; target[13] = 0.; target[14] = 0.; target[15] = 0.;
+    }
+
+    float lambdap = 0.5 * S + 0.5 * norm;
+
+    float lp = sqrt(abs(lambdap)); //=.25sqrt(S) if norm===0
+    float lm = sqrt(-0.5 * S + 0.5 * norm); //if norm is 0 and these things aren't imaginary (???), they're the same
+
+    float cp = lambdap > 0. ? cosh(lp)      : lambdap < 0. ? cos( lp)      : 1.;
+    float sp = lambdap > 0. ? sinh(lp) / lp : lambdap < 0. ? sin( lp) / lp : 1.;
+    float cm = cos(lm);
+    float sm = lm == 0. ? 1. : sin(lm) / lm;
+
+    // Calculate the mixing factors alpha and beta_i.
+    float cmsp = cm * sp, cpsm = cp * sm;
+    float D = cmsp - cpsm;
+    float sc = -0.5 / norm;
+    float E = sc * D; //sc inversely proportional to norm
+    float alpha = D * (0.5 - sc * S) + cpsm;
+    float beta1 = E * T1, beta2 = -E * T2, beta3 = E * T3, beta4 = -E * T4, beta5 = -E * T5;
+    float spsm = sp * sm / 2.;
+    
+    // Create the final rotor.
+    target[ 0] = cp * cm;
+    target[ 1] = axis[0] * alpha + axis[7] * beta5 - axis[8] * beta4 + axis[9] * beta3;
+    target[ 2] = axis[1] * alpha - axis[5] * beta5 + axis[6] * beta4 - axis[9] * beta2;
+    target[ 3] = axis[2] * alpha + axis[4] * beta5 - axis[6] * beta3 + axis[8] * beta2;
+    target[ 4] = axis[3] * alpha + axis[4] * beta4 - axis[5] * beta3 + axis[7] * beta2;
+    target[ 5] = axis[4] * alpha + axis[2] * beta5 - axis[3] * beta4 + axis[9] * beta1;
+    target[ 6] = axis[5] * alpha - axis[1] * beta5 + axis[3] * beta3 - axis[8] * beta1;
+    target[ 7] = axis[6] * alpha - axis[1] * beta4 + axis[2] * beta3 - axis[7] * beta1;
+    target[ 8] = axis[7] * alpha + axis[0] * beta5 - axis[3] * beta2 + axis[6] * beta1;
+    target[ 9] = axis[8] * alpha + axis[0] * beta4 - axis[2] * beta2 + axis[5] * beta1;
+    target[10] = axis[9] * alpha - axis[0] * beta3 + axis[1] * beta2 - axis[4] * beta1;
+    target[11] = spsm * T5; target[12] = spsm * T4; target[13] = spsm * T3; target[14] = spsm * T2; target[15] = spsm * T1;
+}
+
 void reverse(in float[16] rotor, out float[16] target) {
 
     target[ 0] =  rotor[ 0];

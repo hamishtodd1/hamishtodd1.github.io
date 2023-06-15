@@ -10,6 +10,8 @@
             But if currently on a cell defined by other things
         You can select a new black cell
 
+    When you call a function, could inline it, a little box-within-box
+
     Cells should get smaller and fade out when not visible
         When you hover them with pointer, the things in them become visible
             BUT the boxes themselves only re-inflate if you select
@@ -20,15 +22,21 @@ function updatePanel(){}
 
 function initSpreadsheet() {
 
+    let selectedColumn = 0
+    let selectedRow = 6
+    let typingIntoCell = false
+
+    let refreshCountdown = -1.
+
     let initial = [
-        ["time", "hello"],
-        ["mousePos"],
-        ["e2"],
-        ["e3"],
-        ["e23"],
-        ["ep"],
-        ["A1 + B1"],
-        ["e2 + e3"],
+        [ `time`, `hello` ],
+        [ `mousePos` ],
+        [ `e2` ],
+        [ `e3` ],
+        [ `e23` ],
+        [ `ep` ],
+        [ `e23 - time * e13` ],
+        [ `A3 + A4` ],
     ]
 
     let layerWidth = .001
@@ -43,7 +51,7 @@ function initSpreadsheet() {
     scene.add(obj3d)
 
     let bg = new THREE.Mesh(unchangingUnitSquareGeometry, new THREE.MeshBasicMaterial({color:0xFFFFFF}))
-    bg.scale.set(1.4, 2.4, 1.)
+    bg.scale.set(2.4, 2.4, 1.)
     bg.position.z = -layerWidth
     obj3d.add(bg)
 
@@ -62,7 +70,7 @@ function initSpreadsheet() {
     let gridLinesHorizontal = new THREE.InstancedMesh(unchangingUnitSquareGeometry, gridMat, gridLinesHorizontalNum)
     obj3d.add(gridLinesVertical, gridLinesHorizontal)
 
-    let typeableSymbols = `abcdefghijklmnopqrstuvwxyz0123456789()*~/`
+    let typeableSymbols = `abcdefghijklmnopqrstuvwxyz0123456789()*~/ `
     let specialSymbols = `∧∨·>` //Σ√
     let specialStandin = `^&'→` //£#
     function incrementSelection( increment, isRow ) {
@@ -75,6 +83,7 @@ function initSpreadsheet() {
         else
             selectCell( newVal, selectedRow)
     }
+
     document.addEventListener(`keydown`, (event)=>{
 
         let selectedCell = cells[selectedColumn][selectedRow]
@@ -94,21 +103,30 @@ function initSpreadsheet() {
                 incrementSelection( 1,true)
                 return
             default:
+                
+                if (!typingIntoCell || event.key === `Backspace` ) {
+                    selectedCell.setText(``)
+                    typingIntoCell = true
+                }
+
                 if ( typeableSymbols.indexOf(event.key) !== -1 )
                     selectedCell.append(event.key)
                 else if(specialStandin.indexOf(event.key) !== -1)
                     selectedCell.append(specialSymbols[specialStandin.indexOf(event.key)])
+
+                refreshCountdown = 0.5
         }
     })
 
     function selectCell(newColumn, newRow) {
         cells[selectedColumn][selectedRow].setVizVisibility(false)
-        compile( cells[selectedColumn][selectedRow] )
 
         selectedColumn = newColumn
         selectedRow = newRow
 
         cells[selectedColumn][selectedRow].setVizVisibility(true)
+
+        typingIntoCell = false
     }
 
     function inRect(posVec,rectPos,rectScale) {
@@ -140,13 +158,44 @@ function initSpreadsheet() {
         return [px,py]
     }
 
+    ///////////////
+    // Viz types //
+    ///////////////
+
+    //enum
+    const NO_VIZ_TYPE = 0
+    const SPHERE = 1
+    const ROTOR = 2 //grade wise that's more like a circle but this will do for now
+    const vizTypes = [NO_VIZ_TYPE, SPHERE, ROTOR]
+    //want a mesh type, and a curve type
+    //no longer sorts-of-viz
+    let constructors = [() => null, SphereViz, RotorViz]
+
+    let evaluatedCga = new Cga()
+
+    let numOfEachVizType = 90
+    let unusedVizes = Array(vizTypes.length)
+    for (let i = 0; i < vizTypes.length; ++i) {
+        unusedVizes[i] = Array(numOfEachVizType)
+        for (let j = 0; j < numOfEachVizType; ++j) {
+            if (i === 0)
+                unusedVizes[i][j] = null
+            else {
+                unusedVizes[i][j] = new constructors[i]()
+                unusedVizes[i][j].visible = false
+            }
+        }
+    }
+
     ///////////////////
     // Text in cell //
     //////////////////
 
     //both of these matter to where the text appears
+    let textMeshHeight = cellHeight * .7
+    let textMeshWidth = cellWidth - (cellHeight-textMeshHeight)
     let canvasVerticalResolution = 60
-    let canvasHorizontalResolution = 340
+    let canvasHorizontalResolution = canvasVerticalResolution * textMeshWidth / textMeshHeight
     //have to choose a max then stick to it, it's complicated to think about changing uvs at runtime
 
     class Cell extends THREE.Mesh {
@@ -163,19 +212,43 @@ function initSpreadsheet() {
 
             this.canvas.height = canvasVerticalResolution
             this.canvas.width = canvasHorizontalResolution
-            this.scale.y = cellHeight * .7
-            this.scale.x = this.canvas.width / this.canvas.height * this.scale.y;
+            this.scale.y = textMeshHeight
+            this.scale.x = textMeshWidth
             obj3d.add(this)
 
             let [px, py] = getCellPos(column, row)
             this.position.set(px, py, 0.)
 
-            this.viz = null
+            this.viz = null //so vis type is NO_VIZ_TYPE
 
             //"Σ√A∧B∨⋅a*sβα" //if you want ǁ it gets a bit taller
             this.currentText = ``
 
             this.setVizVisibility(false)
+        }
+
+        refresh() {
+
+            let oldVizType = this.viz === null ? NO_VIZ_TYPE : constructors.indexOf(this.viz.constructor)
+
+            let error = compile(this.currentText, evaluatedCga, 0)
+            let vizType =
+                error !== `` ? NO_VIZ_TYPE :
+                !evaluatedCga.cast(sphere0).isZero() ? SPHERE :
+                !evaluatedCga.cast(rotor0).isZero() ? ROTOR :
+                NO_VIZ_TYPE // for now
+
+            if (oldVizType !== vizType) {
+                
+                this.setVizVisibility(false)
+
+                unusedVizes[oldVizType].push(this.viz)
+                this.viz = unusedVizes[vizType].pop()
+            }
+
+            //now give it the value
+            if (vizType !== NO_VIZ_TYPE)
+                evaluatedCga.cast(this.viz.getMv())
         }
 
         setText(newText) {
@@ -190,6 +263,7 @@ function initSpreadsheet() {
             this.context.textBaseline = "top"
 
             // this.context.fillStyle = "#FF0000" //for debugging
+            // this.context.fillRect(
             this.context.clearRect(
                 0, 0,
                 this.canvas.width,
@@ -204,7 +278,7 @@ function initSpreadsheet() {
         }
 
         append(suffix) {
-            this.setText(this.currentText+suffix)
+            this.setText( this.currentText + suffix )
         }
 
         setVizVisibility(newVisibility) {
@@ -213,7 +287,6 @@ function initSpreadsheet() {
         }
     }
 
-    let cells = Array(columns)
     function forEachCell(func) {
         for (let column = 0; column < columns; ++column) {
             for (let row = 0; row < rows; ++row)
@@ -230,7 +303,7 @@ function initSpreadsheet() {
     initial.forEach( ( arr, i ) => {
         arr.forEach( ( entry, j ) => {
             cells[j][i].append(entry)
-            compile( cells[j][i] )
+            cells[j][i].refresh()
         })
     })
 
@@ -279,9 +352,29 @@ function initSpreadsheet() {
             selectionBox.setMatrixAt(3, ourM)
             selectionBox.instanceMatrix.needsUpdate = true
         }
+
+        // Refresh cell if not typed into. Currently useless since if it's visible it's refreshed every frame
+        // if (refreshCountdown !== -1.) {
+        //     refreshCountdown -= frameDelta
+
+        //     if (refreshCountdown < 0.) {
+        //         // log(refreshCountdown)
+        //         cells[selectedColumn][selectedRow].refresh()
+        //         cells[selectedColumn][selectedRow].setVizVisibility(true)
+        //         refreshCountdown = -1.
+        //     }
+        // }
+
+        cells.forEach((column, i) => {
+            column.forEach((cell, j) => {
+                // if(i === selectedColumn && j === selectedRow)
+                //     return
+
+                if ( cell.viz && cell.viz.visible)
+                    cell.refresh()
+            })
+        })
     }
 
-    let selectedColumn = 0
-    let selectedRow = 7
     selectCell(selectedColumn, selectedRow)
 }

@@ -18,7 +18,7 @@ async function init() {
     await initCgaVizes()
 
     initCompilation()
-    // initSpreadsheet()
+    initSpreadsheet()
 
     initMouse()
     initDrawing()
@@ -27,7 +27,7 @@ async function init() {
 
     scene.background = new THREE.Color(0x8F8F8F)
 
-    camera.position.set(0, 1.6, 3.5)
+    camera.position.set(0, 1.6, 3.7 )
     // camera.position.z += 10.
 
     let orbitControls = new OrbitControls(camera, container)
@@ -100,12 +100,9 @@ async function init() {
         ++frameCount
 
         blankFunction()
-        // updateDqMeshes()
-        // disorderedUpdate
         updatePanel()
         handleDrawing()
-        updateRotorVizes()
-        updatePpVizes()
+        obj3dsWithOnBeforeRenders.forEach(obj3d => obj3d.onBeforeRender())
 
         renderer.render(scene, camera)
     }
