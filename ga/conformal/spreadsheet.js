@@ -28,14 +28,15 @@ function initSpreadsheet() {
 
     let refreshCountdown = -1.
 
+    // `₀`, `₁`, `₂`, `₃`, `₄`, `₅`, `ₚ`, `ₘ`, `𝅘`
     let initial = [
-        [ `time`, `hello` ],
+        [`time`, `hey` ],
         [ `mousePos` ],
-        [ `e2` ],
-        [ `e3` ],
-        [ `e23` ],
-        [ `ep` ],
-        [ `e23 - time * e13` ],
+        [ `e₂` ],
+        [ `e₃` ],
+        [ `e₂₃` ],
+        [ `eₚ` ],
+        [ `e₂₃ - time * e₁₃` ],
         [ `A3 + A4` ],
     ]
 
@@ -70,9 +71,11 @@ function initSpreadsheet() {
     let gridLinesHorizontal = new THREE.InstancedMesh(unchangingUnitSquareGeometry, gridMat, gridLinesHorizontalNum)
     obj3d.add(gridLinesVertical, gridLinesHorizontal)
 
-    let typeableSymbols = `abcdefghijklmnopqrstuvwxyz0123456789()*~/ `
-    let specialSymbols = `∧∨·>` //Σ√
-    let specialStandin = `^&'→` //£#
+    let typeableSymbols = `abcdefghijklmnopqrstuvwxyz0123456789()*+-_~ `
+    let specialSymbols = `∧∨·→` //Σ√
+    let specialStandin = `^&'>` //£#
+    let subscriptables = [`0`, `1`, `2`, `3`, `4`, `5`, `p`, `m`, `o`]
+    let subscripts     = [`₀`, `₁`, `₂`, `₃`, `₄`, `₅`, `ₚ`, `ₘ`, `𝅘`]
     function incrementSelection( increment, isRow ) {
         let newVal = isRow ? selectedRow : selectedColumn
         newVal += increment
@@ -102,17 +105,34 @@ function initSpreadsheet() {
             case `ArrowDown`:
                 incrementSelection( 1,true)
                 return
+            case `Backspace`:
+                selectedCell.setText(``)
+                typingIntoCell = true
+                refreshCountdown = 0.5
+                return
             default:
                 
-                if (!typingIntoCell || event.key === `Backspace` ) {
+                if (!typingIntoCell ) {
                     selectedCell.setText(``)
                     typingIntoCell = true
                 }
 
-                if ( typeableSymbols.indexOf(event.key) !== -1 )
-                    selectedCell.append(event.key)
-                else if(specialStandin.indexOf(event.key) !== -1)
-                    selectedCell.append(specialSymbols[specialStandin.indexOf(event.key)])
+                if (subscriptables.includes(event.key) && subscriptify)
+                    selectedCell.append(subscripts[subscriptables.indexOf(event.key)])
+                else {
+                    
+                    if (specialStandin.indexOf(event.key) !== -1)
+                        selectedCell.append(specialSymbols[specialStandin.indexOf(event.key)])
+                    // else if(event.key === `o`)
+                    //     selectedCell.append(`𝅘`) //bug unless this one is separated from other special symbols. Computers
+                    else if (typeableSymbols.indexOf(event.key) !== -1)
+                        selectedCell.append(event.key)
+
+                    if(event.key === `e`)
+                        subscriptify = true
+                    else
+                        subscriptify = false
+                }
 
                 refreshCountdown = 0.5
         }
@@ -354,21 +374,21 @@ function initSpreadsheet() {
         }
 
         // Refresh cell if not typed into. Currently useless since if it's visible it's refreshed every frame
-        // if (refreshCountdown !== -1.) {
-        //     refreshCountdown -= frameDelta
+        if (refreshCountdown !== -1.) {
+            refreshCountdown -= frameDelta
 
-        //     if (refreshCountdown < 0.) {
-        //         // log(refreshCountdown)
-        //         cells[selectedColumn][selectedRow].refresh()
-        //         cells[selectedColumn][selectedRow].setVizVisibility(true)
-        //         refreshCountdown = -1.
-        //     }
-        // }
+            if (refreshCountdown < 0.) {
+                // log(refreshCountdown)
+                cells[selectedColumn][selectedRow].refresh()
+                cells[selectedColumn][selectedRow].setVizVisibility(true)
+                refreshCountdown = -1.
+            }
+        }
 
         cells.forEach((column, i) => {
             column.forEach((cell, j) => {
-                // if(i === selectedColumn && j === selectedRow)
-                //     return
+                if (i === selectedColumn && j === selectedRow && typingIntoCell)
+                    return
 
                 if ( cell.viz && cell.viz.visible)
                     cell.refresh()

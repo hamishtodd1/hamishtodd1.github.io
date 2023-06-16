@@ -42,7 +42,7 @@ function initCompilation() {
 
     const stack = []
 
-    const potentialNameRegex = /^[a-zA-Z0-9]+$/
+    const potentialNameRegex = /^[a-zA-Z0-9₀₁₂₃₄₅ₚₘ𝅘]+$/
 
     function reparseTokens(expression,logLevel) {
         expression = expression.replace(/\s/g, '')
@@ -276,7 +276,6 @@ function initCompilation() {
         if(!result.equals(tests[i*2+1])) {
             console.error("test failed, logging intermediate stuff")
             const result = compile(tests[i * 2], cga0, 1)
-            log(result)
         }
     }
 }

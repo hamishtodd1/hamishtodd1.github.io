@@ -984,12 +984,14 @@ function initCga() {
             current.copy(target)
 
             let nextMeet = 
-                subscript[i] === `1` ? e1c :
-                subscript[i] === `2` ? e2c :
-                subscript[i] === `3` ? e3c :
-                subscript[i] === `p` ? ep :
-                subscript[i] === `m` ? em :
-                subscript[i] === `0` ? e0c : null
+                (subscript[i] === `0` || subscript[i] === `₀`) ? e0c :
+                (subscript[i] === `1` || subscript[i] === `₁`) ? e1c :
+                (subscript[i] === `2` || subscript[i] === `₂`) ? e2c :
+                (subscript[i] === `3` || subscript[i] === `₃`) ? e3c :
+                (subscript[i] === `o` || subscript[i] === `𝅘`) ? eo :
+                (subscript[i] === `p` || subscript[i] === `ₚ` || subscript[i] === `4` || subscript[i] === `₄`) ? ep :
+                (subscript[i] === `m` || subscript[i] === `ₘ` || subscript[i] === `5` || subscript[i] === `₅`) ? em :
+                null
             
             if(nextMeet === null)
                 return false
