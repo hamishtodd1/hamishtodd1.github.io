@@ -59,6 +59,7 @@ async function initCgaVizes() {
     let sphereGeo = new THREE.IcosahedronGeometry(1., 5)
     let renderedAsCga = new Cga()
     class SphereViz extends THREE.Mesh {
+
         constructor() {
             
             let mat = new THREE.MeshPhong2Material({ side: THREE.DoubleSide, map: bourkeTexture })
@@ -71,7 +72,9 @@ async function initCgaVizes() {
         }
 
         onBeforeRender() {
+
             let radius = this.sphere.getRadius()
+
             if( radius < 0.001 || this.sphere.isZero() )
                 this.visible = false
             else 

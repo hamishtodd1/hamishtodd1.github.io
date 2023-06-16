@@ -31,7 +31,6 @@ function initDrawing () {
     //you should be seeing an infinitely long line stabbing the plane
 
     let drawingPp = new PpViz()
-    drawingPp.visible = false
     let drawingCp = new ConformalPointViz()
     let drawingSphere = new SphereViz()
     let laidCga = new Cga().copy(zeroCga)

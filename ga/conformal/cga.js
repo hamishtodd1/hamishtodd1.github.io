@@ -313,7 +313,7 @@ function initCga() {
 
         sqrt(target) {
             this.normalize(localRotor1)
-            localRotor1[0] += 1.
+            localRotor1[0] += (localRotor1[0] === -1. ? -1. : 1.) //because negative translations
             return localRotor1.normalize(target)
         }
 

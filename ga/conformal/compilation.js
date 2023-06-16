@@ -1,11 +1,10 @@
 /**
-    Functions you want:
-        Infix:
-            Add, Subtract, Mul, Wedge, Inner, Vee (div = mul by inverse)
-            Underscore for grade selection
-        Functions?
-            exp, log, sqrt, reverse
-        Negate?
+    Maybe you want:
+        reverse
+        log
+        negate
+
+    Maybe time should be a weight on a spring/simple harmonic oscillator?
 
     would be nice to have a guarantee that everything user makes is always well-defined
 
@@ -35,16 +34,18 @@ function initCompilation() {
     let localCgas = Array(numLocalCgas)
     for (let i = 0; i < numLocalCgas; ++i)
         localCgas[i] = new Cga()
-    function putLocalCgasBack() {
-        while (stack.length !== 0)
-            localCgas.push(stack.pop())
+    function clearStack(stack) {
+        while (stack.length !== 0) {
+            let thing = stack.pop()
+            if (!cgaMethods.includes(thing))
+                localCgas.push(stack.pop()) //because all there ever is is localCgas and cgaMethods
+        }
     }
-
-    const stack = []
 
     const potentialNameRegex = /^[a-zA-Z0-9₀₁₂₃₄₅ₚₘ𝅘]+$/
 
     function reparseTokens(expression,logLevel) {
+
         expression = expression.replace(/\s/g, '')
         const tokens = tokenize(expression)
         if (logLevel > 0)
@@ -53,6 +54,9 @@ function initCompilation() {
         if (logLevel > 0)
             log(parsedTokens)
 
+        while(tokens.length > 0)
+            delete tokens.pop()
+
         return parsedTokens
     }
 
@@ -60,7 +64,9 @@ function initCompilation() {
 
         const parsedTokens = reparseTokens( expression, logLevel )
             
-        evaluateToStack(parsedTokens)
+        const stack = []
+        evaluateToStack(parsedTokens, stack)
+
         if (stack.length !== 1)
             return `malformed expression`
         else {
@@ -77,6 +83,7 @@ function initCompilation() {
         constructor(name, numArgs, symbol, precedence) {
             this.name = name
             this.numArgs = numArgs
+
             this.symbol = symbol || null
             this.precedence = precedence || 0
 
@@ -86,14 +93,14 @@ function initCompilation() {
         }
     }
     
-    new CgaMethod(`selectGradeWithCga`, 2, "_", 3 )
-    new CgaMethod(`mul`,                2, "*", 2 )
-    new CgaMethod(`meet`,               2, "∧", 2 )
-    new CgaMethod(`join`,               2, "∨", 2 )
-    new CgaMethod(`inner`,              2, "·", 2 )
-    new CgaMethod(`sandwich`,           2, "⤻", 2 )
-    new CgaMethod(`add`,                2, "+", 1 )
-    new CgaMethod(`sub`,                2, "-", 1 )
+    new CgaMethod(`selectGradeWithCga`, 2, `_`, 3 )
+    new CgaMethod(`mul`,                2, `*`, 2 )
+    new CgaMethod(`meet`,               2, `∧`, 2 )
+    new CgaMethod(`join`,               2, `∨`, 2 )
+    new CgaMethod(`inner`,              2, `·`, 2 )
+    new CgaMethod(`sandwich`,           2, `⤻`, 2 )
+    new CgaMethod(`add`,                2, `+`, 1 )
+    new CgaMethod(`sub`,                2, `-`, 1 )
     new CgaMethod(`projectOn`,          2 )
     new CgaMethod(`dual`,               1 )
     new CgaMethod(`reverse`,            1 ) //You do not use it so often you need a symbol. Fuck prefix.
@@ -149,22 +156,25 @@ function initCompilation() {
 
             if (isNumberOrVariable(token)) {
                 outputQueue.push(token)
-            } else if (token === '(') {
+            }
+            else if (token === `(`) {
                 operatorStack.push(token)
-            } else if (token === ')') {
+            }
+            else if (token === `)`) {
                 
                 // Pop to queue until opening bracket is encountered
                 while (
                     operatorStack.length && 
-                    operatorStack[operatorStack.length - 1] !== '('
+                    operatorStack[operatorStack.length - 1] !== `(`
                 ) {
                     outputQueue.push(operatorStack.pop())
                 }
 
-                if (operatorStack.length && operatorStack[operatorStack.length - 1] === '(')
+                if (operatorStack.length && operatorStack[operatorStack.length - 1] === `(`)
                     operatorStack.pop() // Discard opening bracket
 
-            } else if (cgaMethods.includes(token)) {
+            }
+            else if (cgaMethods.includes(token)) {
 
                 //if you have no precedence, it's a bit like being "5*(some,shit)" - so, maximal precedence
                 if( token.precedence === null )
@@ -174,7 +184,7 @@ function initCompilation() {
                     // unless maybe an operator with lower precedence is encountered
                     while (
                         operatorStack.length &&
-                        operatorStack[operatorStack.length - 1] !== '(' &&
+                        operatorStack[operatorStack.length - 1] !== `(` &&
                         token.precedence <= operatorStack[operatorStack.length - 1].precedence
                     ) {
                         outputQueue.push(operatorStack.pop())
@@ -203,34 +213,50 @@ function initCompilation() {
     let alphabet = `ABCDEFGHIJKLMNOPQRSTUVWXYZ`
 
     //yes, we might want to put this in a shader
-    function evaluateToStack(tokens) {
+    function evaluateToStack(tokens,stack) {
 
-        stack.length = 0
+        clearStack(stack)
 
-        for(let i = 0, il = tokens.length; i < il; ++i ) {
-            let token = tokens[i]
+        let tokenIndex = 0
+        let numTokens = tokens.length
+        for(tokenIndex; tokenIndex < numTokens; ++tokenIndex ) {
+            let token = tokens[tokenIndex]
 
             if ( !isNaN(parseInt(token[0])) ) {
 
                 let numberCga = localCgas.pop(); numberCga.zero(); numberCga[0] = parseFloat(token)
                 stack.push(numberCga)
 
-            } else if (cgaMethods.includes(token) && token.numArgs === 2 ) {
+            }
+            else if (cgaMethods.includes(token) && token.numArgs === 2 ) {
 
                 const operand2 = stack.pop()
                 const operand1 = stack.pop()
-                stack.push( operand1[token.name]( operand2, localCgas.pop() ) )
-                localCgas.push(operand1,operand2)
+                
+                if(operand1 === undefined)
+                    break
+                else
+                    localCgas.push(operand1,operand2)
 
-            } else if (cgaMethods.includes(token) && token.numArgs === 1) {
+                stack.push( operand1[token.name]( operand2, localCgas.pop() ) )
+
+            }
+            else if (cgaMethods.includes(token) && token.numArgs === 1) {
 
                 const operand1 = stack.pop()
+                
+                if (operand1 === undefined)
+                    break
+                else
+                    localCgas.push(operand1)
+
                 stack.push(operand1[token.name](localCgas.pop()))
-                localCgas.push(operand1)
 
-            } else if (potentialNameRegex.test(token)) {
+            }
+            else if (potentialNameRegex.test(token)) {
 
-                let extraCga = localCgas.pop()
+                let extraCga = cga0
+
                 if (token === `time`) {
                     extraCga.zero()
                     extraCga[0] = clock.getElapsedTime() * .15
@@ -242,39 +268,44 @@ function initCompilation() {
                     //spreadsheet entry
                     let column = alphabet.indexOf(token[0])
                     let row = parseInt(token.slice(1)) - 1
-                    if (cells[column][row].viz === null ) {
-                        log(cells[column][row])
-                        putLocalCgasBack()
+                    let cell = cells[column][row]
+
+                    cell.refresh()
+
+                    if (cell.viz === null )
                         break
-                    }
 
-                    cells[column][row].viz.getMv().cast(extraCga)
+                    cell.viz.getMv().cast(extraCga)
                 }
-                else if (!strToBasisCga(token, extraCga)) {
-
-                    //malformed expression
-                    putLocalCgasBack()
+                else if (!strToBasisCga(token, extraCga))
                     break
-                }
 
-                stack.push(extraCga)
-                    
-                //could also be row-and-column
+                stack.push(localCgas.pop().copy(extraCga))
 
-            } else {
-                console.error("not sure what to do with this token: ", token)
             }
+            else break
 
-            if (localCgas.length === 0)
-                console.error("need more localCgas")
+            if (localCgas.length === 0) {
+                console.error(`needed more localCgas`)
+                localCgas.push(new Cga())
+            }
+        }
+
+        if (tokenIndex !== numTokens ) {
+
+            clearStack(stack)
+            let justAComment = numTokens === 1 && tokens[0] !== `e`
+            if(!justAComment)
+                console.error(`malformed expression, evaluation got to: `, tokens[tokenIndex])
+
         }
     }
 
-    //perform tests
+    //perform tests if there are any
     for(let i = 0, il = tests.length / 2; i < il; ++i) {
         const result = compile(tests[i*2], cga0, 0)
         if(!result.equals(tests[i*2+1])) {
-            console.error("test failed, logging intermediate stuff")
+            console.error(`test failed, logging intermediate stuff`)
             const result = compile(tests[i * 2], cga0, 1)
         }
     }

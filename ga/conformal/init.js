@@ -1,6 +1,24 @@
 /*
+    TODO
+        Want some kind of model you can put in a cell
+        Better sphere rendering close to infinity eg e2+e3 
+        Change what possibly-spherical slice you're looking at? With a watch interface?
+        Make sphere with a texture you can draw on
+        A tube with three bones in it
+
+    Let's say there's a cloud of random dots, call it "cloud"
+        Mention it in a cell on its own and now that cell is that cloud of dots
+        Should be able to write versor ⤻ cloud, and you get the transformed cloud
+        Any 3D model is a visualization of what transforms do
+    Buuuut we're interested in skinning
+        Tuple of a weight paint, a skeleton, and transforms for some bones
+        Imagine it for a tube with two bones
+        Plausibly, your "rest pose" is a sphere
+
     Interfaces the user should be able to make:
         Timeline
+            With parameters on it that you can vary
+            Maybe it behaves like a texture?
         Cubic bezier. For points p0, p1, p2, p3
             pA = p0*t+p1*(1-t)     pB = p1*t+p2*(1-t)     pC = p2*t+p3*(1-t)
             pi = pA*t+pB*(1-t)     pj = pB*t+pC*(1-t)
@@ -27,7 +45,7 @@ async function init() {
 
     scene.background = new THREE.Color(0x8F8F8F)
 
-    camera.position.set(0, 1.6, 3.7 )
+    camera.position.set(-.25, 1.6, 3.7 )
     // camera.position.z += 10.
 
     let orbitControls = new OrbitControls(camera, container)

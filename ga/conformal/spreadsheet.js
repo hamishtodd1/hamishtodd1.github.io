@@ -1,5 +1,5 @@
 /*
-    Want it to be that AT ANY TIME you can grab ANY object and modify it
+    NoModes: AT ANY TIME you can grab ANY object and modify it
         Or, create a new object
     So the way it works:
         You're always in drawing mode of some kind
@@ -10,7 +10,9 @@
             But if currently on a cell defined by other things
         You can select a new black cell
 
-    When you call a function, could inline it, a little box-within-box
+    When you call a function
+        could inline it, a little box-within-box
+        or: it's another column. It comes along and sits on the right
 
     Cells should get smaller and fade out when not visible
         When you hover them with pointer, the things in them become visible
@@ -25,6 +27,7 @@ function initSpreadsheet() {
     let selectedColumn = 0
     let selectedRow = 6
     let typingIntoCell = false
+    let subscriptify = false
 
     let refreshCountdown = -1.
 
@@ -36,8 +39,9 @@ function initSpreadsheet() {
         [ `e₃` ],
         [ `e₂₃` ],
         [ `eₚ` ],
-        [ `e₂₃ - time * e₁₃` ],
-        [ `A3 + A4` ],
+        [ `e₂₃ - A1 * e₁₃` ],
+        [ `e1 - e0` ],
+        // [ `A3 + A4` ],
     ]
 
     let layerWidth = .001
@@ -71,7 +75,7 @@ function initSpreadsheet() {
     let gridLinesHorizontal = new THREE.InstancedMesh(unchangingUnitSquareGeometry, gridMat, gridLinesHorizontalNum)
     obj3d.add(gridLinesVertical, gridLinesHorizontal)
 
-    let typeableSymbols = `abcdefghijklmnopqrstuvwxyz0123456789()*+-_~ `
+    let typeableSymbols = `abcdefghijklmnopqrstuvwxyz0123456789()*+-_~ .`
     let specialSymbols = `∧∨·→` //Σ√
     let specialStandin = `^&'>` //£#
     let subscriptables = [`0`, `1`, `2`, `3`, `4`, `5`, `p`, `m`, `o`]
@@ -254,9 +258,11 @@ function initSpreadsheet() {
             let error = compile(this.currentText, evaluatedCga, 0)
             let vizType =
                 error !== `` ? NO_VIZ_TYPE :
-                !evaluatedCga.cast(sphere0).isZero() ? SPHERE :
-                !evaluatedCga.cast(rotor0).isZero() ? ROTOR :
-                NO_VIZ_TYPE // for now
+                !evaluatedCga.cast(sphere0).isZero() ? SPHERE : ROTOR
+                //Zero is a kind of rotor ;_;
+
+            // if(this.currentText === `time`)
+            //     debugger
 
             if (oldVizType !== vizType) {
                 

@@ -1,39 +1,23 @@
 /*
-    Question: given a vertex at which several triangles are meeting,
+    Given a vertex at which several triangles are meeting,
     If you take the circumcircles of all the triangles, and add them,
-    do you get a zero-radius circle at the vertex?
+    you get a zero-radius circle at the vertex, which has the tangent information
+
+    Displacement map
+    Lighting calculation
 
     CGA visualization of the loop. A sphere which stereographically projects down to the loop
     TODO
         Each point in the 1D "mesh" is actually a line
         Trying to visualize the 1D version of Ideal Hyperbolic Polyhedra
-
-    Conformal VR
-        just a nice thing where you can make spheres and take their geometric products
-        Aaaand, change what possibly-spherical slice you're looking at? With a watch interface?
-
-    Goals:
-        See what conformal skinning is liket
+        Can choose a triangle, or a vertex with its tangent ring
+            And do the conformal transformation preserving that thing
+            Because, er, that would be cool?
 
     TODO 1D
         Bones
             Not rotating properly?
-            You can move, rotate, scale the bones                               
-
-
-    TODO
-        Because animation, want a timeline with parameters you can put on
-        Make a texture you can draw on
-        A tube with three bones in it
-
-    Intrinsic triangulation
-    Displacement map
-    Lighting calculation
-
-    Might be nicer for your "domain of constant curvature" to be a sphere
-
-    There's a simple harmonic oscillator (weight on a spring)
-        You make time out of that thing
+            You can scale the bones
  */
 
 function initSkinning() {
