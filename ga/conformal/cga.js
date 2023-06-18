@@ -968,6 +968,9 @@ function initCga() {
     ]
 
     strToBasisCga = (token, target) => {
+        if(target === undefined)
+            console.error("target needed")
+
         let subscript = token.slice(1)
 
         if (token === "I") {

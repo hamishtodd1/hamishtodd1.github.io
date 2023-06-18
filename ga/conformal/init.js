@@ -1,19 +1,32 @@
 /*
     TODO
         Want some kind of model you can put in a cell
-        Better sphere rendering close to infinity eg e2+e3 
+        Better sphere rendering close to infinity eg e2+e3
         Change what possibly-spherical slice you're looking at? With a watch interface?
         Make sphere with a texture you can draw on
         A tube with three bones in it
 
+    Improved line rendering:
+        It is a full circle, BUT you don't join the last pair of vertices together
+
+
     Let's say there's a cloud of random dots, call it "cloud"
         Mention it in a cell on its own and now that cell is that cloud of dots
-        Should be able to write versor ⤻ cloud, and you get the transformed cloud
-        Any 3D model is a visualization of what transforms do
+            So, that's "cloud, with identity transform applied"
+        Should be able to write versor ⤻ cloud, and you get the transformed cloud (just like a single point)
     Buuuut we're interested in skinning
+        A mesh has a canonical mapping to the sphere
+            You MIGHT use that sphere as a texture, though you don't HAVE to
+            If you don't want to use the sphere as a texture, just map some textures to patches of it
+            The sphere is just a way of laying out the vertices nicely, normal vectors out
+            So your weight paint can be visualized on that sphere; it's a property of the vertices
+            So a weight paint can be interchangeable for meshes
+            Spherical weight paint + bones = arbitrary deformations of a sphere. "Deformation field"
+            Mesh = deformation field of a sphere
         Tuple of a weight paint, a skeleton, and transforms for some bones
         Imagine it for a tube with two bones
         Plausibly, your "rest pose" is a sphere
+        Easier thing to imagine is a bezier curve
 
     Interfaces the user should be able to make:
         Timeline
@@ -35,11 +48,12 @@ async function init() {
 
     await initCgaVizes()
 
+    initMouse()
+
     initCompilation()
     initSpreadsheet()
 
-    initMouse()
-    initDrawing()
+    // initDrawing()
 
     // initSkinning()
 

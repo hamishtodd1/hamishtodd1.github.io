@@ -124,12 +124,17 @@ async function initCgaVizes() {
         }
 
         onBeforeRender() {
+            // log(this.visible)
             this.meshes[0].visible = this.visible
             this.meshes[1].visible = this.visible
 
             this.cga.ppToConformalPoints(p1, p2)
             p1.downPt(this.meshes[0].position)
             p2.downPt(this.meshes[1].position)
+        }
+
+        getMv() {
+            return this.cga
         }
     }
     window.PpViz = PpViz
@@ -206,7 +211,9 @@ async function initCgaVizes() {
     let cgaCircles = [new Cga(), new Cga()]
     //this should be one of the last things in the frame that you call, ideally it'd be onBeforeRender
     function attemptToFindTransform(starter, intended, target) {
-        let ratioCga = starter.mul(intended.reverse(cga0), cga1)
+
+        let ratioCga = intended.mul(starter.reverse(cga0), cga1)
+
         let ratioSquaresToZero = ratioCga.mul(ratioCga, cga2).isZero()
         let ratioRotor = ratioCga.cast(rotor0)
 
@@ -240,9 +247,11 @@ async function initCgaVizes() {
         }
 
         onBeforeRender() {
-            //so, you were TRYING at some point to do proper "separation". For now just try to render the freaking circles
+            //so, you were TRYING at some point to do proper "separation". For now just render one circle
             // let circles = this.rotor.cast(circle0).decompose(cgaCircles[0], cgaCircles[1])
             // cgaCircles[0].log()
+
+            // debugger
             
             this.rotor.cast(cga0).selectGrade(2, cgaCircles[0])
             cgaCircles[1].copy(zeroCga) //because we're not using it at all yet
@@ -287,9 +296,11 @@ async function initCgaVizes() {
             size * (Math.random() - .5) )
     }
 
-    // let ourRotorViz = new RotorViz()
-    // e12c.cast(ourRotorViz.rotor)
-    // e3p.addScaled(e03c, -3.5, cga0).cast(ourRotorViz.rotor)
+    // let testRv = new RotorViz()
+    // e23c.sub(e03c).cast(testRv.rotor)
+    // e3p.addScaled(e03c, -3.5, cga0).cast(testRv.rotor)
+
+    //meshes could be just circles
     
     // let ourAxis = new Circle()
     // e3p.add(e12c,cga0).cast(ourAxis)
@@ -301,11 +312,11 @@ async function initCgaVizes() {
     // smallSphereAtHeadHeight.meet(e1c, cga2).cast(ourAxis)
     // smallSphereAtHeadHeight.meet(e1c, cga2).log()
     // blankFunction = () => {
-    //     ourAxis.exp( ourRotorViz.rotor, .015 * frameCount )
+    //     ourAxis.exp( testRv.rotor, .015 * frameCount )
 
         // for(let i = 0; i < numPts; ++i ){
         //     cga1.upPt(initials[i])
-        //     ourRotorViz.rotor.sandwichConformalPoint( cga1, cps[i].cga )
+        //     testRv.rotor.sandwichConformalPoint( cga1, cps[i].cga )
         // }
     // }
 

@@ -23,41 +23,76 @@
 function updatePanel(){}
 
 function initSpreadsheet() {
-
+    
     let selectedColumn = 0
-    let selectedRow = 6
-    let typingIntoCell = false
-    let subscriptify = false
-
-    let refreshCountdown = -1.
-
-    // `₀`, `₁`, `₂`, `₃`, `₄`, `₅`, `ₚ`, `ₘ`, `𝅘`
+    let selectedRow = 0
     let initial = [
-        [`time`, `hey` ],
-        [ `mousePos` ],
-        [ `e₂` ],
-        [ `e₃` ],
-        [ `e₂₃` ],
-        [ `eₚ` ],
-        [ `e₂₃ - A1 * e₁₃` ],
-        [ `e1 - e0` ],
-        // [ `A3 + A4` ],
+        [`hand & e123`, `ep`],
+        [`time`],
+        [`e23 - time * e13`],
+        [`e1 - e0`, `e2`],
+        [`e4 + time * e0`, `e3`],
+        [`e23 - e03`],
+        [`hand`],
+        [`(1 + time * e01) > e1`, `e23`],
+        [`A3 + A4`],
     ]
+    
+    let refreshCountdown = -1.
+    let typingIntoCell = false
+    
+    let typeableSymbols = `()*+-_~ .0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz`
+    let specialSymbols = `∧∨·⤻` //Σ√
+    let specialStandin = `^&'>` //£#
+    let subscriptables = [`0`, `1`, `2`, `3`, `4`, `5`, `p`, `m`, `o`]
+    let subscripts     = [`₀`, `₁`, `₂`, `₃`, `₄`, `₅`, `ₚ`, `ₘ`, `𝅘`]
+
+    let subscriptify = false
+    translateChar = (char) => {
+
+        if (subscriptables.includes(char) && subscriptify) {
+            let index = subscriptables.indexOf(char)
+            return index === -1 ? char : subscripts[index]
+        }
+        else {
+
+            if (char === `e`)
+                subscriptify = true
+            else
+                subscriptify = false
+
+            if (specialStandin.indexOf(char) !== -1)
+                return specialSymbols[specialStandin.indexOf(char)]
+            else if (typeableSymbols.indexOf(char) !== -1)
+                return char
+
+        }
+    }
+
+    translateExpression = (expression) => {
+        return expression.replace(/./g, translateChar)
+    }
+
+    initial.forEach( (a,i) => {
+        a.forEach( (b,j) => {
+            initial[i][j] = translateExpression(b)
+        })
+    })
 
     let layerWidth = .001
     let columns = 2
     let rows = 14
+
+    let bg = new THREE.Mesh(unchangingUnitSquareGeometry, new THREE.MeshBasicMaterial({ color: 0xFFFFFF, side:THREE.DoubleSide }))
+    bg.scale.set(2.4, 2.4, 1.)
+    bg.position.z = -layerWidth
     
     let obj3d = new THREE.Object3D()
     obj3d.position.y = 1.6
-    obj3d.position.x = -1.1
+    obj3d.position.x = -bg.scale.x / 2.
     obj3d.position.z = .01
     // obj3d.scale.multiplyScalar(.3)
     scene.add(obj3d)
-
-    let bg = new THREE.Mesh(unchangingUnitSquareGeometry, new THREE.MeshBasicMaterial({color:0xFFFFFF}))
-    bg.scale.set(2.4, 2.4, 1.)
-    bg.position.z = -layerWidth
     obj3d.add(bg)
 
     let cellWidth = bg.scale.x / columns
@@ -75,11 +110,6 @@ function initSpreadsheet() {
     let gridLinesHorizontal = new THREE.InstancedMesh(unchangingUnitSquareGeometry, gridMat, gridLinesHorizontalNum)
     obj3d.add(gridLinesVertical, gridLinesHorizontal)
 
-    let typeableSymbols = `abcdefghijklmnopqrstuvwxyz0123456789()*+-_~ .`
-    let specialSymbols = `∧∨·→` //Σ√
-    let specialStandin = `^&'>` //£#
-    let subscriptables = [`0`, `1`, `2`, `3`, `4`, `5`, `p`, `m`, `o`]
-    let subscripts     = [`₀`, `₁`, `₂`, `₃`, `₄`, `₅`, `ₚ`, `ₘ`, `𝅘`]
     function incrementSelection( increment, isRow ) {
         let newVal = isRow ? selectedRow : selectedColumn
         newVal += increment
@@ -89,6 +119,13 @@ function initSpreadsheet() {
             selectCell( selectedColumn, newVal)
         else
             selectCell( newVal, selectedRow)
+    }
+
+    function clearCurrentCell() {
+        cells[selectedColumn][selectedRow].setText(``)
+        typingIntoCell = true
+        subscriptify = false
+        cells[selectedColumn][selectedRow].refresh()
     }
 
     document.addEventListener(`keydown`, (event)=>{
@@ -110,35 +147,19 @@ function initSpreadsheet() {
                 incrementSelection( 1,true)
                 return
             case `Backspace`:
-                selectedCell.setText(``)
-                typingIntoCell = true
-                refreshCountdown = 0.5
+                clearCurrentCell()
                 return
             default:
                 
-                if (!typingIntoCell ) {
-                    selectedCell.setText(``)
-                    typingIntoCell = true
-                }
+                if (!typingIntoCell )
+                    clearCurrentCell()
+                else
+                    refreshCountdown = 0.5
 
-                if (subscriptables.includes(event.key) && subscriptify)
-                    selectedCell.append(subscripts[subscriptables.indexOf(event.key)])
-                else {
-                    
-                    if (specialStandin.indexOf(event.key) !== -1)
-                        selectedCell.append(specialSymbols[specialStandin.indexOf(event.key)])
-                    // else if(event.key === `o`)
-                    //     selectedCell.append(`𝅘`) //bug unless this one is separated from other special symbols. Computers
-                    else if (typeableSymbols.indexOf(event.key) !== -1)
-                        selectedCell.append(event.key)
+                if (event.key === `Shift`)
+                    return
 
-                    if(event.key === `e`)
-                        subscriptify = true
-                    else
-                        subscriptify = false
-                }
-
-                refreshCountdown = 0.5
+                selectedCell.append(translateChar(event.key))
         }
     })
 
@@ -148,15 +169,17 @@ function initSpreadsheet() {
         selectedColumn = newColumn
         selectedRow = newRow
 
+        cells[selectedColumn][selectedRow].refresh()
         cells[selectedColumn][selectedRow].setVizVisibility(true)
 
         typingIntoCell = false
     }
 
-    function inRect(posVec,rectPos,rectScale) {
+    function inRect( posVec, rectPos, rectScaleX, rectScaleY ) {
+
         let ret = 
-            rectPos.x-rectScale.x / 2. < posVec.x && posVec.x < rectPos.x+rectScale.x / 2. &&
-            rectPos.y-rectScale.y / 2. < posVec.y && posVec.y < rectPos.y+rectScale.y / 2.
+            rectPos.x-rectScaleX / 2. < posVec.x && posVec.x < rectPos.x+rectScaleX / 2. &&
+            rectPos.y-rectScaleY / 2. < posVec.y && posVec.y < rectPos.y+rectScaleY / 2.
         return ret
     }
     document.addEventListener(`mousedown`, (event) => {
@@ -167,9 +190,10 @@ function initSpreadsheet() {
         mousePlanePosition.pointToVec3(v1)
         obj3d.worldToLocal(v1)
         
-        if (inRect(v1, bg.position, bg.scale) ) {
+        if ( inRect(v1, bg.position, bg.scale.x, bg.scale.y ) ) {
             forEachCell((cell, column, row)=>{
-                if( inRect(v1, cell.position, cell.scale) )
+                
+                if( inRect(v1, cell.position, cellWidth,cellHeight) )
                     selectCell(column, row)
             })
         }
@@ -190,10 +214,12 @@ function initSpreadsheet() {
     const NO_VIZ_TYPE = 0
     const SPHERE = 1
     const ROTOR = 2 //grade wise that's more like a circle but this will do for now
-    const vizTypes = [NO_VIZ_TYPE, SPHERE, ROTOR]
+    const PP = 3
+    const CONFORMAL_POINT = 3
+    const vizTypes = [NO_VIZ_TYPE, SPHERE, ROTOR, PP, CONFORMAL_POINT ]
     //want a mesh type, and a curve type
     //no longer sorts-of-viz
-    let constructors = [() => null, SphereViz, RotorViz]
+    let constructors = [() => null, SphereViz, RotorViz, PpViz, ConformalPointViz]
 
     let evaluatedCga = new Cga()
 
@@ -255,14 +281,18 @@ function initSpreadsheet() {
 
             let oldVizType = this.viz === null ? NO_VIZ_TYPE : constructors.indexOf(this.viz.constructor)
 
-            let error = compile(this.currentText, evaluatedCga, 0)
-            let vizType =
-                error !== `` ? NO_VIZ_TYPE :
-                !evaluatedCga.cast(sphere0).isZero() ? SPHERE : ROTOR
-                //Zero is a kind of rotor ;_;
-
-            // if(this.currentText === `time`)
+            // if (this.currentText === `hand & e123`)
             //     debugger
+
+            let error = compile(this.currentText, evaluatedCga, 0)
+            let vizType = NO_VIZ_TYPE
+            if(error === ``) {
+
+                vizType = evaluatedCga.grade()
+                if(vizType === -2 || vizType === -1 ) //0 is a rotor
+                    vizType = ROTOR
+                
+            }
 
             if (oldVizType !== vizType) {
                 

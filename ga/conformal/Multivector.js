@@ -22,15 +22,26 @@ class Multivector extends Float32Array {
     }
 
     cast(target) {
+        if( this.constructor === target.constructor ) {
+            target.copy(this)
+            return target
+        }
+
         let targetIsSmaller = this.constructor.size > target.constructor.size
 
         if (targetIsSmaller) {
             let conversion = smallerInLarger[this.constructor.name][target.constructor.name]
+            if(conversion === undefined)
+                console.error("no way to cast")
+
             for(let i = 0; i < target.constructor.size; ++i)
                 target[i] = this[conversion[i]]
         }
         else {
             let conversion = smallerInLarger[target.constructor.name][this.constructor.name]
+            if(conversion === undefined)
+                console.error("no way to cast")
+
             for (let i = 0; i < target.constructor.size; ++i)
                 target[i] = 0.
             for (let i = 0; i < this.constructor.size; ++i)
@@ -58,6 +69,7 @@ class Multivector extends Float32Array {
         return target
     }
 
+    //0 is grade -1, and mixtures of any kind are grade -2
     grade() {
         let grade = -1 //0 is grade -1!
         for(let i = 0; i < this.constructor.size; ++i) {
@@ -65,7 +77,8 @@ class Multivector extends Float32Array {
                 let extraGrade = this.constructor.indexGrades[i]
                 if (grade === -1 || grade === extraGrade)
                     grade = extraGrade
-                // else mixture
+                else
+                    grade = -2
             }
         }
 
@@ -115,11 +128,10 @@ class Multivector extends Float32Array {
     }
 
     copy(v) {
-        if (v.constructor.size !== this.constructor.size)
-            console.error("type error at " + getWhereThisWasCalledFrom())
-
-        if (v.constructor !== this.constructor)
-            console.error("type error")
+        if (v.constructor !== this.constructor) {
+            v.cast(this)
+            return this
+        }
 
         for (let i = 0; i < this.constructor.size; ++i)
             this[i] = v[i]

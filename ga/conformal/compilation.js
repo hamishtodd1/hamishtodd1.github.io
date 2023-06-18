@@ -38,7 +38,7 @@ function initCompilation() {
         while (stack.length !== 0) {
             let thing = stack.pop()
             if (!cgaMethods.includes(thing))
-                localCgas.push(stack.pop()) //because all there ever is is localCgas and cgaMethods
+                localCgas.push(thing) //because all there ever is is localCgas and cgaMethods
         }
     }
 
@@ -65,7 +65,10 @@ function initCompilation() {
         const parsedTokens = reparseTokens( expression, logLevel )
             
         const stack = []
-        evaluateToStack(parsedTokens, stack)
+        // if (expression === translateExpression(`hand & e123`) && !mousePlanePosition.isZero() )
+        //     debugger
+            
+        evaluateToStack( parsedTokens, stack )
 
         if (stack.length !== 1)
             return `malformed expression`
@@ -77,30 +80,29 @@ function initCompilation() {
         }
     }
 
-    const specialSymbols = [`(`, `)`]
+    let specialSymbols = [`(`, `)`]
     const cgaMethods = []
     class CgaMethod {
-        constructor(name, numArgs, symbol, precedence) {
+        constructor(name, numArgs, symbols, precedence) {
             this.name = name
             this.numArgs = numArgs
 
-            this.symbol = symbol || null
+            this.symbols = symbols || []
             this.precedence = precedence || 0
 
             cgaMethods.push(this)
-            if(this.symbol !== null)
-                specialSymbols.push(this.symbol)
+            specialSymbols = specialSymbols.concat(this.symbols)
         }
     }
     
-    new CgaMethod(`selectGradeWithCga`, 2, `_`, 3 )
-    new CgaMethod(`mul`,                2, `*`, 2 )
-    new CgaMethod(`meet`,               2, `∧`, 2 )
-    new CgaMethod(`join`,               2, `∨`, 2 )
-    new CgaMethod(`inner`,              2, `·`, 2 )
-    new CgaMethod(`sandwich`,           2, `⤻`, 2 )
-    new CgaMethod(`add`,                2, `+`, 1 )
-    new CgaMethod(`sub`,                2, `-`, 1 )
+    new CgaMethod(`selectGradeWithCga`, 2, [`_`], 3 )
+    new CgaMethod(`mul`,                2, [`*`], 2 )
+    new CgaMethod(`meet`,               2, [`∧`,`^`], 2 )
+    new CgaMethod(`join`,               2, [`∨`,`&`], 2 )
+    new CgaMethod(`inner`,              2, [`·`,`'`], 2 )
+    new CgaMethod(`sandwich`,           2, [`⤻`, `>`,`→`], 2 )
+    new CgaMethod(`add`,                2, [`+`], 1 )
+    new CgaMethod(`sub`,                2, [`-`], 1 )
     new CgaMethod(`projectOn`,          2 )
     new CgaMethod(`dual`,               1 )
     new CgaMethod(`reverse`,            1 ) //You do not use it so often you need a symbol. Fuck prefix.
@@ -123,7 +125,7 @@ function initCompilation() {
         for (let i = 0; i < expression.length; i++) {
             
             let char = expression[i]
-            let cm = cgaMethods.find( cm => cm.symbol === char )
+            let cm = cgaMethods.find( cm => cm.symbols.includes(char) )
 
             if ( cm !== undefined ) {
                 finishToken()
@@ -232,25 +234,26 @@ function initCompilation() {
 
                 const operand2 = stack.pop()
                 const operand1 = stack.pop()
-                
-                if(operand1 === undefined)
+
+                stack.push(operand1[token.name](operand2, localCgas.pop()) )
+
+                if (operand1 === undefined)
                     break
                 else
-                    localCgas.push(operand1,operand2)
-
-                stack.push( operand1[token.name]( operand2, localCgas.pop() ) )
+                    localCgas.push(operand1, operand2)
 
             }
             else if (cgaMethods.includes(token) && token.numArgs === 1) {
 
                 const operand1 = stack.pop()
-                
+
+                stack.push(operand1[token.name](localCgas.pop()))
+
                 if (operand1 === undefined)
                     break
                 else
                     localCgas.push(operand1)
-
-                stack.push(operand1[token.name](localCgas.pop()))
+                
 
             }
             else if (potentialNameRegex.test(token)) {
@@ -259,11 +262,11 @@ function initCompilation() {
 
                 if (token === `time`) {
                     extraCga.zero()
-                    extraCga[0] = clock.getElapsedTime() * .15
+                    extraCga[0] = clock.getElapsedTime() * .1
                 }
-                // else if(token === `mousePos`) {
-
-                // }
+                else if(token === `hand`) {
+                    cga0.fromEga(mousePlanePosition).flatPpToConformalPoint(extraCga)
+                }
                 else if (/^[A-Z][0-9]+$/.test(token)) {
                     //spreadsheet entry
                     let column = alphabet.indexOf(token[0])
@@ -297,7 +300,6 @@ function initCompilation() {
             let justAComment = numTokens === 1 && tokens[0] !== `e`
             if(!justAComment)
                 console.error(`malformed expression, evaluation got to: `, tokens[tokenIndex])
-
         }
     }
 
