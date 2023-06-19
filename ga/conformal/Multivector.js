@@ -236,6 +236,30 @@ class Multivector extends Float32Array {
     }
 
     log(label, numDecimalPlaces) {
+
+        let str = this.asString(numDecimalPlaces)
+
+        if (label !== undefined)
+            str = label + ": " + str
+        else {
+            label = getWhereThisWasCalledFrom()
+            str = label + ": " + str
+        }
+
+        console.log(str)
+    }
+
+    negate(target) {
+        if(target === undefined)
+            target = new this.constructor()
+
+        for (let i = 0; i < this.constructor.size; ++i)
+            target[i] = -1. * this[i]
+
+        return target
+    }
+
+    asString(numDecimalPlaces) {
         if (numDecimalPlaces === undefined)
             numDecimalPlaces = 1
 
@@ -261,14 +285,7 @@ class Multivector extends Float32Array {
         if (str === "")
             str += "0."
 
-        if (label !== undefined)
-            str = label + ": " + str
-        else {
-            label = getWhereThisWasCalledFrom()
-            str = label + ": " + str
-        }
-
-        console.log(str)
+        return str
     }
 }
 

@@ -27,14 +27,15 @@ function initSpreadsheet() {
     let selectedColumn = 0
     let selectedRow = 0
     let initial = [
+        [`2e12`],
+        [`-1`],
         [`hand & e123`, `ep`],
-        [`time`],
         [`e23 - time * e13`],
         [`e1 - e0`, `e2`],
         [`e4 + time * e0`, `e3`],
         [`e23 - e03`],
         [`hand`],
-        [`(1 + time * e01) > e1`, `e23`],
+        [`(1+time*e01) > e1`, `e23`],
         [`A3 + A4`],
     ]
     
@@ -65,6 +66,8 @@ function initSpreadsheet() {
                 return specialSymbols[specialStandin.indexOf(char)]
             else if (typeableSymbols.indexOf(char) !== -1)
                 return char
+            else
+                return ``
 
         }
     }
@@ -156,9 +159,6 @@ function initSpreadsheet() {
                 else
                     refreshCountdown = 0.5
 
-                if (event.key === `Shift`)
-                    return
-
                 selectedCell.append(translateChar(event.key))
         }
     })
@@ -196,6 +196,22 @@ function initSpreadsheet() {
                 if( inRect(v1, cell.position, cellWidth,cellHeight) )
                     selectCell(column, row)
             })
+        }
+        else {
+            let newRow = -1
+            for(let i = cells[0].length-2; i > -1; --i) {
+                if( cells[0][i].currentText !== ``) {
+                    newRow = i+1
+                    break
+                }
+            }
+
+            let cellToWriteTo = cells[0][newRow]
+            let newText = cga0.fromEga(mousePlanePosition).flatPpToConformalPoint(cga0).asString()
+            log(newText)
+            cellToWriteTo.setText(newText)
+
+            selectCell(selectedColumn, newRow)
         }
     })
 

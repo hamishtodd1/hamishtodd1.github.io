@@ -83,7 +83,7 @@ function initCompilation() {
     let specialSymbols = [`(`, `)`]
     const cgaMethods = []
     class CgaMethod {
-        constructor(name, numArgs, symbols, precedence) {
+        constructor(name, numArgs, precedence, symbols) {
             this.name = name
             this.numArgs = numArgs
 
@@ -95,14 +95,15 @@ function initCompilation() {
         }
     }
     
-    new CgaMethod(`selectGradeWithCga`, 2, [`_`], 3 )
-    new CgaMethod(`mul`,                2, [`*`], 2 )
-    new CgaMethod(`meet`,               2, [`∧`,`^`], 2 )
-    new CgaMethod(`join`,               2, [`∨`,`&`], 2 )
-    new CgaMethod(`inner`,              2, [`·`,`'`], 2 )
-    new CgaMethod(`sandwich`,           2, [`⤻`, `>`,`→`], 2 )
-    new CgaMethod(`add`,                2, [`+`], 1 )
-    new CgaMethod(`sub`,                2, [`-`], 1 )
+    new CgaMethod(`selectGradeWithCga`, 2, 3, [`_`] )
+    new CgaMethod(`mul`,                2, 2, [`*`] )
+    new CgaMethod(`meet`,               2, 2, [`∧`,`^`] )
+    new CgaMethod(`join`,               2, 2, [`∨`,`&`] )
+    new CgaMethod(`inner`,              2, 2, [`·`,`'`] )
+    new CgaMethod(`sandwich`,           2, 2, [`⤻`, `>`,`→`] )
+    new CgaMethod(`add`,                2, 1, [`+`] )
+    new CgaMethod(`negate`,             1, 2, [`-`] )
+    let subMethod = new CgaMethod(`sub`,2, 1 )
     new CgaMethod(`projectOn`,          2 )
     new CgaMethod(`dual`,               1 )
     new CgaMethod(`reverse`,            1 ) //You do not use it so often you need a symbol. Fuck prefix.
@@ -154,13 +155,21 @@ function initCompilation() {
         const outputQueue = []
         const operatorStack = []
 
+        //just used for subtraction
+        let nextNegationWouldBeSub = false //because i
+
+        //you want to be able to have scalars next to thingies
+        // let next
+
         tokens.forEach( token => {
 
             if (isNumberOrVariable(token)) {
                 outputQueue.push(token)
+                nextNegationWouldBeSub = true
             }
             else if (token === `(`) {
                 operatorStack.push(token)
+                nextNegationWouldBeSub = true
             }
             else if (token === `)`) {
                 
@@ -175,24 +184,35 @@ function initCompilation() {
                 if (operatorStack.length && operatorStack[operatorStack.length - 1] === `(`)
                     operatorStack.pop() // Discard opening bracket
 
+                nextNegationWouldBeSub = true
             }
             else if (cgaMethods.includes(token)) {
 
+                let cm = token
+                if(token.name === `negate` && nextNegationWouldBeSub ) {
+                    // - b     //means "negate" - nothing previous
+                    // a + - b //means "negate" - operator previous
+                    // a - b   //means "sub"    - SOMETHING previous, NOT a method
+                    cm = subMethod
+                }
+
                 //if you have no precedence, it's a bit like being "5*(some,shit)" - so, maximal precedence
                 if( token.precedence === null )
-                    operatorStack.push(token)
+                    operatorStack.push(cm)
                 else {
                     // if you have non-maximal precedence, pop operator stack fully
                     // unless maybe an operator with lower precedence is encountered
                     while (
                         operatorStack.length &&
                         operatorStack[operatorStack.length - 1] !== `(` &&
-                        token.precedence <= operatorStack[operatorStack.length - 1].precedence
+                        cm.precedence <= operatorStack[operatorStack.length - 1].precedence
                     ) {
                         outputQueue.push(operatorStack.pop())
                     }
-                    operatorStack.push(token)
+                    operatorStack.push(cm)
                 }
+
+                nextNegationWouldBeSub = false
             }
             else
                 console.error("Unrecognized token: "+token)
@@ -234,26 +254,23 @@ function initCompilation() {
 
                 const operand2 = stack.pop()
                 const operand1 = stack.pop()
+                if (operand1 === undefined)
+                    break
 
                 stack.push(operand1[token.name](operand2, localCgas.pop()) )
 
-                if (operand1 === undefined)
-                    break
-                else
-                    localCgas.push(operand1, operand2)
+                localCgas.push(operand1, operand2)
 
             }
             else if (cgaMethods.includes(token) && token.numArgs === 1) {
 
                 const operand1 = stack.pop()
-
-                stack.push(operand1[token.name](localCgas.pop()))
-
                 if (operand1 === undefined)
                     break
-                else
-                    localCgas.push(operand1)
+
+                stack.push(operand1[token.name](localCgas.pop()))
                 
+                localCgas.push(operand1)
 
             }
             else if (potentialNameRegex.test(token)) {
@@ -286,7 +303,8 @@ function initCompilation() {
                 stack.push(localCgas.pop().copy(extraCga))
 
             }
-            else break
+            else
+                break
 
             if (localCgas.length === 0) {
                 console.error(`needed more localCgas`)
@@ -299,7 +317,7 @@ function initCompilation() {
             clearStack(stack)
             let justAComment = numTokens === 1 && tokens[0] !== `e`
             if(!justAComment)
-                console.error(`malformed expression, evaluation got to: `, tokens[tokenIndex])
+                console.error(`malformed expression, evaluation got to: `, tokens[tokenIndex], `tokens having been `, tokens)
         }
     }
 

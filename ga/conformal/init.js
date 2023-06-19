@@ -5,9 +5,8 @@
         Change what possibly-spherical slice you're looking at? With a watch interface?
         Make sphere with a texture you can draw on
         A tube with three bones in it
-
-    Improved line rendering:
-        It is a full circle, BUT you don't join the last pair of vertices together
+        Improved line rendering:
+            It is a full circle, BUT you don't join the last pair of vertices together
 
 
     Let's say there's a cloud of random dots, call it "cloud"
