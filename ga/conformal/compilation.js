@@ -1,4 +1,4 @@
-/**
+/*
     Maybe you want:
         reverse
         log
@@ -95,26 +95,30 @@ function initCompilation() {
         }
     }
     
+    let mulMethod = new CgaMethod(`mul`,2, 2, [`*`] )
+    let subMethod = new CgaMethod(`sub`,2, 1 )
     new CgaMethod(`selectGradeWithCga`, 2, 3, [`_`] )
-    new CgaMethod(`mul`,                2, 2, [`*`] )
     new CgaMethod(`meet`,               2, 2, [`∧`,`^`] )
     new CgaMethod(`join`,               2, 2, [`∨`,`&`] )
     new CgaMethod(`inner`,              2, 2, [`·`,`'`] )
     new CgaMethod(`sandwich`,           2, 2, [`⤻`, `>`,`→`] )
     new CgaMethod(`add`,                2, 1, [`+`] )
     new CgaMethod(`negate`,             1, 2, [`-`] )
-    let subMethod = new CgaMethod(`sub`,2, 1 )
     new CgaMethod(`projectOn`,          2 )
     new CgaMethod(`dual`,               1 )
     new CgaMethod(`reverse`,            1 ) //You do not use it so often you need a symbol. Fuck prefix.
     new CgaMethod(`exp`,                1 )
     new CgaMethod(`sqrt`,               1 ) //TODO what if they put in unnormalized thing?    
     //and user-made methods would probably be added too
+
+    const numberSymbols = `0123456789.`
+    const letterSymbols = `ABCDEFGHIJKLMNOPQRSTUVWXYZ`
     
     function tokenize(expression) {
 
         const tokens = []
         let currentToken = ''
+        let currentTokenIsNumber = false
 
         function finishToken() {
             if (currentToken.length > 0) {
@@ -138,8 +142,15 @@ function initCompilation() {
             }
             else if (char === ',')
                 finishToken()
-            else
+            else {
+                if ( currentToken.length !== 0 && currentTokenIsNumber && !numberSymbols.includes(char))
+                    finishToken()
+                
+                if (currentToken.length === 0)
+                    currentTokenIsNumber = numberSymbols.includes(char)
+
                 currentToken += char
+            }
         }
 
         finishToken()
@@ -155,21 +166,29 @@ function initCompilation() {
         const outputQueue = []
         const operatorStack = []
 
-        //just used for subtraction
-        let nextNegationWouldBeSub = false //because i
-
         //you want to be able to have scalars next to thingies
-        // let next
+
+        let START = -1
+        let NUMBER_OR_VARIABLE = 0
+        let OPEN_BRACKET = 1
+        let CLOSE_BRACKET = 2
+        let METHOD = 3
+        let lastTokenWas = START
 
         tokens.forEach( token => {
 
             if (isNumberOrVariable(token)) {
+
                 outputQueue.push(token)
-                nextNegationWouldBeSub = true
+
+                if(lastTokenWas === NUMBER_OR_VARIABLE)
+                    outputQueue.push(mulMethod)
+
+                lastTokenWas = NUMBER_OR_VARIABLE
             }
             else if (token === `(`) {
                 operatorStack.push(token)
-                nextNegationWouldBeSub = true
+                lastTokenWas = OPEN_BRACKET
             }
             else if (token === `)`) {
                 
@@ -184,17 +203,13 @@ function initCompilation() {
                 if (operatorStack.length && operatorStack[operatorStack.length - 1] === `(`)
                     operatorStack.pop() // Discard opening bracket
 
-                nextNegationWouldBeSub = true
+                lastTokenWas = CLOSE_BRACKET
             }
             else if (cgaMethods.includes(token)) {
 
                 let cm = token
-                if(token.name === `negate` && nextNegationWouldBeSub ) {
-                    // - b     //means "negate" - nothing previous
-                    // a + - b //means "negate" - operator previous
-                    // a - b   //means "sub"    - SOMETHING previous, NOT a method
+                if (token.name === `negate` && (lastTokenWas === NUMBER_OR_VARIABLE || lastTokenWas === CLOSE_BRACKET ) )
                     cm = subMethod
-                }
 
                 //if you have no precedence, it's a bit like being "5*(some,shit)" - so, maximal precedence
                 if( token.precedence === null )
@@ -212,7 +227,7 @@ function initCompilation() {
                     operatorStack.push(cm)
                 }
 
-                nextNegationWouldBeSub = false
+                lastTokenWas = METHOD
             }
             else
                 console.error("Unrecognized token: "+token)
@@ -231,8 +246,6 @@ function initCompilation() {
     //         arr[n - i - 1] = stack.pop()
     //     return arr
     // }
-
-    let alphabet = `ABCDEFGHIJKLMNOPQRSTUVWXYZ`
 
     //yes, we might want to put this in a shader
     function evaluateToStack(tokens,stack) {
@@ -286,7 +299,7 @@ function initCompilation() {
                 }
                 else if (/^[A-Z][0-9]+$/.test(token)) {
                     //spreadsheet entry
-                    let column = alphabet.indexOf(token[0])
+                    let column = letterSymbols.indexOf(token[0])
                     let row = parseInt(token.slice(1)) - 1
                     let cell = cells[column][row]
 
