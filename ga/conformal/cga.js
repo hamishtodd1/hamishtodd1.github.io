@@ -570,7 +570,7 @@ function initCga() {
 
                 let lengthSqDesired = _26 + _27
                 let lengthSqCurrent = _28 * _28 + _29 * _29 + _30 * _30
-                if (Math.abs(lengthSqCurrent - lengthSqDesired) < .01) 
+                if (Math.abs((lengthSqCurrent / lengthSqDesired) - 1.) < .01) 
                 {
                     //null point
                     targetVec3.z =  _28

@@ -36,31 +36,30 @@ function initDrawing () {
     let laidCga = new Cga().copy(zeroCga)
     handleDrawing = () => {
 
-        if(drawingMode!== 1) {
+        if(drawingMode!== 1)
             drawingSphere.visible = false
-        }
         else {
             drawingSphere.visible = true
             if (laidCga.equals(zeroCga)) {
-                    //zero radius sphere
-                    // cga1.fromEga(mouseRay).meet(e3c, drawingPp.cga)
-                    // drawingSphere.sphere.upSphere()
-                    let intersectionPp = cga0.fromEga(mouseRay).meet(e3c, cga2)
-                    // log(mouseRay)
-                    intersectionPp.flatPpToConformalPoint(cga1)
-                    //.dual(cga0).cast(drawingSphere.sphere)
-                }
-                else {
+                //zero radius sphere
+                // cga1.fromEga(mouseRay).meet(e3c, drawingPp.cga)
+                // drawingSphere.sphere.upSphere()
+                let intersectionPp = cga0.fromEga(mouseRay).meet(e3c, cga2)
+                // log(mouseRay)
+                intersectionPp.flatPpToConformalPoint(cga1)
+                //.dual(cga0).cast(drawingSphere.sphere)
+            }
+            else {
 
-                }
+            }
 
-                // sphere
-                //initially a zero-radius sphere, because no direction for a plane
-                //move your hand/mouse outside deadzone and it's a sphere, mouse at its center
-                //up to a certain point and it's a plane 
-                //because it's unlikely that anyone would want a super huge sphere
+            // sphere
+            //initially a zero-radius sphere, because no direction for a plane
+            //move your hand/mouse outside deadzone and it's a sphere, mouse at its center
+            //up to a certain point and it's a plane 
+            //because it's unlikely that anyone would want a super huge sphere
 
-                // sooo, zero radius sphere if you don't move, nice
+            // sooo, zero radius sphere if you don't move, nice
         }
 
         // if(drawingMode !== 2)

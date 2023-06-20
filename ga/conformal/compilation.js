@@ -70,7 +70,7 @@ function initCompilation() {
             
         evaluateToStack( parsedTokens, stack )
 
-        if (stack.length !== 1)
+        if (stack.length !== 1 || stack[0].constructor !== Cga )
             return `malformed expression`
         else {
             let result = stack.pop()
@@ -290,13 +290,10 @@ function initCompilation() {
 
                 let extraCga = cga0
 
-                if (token === `time`) {
-                    extraCga.zero()
-                    extraCga[0] = clock.getElapsedTime() * .1
-                }
-                else if(token === `hand`) {
+                if (token === `time`)
+                    extraCga.fromFloatAndIndex( clock.getElapsedTime() * .1, 0 )
+                else if(token === `hand`)
                     cga0.fromEga(mousePlanePosition).flatPpToConformalPoint(extraCga)
-                }
                 else if (/^[A-Z][0-9]+$/.test(token)) {
                     //spreadsheet entry
                     let column = letterSymbols.indexOf(token[0])
@@ -304,6 +301,7 @@ function initCompilation() {
                     let cell = cells[column][row]
 
                     cell.refresh()
+                    setSecondarySelectionBox(column,row)
 
                     if (cell.viz === null )
                         break
@@ -330,7 +328,7 @@ function initCompilation() {
             clearStack(stack)
             let justAComment = numTokens === 1 && tokens[0] !== `e`
             if(!justAComment)
-                console.error(`malformed expression, evaluation got to: `, tokens[tokenIndex], `tokens having been `, tokens)
+                console.error(`Evaluation error at "` + tokens[tokenIndex] + `", tokens having been `, tokens)
         }
     }
 

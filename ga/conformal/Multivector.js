@@ -237,7 +237,7 @@ class Multivector extends Float32Array {
 
     log(label, numDecimalPlaces) {
 
-        let str = this.asString(numDecimalPlaces)
+        let str = this.toString(numDecimalPlaces)
 
         if (label !== undefined)
             str = label + ": " + str
@@ -259,7 +259,7 @@ class Multivector extends Float32Array {
         return target
     }
 
-    asString(numDecimalPlaces) {
+    toString(numDecimalPlaces) {
         if (numDecimalPlaces === undefined)
             numDecimalPlaces = 1
 
@@ -276,7 +276,7 @@ class Multivector extends Float32Array {
                 //     sign = -1.
 
                 let basisName = this.constructor.basisNames[i]
-                str += (sign * this[i]).toFixed(numDecimalPlaces) + (basisName === `` ? "" : "e") + basisName
+                str += (sign * this[i]).toFixed(numDecimalPlaces) + (basisName === `` ? `` : `e`) + basisName
 
                 //would be nice to have e0 in cga printing
             }

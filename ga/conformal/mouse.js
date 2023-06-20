@@ -1,7 +1,6 @@
 function initMouse() {
 
     mouseRay = new Ega()
-    log(mouseRay)
     mouseRay.copy(e12e)
     let mouseRayOld = new Ega()
 
