@@ -62,7 +62,10 @@ async function initCgaVizes() {
 
         constructor() {
             
-            let mat = new THREE.MeshPhong2Material({ side: THREE.DoubleSide, map: bourkeTexture })
+            let mat = new THREE.MeshPhong2Material({ 
+                side: THREE.DoubleSide, 
+                map: bourkeTexture 
+            })
             mat.injections = sphereMatInjections
 
             super( sphereGeo, mat )

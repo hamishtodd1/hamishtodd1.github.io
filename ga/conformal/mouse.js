@@ -1,7 +1,8 @@
 function initMouse() {
 
-    mouseRay = new Ega()
-    mouseRay.copy(e12e)
+    mouseRay = new Ega().copy(e12e)
+    mousePlanePosition = new Ega().copy(e123e)
+    mousePlanePositionOld = new Ega().copy(e123e)
     let mouseRayOld = new Ega()
 
     let raycaster = new THREE.Raycaster()
@@ -67,8 +68,6 @@ function initMouse() {
 
     let mouseMvmt = new Dq()
     let workingPlane = new Ega().copy(e3e)
-    mousePlanePosition = new Ega()
-    mousePlanePositionOld = new Ega()
     function onMouseMove(event) {
         updateRay(event)
 

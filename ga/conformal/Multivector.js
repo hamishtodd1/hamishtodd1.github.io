@@ -263,27 +263,37 @@ class Multivector extends Float32Array {
         if (numDecimalPlaces === undefined)
             numDecimalPlaces = 1
 
-        let str = ""
-        for (let i = 0; i < this.constructor.size; ++i) {
+        let isCga = this.constructor.size === 32
 
+        let str = ""
+        for (let j = 0; j < this.constructor.size; ++j) {
+
+            let i = j
+            if(j===26) i = 31
+            if(j===31) i = 26
+            
             if (Math.abs(this[i]) > 0.05 || isNaN(this[i]) ) { // && this[i].toFixed() != 0) {
 
                 if (str !== "")
                     str += " + "
 
-                let sign = 1.
+                // let sign = 1.
                 // if (this.constructor.onesWithMinus.indexOf(this.constructor.basisNames[i]) !== -1)
                 //     sign = -1.
 
+                let numString = this[i].toString()
+                if(numString.length > numDecimalPlaces)
+                    numString = this[i].toFixed(numDecimalPlaces)
+                
                 let basisName = this.constructor.basisNames[i]
-                str += (sign * this[i]).toFixed(numDecimalPlaces) + (basisName === `` ? `` : `e`) + basisName
+                str += numString + (basisName === `` ? `` : `e`) + basisName
 
                 //would be nice to have e0 in cga printing
             }
         }
 
-        if (str === "")
-            str += "0."
+        if (str === ``)
+            str += `0.`
 
         return str
     }

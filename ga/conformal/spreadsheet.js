@@ -33,6 +33,7 @@ function initSpreadsheet() {
     let selectedColumn = 0
     let selectedRow = 0
     let initial = [
+        [`exp( time * (e12 + e01) )`],
         [`0.7e123p - 0.7e123m`],
         [`2e12`],
         [`-1`],
@@ -44,10 +45,11 @@ function initSpreadsheet() {
         [`hand`],
         [`(1+time*e01) > e1`, `e23`],
         [`A3 + A4`],
+        [`A1 > hand`],
     ]
 
     let columns = 2
-    let rows = 14
+    let rows = 26
     let layerWidth = .001
 
     spreadsheet = new THREE.Object3D()
@@ -55,7 +57,7 @@ function initSpreadsheet() {
 
     let bgMat = new THREE.MeshBasicMaterial({ color: 0xFFFFFF, side: THREE.DoubleSide })
     let bg = new THREE.Mesh(unchangingUnitSquareGeometry, bgMat )
-    bg.scale.set(2.4, 2.4, 1.)
+    bg.scale.set(2.4, 2.9, 1.)
     bg.position.z = -layerWidth
     spreadsheet.add(bg)
     spreadsheet.position.set( -bg.scale.x / 2., 1.6, .01 )
@@ -166,10 +168,10 @@ function initSpreadsheet() {
         }
     }
     setSecondarySelectionBox = (col, row) => {
+
         if (unusedSecondarySelectionBoxes.length === 0) {
             let ssb = new SelectionBox(ssbMat)
             unusedSecondarySelectionBoxes.push(ssb)
-            usedSecondarySelectionBoxes.push(ssb)
         }
 
         let ssb = unusedSecondarySelectionBoxes.pop()
@@ -209,7 +211,7 @@ function initSpreadsheet() {
             else
                 refreshCountdown = 0.65
 
-            selectedCell.append(translateExpression(selectCell.currentText + event.key))
+            selectedCell.append(translateExpression(selectedCell.currentText + event.key))
         }
 
         //also "you're done entering into that box", so we finalize the string
@@ -247,7 +249,8 @@ function initSpreadsheet() {
         mousePlanePosition.pointToVec3(v1)
         spreadsheet.worldToLocal(v1)
         
-        if ( inRect(v1, bg.position, bg.scale.x, bg.scale.y ) ) {
+        let inSpreadsheet = inRect(v1, bg.position, bg.scale.x, bg.scale.y)
+        if ( inSpreadsheet ) {
             forEachCell((cell, column, row)=>{
                 
                 if( inRect(v1, cell.position, cellWidth,cellHeight) )
@@ -257,9 +260,8 @@ function initSpreadsheet() {
         else {
             let newRow = -1
             for (newRow = cells[0].length-2; newRow > -1; --newRow) {
-                if( cells[0][newRow].currentText !== ``) {
+                if( cells[0][newRow].currentText !== ``)
                     break
-                }
             }
             ++newRow
 

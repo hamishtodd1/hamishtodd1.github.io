@@ -44,14 +44,14 @@ function initCompilation() {
 
     const potentialNameRegex = /^[a-zA-Z0-9₀₁₂₃₄₅ₚₘ𝅘]+$/
 
-    function reparseTokens(expression,logLevel) {
+    reparseTokens = ( expression, doLog ) => {
 
         expression = expression.replace(/\s/g, '')
         const tokens = tokenize(expression)
-        if (logLevel > 0)
+        if (doLog )
             log(tokens)
         const parsedTokens = parseTokens(tokens)
-        if (logLevel > 0)
+        if (doLog )
             log(parsedTokens)
 
         while(tokens.length > 0)
@@ -60,24 +60,21 @@ function initCompilation() {
         return parsedTokens
     }
 
-    compile = ( expression, targetCga, logLevel = 0) => {
-
-        const parsedTokens = reparseTokens( expression, logLevel )
+    compile = ( parsedTokens, targetCga, doLog ) => {
             
-        const stack = []
-        // if (expression === translateExpression(`hand & e123`) && !mousePlanePosition.isZero() )
-        //     debugger
-            
-        evaluateToStack( parsedTokens, stack )
+        const stack = evaluateToStack( parsedTokens )
 
-        if (stack.length !== 1 || stack[0].constructor !== Cga )
-            return `malformed expression`
+        if (stack.length !== 1 || stack[0].constructor !== Cga ) {
+            clearStack(stack)
+            return false
+        }
         else {
             let result = stack.pop()
             targetCga.copy(result)
             localCgas.push(result)
-            return ``
+            return true
         }
+
     }
 
     let specialSymbols = [`(`, `)`]
@@ -101,7 +98,7 @@ function initCompilation() {
     new CgaMethod(`meet`,               2, 2, [`∧`,`^`] )
     new CgaMethod(`join`,               2, 2, [`∨`,`&`] )
     new CgaMethod(`inner`,              2, 2, [`·`,`'`] )
-    new CgaMethod(`sandwich`,           2, 2, [`⤻`, `>`,`→`] )
+    new CgaMethod(`sandwich`,           2, 2, [`⤳`, `>`,`→`] )
     new CgaMethod(`add`,                2, 1, [`+`] )
     new CgaMethod(`negate`,             1, 2, [`-`] )
     new CgaMethod(`projectOn`,          2 )
@@ -122,7 +119,8 @@ function initCompilation() {
 
         function finishToken() {
             if (currentToken.length > 0) {
-                tokens.push(currentToken)
+                let cm = cgaMethods.find(cm => cm.name === currentToken)
+                tokens.push( cm === undefined ? currentToken : cm )
                 currentToken = ''
             }
         }
@@ -167,13 +165,15 @@ function initCompilation() {
         const operatorStack = []
 
         //you want to be able to have scalars next to thingies
-
+        
         let START = -1
         let NUMBER_OR_VARIABLE = 0
         let OPEN_BRACKET = 1
         let CLOSE_BRACKET = 2
         let METHOD = 3
         let lastTokenWas = START
+
+        // debugger
 
         tokens.forEach( token => {
 
@@ -248,9 +248,9 @@ function initCompilation() {
     // }
 
     //yes, we might want to put this in a shader
-    function evaluateToStack(tokens,stack) {
+    evaluateToStack = (tokens) => {
 
-        clearStack(stack)
+        let stack = []
 
         let tokenIndex = 0
         let numTokens = tokens.length
@@ -292,8 +292,10 @@ function initCompilation() {
 
                 if (token === `time`)
                     extraCga.fromFloatAndIndex( clock.getElapsedTime() * .1, 0 )
-                else if(token === `hand`)
+                else if(token === `hand`) {
                     cga0.fromEga(mousePlanePosition).flatPpToConformalPoint(extraCga)
+                    // log(extraCga)
+                }
                 else if (/^[A-Z][0-9]+$/.test(token)) {
                     //spreadsheet entry
                     let column = letterSymbols.indexOf(token[0])
@@ -302,6 +304,7 @@ function initCompilation() {
 
                     cell.refresh()
                     setSecondarySelectionBox(column,row)
+                    cell.setVizVisibility(true)
 
                     if (cell.viz === null )
                         break
@@ -330,14 +333,16 @@ function initCompilation() {
             if(!justAComment)
                 console.error(`Evaluation error at "` + tokens[tokenIndex] + `", tokens having been `, tokens)
         }
+
+        return stack
     }
 
     //perform tests if there are any
     for(let i = 0, il = tests.length / 2; i < il; ++i) {
-        const result = compile(tests[i*2], cga0, 0)
+        const result = compile( reparseTokens( tests[i*2] ), cga0)
         if(!result.equals(tests[i*2+1])) {
             console.error(`test failed, logging intermediate stuff`)
-            const result = compile(tests[i * 2], cga0, 1)
+            const result = compile( reparseTokens( tests[i * 2], true ), cga0, true)
         }
     }
 }

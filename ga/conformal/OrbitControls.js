@@ -1242,7 +1242,7 @@ class OrbitControls extends THREE.EventDispatcher {
 
 		scope.domElement.addEventListener( 'pointerdown', onPointerDown );
 		scope.domElement.addEventListener( 'pointercancel', onPointerUp );
-		// scope.domElement.addEventListener( 'wheel', onMouseWheel, { passive: false } );
+		scope.domElement.addEventListener( 'wheel', onMouseWheel, { passive: false } );
 
 		// force an update at start
 

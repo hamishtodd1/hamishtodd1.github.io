@@ -59,40 +59,54 @@ function initCells(cellWidth,cellHeight) {
 
             //"Σ√A∧B∨⋅a*sβα" //if you want ǁ it gets a bit taller
             this.currentText = ``
+            this.lastParsedText = ``
+            this.parsedTokens = []
 
             this.setVizVisibility(false)
         }
 
         refresh() {
 
-            let oldVizType = this.viz === null ? NO_VIZ_TYPE : constructors.indexOf(this.viz.constructor)
-
-            // if (this.currentText === `hand & e123`)
-            //     debugger
-
-            let error = compile(this.currentText, evaluatedCga, 0)
-            let vizType = NO_VIZ_TYPE
-            if (error === ``) {
-
-                vizType = evaluatedCga.grade()
-                if (vizType === -2 || vizType === -1 || vizType === 0) //0 is a rotor
-                    vizType = ROTOR
-
+            if( this.currentText === this.lastParsedText ) {
+                let compiledToMv = compile(this.parsedTokens, evaluatedCga, 0)
+                if (compiledToMv )
+                    evaluatedCga.cast(this.viz.getMv())
             }
+            else {
+                while(this.parsedTokens.length !== 0) {
+                    delete this.parsedTokens.pop()
+                }
+                this.parsedTokens = reparseTokens( this.currentText )
+                this.lastParsedText = this.currentText
 
-            if (oldVizType !== vizType) {
+                let oldVizType = this.viz === null ? NO_VIZ_TYPE : constructors.indexOf(this.viz.constructor)
 
-                //putting old one to sleep
-                this.setVizVisibility(false)
-                unusedVizes[oldVizType].push(this.viz)
+                let compiledToMv = compile(this.parsedTokens, evaluatedCga, 0)
+                let vizType = NO_VIZ_TYPE
+                if ( compiledToMv ) {
 
-                this.viz = unusedVizes[vizType].pop()
-                this.setVizVisibility(true)
+                    vizType = evaluatedCga.grade()
+                    if (this.currentText === `hand`)
+                        log(evaluatedCga)
+                    if (vizType === -2 || vizType === -1 || vizType === 0) //0 is a rotor
+                        vizType = ROTOR
+
+                }
+
+                if (oldVizType !== vizType) {
+
+                    //putting old one to sleep
+                    this.setVizVisibility(false)
+                    unusedVizes[oldVizType].push(this.viz)
+
+                    this.viz = unusedVizes[vizType].pop()
+                    this.setVizVisibility(true)
+                }
+
+                //now give it the value
+                if (vizType !== NO_VIZ_TYPE)
+                    evaluatedCga.cast(this.viz.getMv())
             }
-
-            //now give it the value
-            if (vizType !== NO_VIZ_TYPE)
-                evaluatedCga.cast(this.viz.getMv())
         }
 
         setText(newText) {

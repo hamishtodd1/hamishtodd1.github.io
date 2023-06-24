@@ -1,6 +1,7 @@
 /*
     TODO
-        Want some kind of model you can put in a cell
+        Just put in SOME kind of surface, it doesn't have to be thought of as the last
+        Would be nice to drag a cell onto another cell and have it fill in the thing there
         Better sphere rendering close to infinity eg e2+e3
         Change what possibly-spherical slice you're looking at? With a watch interface?
         Make sphere with a texture you can draw on
@@ -8,11 +9,19 @@
         Improved line rendering:
             It is a full circle, BUT you don't join the last pair of vertices together
 
+    Ideas
+        You should be able to break off definitions and stick them to a point
+
+    Level of detail idea
+        CGA gives a natural way to
+            take three vertices of a triangle
+            Find midpoints of its edges (or things close to midpoints)
+            and poof them outwards, thereby turning one triangle into 4
 
     Let's say there's a cloud of random dots, call it "cloud"
         Mention it in a cell on its own and now that cell is that cloud of dots
             So, that's "cloud, with identity transform applied"
-        Should be able to write versor ⤻ cloud, and you get the transformed cloud (just like a single point)
+        Should be able to write versor ⤳ cloud, and you get the transformed cloud (just like a single point)
     Buuuut we're interested in skinning
         A mesh has a canonical mapping to the sphere
             You MIGHT use that sphere as a texture, though you don't HAVE to
@@ -48,6 +57,8 @@ async function init() {
     await initCgaVizes()
 
     initMouse()
+
+    // initLod()
 
     initCompilation()
     initSpreadsheet()

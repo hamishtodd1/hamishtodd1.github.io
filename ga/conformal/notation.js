@@ -1,6 +1,6 @@
 function initNotation() {
     let typeableSymbols = `()*+-_~ .0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz`
-    let specialSymbols = `∧∨·⤻` //Σ√
+    let specialSymbols = `∧∨·⤳` //Σ√
     let specialStandin = `^&'>` //£#
     let subscriptables = [`0`, `1`, `2`, `3`, `4`, `5`, `p`, `m`, `o`]
     let subscripts = [`₀`, `₁`, `₂`, `₃`, `₄`, `₅`, `ₚ`, `ₘ`, `𝅘`]
