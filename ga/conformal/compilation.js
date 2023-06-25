@@ -298,12 +298,12 @@ function initCompilation() {
                 }
                 else if (/^[A-Z][0-9]+$/.test(token)) {
                     //spreadsheet entry
-                    let column = letterSymbols.indexOf(token[0])
+                    let spreadsheet = spreadsheets[letterSymbols.indexOf(token[0])]
                     let row = parseInt(token.slice(1)) - 1
-                    let cell = cells[column][row]
+                    let cell = spreadsheet.cells[row]
 
                     cell.refresh()
-                    setSecondarySelectionBox(column,row)
+                    setSecondarySelectionBox( spreadsheet, row )
                     cell.setVizVisibility(true)
 
                     if (cell.viz === null )

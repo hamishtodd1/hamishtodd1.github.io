@@ -142,7 +142,7 @@ async function init() {
         ++frameCount
 
         blankFunction()
-        updatePanel()
+        refreshActiveCells()
         handleDrawing()
         obj3dsWithOnBeforeRenders.forEach(obj3d => obj3d.onBeforeRender())
 

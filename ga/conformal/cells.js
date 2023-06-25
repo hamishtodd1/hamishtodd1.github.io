@@ -1,4 +1,4 @@
-function initCells(cellWidth,cellHeight) {
+function initCells( cellWidth, cellHeight ) {
 
     //enum
     const NO_VIZ_TYPE = 0
@@ -35,7 +35,7 @@ function initCells(cellWidth,cellHeight) {
     //have to choose a max then stick to it, it's complicated to think about changing uvs at runtime
 
     class Cell extends THREE.Mesh {
-        constructor(column, row) {
+        constructor(x,y) {
             let canvas = document.createElement("canvas")
             let context = canvas.getContext("2d")
             let map = new THREE.CanvasTexture(canvas)
@@ -50,10 +50,6 @@ function initCells(cellWidth,cellHeight) {
             this.canvas.width = canvasHorizontalResolution
             this.scale.y = textMeshHeight
             this.scale.x = textMeshWidth
-            spreadsheet.add(this)
-
-            let [px, py] = getCellPos(column, row)
-            this.position.set(px, py, 0.)
 
             this.viz = null //so vis type is NO_VIZ_TYPE
 
@@ -86,8 +82,6 @@ function initCells(cellWidth,cellHeight) {
                 if ( compiledToMv ) {
 
                     vizType = evaluatedCga.grade()
-                    if (this.currentText === `hand`)
-                        log(evaluatedCga)
                     if (vizType === -2 || vizType === -1 || vizType === 0) //0 is a rotor
                         vizType = ROTOR
 
