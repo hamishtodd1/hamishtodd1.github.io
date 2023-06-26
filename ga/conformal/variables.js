@@ -40,6 +40,7 @@ debugSphere.position.copy(outOfSightVec3)
 
 const grabbables = []
 const spreadsheets = []
+const cellHeight = 0.11
 
 THREE.Matrix4.prototype.log = function() {
 	let order = [

@@ -1,6 +1,8 @@
 /*
     You do want a little "lock" symbol next to the columns that you can check to make it stay visible
 
+    should be able to hover within a cell, over eg the "e2" in "2e1 + 5e2", and see that thing
+
     NoModes: AT ANY TIME you can grab ANY object you can see and modify it
         Or, create a new object
     So the way it works:
@@ -30,64 +32,225 @@ function updatePanel(){}
 
 function initSpreadsheet() {
 
-    let initial = [
-    [
-        `exp( time * (e12 + e01) )`,
-        `0.7e123p - 0.7e123m`,
-        `2e12`,
-        `-1`,
-        `hand & e123`,
-        `e23 - time * e13`,
-        `e1 - e0`,
-        `e4 + time * e0`,
-        `e23 - e03`,
-        `hand`,
-        `(1+time*e01) > e1`,
-        `A3 + A4`,
-        `A1 > hand`,
-    ],
-    [
-        `ep`, `e2`, `e3`, `e23`
-    ]
-    ]
-    initNotation()
-    initial.forEach((a, i) => {
-        a.forEach((b, j) => {
-            initial[i][j] = translateExpression(b)
-        })
-    })
-
-    let refreshCountdown = -1.
-    let currentlyTyping = false
-    
-    let cellWidth = 1.2
-    let cellHeight = 0.11
-    initCells(cellWidth, cellHeight)
-
     let gridThickness = .09 * cellHeight
-    let gridMat = new THREE.MeshBasicMaterial({ color: 0xAAAAAA })
+    let gridMat = new THREE.MeshBasicMaterial({ color: 0xAAAAAA, side:THREE.DoubleSide })
     let layerWidth = .001
-    
-    let ourM = new THREE.Matrix4()
+
     let MAX_CELLS = 30 //based on nothing right now
+
+    let cellWidthMax = 1.9 // trying to squee
+    let textMeshHeight = cellHeight * .7 //you get a .3 padding on all four sides
+    let canvasYRez = 64 //eyeballed
+
+    function canvasXRezToCellWidth(canvasXRez) {
+        let textMeshWidth = canvasXRez / canvasYRez * textMeshHeight
+        let cellWidth = textMeshWidth + (cellHeight - textMeshHeight)
+        return cellWidth
+    }
+    function cellWidthToCanvasXRez(cellWidth) {
+        let textMeshWidth = cellWidthToTextMeshWidth(cellWidth)
+        let canvasXRez = canvasYRez * textMeshWidth / textMeshHeight
+        return canvasXRez
+    }
+    function cellWidthToTextMeshWidth(cellWidth) {
+        return cellWidth - (cellHeight - textMeshHeight)
+    }
+    let canvasXRezMax = cellWidthToCanvasXRez(cellWidthMax)
+    let textMeshWidthMax = cellWidthToTextMeshWidth(cellWidthMax)
+
+    {
+        //enum
+        const NO_VIZ_TYPE = 0
+        const SPHERE = 1
+        const ROTOR = 2 //grade wise that's more like a circle but this will do for now
+        const PP = 3
+        const CONFORMAL_POINT = 3
+        const vizTypes = [NO_VIZ_TYPE, SPHERE, ROTOR, PP, CONFORMAL_POINT]
+        //want a mesh type, and a curve type
+        //no longer sorts-of-viz
+        let constructors = [() => null, SphereViz, RotorViz, PpViz, ConformalPointViz]
+
+        let evaluatedCga = new Cga()
+
+        let numOfEachVizType = 90
+        let unusedVizes = Array(vizTypes.length)
+        for (let i = 0; i < vizTypes.length; ++i) {
+            unusedVizes[i] = Array(numOfEachVizType)
+            for (let j = 0; j < numOfEachVizType; ++j) {
+                if (i === 0)
+                    unusedVizes[i][j] = null
+                else {
+                    unusedVizes[i][j] = new constructors[i]()
+                    unusedVizes[i][j].visible = false
+                }
+            }
+        }
+
+        class Cell extends THREE.Mesh {
+            constructor(spreadsheet) {
+                let canvas = document.createElement("canvas")
+                let context = canvas.getContext("2d")
+                let map = new THREE.CanvasTexture(canvas)
+
+                super(spreadsheet.cellGeo, new THREE.MeshBasicMaterial({ map: map, transparent: true }))
+
+                this.spreadsheet = spreadsheet
+
+                this.minCellWidth = cellHeight
+
+                this.map = map
+                this.context = context
+                this.canvas = canvas
+
+                this.canvas.height = canvasYRez
+                this.canvas.width = canvasXRezMax
+                this.scale.y = textMeshHeight
+                //scale.x handled by spreadsheet
+
+                this.viz = null //so vis type is NO_VIZ_TYPE
+
+                //"Σ√A∧B∨⋅a*sβα" //if you want ǁ it gets a bit taller
+                this.currentText = ``
+                this.lastParsedText = ``
+                this.parsedTokens = []
+
+                this.setVizVisibility(false)
+            }
+
+            refresh() {
+
+                if (this.currentText === this.lastParsedText) {
+                    let compiledToMv = compile(this.parsedTokens, evaluatedCga, 0)
+                    if (compiledToMv)
+                        evaluatedCga.cast(this.viz.getMv())
+                }
+                else {
+                    while (this.parsedTokens.length !== 0) {
+                        delete this.parsedTokens.pop()
+                    }
+                    this.parsedTokens = reparseTokens(this.currentText)
+                    this.lastParsedText = this.currentText
+
+                    let oldVizType = this.viz === null ? NO_VIZ_TYPE : constructors.indexOf(this.viz.constructor)
+
+                    let compiledToMv = compile(this.parsedTokens, evaluatedCga, 0)
+                    let vizType = NO_VIZ_TYPE
+                    if (compiledToMv) {
+
+                        vizType = evaluatedCga.grade()
+                        if (vizType === -2 || vizType === -1 || vizType === 0) //0 is a rotor
+                            vizType = ROTOR
+
+                    }
+
+                    if (oldVizType !== vizType) {
+
+                        //putting old one to sleep
+                        this.setVizVisibility(false)
+                        unusedVizes[oldVizType].push(this.viz)
+
+                        this.viz = unusedVizes[vizType].pop()
+                        this.setVizVisibility(true)
+                    }
+
+                    //now give it the value
+                    if (vizType !== NO_VIZ_TYPE)
+                        evaluatedCga.cast(this.viz.getMv())
+                }
+            }
+
+            setText(newText) {
+                this.currentText = newText
+
+                this.context.font = this.canvas.height + `px monospace`
+                this.context.textAlign = `left`
+                this.context.textBaseline = `top`
+
+                // this.context.fillStyle = "#FF0000" //for debugging
+                // this.context.fillRect(
+                this.context.clearRect(
+                    0, 0,
+                    this.canvas.width,
+                    this.canvas.height)
+
+                this.context.fillStyle = "#000000"
+                this.context.fillText(this.currentText, 0, 0)
+
+                this.map.needsUpdate = true
+
+                let textWidth = this.context.measureText(this.currentText).width
+                this.minCellWidth = clamp(canvasXRezToCellWidth(textWidth), cellHeight, cellWidthMax)
+                this.spreadsheet.resizeFromCellWidths()
+            }
+
+            append(suffix) {
+                this.setText(this.currentText + suffix)
+            }
+
+            setVizVisibility(newVisibility) {
+                if (this.viz !== null)
+                    this.viz.visible = newVisibility
+            }
+        }
+        window.Cell = Cell
+    }
+
+    {
+        const spandrelShape = new THREE.Shape()
+        var spandrelWidth = cellHeight * .6
+        spandrelShape.bezierCurveTo(spandrelWidth, 0., 0., cellHeight, spandrelWidth, cellHeight)
+        spandrelShape.lineTo(spandrelWidth, 0.)
+        spandrelShape.lineTo(0.,0.)
+        var spandrelGeo = new THREE.ShapeGeometry(spandrelShape)
+        var spandrelMat = new THREE.MeshBasicMaterial({ color: 0xD8D8D8, side: THREE.DoubleSide })
+    }
+
+    let bgMat = new THREE.MeshBasicMaterial({ color: 0xFFFFFF, side: THREE.DoubleSide })
+    let capitalAlphabet = `ABCDEFGHIJKLMNOPQRSTUVWXYZ`
     class Spreadsheet extends THREE.Object3D {
+
         constructor(numRows) {
+
+            if(spreadsheets.length === 26) {
+                console.error("Too many spreadsheets!")
+                return
+            }
             super()
             scene.add(this)
             spreadsheets.push(this)
-            this.position.set(0., 1.6, .01)
+            this.position.set( 0., 1.6, .01 )
 
-            let bgMat = new THREE.MeshBasicMaterial({ color: 0xFFFFFF, side: THREE.DoubleSide })
+            this.cellGeo = unchangingUnitSquareGeometry.clone()
+
             this.bg = new THREE.Mesh(unchangingUnitSquareGeometry, bgMat)
             this.bg.position.z = -layerWidth
             this.add(this.bg)
 
+            {
+                let title = capitalAlphabet[spreadsheets.indexOf(this)]
+                this.sign = text(title, false, `#000000`)
+                this.sign.scale.multiplyScalar(cellHeight)
+                this.add(this.sign)
+
+                this.plaque = new THREE.Mesh(unchangingUnitSquareGeometry, spandrelMat)
+                this.plaque.scale.y = cellHeight
+                this.plaque.position.z = -layerWidth
+                this.add(this.plaque)
+
+                this.leftSpandrel = new THREE.Mesh(spandrelGeo, spandrelMat)
+                this.rightSpandrel = new THREE.Mesh(spandrelGeo, spandrelMat)
+                this.rightSpandrel.rotation.y = Math.PI
+                this.rightSpandrel.position.z = -layerWidth
+                this.leftSpandrel.position.z = -layerWidth
+                this.add(this.leftSpandrel, this.rightSpandrel)
+            }
+
             this.cells = []
             for (let row = 0; row < numRows; ++row) {
-                this.cells[row] = new Cell()
+                this.cells[row] = new Cell(this)
                 this.add(this.cells[row])
             }
-            this.updateScale()
+            this.resizeFromCellWidths()
 
             let gridLinesHorizontalNum = MAX_CELLS + 1
             let gridLinesVertical = new THREE.InstancedMesh(unchangingUnitSquareGeometry, gridMat, 2)
@@ -103,22 +266,20 @@ function initSpreadsheet() {
                     cell.position.set(0., this.getCellY(row), 0.)
                 })
 
-                this.updateScale()
-
                 let xMin = -this.bg.scale.x / 2.
                 for (let i = 0; i < 2; ++i) {
-                    ourM.makeScale(gridThickness, this.bg.scale.y + gridThickness, 1.)
-                    ourM.setPosition(xMin + i * cellWidth, 0., 0.)
-                    gridLinesVertical.setMatrixAt(i, ourM)
+                    m1.makeScale(gridThickness, this.bg.scale.y + gridThickness, 1.)
+                    m1.setPosition(xMin + i * this.bg.scale.x, 0., layerWidth)
+                    gridLinesVertical.setMatrixAt(i, m1)
                 }
                 gridLinesVertical.instanceMatrix.needsUpdate = true
 
                 let yMax = this.bg.scale.y / 2.
                 for (let i = 0; i < gridLinesHorizontalNum; ++i) {
                     let iLimited = Math.min(i, this.cells.length)
-                    ourM.makeScale(this.bg.scale.x + gridThickness, gridThickness, 1.)
-                    ourM.setPosition(0., yMax - iLimited * cellHeight, 0.)
-                    gridLinesHorizontal.setMatrixAt(i, ourM)
+                    m1.makeScale(this.bg.scale.x + gridThickness, gridThickness, 1.)
+                    m1.setPosition(0., yMax - iLimited * cellHeight, layerWidth)
+                    gridLinesHorizontal.setMatrixAt(i, m1)
                 }
                 gridLinesHorizontal.instanceMatrix.needsUpdate = true
             }
@@ -126,240 +287,80 @@ function initSpreadsheet() {
 
         addCell() {
             let row = this.cells.length
-            let cell = new Cell()
+            let cell = new Cell(this)
             this.add( cell )
             cell.position.set(0., this.getCellY(row), 0.)
             this.cells[row] = cell
         }
 
-        updateScale() {
-            this.bg.scale.set(cellWidth, cellHeight * this.cells.length, 1.)
+        resizeFromCellWidths() {
+
+            let maxCellWidth = this.cells.reduce(
+                (accumulator, cell) => Math.max(accumulator, cell.minCellWidth),
+                cellHeight)
+
+            this.bg.scale.set(maxCellWidth, cellHeight * this.cells.length, 1.)
+
+            let newTextMeshWidth = cellWidthToTextMeshWidth(maxCellWidth)
+            this.cells.forEach( cell => {
+                cell.scale.x = newTextMeshWidth
+            })
+
+            //the uv x coords of the top right and bottom right corners
+            let cutoffX = newTextMeshWidth / textMeshWidthMax
+            this.cellGeo.attributes.uv.array[2] = cutoffX
+            this.cellGeo.attributes.uv.array[6] = cutoffX
+            // log(this.cellGeo.attributes.uv.version)
+            this.cellGeo.attributes.uv.needsUpdate = true
+            // this.cellGeo.uvsNeedUpdate = true
+
+            this.leftSpandrel.position.set( -this.bg.scale.x / 2., this.bg.scale.y / 2., -layerWidth)
+            this.rightSpandrel.position.set( this.bg.scale.x / 2., this.bg.scale.y / 2., -layerWidth)
+            this.plaque.position.y = this.bg.scale.y / 2. + cellHeight / 2.
+            this.plaque.scale.x = this.bg.scale.x - spandrelWidth * 2. + .001
+            this.sign.position.y = this.plaque.position.y
         }
 
         getCellY(row) {
             return this.bg.scale.y / 2. - cellHeight * (row+.5)
         }
     }
-    let ss1 = new Spreadsheet(initial[0].length)
-    ss1.position.x = -cellWidth / 2. - .1
-    let ss2 = new Spreadsheet(initial[1].length)
-    ss2.position.x =  cellWidth / 2. + .1
-
-    function forEachCell(func) {
-        spreadsheets.forEach((ss,ssIndex) => {
-            ss.cells.forEach( ( cell, cellIndex ) => {
-                func( cell, ssIndex, cellIndex )
-            })
-        })
-    }
-
-    ///////////////
-    // Selection //
-    ///////////////
+    window.Spreadsheet = Spreadsheet
 
     class SelectionBox extends THREE.InstancedMesh {
 
         constructor(mat) {
-            
-            super(unchangingUnitSquareGeometry, mat, 4)
-            
+
+            super( unchangingUnitSquareGeometry, mat, 4 )
+            this.spreadsheet = null
+            this.row = -1
         }
 
-        setPosition(spreadsheet, row) {
-
-            spreadsheet.add(this)
-
-            let py = spreadsheet.getCellY(row)
+        onBeforeRender() {
+            let py = this.spreadsheet.getCellY(this.row)
             //horizontal
-            ourM.makeScale(cellWidth + gridThickness, gridThickness, 1.)
-            ourM.setPosition(0., py + cellHeight / 2., layerWidth)
-            this.setMatrixAt(0, ourM)
-            ourM.setPosition(0., py - cellHeight / 2., layerWidth)
-            this.setMatrixAt(1, ourM)
+            m1.makeScale(this.spreadsheet.bg.scale.x + gridThickness, gridThickness, 1.)
+            m1.setPosition(0., py + cellHeight / 2., layerWidth*2.)
+            this.setMatrixAt(0, m1)
+            m1.setPosition(0., py - cellHeight / 2., layerWidth*2.)
+            this.setMatrixAt(1, m1)
             //vertical
-            ourM.makeScale(gridThickness, cellHeight + gridThickness, 1.)
-            ourM.setPosition(0. + cellWidth / 2., py, layerWidth)
-            this.setMatrixAt(2, ourM)
-            ourM.setPosition(0. - cellWidth / 2., py, layerWidth)
-            this.setMatrixAt(3, ourM)
+            m1.makeScale(gridThickness, cellHeight + gridThickness, 1.)
+            m1.setPosition(0. + this.spreadsheet.bg.scale.x / 2., py, layerWidth*2.)
+            this.setMatrixAt(2, m1)
+            m1.setPosition(0. - this.spreadsheet.bg.scale.x / 2., py, layerWidth*2.)
+            this.setMatrixAt(3, m1)
             this.instanceMatrix.needsUpdate = true
         }
-    }
-    let mainSelectionBox = new SelectionBox( new THREE.MeshBasicMaterial({ color: 0x111111 }) )
 
-    function selectCell(newSs, newRow) {
+        setCell(spreadsheet, row) {
 
-        resetSecondarySelectionBoxes()
-        forEachCell(cell => cell.setVizVisibility(false))
-
-        selectedSpreadsheet = newSs
-        selectedRow = newRow
-        selectedSpreadsheet.cells[selectedRow].refresh()
-        selectedSpreadsheet.cells[selectedRow].setVizVisibility(true)
-
-        mainSelectionBox.setPosition(newSs, newRow)
-
-        currentlyTyping = false
-    }
-
-    let ssbMat = new THREE.MeshBasicMaterial({ color: 0x404040 })
-    let usedSecondarySelectionBoxes = []
-    let unusedSecondarySelectionBoxes = []
-    resetSecondarySelectionBoxes = () => {
-        while (usedSecondarySelectionBoxes.length > 0) {
-            let ssb = usedSecondarySelectionBoxes.pop()
-            ssb.visible = false
-            unusedSecondarySelectionBoxes.push(ssb)
+            spreadsheet.add(this)
+            this.spreadsheet = spreadsheet
+            this.row = row
         }
     }
-    setSecondarySelectionBox = (spreadsheet, row) => {
+    window.SelectionBox = SelectionBox
 
-        if (unusedSecondarySelectionBoxes.length === 0) {
-            let ssb = new SelectionBox(ssbMat)
-            unusedSecondarySelectionBoxes.push(ssb)
-        }
-
-        let ssb = unusedSecondarySelectionBoxes.pop()
-        ssb.setPosition(spreadsheet, row)
-        ssb.visible = true
-        usedSecondarySelectionBoxes.push(ssb)
-    }
-
-    //////////////////////////
-    // Controls / selection //
-    //////////////////////////
-
-    let rememberedSelectedRow = 0
-    function incrementCell( increment ) {
-        let maxVal = selectedSpreadsheet.cells.length - 1
-        let newVal = clamp(selectedRow + increment, 0, maxVal)
-        selectCell( selectedSpreadsheet, newVal)
-        rememberedSelectedRow = newVal
-    }
-    function incrementSs(increment) {
-        let currentVal = spreadsheets.indexOf(selectedSpreadsheet)
-        let index = (currentVal + 1) % spreadsheets.length
-        let newSs = spreadsheets[index]
-
-        let newRow = rememberedSelectedRow
-        if (newRow >= newSs.cells.length)
-            newRow = newSs.cells.length - 1
-
-        selectCell(newSs, newRow)
-    }
-
-    function clearCurrentCell() {
-        selectedSpreadsheet.cells[selectedRow].setText(``)
-        currentlyTyping = true
-        selectedSpreadsheet.cells[selectedRow].refresh()
-    }
-
-    document.addEventListener(`keydown`, (event)=>{
-
-        let selectedCell = selectedSpreadsheet.cells[selectedRow]
-
-        if(event.key.length === 1) {
-            if (!currentlyTyping)
-                clearCurrentCell()
-            else
-                refreshCountdown = 0.65
-
-            selectedCell.setText(translateExpression(selectedCell.currentText + event.key))
-        }
-
-        //also "you're done entering into that box", so we finalize the string
-        switch(event.key) {
-            case `ArrowUp`:
-                incrementCell( -1 )
-                return
-            case `ArrowDown`:
-                incrementCell(  1 )
-                return
-            case `ArrowRight`:
-                incrementSs(-1)
-                return
-            case `ArrowLeft`:
-                incrementSs(1)
-                return
-            case `Backspace`:
-                clearCurrentCell()
-                return
-        }
-    })
-
-    function inRect( posVec, rectPos, rectScaleX, rectScaleY ) {
-
-        let ret = 
-            rectPos.x-rectScaleX / 2. < posVec.x && posVec.x < rectPos.x+rectScaleX / 2. &&
-            rectPos.y-rectScaleY / 2. < posVec.y && posVec.y < rectPos.y+rectScaleY / 2.
-        return ret
-    }
-    document.addEventListener(`mousedown`, (event) => {
-        if (event.button !== 0)
-            return
-
-        //first of all we do need the position of the "mouse"
-        let clickedSpreadsheet = false
-        spreadsheets.forEach(ss=>{
-            mousePlanePosition.pointToVec3(v1)
-            ss.worldToLocal(v1)
-            if( inRect(v1, ss.bg.position, ss.bg.scale.x, ss.bg.scale.y) ) {
-                ss.cells.forEach((cell,row)=>{
-                    if (inRect(v1, cell.position, cellWidth, cellHeight)) {
-                        selectCell(ss, row)
-                        clickedSpreadsheet = true
-                        rememberedSelectedRow = row
-                    }
-                })
-            }
-        })
-        
-        if ( !clickedSpreadsheet ) {
-            selectedSpreadsheet.addCell()
-
-            let newRow = selectedSpreadsheet.cells.length - 1
-            let cellToWriteTo = selectedSpreadsheet.cells[newRow]
-            cga0.fromEga(mousePlanePosition).flatPpToConformalPoint(cga0)
-            let newText = translateExpression(cga0.toString(3))
-            cellToWriteTo.setText(newText)
-
-            selectedSpreadsheet.updateScale()
-            selectCell(selectedSpreadsheet, newRow)
-        }
-    })
-
-    //////////////////////////
-    // Auto refresh control //
-    //////////////////////////
-
-    refreshActiveCells = () => {
-
-        if (!currentlyTyping)
-            selectedSpreadsheet.cells[selectedRow].refresh()
-        else if (refreshCountdown !== -1.) {
-
-            // Refresh cell if not typed into for a while
-            refreshCountdown -= frameDelta
-
-            if (refreshCountdown < 0.) {
-                selectedSpreadsheet.cells[selectedRow].refresh()
-                selectedSpreadsheet.cells[selectedRow].setVizVisibility(true)
-                refreshCountdown = -1.
-            }
-        }
-    }
-
-    /////////////
-    // Finally //
-    /////////////
-
-    forEachCell((cell, ssIndex, row) => {
-        if (initial[ssIndex] !== undefined && initial[ssIndex][row] !== undefined) {
-            cell.append(initial[ssIndex][row])
-            cell.refresh()
-        }
-    })
-    let selectedSpreadsheet = spreadsheets[0]
-    let selectedRow = 0
-    selectCell(selectedSpreadsheet, selectedRow)
+    initSpreadsheetNavigation()
 }

@@ -14,8 +14,8 @@ function text(initialText,materialOnly,textColorHex) {
 		currentText = text
 
 		let font = "Arial"
-		let backgroundMargin = 50
-		let textSize = 100
+		let backgroundMargin = 43
+		let textSize = 85
 		context.font = "bold " + textSize + "px " + font
 		let textWidth = context.measureText(text).width
 		canvas.width = textWidth + backgroundMargin
