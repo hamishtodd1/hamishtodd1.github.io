@@ -317,7 +317,7 @@ function initSpreadsheet() {
             this.leftSpandrel.position.set( -this.bg.scale.x / 2., this.bg.scale.y / 2., -layerWidth)
             this.rightSpandrel.position.set( this.bg.scale.x / 2., this.bg.scale.y / 2., -layerWidth)
             this.plaque.position.y = this.bg.scale.y / 2. + cellHeight / 2.
-            this.plaque.scale.x = this.bg.scale.x - spandrelWidth * 2. + .001
+            this.plaque.scale.x = this.bg.scale.x - spandrelWidth * 2. + .0001
             this.sign.position.y = this.plaque.position.y
         }
 

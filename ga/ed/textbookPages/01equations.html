@@ -1,0 +1,21 @@
+    <div id="equationarea">
+        <p>
+            The meet of two objects is denoted:
+
+            \[ a \wedge b \]
+            
+            And indeed this is part of the construction of our basis:
+
+            \[ \cssId{e12Id}{e_{12}} = \cssId{e1Id}{e_{1}} \wedge \cssId{e2Id}{e_{2}} \]
+        </p>
+    </div>
+
+    <!-- 
+        Hover equals to see all the things?
+     -->
+
+    <script id="fragmentShader" type="x-shader/x-fragment">
+Plane e1 = Plane(0.,1.,0.,0.);
+Plane e2 = Plane(0.,0.,1.,0.);
+Dq e12 = Dq(0., 0.,0.,0., 1.,0.,0., 0.);
+    </script>

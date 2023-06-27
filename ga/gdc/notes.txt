@@ -1,0 +1,86 @@
+TODO
+    Make an interface
+    Make some puppets!
+
+Interface
+    "Professional" version won't have the faces anyway
+    const pile: just make things whenever and store them
+    Drag the variable into a ring and you're referencing it
+
+
+So could barrel ahead with this group idea. It's not obviously a BAD idea yet
+It's just freaky to not know where it's going
+I mean it IS nice to be able to work on what's on a hand
+    you were thinking about that anyway with the CGA watch
+    so if you're definitely doing that
+
+
+First goal
+    Might as well start with Cl(3), avoid infinities
+        Puzzle 0, "you gotta match up the boxes"
+            Nothing in the box, you just gotta put it there
+            Give the goal box some eyeballs
+                It and the workBox hold hands and look happy when they disappear
+        Puzzle 1, "you gotta make the thing that's in the box":
+            A plane, in the box (e1, but you don't know that)
+            Just make the plane e1, it's probably a single button
+        Puzzle 2, "confirming that":
+            e2 and e3 superimposed
+        Puzzle 3, "The midpoint monster":
+            A Line in the box, it's e12
+            Gotta stick e1 and e2 in a robot and bring in midpoint monster
+
+        Puzzle X, "The time monster"
+            Time monster is a scalar. It repeatedly counts to 4 or so (tweak it), a reasonable length for a loop
+
+        Need to make something challenging without animation
+
+        Puzzle N:
+            There is a line in the center, e13
+            There is another line, e12, going round and round the pole, occasionally touching its original
+            You need to
+                make e13 and e12, easy
+                make a rotor monster by connecting the "time" monster to the pole and an exponential monster
+                then connect the rotor monster to a sandwich monster and the plane you made
+
+                Or, instead of time, do you do it by making a slight, constant change every frame?
+
+
+The const box
+    You always get e1, e2, e3
+    It floats around, relative to you, always at your side (but not moving too fast)
+    The boxes appear to be groups. So, a box might be a bad idea
+
+So, you've brought in groups
+
+
+
+Vlojure + GA
+    This is a game and a puppet show program
+    Needs to be a game first in order to be fun
+
+Have a usable PGA subset
+Maybe even a (2,1) subset
+Read that paper PGA as subalgebra of CGA
+
+First few levels should not use demons, so make those
+
+
+
+Have the little demons
+
+The Vlojure interface
+    There is a cutoff, ones that are several scopes away just fade
+    Maaaaybe that 3D tree effect
+        Maybe it can be used to elegantly make big stuff small
+    controls
+        A
+            Bring over a monster from your roster
+        B
+
+        index
+        middle
+
+        joystick
+            Navigate and push and pop
+        Can lean over with other hand and go to a spot

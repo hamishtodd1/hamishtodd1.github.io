@@ -25,6 +25,7 @@ let logged = 0
 
 
 const renderer = new THREE.WebGLRenderer({ antialias: true })
+console.log(renderer)
 const scene = new THREE.Scene()
 let mouse = null
 

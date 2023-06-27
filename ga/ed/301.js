@@ -218,9 +218,10 @@ function init301WithoutDeclarations(basisNames) {
         }
 
         fromMat4(mat) {
-            mat.decompose(v1, q1, v2)
-            let asMv = newMv.fromPosQuat(v1, q1)
-            boneInverseDqs[i].fromMv(asMv)
+            // mat.decompose(v1, q1, v2)
+            // let asMv = newMv.fromPosQuat(v1, q1)
+            // boneInverseDqs[i].fromMv(asMv)
+            console.error("WHAT THE FUCK WAS GOING ON HERE??") //PRESUMABLY boneInverseDqs[i] should just say "this"
             return this
         }
 

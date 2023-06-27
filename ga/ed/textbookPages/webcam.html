@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<meta charset="utf-8">
+<title>Webcam</title>
+
+<style>
+    body {
+        scrollbar-width: none;
+        overflow-y: hidden;
+        overflow-x: hidden;
+    }
+
+    #videoElement {
+
+        height: 785px;
+        top: 0px;
+        position: absolute;
+        margin-left: 50%;
+        transform: translateX(-50%);
+    }
+</style>
+</head>
+
+<body>
+    <video autoplay="true" id="videoElement">
+
+    </video>
+    <script>
+
+        var video = document.querySelector("#videoElement");
+
+        if (navigator.mediaDevices.getUserMedia) {
+            navigator.mediaDevices.getUserMedia({ video: true })
+                .then(function (stream) {
+                    video.srcObject = stream;
+                })
+                .catch(function (err0r) {
+                    console.log("Something went wrong!");
+                });
+        }
+
+    </script>
+
+</body>
+</html>

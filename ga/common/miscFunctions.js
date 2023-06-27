@@ -10,7 +10,7 @@ function keyOfProptInObject(propt,obj) {
 function forEachPropt(obj,func) {
 	let keys = Object.keys(obj)
 	keys.forEach((key)=>{
-		func(obj[key])
+		func(obj[key], key)
 	})
 }
 
@@ -119,11 +119,14 @@ THREE.Matrix4.prototype.multiplyScaleScalar = function(scalar) {
 
 function setRotationallySymmetricMatrix(yX, yY, yZ, target, radius)
 {
-	v1.set(yX, yY, yZ)
-	randomPerpVector(v1, v2)
-	v2.normalize()
-	v3.crossVectors(v1,v2).normalize().negate()
-	target.makeBasis(v2, v1, v3)
+	if(radius === undefined)
+		radius = 1.
+
+	v7.set(yX, yY, yZ)
+	randomPerpVector(v7, v8)
+	v8.normalize()
+	v9.crossVectors(v7,v8).normalize().negate()
+	target.makeBasis(v8, v7, v9)
 
 	return target
 }
@@ -320,8 +323,8 @@ async function getTextFile(fileName) {
 			ret = xhr.response
 			resolve();
 		};
-		xhr.onerror = function () {
-			console.error(fileName, "didn't load");
+		xhr.onerror = function (e) {
+			console.error(fileName, "didn't load",e);
 		};
 		xhr.send();
 	})

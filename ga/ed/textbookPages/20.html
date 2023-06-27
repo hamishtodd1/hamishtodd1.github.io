@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Blade</title>
+    <link rel="stylesheet" href="../prism-monokai.css">
+    <link rel="stylesheet" href="../style.css">
+
+    <link rel="stylesheet" href="../edStyle.css">
+</head>
+<body>
+    <script src="../pageNumbers.js"></script>
+
+<script>
+pageParameters = {
+    untransformed: true,
+    final: true,
+    complex: false,
+    euclidean: true,
+    infinity: false,
+    scalar: false,
+    vectorSpace: false
+}
+
+textareaValueDefault = `vec4 getChangedVertex(in vec4 initialVertex) {
+
+    // Applying Reflections
+
+    Plane x = Plane(0.,1.,0.,0.);
+
+    //Dq line = Line(1.,0.,1.,  0.,0.,0.);
+    //Dq transformed = apply(x, line);
+
+    //return apply(x, initialVertex);
+    return initialVertex;
+}`
+</script>
+<!-- DIFFERENCES END -->
+    
+    <textarea id="textarea" spellcheck="false"></textarea>
+    <pre id="highlighting" aria-hidden="true">
+        <code class="language-glsl" id="highlighting-content"></code>
+    </pre>
+    <div id="errorBox"></div>
+
+    <svg id="ourSvg" style="stroke-width:2" >
+        <circle id="textAreaMouseProxy" cx="-100" cy="-100" r="8" stroke="black" stroke-width="3" fill="white" />
+    </svg>
+    
+    <canvas id="canvas3d"></canvas>
+
+    <span id="textMeasurer">xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</span> <!-- 40 characters there -->
+    
+    <script src="../prism.js"></script>
+    <script src="../syntaxHighlighting.js"></script>
+
+    <script src="../301.js"></script>
+    <script src="../shaders/301.glsl"></script>
+    <script src="../301meta.js"></script>
+    
+    <script src="../lib/three.js"></script>
+    <script src="../lib/OBJLoader.js"></script>
+    <script src="../../common/miscFunctions.js"></script>
+    <script src="../threejsVariables.js"></script>
+    
+    <script src="../../common/variables.js"></script>
+    <script src="../variables.js"></script>
+
+    <script src="../../common/text.js"></script>
+
+    <script src="../../common/text.js"></script>
+
+    <script src="../mouseInteractionsAndIndicatedMention.js"></script>
+    <script src="../caretInteractions.js"></script>
+    <script src="../compilation.js"></script>
+    <script src="../camera.js"></script>
+
+    <script src="../svgLines.js"></script>
+    
+    <script src="../ourGltfLoader.js"></script>
+    
+    <script src="../shaderOutput.js"></script>
+    <script src="../initialAndFinalDws.js"></script>
+    <script src="../dws.js"></script>
+
+    <script src="../appearances/floatAppearances.js"></script>
+    <script src="../halfPlaneDw.js"></script>
+    
+    <script src="../appearances/dqAppearances.js"></script>
+    <script src="../appearances/pointAppearances.js"></script>
+    <script src="../appearances/planeAppearances.js"></script>
+    <script src="../appearances/vec3Appearances.js"></script>
+    <script src="../appearances/flecAppearances.js"></script>
+    <script src="../appearances/mat4Appearances.js"></script>
+    <script src="../appearances/skeletonAppearances.js"></script>
+    <script src="../appearances/complexDw.js"></script>
+    <script src="../appearances/vectorSpaceDw.js"></script>
+
+    <script src="../infinityDw.js"></script>
+    <script src="../euclideanDw.js"></script>
+    <script src="../meshDw.js"></script>
+    <script src="../weightsDw.js"></script>
+
+    <script src="../mention.js"></script>
+    <script src="../appearances.js"></script>
+    <script src="../shaders/floatOutputterPrefix.glsl"></script>
+    <script src="../init.js"></script>    
+
+    <script>
+        init( textareaValueDefault );// DIFFERENCE ENDED AGAIN
+    </script>
+
+</body>
+</html>

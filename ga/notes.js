@@ -1,4 +1,6 @@
 /*
+    Next course of action is just to make Vlojure+CGA
+
     So there's:
         Practical programming thing for:
             Undergraduate CS students learning computer graphics (needs spatially varying stuff for lighting!)
@@ -41,8 +43,6 @@
     Start going to LOTS of puppet shows
     Busk? Nah, shit will get stolen and not be visible in daylight
     
-
-
     Your own puppet show
         Use some classic stories. Arthurian legend or greek myth
         Ultimate showdown
@@ -51,40 +51,378 @@
 
 
 
-    These notes essentially for a differentiation game, where you've got a zoomed in view of some field:
-        Do it in raw webgl. Bootstrap your shaders!
-        Maybe wait until they've nailed join lines
-        This is CALCULUS. Don't expect to get it right the first time, just try things out
-
-        Different spaces:
-            "points on the surface of the sphere" = sphere at infinity?
-            1D scalar space. A bar chart, when comparing
-            1D circle = directions in 2D? = angles?
-            mass space, how heavy some things are
-            Binary space, {1,-1}. A button...
-            If you've got a 1D/2D simulation
-                The space of that 2D simulation
-            The surface in which you're doing the thing
-            "Vector space" where you can add things, distinct from PGA-type spaces ("euclidean" spaces)
-            RGB color space/hue, also alpha
-            A closeup of "a point" in a domain space, = uv
-            A 2D vector space within a 3D vector space requires a 2x3 matrix
-                Try to just drag it into one and it'll automatically make that matrix and initialize it to a default
-            "Rasterized space", a 2D space such that you ascribe colors to each place in it
-                That's a window in which you are *not* comparing things
-
-        Actions
-            Press a button and see a space where all the various variables of that type superimposed
+    
 
 
-        Your calculus thing is just one example of that
-        PGA/CGA gives you a nice set of visualizable geometric objects you can have and work with and program with
-        The spaces give you the way you work with them
-        Something YOU would use
-        Hook to unity transform
-        
-        Array for light sources
 
-        
-        unreal and unity don't compile shaders at runtime
+
+From "infiniteGeometry":
+
+Chimera thing that might be nice: you make a little puppet show you can control with a mouse
+There are just pre-defined paths for each thing. You set up poses and it'll interpolate
+
+Maybe it's bad to see so many stripes in the quantum viz? Maybe that's "having taken the exponential"
+
+
+When you go back to attempt01, the fun thing to work on would be arrays
+
+Moving and rotating rigid bodies is a great local maximum of expressive power and complexity.
+No fields, no colors
+exportable to gltf
+Also insight into deep maths, group theory, quantum entanglement
+
+
+
+
+
+
+
+
+Scalars:
+	When creating a scalar, various bars can come and sit alongside one another to show you the comparison
+	For measuring a translation, given a euclidean point you can make a line segment between them whose extension passes through that point
+	The position of the point along the line segment is irrelevant. It's determined by the position of those planes along it, which is a gauge too
+	you can imagine the point as being in the plane joining the origin with the line of translation
+
+
+-----------------IF STATEMENTS / CONDITIONALS
+First implement orientations and points, which you know you need
+
+-1 should correspond to "false" or "not equal" because it's saying "these two planes are oriented in different directions", i.e. their geometric product is -1, i.e. "!="
+
+How would you have: "if this scalar > 0 point over here, else point over there"?
+	This is "symbolic" but: an arrow flowing from the scalar to two vizes
+
+So we have an extra variable, a "switch", which is either +1 or -1
+It could be like "compare these two planes, check orientation is same"
+That can be turned into "
+
+The kinds of question to answer (ONLY EXPERIENCE OF TRYING TO IMPLEMENT THE BELOW STUFF TELL):
+	Is scalar x > 0?
+	Is scalar x > scalar y
+	Is this point ideal or non-ideal?
+	Which side of plane is point on?
+	Each of these metrics that get "orientations" I guess
+
+
+One way you can have 0 is the meet of two lines that don't meet. Ummm that is e0123
+
+
+Could have a transformation that is either the identity or 0
+"Multiply this by 0 if..." is equivalent to "only have this thing appear if", which is good
+
+Problem with {-1,1} is that -1 is different to 0
+	But maybe it isn't so different. e0 in one dimension is a pair of points. You're really either going toward one or t'other
+	-e0
+
+Convo with prathyush
+	Ok, you do it in one situation, and you tell it what you want
+	Construct the other, tell it the other thing you want
+	There doesn't HAVE to be a boolean visualization / multivector
+		Just a boolean DEFINITION
+		PROBABLY there's always a given mv such that if A then it's x and if !A it's y
+		So you construct x and y
+	Watch that lambda calc birds thing again
+	simulation in GA, multiplying by zero
+	Modal vs equational
+	Just need to be moment-to-moment when performing simulation, the visualization of the if statement is only a problem for this UI question
+
+	We're going to define a boolean, it is BY DEFINITION DEPENDENT ON TWO THINGS AND SOME OPERATION
+
+	booleans are... "oriented this way or that way". You can probably turn anything into a question like that.
+	Maybe it's a little clockwise/anticlockwise thing... has to be "affected" by those things
+
+--------------------ARRAYS
+Could be more like classes? So you choose some object and duplicate it (put both hands on it, grab and pull apart)
+
+Suppose we're 2D, you're grabbing a line. Line is currently snapped to be meet of points A and B
+Move hand freely and of course this "end" of the array is being mapped to that place
+	and the others in between are interpolated
+Snap the line you've got to some other points C and D, stuff is also interpolated
+
+When you move its duplicate, well...
+	the whole set of your objects are defined by a directed graph where each arrow is an equation
+	Obviously if this member of the class has a different value in it, it must have "derive from" different things
+	So if you're going to move its position,
+		there must be a duplicate made of the thing its position came from
+		and that thing must be moved
+	Some arrows can only go in one direction, the grade-selectors
+		Hey maybe you wanna control arrow direction
+		Does everything come from two arguments? If so it's a simple switch. Or cycle through them
+		The way it works is: if you hold THIS ONE in place and move THIS ONE that derives from it
+			It'll try to redo it such that the one you're holding in place stays there and THIS ONE moves
+
+
+
+-----------------SHOULD BE ABLE TO MAKE
+Infrastructure is boring, eg "keeping score: score += 1 if ball in net". Kids can do it themselves
+Pong
+Bullet hell shmup
+Shoot all the balls with all the guns
+Shadow puppets game
+
+Apparently dancing tutorials. Teacher does a certain thing
+rope-like things
+A super hexagon like puzzle exercise game
+Ok so it is a about knotting. Maybe even knitting. You have a column rising out of the floor and there are, flower like, rigid wires that have hook like parts of them that you can wrap the string onto.
+Most interesting vr weapon would be a whip
+Jam: juggling with low gravity and trails. Maybe loops back to make a nice looped braid
+You have a pile that gives you more whenever you need them
+You can crank gravity down so low that you need to pull stuff down
+You can change your hand radius
+You can make it so that they stay in your hand plane
+Different size balls with different bounce heights
+Poi
+blooming flower
+a bouncing ball
+A little "pet dog" following your hand
+Flappy bird / canbalt
+Weights
+Skinning (dual quat fields)
+	"Animation" is too broad, everything is animation. You want a kind of animation s.t. dual quat field is natural
+Minimization
+	Well that's just a ball getting to the bottom of a valley
+Rigid body dynamics
+Texture/normal mapping
+	Motor manifolds, probably mappings from I^2 -> motors in 3D
+Fields 
+	of force
+	of velocity
+	the slicing of them
+	their action on objects
+Curves
+	1D
+	2D
+Back to classical mechanics
+A little cartoon character that
+	knows what direction to look in
+Import
+	1D textures
+	2D textures
+	3D models
+
+Platformer control scheme:
+    you've got your finger, on the dome, from above.
+    The avatar is in the center, always going around the (w=1 version of the) point indicated by your finger,
+    osculating-circle-style
+    What for?
+        Nice how it generalizes to more dimensions?
+
+
+
+-----------------MAKING ANIMATIONS
+
+Frenet Serret
+	So if you imagine time is just passing, and you're changing the orientation of your hand
+    That can build up a curve in 3D space because at any given time,
+        forward is the tangent
+        Up is the normal
+        Right is the binormal
+    It's like you're firing a gun squirting a twirling tube of liquid
+    Or that colored string loop shooting toy
+
+
+
+So one very puppet like way to bring in some flexibility would be:
+        motor field that varies along one direction
+        Very similar to chinese dragons: you hold both ends in each hand, wave it to get nice effect
+        You have the two interpolants, pretty intuitive what'll happen, maybe base a bunch on that?
+        Also like an accordion
+
+If a name is derived from (something derived from) itself, you can be sure it's "to be animated"
+If it's not based on itself, you know what to do
+
+Might be best off as a children's puppet show
+	you want to be able to control from a hand model
+
+If statements: there are loads of ways of making something crash to 0, i.e. "make it so nothing happens". Try to use that?
+
+Things are done in the order the user did them
+
+The game should be about crafting trajectories for objects using whatever
+	Maybe it should be completely about making loops, no beginning or end, no worry about controls / seeing the whole thing when it's embedded in an article
+
+Puppets, lots of puppets
+
+HOW WOULD YOU MAKE AN ANIMATED THING IN EXCEL?
+
+Colors are your "names" / your pointers to buffers
+By default, everything creates a new thing, so a "series of frames" will make a dotted curve.
+But you can make it so that we assign a new value to a thing. That's a choice though
+And so long as you have one of these reassignments, you have a thing that can be thought of as an animation
+	If there's a series, you go through them all in order
+
+
+
+
+--------------------MUSIC/DANCE INSPIRED
+
+There are multiple little areas you work on concurrently
+
+And deleting things easily
+Ability to "record" a motion of the hand, especially to create phrases in music
+Maybe the ruler is visualized using the same stuff? Just an infinite line with planes along it as notches and a point in the center as its origin. Yes, still special case, getting transformed together
+
+Rigid body puppets to make
+	Flapping birds and beetles
+	Waving flowers
+	Rotating planets
+	Moving eyes
+	Snake
+	Penguin
+	Quadruped is too much, maybe hedghog
+
+
+
+--------------------REVERSIBILITY / REVERSIBLE
+Z derived from X and Y. Can "Hold X in place and move Z, changing Y"
+
+The idea is you may both the angle and the line
+
+--------------------FUNCTIONS
+Need to be able to have something like a function: "what I just did for this, except with this input"
+
+Way of defining a function:
+	"Gather" all the things you want as inputs
+	select what the output is
+	Now that's in the library of things that'll be run through when you have that bunch of types
+	Is it a problem that f(point2,point1) can't be distinguished from f(pointB,pointA)? Not really because both would have to be generated from you unordered pile anyway
+
+This is where programming by example comes in. Or is it needed?
+
+Excel doesn't really do function syntax in a way you can rip off
+Excel function syntax works as: "you have these three cells, you're going to act on them"
+With your thing, you can designate function inputs: you can "isolate" the variables you want as input
+Then that just gets added to your joypad directions
+But the point of the game version is you won't be making new functions willy-nilly
+Each one will be introduced with a level
+
+
+
+--------------------CONTROLS
+probably you should be able to do one with one hand and one with t'other
+the ones being used to make the candidate should highlight when being used
+
+The way to make a curve is just a series of points
+
+"Hide" button
+
+----------SHOWING / HIDING
+Let's assume everything is visible to start with
+
+Re hiding, the shit that defines each mv in the final viz is a "scope"
+There's a button which, when pressed on an mv, shows you what derives from it
+And a button that does that recursively perhaps
+Hide something that's not used in any visible mv = delete
+
+Visibility modes:
+all visible
+Only your starting points
+only those in scope visible
+only those in final game visible
+
+When you open the vizes of a different object, it should any invisible vizes you currently have open
+unless it's causally downstream of the vizes for the one you currently have open. In which case, if there's intermediate ones, you show those too. This is good because you can hit "viz that is currently buggy" then "viz that you know is fine" and see where things went wrong
+
+So showing and hiding is a big deal
+	You could, by default, hide everything that lead up to the final thing you've made
+	Then people have to make those things again. Er, why is this a good idea?
+
+There's the game view, and then there's the "currently doing something" view in which you spend most of your time
+The game view is extremely faded and in the background. Like, render it to a texture and fade it.
+
+
+-----------------ANIMATIONS ILLUSTRATING THE ALGEBRA
+How you show the "formulae within": when you make object X based on objects A, B, C, it briefly flashes up all the intermediate objects
+
+It "should" be the case that frameDelta = 0 gives 0 change to something. It should be differentiable
+The ruler, which has all your scalars on it, is powerful. You can put it in a certain place, at a certain angle, and measure a distance
+
+You're working with two superimposed frames so you can get differential
+	This is also how you conceptualized "based on frame n we are affecting n+1". Things in frame n are un-alterable
+
+
+
+--------------------TWO QUBITS
+Try to prove 4 vectors over C are isomorphic?
+
+Potential fun way to lay out quantum circuits:
+	you can organize them on a 2D grid
+	They're all plane-pairs through their respective origins
+	Some of them will have their lines parallel, those are, er, closer to being in phase
+	Some will have their planes the same, those are actually the same
+	Have them all in a row. Let the quantum circuits stream through them
+	Could have a nice conformal transformation that makes it so you don't have to look THAT far up to see where the planes converge (because the planes are spherical
+
+
+--------------------MISC / PHILOSOPHICAL / PUT THIS INTO THE PRESENTATION
+Play to your strengths: GA lets you make things, the people in charge of roblox don't know this
+	The idea of manipulating all the points in a curve, seeing how your solution performs in general, is surely good. It's an even better idea than GA
+	Eh, but you do kinda need to skip to 3D to build this interface
+	
+What for?
+	Simplifying code is something we all know is good. Make tools to help automate that!
+	Make it so people learn these simplifying/geometrical things
+	Ordinary physics and maths is about doing these / teaching theorems
+	Runtime differentiation
+	The maths you write in your notebook then use to derive a single crazy formula that you put in a line of code - that should be in your codebase
+	What it says about this system
+		Algebra can be useful to a computer scientist if you stay consistent
+
+This is very much the "literal terms" approach. In sport, people do talk about spaces. They DON'T construct elaborate non-literal things then talk about THOSE.
+
+-------------------NAMES
+implement IF OR WHEN YOU NEED IT
+
+This allows you to do arrays, by having all the things be the same color
+It also allows you to have self reference in some sense? Give them individuality
+Need something on these vizes that shows you their name
+	stripes in the case of line
+	horizontal strips in the case of points
+	Plane, ehh
+		Could be boundary, could be in the middle, wherever that is
+		Maybe there's a thing on it, and it always moves to be quite close to where you'll next look on the plane
+There's a "rename" button. Click it on an object and you get a radial menu of existing names
+	To animate, you make a new point based on a previous point then make the new name the same as what it's based on
+	You may want to rename for other reasons
+		Suppose you've got lines a, b and c = a^b
+		But you want c, which is involved in other things, to be a^d instead
+		You construct a^d and it gets assigned the name x. Then you rename x to c and now all flows from that
+
+-------------------RENDERING
+You DON'T want to change the lighting on reflected objects, they should be lit as if they were real objects
+
+Consider: the points and lines could be like stars in the sense that they look no different how close or far they are.
+In that situation you need neither a mesh nor an sdf? You just need a way of computing where they'll appear to be?
+
+So these mirrors. They reflect the "background". But NOT the objects, unless you use 'em that way. Probably they're also transparent mirrors, urgh.
+Probably they're not pure mirrors, you really need some ripples on them or whatever. Scratches?
+By the way maybe they can have fading at the edges
+
+Maybe everything south of the equator LOOKS like it's at infinity
+Single fragment shader / sdf:
+	https://www.shadertoy.com/view/XsXXDB
+	Best not to use sdf because when you do your funky transform with finitized infinity it's not closed form
+	Ambient occlusion
+	Soft shadows
+	Not performant, limited bounces
+	Doesn't work for meshes / you need another kind of reflection
+
+Stencil:
+	Maybe you do want to render objects differently sometimes
+	Probably pretty good performance
+	Have to work out light direction
+	You have something like n^m draw calls. n is number of bounces, m number of mirrors
+
+Render targets:
+	Have to work out order
+	No nice shadows
+	Performance might be crap
+	You need 3 layers because points
+	If you were to do it
+		Only have the three reflections when you're showing a motor
+			We render the scene from the point of view of the deepest reflections
+				Then the next
+				Then the final
+
 */

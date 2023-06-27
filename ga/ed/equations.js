@@ -46,7 +46,7 @@ async function initEquations() {
 
     //each "mention" will have variable and appearance
 
-    
+        
 
     let equationareaMentions = []
     class MentionEa {

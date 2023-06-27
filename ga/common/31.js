@@ -21,6 +21,37 @@ function init31() {
 			return this
 		}
 
+		log(label, numDecimalPlaces) {
+			if (numDecimalPlaces === undefined)
+				numDecimalPlaces = 1
+
+			let str = ""
+			for (let i = 0; i < basisNames.length; ++i) {
+				if (this[i] !== 0.) { // && this[i].toFixed() != 0) {
+					if (str !== "")
+						str += ", "
+
+					let sign = 1.
+					// if (onesWithMinus.indexOf(basisNames[i]) !== -1)
+					//     sign = -1.
+
+					str += (sign * this[i]).toFixed(numDecimalPlaces) + (i !== 0 ? "e" : "") + basisNames[i]
+				}
+			}
+
+			if (str === "")
+				str += "0."
+
+			if (label !== undefined)
+				str = label + ": " + str
+			else {
+				label = getWhereThisWasCalledFrom()
+				str = label + ": " + str
+			}
+
+			console.log(str)
+		}
+
 		clone() {
 			let cl = new Mv()
 			cl.copy(this)

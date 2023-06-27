@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>GDC Demo</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+		<link type="text/css" rel="stylesheet" href="main.css">
+	</head>
+	
+	<body>
+		
+		<script src="init.js"></script>
+		<script src="globals.js"></script>
+		
+		<script src="gaMeta.js"></script>
+		<script src="301.js"></script>
+		<script src="vizes.js"></script>
+		
+		<script src="boxes.js"></script>
+		<script src="dragging.js"></script>
+		<script src="programming.js"></script>
+
+		<script src="camera.js"></script>
+		<script src="mouse.js"></script>
+		<script src="buttons.js"></script>
+		<script src="sound.js"></script>
+		<script src="text.js"></script>
+
+		<script src="miscFunctions.js"></script>
+
+		<script type="module">
+
+			import * as THREE from '/three.module.js'
+			import { VRButton } from '/VRButton.js'
+			import { OrbitControls } from '/OrbitControls.js'
+			import { XRControllerModelFactory } from '/XRControllerModelFactory.js'
+			window.THREE = THREE
+			
+			initGa()
+			initGlobals()
+			let updateCameraMvs = initCamera()
+			initMouse()
+			initSound()
+			
+			init(VRButton, OrbitControls, XRControllerModelFactory)
+			
+			camera.position.x += .4
+			camera.position.y += .4
+			camera.lookAt(0.,1.6,0.)
+
+			let updateButtons = initButtons()
+
+			let vizes = []
+			let planeVizes = []
+			initVizes(vizes, planeVizes)
+
+			initPuzzles()
+			workBox.groupOriginInitial = new Mv().point(0., 1.6, 0., 1.)
+			workBox.groupOrigin = new Mv().copy(workBox.groupOriginInitial)
+			
+			window.constGroupOrigin = new Mv().point(.9, 1.2, 0.)
+			let constGroupColor = new THREE.Color(1.,0.,0.)
+			let e1Const = new PlaneViz( e1.projectOn(constGroupOrigin, new Mv()), constGroupOrigin, constGroupColor )
+			let e2Const = new PlaneViz( e2.projectOn(constGroupOrigin, new Mv()), constGroupOrigin, constGroupColor )
+			let e3Const = new PlaneViz( e3.projectOn(constGroupOrigin, new Mv()), constGroupOrigin, constGroupColor )
+
+			initDragging(planeVizes)
+
+			initProgramming()
+
+			bindButton( `Enter`, () => {
+				getGoalBoxPlace(v1)
+				workBox.groupOrigin.fromVec(v1)
+			})
+			
+			function render() {
+				updateCameraMvs()
+
+				updateButtons()
+
+				updateCheckAnimation()
+				
+				vizes.forEach((viz)=>{
+					viz.updateMeshesFromState()
+				})
+
+				renderer.render( scene, camera )
+			}
+			renderer.setAnimationLoop(render)
+
+		</script>
+	</body>
+</html>

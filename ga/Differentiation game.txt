@@ -1,3 +1,86 @@
+--------------------FIELDS
+Do it in raw webgl. Bootstrap your shaders!
+Maybe wait until they've nailed join lines
+This is CALCULUS. Don't expect to get it right the first time, just try things out
+
+Different spaces:
+    "points on the surface of the sphere" = sphere at infinity?
+    1D scalar space. A bar chart, when comparing
+    1D circle = directions in 2D? = angles?
+    mass space, how heavy some things are
+    Binary space, {1,-1}. A button...
+    If you've got a 1D/2D simulation
+        The space of that 2D simulation
+    The surface in which you're doing the thing
+    "Vector space" where you can add things, distinct from PGA-type spaces ("euclidean" spaces)
+    RGB color space/hue, also alpha
+    A closeup of "a point" in a domain space, = uv
+    A 2D vector space within a 3D vector space requires a 2x3 matrix
+        Try to just drag it into one and it'll automatically make that matrix and initialize it to a default
+    "Rasterized space", a 2D space such that you ascribe colors to each place in it
+        That's a window in which you are *not* comparing things
+
+Actions
+    Press a button and see a space where all the various variables of that type superimposed
+
+
+Your calculus thing is just one example of that
+PGA/CGA gives you a nice set of visualizable geometric objects you can have and work with and program with
+The spaces give you the way you work with them
+Something YOU would use
+Hook to unity transform
+
+Array for light sources
+
+unreal and unity don't compile shaders at runtime
+
+--------------------DIFFERENTIATION
+Low priority. Work on known-good ideas then "listen"
+
+It is surely a good idea to do the "little jumps" by applying a translation instead of adding a scalar,
+    because the space you're looking at may not be euclidean
+
+e1, e123, e4, e423
+x1,y1 outer x2,y2
+x1*e1+y1*e4 gp x2*e23+y2*e14
+x1*x2*e123  + x1*y2*e4  +  y1*x2*e423 +  y1*y2*e1
+
+x1*e1+y1*e4 gp x2*e3+y2*e2
+x1*x2*e13  + x1*y2*e12  +  y1*x2*e43 +  y1*y24
+
+x1*e1+y1*e3 gp x2*e2+y2*e3
+x1*x2*e12  + x1*y2*e13  +  y1*x2*e23 +  y1*y2
+
+Jon https://www.youtube.com/watch?v=fdAOPHgW7qM&t=16s Sean https://www.youtube.com/watch?v=jTzIDmjkLQo
+
+If everything is differentiable WRT inputs you can figure out where things should be given a certain specified output
+	You can freeze every other object and see how this one reacts
+		Which is like taking a 2D slice of 3D, then 1D slice of 2D, and seeing
+
+Maybe pinch to zoom is a good interface to get to your differentials?
+
+if you can get the kids to determine a differential at a point in time, that's all you need to make things with behaviour
+
+Adding up a series of line segment lengths - that is much more like actual fucking integration
+
+You want a generalization of frenet serret
+	differentiation in 1D, whatever who cares, probably crap to base everything on that
+	Generalize to nD...
+	That probably means... a tangent vector...
+	Probably you're just going to do derivatives with tangent lines
+
+Do not sweat curves. The only import differential is over time
+
+Are you about to just reinvent 3D animation?
+To be fair you're trying to make it so you can do stuff like that but in a way that can be programmed
+
+Different values are viewed differently in different contexts. 
+	And to make the most of visual intuition they need to be seen differently in the different contexts
+	Their units give you info about that. 
+
+
+
+
 The transfinite induction wheel might be a great interface for doing calculus
     https://en.wikipedia.org/wiki/Transfinite_induction
 

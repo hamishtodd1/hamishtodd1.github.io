@@ -1,0 +1,22 @@
+    <div id="equationarea">
+        <p>
+            \[ \displaylines{
+            \cssId{rotationByZeroDegreesId}{rotationByZeroDegrees} = 1 \\
+            \cssId{rotationBy180DegreesId}{rotationBy180Degrees} = {e_{23}} \\
+            \\
+            \cssId{rotationByThetaDegreesId}{rotationBy}\theta{Degrees} = \\
+            cos( \cssId{thetaId}\theta ) * \cssId{rotationByZeroDegreesId}{rotationByZeroDegrees}~+ \\
+            sin( \cssId{thetaId}\theta ) * \cssId{rotationBy180DegreesId}{rotationBy180Degrees}
+            } \]
+        </p>
+    </div>
+
+    <script id="fragmentShader" type="x-shader/x-fragment">
+Dq rotationByZeroDegrees;
+rotationByZeroDegrees.scalar = 1.;
+Dq rotationBy180Degrees;
+rotationByZeroDegrees.e23 = 1.;
+
+float theta = 0.77;
+Dq rotationByThetaDegrees = dqAdd( dqMultiplyScalar(rotationByZeroDegrees, cos(theta)), dqMultiplyScalar(rotationBy180Degrees, sin(theta)) );
+    </script>
