@@ -1,0 +1,36 @@
+function initSurroundings() {
+
+    const urls = ['posx.jpg', 'negx.jpg', 'posy.jpg', 'negy.jpg', 'posz.jpg', 'negz.jpg'];
+    new THREE.CubeTextureLoader()
+        .setPath('data/')
+        .load(urls, (cubeTexture) => {
+            cubeTexture.generateMipmaps = true;
+            cubeTexture.minFilter = THREE.LinearMipmapLinearFilter;
+            scene.background = cubeTexture
+        }
+        )
+
+    const floorGeometry = new THREE.CircleGeometry(5., 31)
+    const floorMaterial = new THREE.MeshPhongMaterial()
+    new THREE.TextureLoader().load('data/negy.jpg', (texture) => {
+        floorMaterial.map = texture
+        floorMaterial.needsUpdate = true
+    })
+    const floor = new THREE.Mesh(floorGeometry, floorMaterial)
+    floor.rotation.x = - Math.PI / 2
+    floor.position.y = -.01
+    floor.receiveShadow = true
+    scene.add(floor)
+
+    scene.add(new THREE.HemisphereLight(0x808080, 0x606060))
+
+    const light = new THREE.DirectionalLight(0xffffff)
+    light.position.set(0, 6, 0)
+    light.castShadow = true
+    light.shadow.camera.top = 2
+    light.shadow.camera.bottom = - 2
+    light.shadow.camera.right = 2
+    light.shadow.camera.left = - 2
+    light.shadow.mapSize.set(4096, 4096)
+    scene.add(light)
+}

@@ -57,7 +57,8 @@ async function initCgaVizes() {
     ]
 
     let sphereGeo = new THREE.IcosahedronGeometry(1., 5)
-    let renderedAsCga = new Cga()
+    let asCga = new Cga()
+    let approximatelyInfinity = e0c.addScaled(ep,.003,new Cga()) //eyeballed
     class SphereViz extends THREE.Mesh {
 
         constructor() {
@@ -80,16 +81,26 @@ async function initCgaVizes() {
 
             if( radius < 0.001 || this.sphere.isZero() )
                 this.visible = false
-            else 
-            {
+            else {
+                this.visible = true
+
                 //need to do something in the radius zero situation
                 // if(radius < .01) {
                 // }
                 
-                this.sphere.cast(renderedAsCga)
-                this.visible = true
+                this.sphere.cast(asCga)
+
+                let isAtInfinity = true
+                if(asCga[4] == 0. || asCga[5] === 0. || Math.abs(asCga[4] - asCga[5]) > .0001)
+                isAtInfinity = false
+                for(let i = 0; i < 32; ++i) {
+                    if(i !== 4 && i !== 5 && asCga[i] !== 0.)
+                        isAtInfinity = false
+                }
+                if(isAtInfinity)
+                    asCga.copy(approximatelyInfinity)
                 
-                ep.rotorTo(renderedAsCga, this.material.rotor )
+                ep.rotorTo( asCga, this.material.rotor )
             }
         }
 

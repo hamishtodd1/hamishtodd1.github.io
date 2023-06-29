@@ -5,6 +5,7 @@ function initSpreadsheetNavigation() {
 
     let initial = [
         [
+            `e0`,
             `exp( time * (e12 + e01) )`,
             `0.7e123p - 0.7e123m`,
             `2e12`,
