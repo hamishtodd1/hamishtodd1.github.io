@@ -1,16 +1,20 @@
 /*
+    Non-spreasheet TODO
+        Wanna be able to make looooots of things gesturally
+        And, yes, you snap things
+        Need your rotation and translation arrows and need them to follow your hands in a good way
     TODO
-    Would be nice to drag a cell onto another cell and have it fill in the thing there
-        Just put in SOME kind of surface, it doesn't have to be thought of as the last
+        Would be nice to drag a cell onto a declaration in another cell and have it fill in the thing there
         Better sphere rendering close to infinity eg e2+e3
         Change what possibly-spherical slice you're looking at? With a watch interface?
-        Make sphere with a texture you can draw on
         A tube with three bones in it
         Improved line rendering:
-            It is a full circle, BUT you don't join the last pair of vertices together
+            It is a full circle, and the last two vertices are in the same place,
+            BUT you don't join them together
 
     Ideas
         You should be able to break off definitions and stick them to a point
+        Arrows going from cell to cell I guess
 
     Let's say there's a cloud of random dots, call it "cloud"
         Mention it in a cell on its own and now that cell is that cloud of dots
@@ -63,8 +67,6 @@ async function init() {
 
     // initSkinning()
 
-    scene.background = new THREE.Color(0x8F8F8F)
-
     camera.position.set(-.25, 1.6, 3.7 )
     // camera.position.z += 10.
 
@@ -73,8 +75,6 @@ async function init() {
     orbitControls.update()
 
     initSurroundings()
-
-    //
 
     renderer.setPixelRatio(window.devicePixelRatio)
     renderer.setSize(window.innerWidth, window.innerHeight)
@@ -86,21 +86,22 @@ async function init() {
     document.body.appendChild(VRButton.createButton(renderer))
 
     // controllers
+    {
+        let controller1 = renderer.xr.getController(0)
+        // controller1.addEventListener('selectstart', onSelectStart)
+        // controller1.addEventListener('selectend', onSelectEnd)
+        scene.add(controller1)
 
-    let controller1 = renderer.xr.getController(0)
-    // controller1.addEventListener('selectstart', onSelectStart)
-    // controller1.addEventListener('selectend', onSelectEnd)
-    scene.add(controller1)
+        let controller2 = renderer.xr.getController(1)
+        // controller2.addEventListener('selectstart', onSelectStart)
+        // controller2.addEventListener('selectend', onSelectEnd)
+        scene.add(controller2)
 
-    let controller2 = renderer.xr.getController(1)
-    // controller2.addEventListener('selectstart', onSelectStart)
-    // controller2.addEventListener('selectend', onSelectEnd)
-    scene.add(controller2)
-
-    const laserGeo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 0, -5)])
-    const laser = new THREE.Line(laserGeo)
-    controller1.add(laser.clone())
-    controller2.add(laser.clone())
+        const laserGeo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 0, -5)])
+        const laser = new THREE.Line(laserGeo)
+        controller1.add(laser.clone())
+        controller2.add(laser.clone())
+    }
 
     window.addEventListener('resize', () => {
 

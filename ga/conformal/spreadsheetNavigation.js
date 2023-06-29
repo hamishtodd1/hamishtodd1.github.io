@@ -5,6 +5,7 @@ function initSpreadsheetNavigation() {
 
     let initial = [
         [
+            `e23 - e03`,
             `e0`,
             `exp( time * (e12 + e01) )`,
             `0.7e123p - 0.7e123m`,
@@ -14,7 +15,6 @@ function initSpreadsheetNavigation() {
             `e23 - time * e13`,
             `e1 - e0`,
             `e4 + time * e0`,
-            `e23 - e03`,
             `hand`,
             `(1+time*e01) > e1`,
             `A3 + A4`,
@@ -166,7 +166,7 @@ function initSpreadsheetNavigation() {
         spreadsheets.forEach(ss => {
             mousePlanePosition.pointToVec3(v1)
             ss.worldToLocal(v1)
-            if (inRect(v1, ss.bg.position, ss.bg.scale.x, ss.bg.scale.y)) {
+            if (inRect(v1, zeroVector, ss.bg.scale.x, ss.bg.scale.y)) {
                 ss.cells.forEach((cell, row) => {
                     if (inRect(v1, cell.position, ss.bg.scale.x, cellHeight)) {
                         selectCell(ss, row)

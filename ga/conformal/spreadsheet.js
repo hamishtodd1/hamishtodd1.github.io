@@ -223,6 +223,7 @@ function initSpreadsheet() {
             this.cellGeo = unchangingUnitSquareGeometry.clone()
 
             this.bg = new THREE.Mesh(unchangingUnitSquareGeometry, bgMat)
+            this.bg.castShadow = true
             this.bg.position.z = -layerWidth
             this.add(this.bg)
 

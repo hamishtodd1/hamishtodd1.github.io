@@ -1,5 +1,7 @@
 function initSurroundings() {
 
+    scene.background = new THREE.Color(0x8F8F8F)
+
     const urls = ['posx.jpg', 'negx.jpg', 'posy.jpg', 'negy.jpg', 'posz.jpg', 'negz.jpg'];
     new THREE.CubeTextureLoader()
         .setPath('data/')
@@ -7,8 +9,7 @@ function initSurroundings() {
             cubeTexture.generateMipmaps = true;
             cubeTexture.minFilter = THREE.LinearMipmapLinearFilter;
             scene.background = cubeTexture
-        }
-        )
+        })
 
     const floorGeometry = new THREE.CircleGeometry(5., 31)
     const floorMaterial = new THREE.MeshPhongMaterial()
@@ -25,7 +26,8 @@ function initSurroundings() {
     scene.add(new THREE.HemisphereLight(0x808080, 0x606060))
 
     const light = new THREE.DirectionalLight(0xffffff)
-    light.position.set(0, 6, 0)
+    light.position.set(-.5, 2., 2.)
+    light.lookAt(0.,1.6,0.)
     light.castShadow = true
     light.shadow.camera.top = 2
     light.shadow.camera.bottom = - 2

@@ -128,6 +128,7 @@ async function initCgaVizes() {
             this.meshes = Array(2)
             for(let i = 0; i < 2; ++i) {
                 this.meshes[i] = new THREE.Mesh(pointGeo, pointMat) //trivially instanceable
+                this.meshes[i].castShadow = true
                 scene.add(this.meshes[i])
             }
 
@@ -156,6 +157,7 @@ async function initCgaVizes() {
     class ConformalPointViz extends THREE.Mesh {
         constructor() {
             super(pointGeo,pointMat)
+            this.castShadow = true
             scene.add(this)
 
             this.cga = new Cga()
