@@ -1,3 +1,9 @@
+let selectedSpreadsheet = null
+const grabbables = []
+const spreadsheets = []
+const cellHeight = 0.11
+const meshVizes = []
+
 const zUnit = new THREE.Vector3(0, 0, 1)
 const yUnit = new THREE.Vector3(0, 1, 0)
 const xUnit = new THREE.Vector3(1, 0, 0)
@@ -37,10 +43,6 @@ const discreteViridis = [
 var debugSphere = new THREE.Mesh(new THREE.SphereGeometry(.0431),new THREE.MeshBasicMaterial({color:0xCCCCCC}))
 scene.add(debugSphere)
 debugSphere.position.copy(outOfSightVec3)
-
-const grabbables = []
-const spreadsheets = []
-const cellHeight = 0.11
 
 THREE.Matrix4.prototype.log = function() {
 	let order = [

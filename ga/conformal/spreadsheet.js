@@ -3,6 +3,11 @@
 
     should be able to hover within a cell, over eg the "e2" in "2e1 + 5e2", and see that thing
 
+    A little "+" symbol at the bottom when you want another row
+
+    These things will be "minimized" for the average user
+        Won't be able to (or want to) read the text but will be able to copy around
+
     NoModes: AT ANY TIME you can grab ANY object you can see and modify it
         Or, create a new object
     So the way it works:
@@ -65,12 +70,11 @@ function initSpreadsheet() {
         const ROTOR = 2 //grade wise that's more like a circle but this will do for now
         const PP = 3
         const CONFORMAL_POINT = 3
-        const vizTypes = [NO_VIZ_TYPE, SPHERE, ROTOR, PP, CONFORMAL_POINT]
+        const MESH = 4
+        const vizTypes = [NO_VIZ_TYPE, SPHERE, ROTOR, PP, CONFORMAL_POINT, MESH]
         //want a mesh type, and a curve type
         //no longer sorts-of-viz
-        let constructors = [() => null, SphereViz, RotorViz, PpViz, ConformalPointViz]
-
-        let evaluatedCga = new Cga()
+        let constructors = [() => null, SphereViz, RotorViz, PpViz, ConformalPointViz, MeshViz]
 
         let numOfEachVizType = 90
         let unusedVizes = Array(vizTypes.length)
@@ -120,28 +124,40 @@ function initSpreadsheet() {
             refresh() {
 
                 if (this.currentText === this.lastParsedText) {
-                    let compiledToMv = compile(this.parsedTokens, evaluatedCga, 0)
-                    if (compiledToMv)
-                        evaluatedCga.cast(this.viz.getMv())
+                    let result = compile(this.parsedTokens)
+                    if (result) {
+                        result.cast(this.viz.getMv())
+                        result.free()
+                    }
                 }
                 else {
-                    while (this.parsedTokens.length !== 0) {
+                    while (this.parsedTokens.length !== 0)
                         delete this.parsedTokens.pop()
-                    }
-                    this.parsedTokens = reparseTokens(this.currentText)
+                        
+                    reparseTokens( this.currentText, this.parsedTokens )
                     this.lastParsedText = this.currentText
 
+                    //so, there has to be a meshViz constructor
                     let oldVizType = this.viz === null ? NO_VIZ_TYPE : constructors.indexOf(this.viz.constructor)
 
-                    let compiledToMv = compile(this.parsedTokens, evaluatedCga, 0)
+                    let result = compile(this.parsedTokens)
                     let vizType = NO_VIZ_TYPE
-                    if (compiledToMv) {
 
-                        vizType = evaluatedCga.grade()
-                        if (vizType === -2 || vizType === -1 || vizType === 0) //0 is a rotor
-                            vizType = ROTOR
+                    if (!result)
+                        log("couldn't parse")
+                    else {
 
+                        if (result.meshName !== ``)
+                            vizType = MESH
+                        else {
+                            vizType = result.grade()
+                            if (vizType === -2 || vizType === -1 || vizType === 0) //0 is a rotor
+                                vizType = ROTOR
+                        }
                     }
+
+                    if (this.parsedTokens[0] === `B1`)
+                        log(vizType)
 
                     if (oldVizType !== vizType) {
 
@@ -149,13 +165,19 @@ function initSpreadsheet() {
                         this.setVizVisibility(false)
                         unusedVizes[oldVizType].push(this.viz)
 
-                        this.viz = unusedVizes[vizType].pop()
+                        this.viz = unusedVizes[vizType].pop()                        
                         this.setVizVisibility(true)
                     }
 
                     //now give it the value
-                    if (vizType !== NO_VIZ_TYPE)
-                        evaluatedCga.cast(this.viz.getMv())
+                    if (result) {
+
+                        result.cast(this.viz.getMv())
+                        if (result.meshName !== ``)
+                            this.viz.set(result.meshName)
+
+                        result.free()
+                    }
                 }
             }
 
@@ -260,8 +282,7 @@ function initSpreadsheet() {
 
             this.bg.onBeforeRender = () => {
 
-                //for vr, except you're doing the mouse-in-plane thing for now
-                // this.lookAt(camera.position)
+                this.quaternion.slerpQuaternions(this.quaternion,camera.quaternion,.12)
 
                 this.cells.forEach( (cell,row) => {
                     cell.position.set(0., this.getCellY(row), 0.)
@@ -286,12 +307,14 @@ function initSpreadsheet() {
             }
         }
 
-        addCell() {
+        makeExtraCell() {
             let row = this.cells.length
             let cell = new Cell(this)
             this.add( cell )
             cell.position.set(0., this.getCellY(row), 0.)
             this.cells[row] = cell
+
+            return cell
         }
 
         resizeFromCellWidths() {

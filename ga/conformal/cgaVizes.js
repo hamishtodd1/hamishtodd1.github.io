@@ -1,9 +1,4 @@
 /*
-    with the mouse, you do 2D CGA in a plane?
-        place circles that are point pairs
-        place spheres that are circles
-        place points that 
-
     better way of doing the circles
     1. Take the meet of the circle with e0, getting, say, e012
     2. Take the dual of that. e012's dual would be e03

@@ -30,27 +30,40 @@ function initCompilation() {
         // `(e1 ∧ e2) ∧ e3`, e123c,
     ]
 
-    let numLocalCgas = 32
-    let localCgas = Array(numLocalCgas)
-    for (let i = 0; i < numLocalCgas; ++i)
-        localCgas[i] = new Cga()
+    class Thingy extends Cga {
+        constructor() {
+            super()
+            this.meshName = ``
+        }
+
+        free() {
+            this.meshName = ``
+            this.copy(zeroCga)
+            unusedThingies.push(this)
+        }
+    }
+
+    let numThingies = 32
+    let unusedThingies = Array(numThingies)
+    for (let i = 0; i < numThingies; ++i)
+        unusedThingies[i] = new Thingy()
     function clearStack(stack) {
         while (stack.length !== 0) {
-            let thing = stack.pop()
-            if (!cgaMethods.includes(thing))
-                localCgas.push(thing) //because all there ever is is localCgas and cgaMethods
+            let thingy = stack.pop()
+            if (!cgaMethods.includes(thingy))
+                thingy.free() //because all there ever is is Thingies and cgaMethods
         }
     }
 
     const potentialNameRegex = /^[a-zA-Z0-9₀₁₂₃₄₅ₚₘ𝅘]+$/
 
-    reparseTokens = ( expression, doLog ) => {
+    reparseTokens = ( expression, parsedTokens, doLog ) => {
 
         expression = expression.replace(/\s/g, '')
         const tokens = tokenize(expression)
         if (doLog )
             log(tokens)
-        const parsedTokens = parseTokens(tokens)
+        parseTokens(tokens, parsedTokens)
         if (doLog )
             log(parsedTokens)
 
@@ -60,26 +73,26 @@ function initCompilation() {
         return parsedTokens
     }
 
-    compile = ( parsedTokens, targetCga, doLog ) => {
+    compile = ( parsedTokens ) => {
+
+        //things aren't being freed! Also where even is the result!
             
         const stack = evaluateToStack( parsedTokens )
 
-        if (stack.length !== 1 || stack[0].constructor !== Cga ) {
-            clearStack(stack)
-            return false
-        }
+        if (stack.length === 1 || !cgaMethods.includes(stack[0]) ) 
+            ret = stack.pop()
         else {
-            let result = stack.pop()
-            targetCga.copy(result)
-            localCgas.push(result)
-            return true
+            clearStack(stack)
+            ret = null
         }
 
+        delete stack
+        return ret //to be freed!
     }
 
     let specialSymbols = [`(`, `)`]
     const cgaMethods = []
-    class CgaMethod {
+    class SpreadsheetMethod {
         constructor(name, numArgs, precedence, symbols) {
             this.name = name
             this.numArgs = numArgs
@@ -92,24 +105,24 @@ function initCompilation() {
         }
     }
     
-    let mulMethod = new CgaMethod(`mul`,2, 2, [`*`] )
-    let subMethod = new CgaMethod(`sub`,2, 1 )
-    new CgaMethod(`selectGradeWithCga`, 2, 3, [`_`] )
-    new CgaMethod(`meet`,               2, 2, [`∧`,`^`] )
-    new CgaMethod(`join`,               2, 2, [`∨`,`&`] )
-    new CgaMethod(`inner`,              2, 2, [`·`,`'`] )
-    new CgaMethod(`sandwich`,           2, 2, [`⤳`, `>`,`→`] )
-    new CgaMethod(`add`,                2, 1, [`+`] )
-    new CgaMethod(`negate`,             1, 2, [`-`] )
-    new CgaMethod(`projectOn`,          2 )
-    new CgaMethod(`dual`,               1 )
-    new CgaMethod(`reverse`,            1 ) //You do not use it so often you need a symbol. Fuck prefix.
-    new CgaMethod(`exp`,                1 )
-    new CgaMethod(`sqrt`,               1 ) //TODO what if they put in unnormalized thing?    
+    let mulMethod = new SpreadsheetMethod(`mul`,2, 2, [`*`] )
+    let subMethod = new SpreadsheetMethod(`sub`,2, 1 )
+    new SpreadsheetMethod(`selectGradeWithCga`, 2, 3, [`_`] )
+    new SpreadsheetMethod(`meet`,               2, 2, [`∧`,`^`] )
+    new SpreadsheetMethod(`join`,               2, 2, [`∨`,`&`] )
+    new SpreadsheetMethod(`inner`,              2, 2, [`·`,`'`] )
+    new SpreadsheetMethod(`sandwich`,           2, 2, [`⤳`, `>`,`→`] )
+    new SpreadsheetMethod(`add`,                2, 1, [`+`] )
+    new SpreadsheetMethod(`negate`,             1, 2, [`-`] )
+    new SpreadsheetMethod(`projectOn`,          2 )
+    new SpreadsheetMethod(`dual`,               1 )
+    new SpreadsheetMethod(`reverse`,            1 ) //You do not use it so often you need a symbol. Fuck prefix.
+    new SpreadsheetMethod(`exp`,                1 )
+    new SpreadsheetMethod(`sqrt`,               1 ) //TODO what if they put in unnormalized thing?    
     //and user-made methods would probably be added too
 
-    const numberSymbols = `0123456789.`
     const letterSymbols = `ABCDEFGHIJKLMNOPQRSTUVWXYZ`
+    const numberSymbols = `0123456789.`
     
     function tokenize(expression) {
 
@@ -160,11 +173,11 @@ function initCompilation() {
         return !isNaN(parseFloat(token)) || potentialNameRegex.test(token) //hmmm
     }
 
-    function parseTokens(tokens) {
-        const outputQueue = []
+    function parseTokens(tokens, outputQueue) {
+        outputQueue.length = 0
         const operatorStack = []
 
-        //you want to be able to have scalars next to thingies
+        //you want to be able to have scalars next to unusedThingies
         
         let START = -1
         let NUMBER_OR_VARIABLE = 0
@@ -173,7 +186,6 @@ function initCompilation() {
         let METHOD = 3
         let lastTokenWas = START
 
-        // debugger
 
         tokens.forEach( token => {
 
@@ -250,6 +262,7 @@ function initCompilation() {
     //yes, we might want to put this in a shader
     evaluateToStack = (tokens) => {
 
+
         let stack = []
 
         let tokenIndex = 0
@@ -257,33 +270,37 @@ function initCompilation() {
         for(tokenIndex; tokenIndex < numTokens; ++tokenIndex ) {
             let token = tokens[tokenIndex]
 
-            if ( !isNaN(parseInt(token[0])) ) {
+            let isCgaMethod = cgaMethods.includes(token)
+            // let isThing = meshVizes.find( thing => thing.name === token )
 
-                let numberCga = localCgas.pop(); numberCga.zero(); numberCga[0] = parseFloat(token)
+            if ( !isNaN(parseFloat(token[0])) ) {
+
+                let numberCga = unusedThingies.pop(); numberCga.zero(); numberCga[0] = parseFloat(token)
                 stack.push(numberCga)
 
             }
-            else if (cgaMethods.includes(token) && token.numArgs === 2 ) {
+            else if (isCgaMethod && token.numArgs === 2 ) {
 
                 const operand2 = stack.pop()
                 const operand1 = stack.pop()
                 if (operand1 === undefined)
                     break
 
-                stack.push(operand1[token.name](operand2, localCgas.pop()) )
+                stack.push(operand1[token.name](operand2, unusedThingies.pop()) )
 
-                localCgas.push(operand1, operand2)
+                operand1.free()
+                operand2.free()
 
             }
-            else if (cgaMethods.includes(token) && token.numArgs === 1) {
+            else if (isCgaMethod && token.numArgs === 1) {
 
                 const operand1 = stack.pop()
                 if (operand1 === undefined)
                     break
 
-                stack.push(operand1[token.name](localCgas.pop()))
+                stack.push(operand1[token.name](unusedThingies.pop()))
                 
-                localCgas.push(operand1)
+                operand1.free()
 
             }
             else if (potentialNameRegex.test(token)) {
@@ -302,27 +319,30 @@ function initCompilation() {
                     let row = parseInt(token.slice(1)) - 1
                     let cell = spreadsheet.cells[row]
 
-                    cell.refresh()
-                    setSecondarySelectionBox( spreadsheet, row )
-                    cell.setVizVisibility(true)
-
                     if (cell.viz === null )
-                        break
+                        extraCga.copy(zeroCga)
+                    else {
+                        
+                        cell.refresh() //actually only want to do this under certain circumstances
+                        setSecondarySelectionBox(spreadsheet, row)
+                        cell.setVizVisibility(true)
 
-                    cell.viz.getMv().cast(extraCga)
+                        cell.viz.getMv().cast(extraCga)
+
+                    }
                 }
                 else if (!strToBasisCga(token, extraCga))
                     break
 
-                stack.push(localCgas.pop().copy(extraCga))
+                stack.push(unusedThingies.pop().copy(extraCga))
 
             }
             else
                 break
 
-            if (localCgas.length === 0) {
-                console.error(`needed more localCgas`)
-                localCgas.push(new Cga())
+            if (unusedThingies.length === 0) {
+                console.error(`needed more unusedThingies`)
+                unusedThingies.push(new Thingy())
             }
         }
 

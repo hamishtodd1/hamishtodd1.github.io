@@ -11,6 +11,10 @@ function getWhereThisWasCalledFrom(depth) {
     return splitByColons[0] + ":" + splitByColons[1]
 }
 
+function basicallySameType(a,b) {
+    return (a instanceof b.constructor) || (b instanceof a.constructor)
+}
+
 class Multivector extends Float32Array {
 
     isZero() {
@@ -22,7 +26,7 @@ class Multivector extends Float32Array {
     }
 
     cast(target) {
-        if( this.constructor === target.constructor ) {
+        if (basicallySameType(this,target) ) {
             target.copy(this)
             return target
         }
@@ -30,6 +34,7 @@ class Multivector extends Float32Array {
         let targetIsSmaller = this.constructor.size > target.constructor.size
 
         if (targetIsSmaller) {
+            // debugger
             let conversion = smallerInLarger[this.constructor.name][target.constructor.name]
             if(conversion === undefined)
                 console.error("no way to cast")
@@ -128,7 +133,7 @@ class Multivector extends Float32Array {
     }
 
     copy(v) {
-        if (v.constructor !== this.constructor) {
+        if (!basicallySameType(this, v) ) {
             v.cast(this)
             return this
         }
@@ -160,10 +165,7 @@ class Multivector extends Float32Array {
     }
 
     approxEquals(v) {
-        if (v.constructor.size !== this.constructor.size)
-            console.error("type error at " + getWhereThisWasCalledFrom())
-
-        if (v.constructor !== this.constructor)
+        if (!basicallySameType(this, v) )
             console.error("type error")
 
         let doesEqual = true
@@ -192,13 +194,11 @@ class Multivector extends Float32Array {
     }
 
     add(v,target) {
-        if (v.constructor.size !== this.constructor.size)
-            console.error("type error at " + getWhereThisWasCalledFrom())
-
+        
         if(target === undefined)
             target = new this.constructor()
 
-        if (v.constructor !== this.constructor)
+        if (!basicallySameType(this, v) )
             console.error("type error")
 
         for(let i = 0; i < this.constructor.size; ++i)
@@ -206,13 +206,11 @@ class Multivector extends Float32Array {
         return target
     }
     sub(v, target) {
-        if (v.constructor.size !== this.constructor.size)
-            console.error("type error at " + getWhereThisWasCalledFrom())
-
+        
         if (target === undefined)
             target = new this.constructor()
 
-        if (v.constructor !== this.constructor)
+        if (!basicallySameType(this, v) )
             console.error("type error")
 
         for (let i = 0; i < this.constructor.size; ++i)
@@ -221,13 +219,11 @@ class Multivector extends Float32Array {
     }
 
     addScaled(v, scale, target) { //by default, applies to itself
-        if (v.constructor.size !== this.constructor.size)
-            console.error("type error at " + getWhereThisWasCalledFrom())
-
+        
         if(target === undefined)
             target = this
         
-        if (v.constructor !== this.constructor)
+        if (!basicallySameType(this, v) )
             console.error("type error")
 
         for (let i = 0; i < this.constructor.size; ++i)

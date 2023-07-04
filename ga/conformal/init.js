@@ -3,6 +3,7 @@
         Wanna be able to make looooots of things gesturally
         And, yes, you snap things
         Need your rotation and translation arrows and need them to follow your hands in a good way
+        Need some way of making a simple animation with a hand gesture
     TODO
         Would be nice to drag a cell onto a declaration in another cell and have it fill in the thing there
         Better sphere rendering close to infinity eg e2+e3
@@ -13,27 +14,15 @@
             BUT you don't join them together
 
     Ideas
+        Dance demo
         You should be able to break off definitions and stick them to a point
-        Arrows going from cell to cell I guess
+        Something indicating what cells affect what, for example arrows
 
     Let's say there's a cloud of random dots, call it "cloud"
         Mention it in a cell on its own and now that cell is that cloud of dots
             So, that's "cloud, with identity transform applied"
         Should be able to write versor ⤳ cloud, and you get the transformed cloud (just like a single point)
-    Buuuut we're interested in skinning
-        A mesh has a canonical mapping to the sphere
-            You MIGHT use that sphere as a texture, though you don't HAVE to
-            If you don't want to use the sphere as a texture, just map some textures to patches of it
-            The sphere is just a way of laying out the vertices nicely, normal vectors out
-            So your weight paint can be visualized on that sphere; it's a property of the vertices
-            So a weight paint can be interchangeable for meshes
-            Spherical weight paint + bones = arbitrary deformations of a sphere. "Deformation field"
-            Mesh = deformation field of a sphere
-        Tuple of a weight paint, a skeleton, and transforms for some bones
-        Imagine it for a tube with two bones
-        Plausibly, your "rest pose" is a sphere
-        Easier thing to imagine is a bezier curve
-
+    
     Interfaces the user should be able to make:
         Timeline
             With parameters on it that you can vary
@@ -56,7 +45,7 @@ async function init() {
 
     initMouse()
 
-    // initLod()
+    initMeshes()
 
     initCompilation()
     initSpreadsheet()

@@ -5,23 +5,21 @@ function initSpreadsheetNavigation() {
 
     let initial = [
         [
-            `e23 - e03`,
-            `e0`,
-            `exp( time * (e12 + e01) )`,
-            `0.7e123p - 0.7e123m`,
+            //want something that affects itself Or two affecting each other
             `2e12`,
-            `-1`,
-            `hand & e123`,
-            `e23 - time * e13`,
             `e1 - e0`,
             `e4 + time * e0`,
-            `hand`,
+            `e23 - e03`,
             `(1+time*e01) > e1`,
-            `A3 + A4`,
-            `A1 > hand`,
+            `e0`, `ep`, `e2`, `e23`
         ],
         [
-            `ep`, `e2`, `e3`, `e23`
+            `exp( time * (e12 + e01) )`,
+            `B1 > hand`,
+            `e23 - time * e13`,
+            `hand & e123`,
+            `B3 + B4`,
+            `hand`,
         ]
     ]
     initNotation()
@@ -42,17 +40,25 @@ function initSpreadsheetNavigation() {
 
     let mainSelectionBox = new SelectionBox(new THREE.MeshBasicMaterial({ color: 0x111111 }))
 
-    function selectCell(newSs, newRow) {
+    selectCell = (newSs, newRow) => {
 
         resetSecondarySelectionBoxes()
         forEachCell(cell => cell.setVizVisibility(false))
 
-        selectedSpreadsheet = newSs
-        selectedRow = newRow
+        if(newRow === undefined) {
+            let cell = newSs
+            selectedSpreadsheet = spreadsheets.find(ss => ss.cells.includes(cell))
+            selectedRow = selectedSpreadsheet.cells.indexOf(cell)
+        }
+        else {
+            selectedSpreadsheet = newSs
+            selectedRow = newRow
+        }
+
         selectedSpreadsheet.cells[selectedRow].refresh()
         selectedSpreadsheet.cells[selectedRow].setVizVisibility(true)
 
-        mainSelectionBox.setCell(newSs, newRow)
+        mainSelectionBox.setCell(selectedSpreadsheet, selectedRow)
 
         currentlyTyping = false
     }
@@ -117,39 +123,6 @@ function initSpreadsheetNavigation() {
         selectedSpreadsheet.cells[selectedRow].refresh()
     }
 
-    document.addEventListener(`keydown`, (event) => {
-
-        let selectedCell = selectedSpreadsheet.cells[selectedRow]
-
-        if (event.key.length === 1) {
-            if (!currentlyTyping)
-                clearCurrentCell()
-            else
-                refreshCountdown = 0.65
-
-            selectedCell.setText(translateExpression(selectedCell.currentText + event.key))
-        }
-
-        //also "you're done entering into that box", so we finalize the string
-        switch (event.key) {
-            case `ArrowUp`:
-                incrementCell(-1)
-                return
-            case `ArrowDown`:
-                incrementCell(1)
-                return
-            case `ArrowRight`:
-                incrementSs(-1)
-                return
-            case `ArrowLeft`:
-                incrementSs(1)
-                return
-            case `Backspace`:
-                clearCurrentCell()
-                return
-        }
-    })
-
     function inRect(posVec, rectPos, rectScaleX, rectScaleY) {
 
         let ret =
@@ -157,38 +130,6 @@ function initSpreadsheetNavigation() {
             rectPos.y - rectScaleY / 2. < posVec.y && posVec.y < rectPos.y + rectScaleY / 2.
         return ret
     }
-    document.addEventListener(`mousedown`, (event) => {
-        if (event.button !== 0)
-            return
-
-        //first of all we do need the position of the "mouse"
-        let clickedSpreadsheet = false
-        spreadsheets.forEach(ss => {
-            mousePlanePosition.pointToVec3(v1)
-            ss.worldToLocal(v1)
-            if (inRect(v1, zeroVector, ss.bg.scale.x, ss.bg.scale.y)) {
-                ss.cells.forEach((cell, row) => {
-                    if (inRect(v1, cell.position, ss.bg.scale.x, cellHeight)) {
-                        selectCell(ss, row)
-                        clickedSpreadsheet = true
-                        rememberedSelectedRow = row
-                    }
-                })
-            }
-        })
-
-        if (!clickedSpreadsheet) {
-            selectedSpreadsheet.addCell()
-
-            let newRow = selectedSpreadsheet.cells.length - 1
-            let cellToWriteTo = selectedSpreadsheet.cells[newRow]
-            cga0.fromEga(mousePlanePosition).flatPpToConformalPoint(cga0)
-            let newText = translateExpression(cga0.toString(3))
-            cellToWriteTo.setText(newText)
-
-            selectCell(selectedSpreadsheet, newRow)
-        }
-    })
 
     function forEachCell(func) {
         spreadsheets.forEach((ss, ssIndex) => {
@@ -204,7 +145,7 @@ function initSpreadsheetNavigation() {
             cell.refresh()
         }
     })
-    let selectedSpreadsheet = spreadsheets[0]
+    selectedSpreadsheet = spreadsheets[0]
     let selectedRow = 0
     selectCell(selectedSpreadsheet, selectedRow)
 
@@ -228,4 +169,79 @@ function initSpreadsheetNavigation() {
             }
         }
     }
+
+    /////////////////////
+    // event listeners //
+    /////////////////////
+
+    document.addEventListener(`mousedown`, (event) => {
+        if (event.button !== 0)
+            return
+
+        //first of all we do need the position of the "mouse"
+        let clickedSpreadsheet = false
+        spreadsheets.forEach(ss => {
+            mousePlanePosition.pointToVec3(v1)
+            ss.worldToLocal(v1)
+            if (inRect(v1, zeroVector, ss.bg.scale.x, ss.bg.scale.y)) {
+                ss.cells.forEach((cell, row) => {
+                    if (inRect(v1, cell.position, ss.bg.scale.x, cellHeight)) {
+                        selectCell(ss, row)
+                        clickedSpreadsheet = true
+                        rememberedSelectedRow = row
+                    }
+                })
+            }
+        })
+
+        if (!clickedSpreadsheet) {
+            let cell = selectedSpreadsheet.makeExtraCell()
+
+            cga0.fromEga(mousePlanePosition).flatPpToConformalPoint(cga0)
+            let newText = translateExpression(cga0.toString(3))
+            cell.setText(newText)
+
+            selectCell(cell)
+        }
+    })
+
+    document.addEventListener(`keydown`, (event) => {
+
+        //also "you're done entering into that box", so we finalize the string
+        if (event.key.length > 1) {
+            switch (event.key) {
+                case `ArrowUp`:
+                    incrementCell(-1); 
+                    break
+                case `ArrowDown`:
+                    incrementCell(1); 
+                    break
+                case `ArrowRight`:
+                    incrementSs(-1); 
+                    break
+                case `ArrowLeft`:
+                    incrementSs(1); 
+                    break
+                case `Backspace`:
+                    clearCurrentCell(); 
+                    break
+                case `Tab`:
+                    spreadsheets.forEach(ss => {
+                        ss.cells.forEach(cell => cell.setVizVisibility(true))
+                    })
+                    break
+            }
+
+            return
+        }
+        log(event.key)
+
+        if (!currentlyTyping)
+            clearCurrentCell()
+        else
+            refreshCountdown = 0.65
+
+        let selectedCell = selectedSpreadsheet.cells[selectedRow]
+        selectedCell.setText(translateExpression(selectedCell.currentText + event.key))
+    })
 }
