@@ -13,7 +13,7 @@ function initSurroundings() {
 
     const floorGeometry = new THREE.CircleGeometry(5., 31)
     const floorMaterial = new THREE.MeshPhongMaterial()
-    new THREE.TextureLoader().load('data/negy.jpg', (texture) => {
+    textureLoader.load('data/negy.jpg', (texture) => {
         floorMaterial.map = texture
         floorMaterial.needsUpdate = true
     })

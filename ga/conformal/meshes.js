@@ -34,20 +34,20 @@ function initMeshes() {
     }
     window.MeshViz = MeshViz
 
-    // new THREE.OBJLoader().load(`data/spot.obj`,(obj)=>{
-    //     let spotGeo = obj.children[0].geometry
-    //     spotGeo.scale(.5, .5, .5)
-    //     new THREE.TextureLoader().load(`data/spot.png`, (texture) => {
+    new THREE.OBJLoader().load(`data/cow.obj`,(obj)=>{
+        let cowGeo = obj.children[0].geometry
+        cowGeo.scale(.5, .5, .5)
+        textureLoader.load(`data/cow.png`, (texture) => {
             
-    //         let spotMat = new THREE.MeshPhongMaterial({ map: texture })
+            let cowMat = new THREE.MeshPhongMaterial({ map: texture })
 
-    //         matGeoPairs.spot = { mat: spotMat, geo: spotGeo }
+            matGeoPairs.cow = { mat: cowMat, geo: cowGeo }
 
-    //         let cell = selectedSpreadsheet.makeExtraCell()
-    //         cell.setText(`e12 > spot`)
-    //         selectCell(cell)
+            let cell = selectedSpreadsheet.makeExtraCell()
+            cell.setText(translateExpression(`(1+time*e01) > cow`))
+            // selectCell(cell)
 
-    //     })
-    // })
+        })
+    })
     
 }

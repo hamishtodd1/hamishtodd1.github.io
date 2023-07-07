@@ -39,7 +39,6 @@ function initSpreadsheet() {
 
     let gridThickness = .09 * cellHeight
     let gridMat = new THREE.MeshBasicMaterial({ color: 0xAAAAAA, side:THREE.DoubleSide })
-    let layerWidth = .001
 
     let MAX_CELLS = 30 //based on nothing right now
 
@@ -63,18 +62,27 @@ function initSpreadsheet() {
     let canvasXRezMax = cellWidthToCanvasXRez(cellWidthMax)
     let textMeshWidthMax = cellWidthToTextMeshWidth(cellWidthMax)
 
+    //maybe want an eye button at the top of each spreadsheet, to show/hide all
+    let buttonNames = [`mesh`, `sphere`, `plane`, `rotor`]
+    let buttonStrings = [`1 > cow`,`ep`,`e1`,`e12`]
+    let buttonMats = Array(buttonNames.length)
+    for (let i = 0; i < buttonNames.length; ++i)
+        buttonMats[i] = new THREE.MeshBasicMaterial({ transparent: true })
+    buttonNames.forEach( (name, i) => {
+        textureLoader.load( `data/icons/` + name + `.png`, (texture) => {
+            buttonMats[i].map = texture
+            buttonMats[i].needsUpdate = true
+        })  
+    })
+
     {
-        //enum
-        const NO_VIZ_TYPE = 0
-        const SPHERE = 1
-        const ROTOR = 2 //grade wise that's more like a circle but this will do for now
-        const PP = 3
-        const CONFORMAL_POINT = 3
-        const MESH = 4
-        const vizTypes = [NO_VIZ_TYPE, SPHERE, ROTOR, PP, CONFORMAL_POINT, MESH]
-        //want a mesh type, and a curve type
-        //no longer sorts-of-viz
-        let constructors = [() => null, SphereViz, RotorViz, PpViz, ConformalPointViz, MeshViz]
+        let constructors = []
+        constructors[NO_VIZ_TYPE] = null
+        constructors[SPHERE] = SphereViz
+        constructors[ROTOR] = RotorViz
+        constructors[PP] = PpViz
+        constructors[CONFORMAL_POINT] = ConformalPointViz
+        constructors[MESH] = MeshViz
 
         let numOfEachVizType = 90
         let unusedVizes = Array(vizTypes.length)
@@ -121,6 +129,10 @@ function initSpreadsheet() {
                 this.setVizVisibility(false)
             }
 
+            getVizType() {
+                return this.viz === null ? NO_VIZ_TYPE : constructors.indexOf(this.viz.constructor)
+            }
+
             refresh() {
 
                 if (this.currentText === this.lastParsedText) {
@@ -138,12 +150,12 @@ function initSpreadsheet() {
                     this.lastParsedText = this.currentText
 
                     //so, there has to be a meshViz constructor
-                    let oldVizType = this.viz === null ? NO_VIZ_TYPE : constructors.indexOf(this.viz.constructor)
+                    let oldVizType = this.getVizType()
 
                     let result = compile(this.parsedTokens)
                     let vizType = NO_VIZ_TYPE
 
-                    if (!result)
+                    if (result === null)
                         log("couldn't parse")
                     else {
 
@@ -151,13 +163,10 @@ function initSpreadsheet() {
                             vizType = MESH
                         else {
                             vizType = result.grade()
-                            if (vizType === -2 || vizType === -1 || vizType === 0) //0 is a rotor
+                            if (vizType === -2 || vizType === -1 || vizType === 0) //a combination, OR 0, OR a scalar
                                 vizType = ROTOR
                         }
                     }
-
-                    if (this.parsedTokens[0] === `B1`)
-                        log(vizType)
 
                     if (oldVizType !== vizType) {
 
@@ -165,7 +174,7 @@ function initSpreadsheet() {
                         this.setVizVisibility(false)
                         unusedVizes[oldVizType].push(this.viz)
 
-                        this.viz = unusedVizes[vizType].pop()                        
+                        this.viz = unusedVizes[vizType].pop()
                         this.setVizVisibility(true)
                     }
 
@@ -217,16 +226,59 @@ function initSpreadsheet() {
         window.Cell = Cell
     }
 
-    {
-        const spandrelShape = new THREE.Shape()
-        var spandrelWidth = cellHeight * .6
-        spandrelShape.bezierCurveTo(spandrelWidth, 0., 0., cellHeight, spandrelWidth, cellHeight)
-        spandrelShape.lineTo(spandrelWidth, 0.)
-        spandrelShape.lineTo(0.,0.)
-        var spandrelGeo = new THREE.ShapeGeometry(spandrelShape)
-        var spandrelMat = new THREE.MeshBasicMaterial({ color: 0xD8D8D8, side: THREE.DoubleSide })
+    class Tab extends THREE.Group {
+        constructor(mat) {
+            super()
+
+            this.plaque = new THREE.Mesh(unchangingUnitSquareGeometry, mat)
+            this.plaque.scale.y = cellHeight
+            this.plaque.position.z = -layerWidth
+            this.add(this.plaque)
+
+            this.leftSpandrel = new THREE.Mesh(spandrelGeo, mat)
+            this.leftSpandrel.scale.x = spandrelWidth
+            this.leftSpandrel.scale.y = cellHeight
+            this.rightSpandrel = new THREE.Mesh(spandrelGeo, mat)
+            this.rightSpandrel.scale.x = spandrelWidth
+            this.rightSpandrel.scale.y = cellHeight
+            this.rightSpandrel.rotation.y = Math.PI
+            this.rightSpandrel.position.z = -layerWidth
+            this.leftSpandrel.position.z = -layerWidth
+            this.add(this.leftSpandrel, this.rightSpandrel)
+        }
+
+        setTotalWidth(totalWidth) {
+            this.leftSpandrel.position.x = -totalWidth / 2.
+            this.rightSpandrel.position.x = totalWidth / 2.
+            this.plaque.scale.x = totalWidth - spandrelWidth * 2. + .0001
+        }
+
+        setPlaqueWidth(width) {
+            this.plaque.scale.x = width
+            this.leftSpandrel.position.x = -width / 2. - this.leftSpandrel.scale.x
+            this.rightSpandrel.position.x = width / 2. + this.rightSpandrel.scale.x
+        }
     }
 
+    class Button extends THREE.Group {
+        constructor(mat, buttonString) {
+            super()
+            this.symbol = new THREE.Mesh(unchangingUnitSquareGeometry, mat)
+            this.symbol.scale.setScalar(cellHeight * .7)
+            this.add(this.symbol)
+
+            this.tab = new Tab(spandrelMat)
+            this.tab.rotation.z = Math.PI
+            this.tab.position.z = -layerWidth
+            this.tab.setPlaqueWidth(cellHeight)
+            this.add(this.tab)
+
+            this.buttonString = buttonString
+        }
+    }
+    
+    let spandrelMat = new THREE.MeshBasicMaterial({ color: 0xD8D8D8, side: THREE.DoubleSide })
+    let spandrelWidth = cellHeight * .6
     let bgMat = new THREE.MeshBasicMaterial({ color: 0xFFFFFF, side: THREE.DoubleSide })
     let capitalAlphabet = `ABCDEFGHIJKLMNOPQRSTUVWXYZ`
     class Spreadsheet extends THREE.Object3D {
@@ -249,23 +301,22 @@ function initSpreadsheet() {
             this.bg.position.z = -layerWidth
             this.add(this.bg)
 
+            this.buttons = []
+            buttonMats.forEach((mat, i) => {
+                let btn = new Button(mat, buttonStrings[i])
+                this.add(btn)
+                this.buttons.push(btn)                
+            })
+
             {
                 let title = capitalAlphabet[spreadsheets.indexOf(this)]
                 this.sign = text(title, false, `#000000`)
                 this.sign.scale.multiplyScalar(cellHeight)
                 this.add(this.sign)
 
-                this.plaque = new THREE.Mesh(unchangingUnitSquareGeometry, spandrelMat)
-                this.plaque.scale.y = cellHeight
-                this.plaque.position.z = -layerWidth
-                this.add(this.plaque)
-
-                this.leftSpandrel = new THREE.Mesh(spandrelGeo, spandrelMat)
-                this.rightSpandrel = new THREE.Mesh(spandrelGeo, spandrelMat)
-                this.rightSpandrel.rotation.y = Math.PI
-                this.rightSpandrel.position.z = -layerWidth
-                this.leftSpandrel.position.z = -layerWidth
-                this.add(this.leftSpandrel, this.rightSpandrel)
+                this.titleTab = new Tab(spandrelMat)
+                this.titleTab.position.z = -layerWidth
+                this.add(this.titleTab)
             }
 
             this.cells = []
@@ -323,9 +374,10 @@ function initSpreadsheet() {
                 (accumulator, cell) => Math.max(accumulator, cell.minCellWidth),
                 cellHeight)
 
-            this.bg.scale.set(maxCellWidth, cellHeight * this.cells.length, 1.)
+            let bgScaleX = Math.max(maxCellWidth, .85)
+            this.bg.scale.set(bgScaleX, cellHeight * this.cells.length, 1.)
 
-            let newTextMeshWidth = cellWidthToTextMeshWidth(maxCellWidth)
+            let newTextMeshWidth = cellWidthToTextMeshWidth(bgScaleX)
             this.cells.forEach( cell => {
                 cell.scale.x = newTextMeshWidth
             })
@@ -334,15 +386,16 @@ function initSpreadsheet() {
             let cutoffX = newTextMeshWidth / textMeshWidthMax
             this.cellGeo.attributes.uv.array[2] = cutoffX
             this.cellGeo.attributes.uv.array[6] = cutoffX
-            // log(this.cellGeo.attributes.uv.version)
             this.cellGeo.attributes.uv.needsUpdate = true
-            // this.cellGeo.uvsNeedUpdate = true
+            
+            this.sign.position.y = this.bg.scale.y / 2. + cellHeight / 2.
+            this.titleTab.position.y = this.sign.position.y
+            this.titleTab.setTotalWidth(this.bg.scale.x)
 
-            this.leftSpandrel.position.set( -this.bg.scale.x / 2., this.bg.scale.y / 2., -layerWidth)
-            this.rightSpandrel.position.set( this.bg.scale.x / 2., this.bg.scale.y / 2., -layerWidth)
-            this.plaque.position.y = this.bg.scale.y / 2. + cellHeight / 2.
-            this.plaque.scale.x = this.bg.scale.x - spandrelWidth * 2. + .0001
-            this.sign.position.y = this.plaque.position.y
+            this.buttons.forEach( (btn, i) => {
+                btn.position.y = -this.bg.scale.y / 2. - cellHeight / 2.
+                btn.position.x = (cellHeight*1.9) * (i - this.buttons.length / 2. + .5)
+            })
         }
 
         getCellY(row) {
@@ -385,6 +438,4 @@ function initSpreadsheet() {
         }
     }
     window.SelectionBox = SelectionBox
-
-    initSpreadsheetNavigation()
 }

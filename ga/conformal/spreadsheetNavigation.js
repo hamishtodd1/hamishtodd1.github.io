@@ -1,27 +1,26 @@
-function initSpreadsheetNavigation() {
+function initSpreadsheetNavigation(initial) {
+
+    let carat = new THREE.Mesh(unchangingUnitSquareGeometry, new THREE.MeshBasicMaterial({ color: 0x000000 }))
+    carat.material.transparent = true
+    carat.scale.set(0.01, cellHeight, 1.)
+    scene.add(carat)
+    carat.onBeforeRender = () => {
+
+        let selectedCell = selectedSpreadsheet.cells[selectedRow]
+
+        carat.position.y = selectedCell.position.y
+        carat.position.z = layerWidth
+
+        carat.position.x = selectedCell.position.x - selectedCell.scale.x / 2. + selectedCell.currentText.length * selectedCell.scale.y * .57
+
+        carat.material.opacity = (frameCount % 120 < 60) ? 0. : 1.
+        if (carat.position.x > selectedSpreadsheet.bg.scale.x / 2.)
+            carat.material.opacity = carat.material.opacity = 0.
+    }
 
     let refreshCountdown = -1.
     let currentlyTyping = false
 
-    let initial = [
-        [
-            //want something that affects itself Or two affecting each other
-            `2e12`,
-            `e1 - e0`,
-            `e4 + time * e0`,
-            `e23 - e03`,
-            `(1+time*e01) > e1`,
-            `e0`, `ep`, `e2`, `e23`
-        ],
-        [
-            `exp( time * (e12 + e01) )`,
-            `B1 > hand`,
-            `e23 - time * e13`,
-            `hand & e123`,
-            `B3 + B4`,
-            `hand`,
-        ]
-    ]
     initNotation()
     initial.forEach((a, i) => {
         a.forEach((b, j) => {
@@ -41,6 +40,8 @@ function initSpreadsheetNavigation() {
     let mainSelectionBox = new SelectionBox(new THREE.MeshBasicMaterial({ color: 0x111111 }))
 
     selectCell = (newSs, newRow) => {
+
+        newSs.add(carat)
 
         resetSecondarySelectionBoxes()
         forEachCell(cell => cell.setVizVisibility(false))
@@ -195,13 +196,12 @@ function initSpreadsheetNavigation() {
         })
 
         if (!clickedSpreadsheet) {
-            let cell = selectedSpreadsheet.makeExtraCell()
 
-            cga0.fromEga(mousePlanePosition).flatPpToConformalPoint(cga0)
-            let newText = translateExpression(cga0.toString(3))
-            cell.setText(newText)
+            let vizType = selectedSpreadsheet.cells[selectedRow].getVizType()
+            if(vizType === NO_VIZ_TYPE) //No viz
+                vizType = CONFORMAL_POINT //point
 
-            selectCell(cell)
+            startDrawing(selectedSpreadsheet.cells[selectedRow], vizType)
         }
     })
 
@@ -242,6 +242,6 @@ function initSpreadsheetNavigation() {
             refreshCountdown = 0.65
 
         let selectedCell = selectedSpreadsheet.cells[selectedRow]
-        selectedCell.setText(translateExpression(selectedCell.currentText + event.key))
+        selectedCell.setText(selectedCell.currentText + translateExpression(event.key))
     })
 }

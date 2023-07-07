@@ -461,10 +461,10 @@ function initCga() {
 
         ppToConformalPoints(pAdd, pSub) {
             //tortured appeal to hyperbolic PGA
-            let directionTowardNullPt = em.meet(this, cga1)
+            let directionTowardNullPt = em.meet(this, localCga5)
             directionTowardNullPt.multiplyScalar(1. / Math.sqrt(sq(directionTowardNullPt[27]) + sq(directionTowardNullPt[28]) + sq(directionTowardNullPt[29]) + sq(directionTowardNullPt[30])))
 
-            let imaginaryPtBetweenPts = e123p.projectOn(this, cga0)
+            let imaginaryPtBetweenPts = e123p.projectOn(this, localCga6)
             imaginaryPtBetweenPts.multiplyScalar(1. / imaginaryPtBetweenPts[26])
 
             let currentEDistFromHyperbolicCenterSq = sq(imaginaryPtBetweenPts[27]) + sq(imaginaryPtBetweenPts[28]) + sq(imaginaryPtBetweenPts[29]) + sq(imaginaryPtBetweenPts[30])
@@ -556,7 +556,7 @@ function initCga() {
             return this
         }
 
-        downPt(targetVec3, doLog) {
+        downPt(targetVec3) {
 
             if (targetVec3 === undefined)
                 targetVec3 = new THREE.Vector3()
@@ -571,7 +571,8 @@ function initCga() {
 
                 let lengthSqDesired = _26 + _27
                 let lengthSqCurrent = _28 * _28 + _29 * _29 + _30 * _30
-                if (Math.abs((lengthSqCurrent / lengthSqDesired) - 1.) < .01) 
+                //it's like this because of catastrophic cancellation
+                if ((lengthSqDesired === 0. && lengthSqCurrent === 0.) || Math.abs((lengthSqCurrent / lengthSqDesired) - 1.) < .01) 
                 {
                     //null point
                     targetVec3.z =  _28

@@ -295,7 +295,7 @@ class OrbitControls extends THREE.EventDispatcher {
 
 			scope.domElement.removeEventListener( 'pointerdown', onPointerDown );
 			scope.domElement.removeEventListener( 'pointercancel', onPointerUp );
-			// scope.domElement.removeEventListener( 'wheel', onMouseWheel );
+			scope.domElement.removeEventListener( 'wheel', onMouseWheel );
 
 			scope.domElement.removeEventListener( 'pointermove', onPointerMove );
 			scope.domElement.removeEventListener( 'pointerup', onPointerUp );

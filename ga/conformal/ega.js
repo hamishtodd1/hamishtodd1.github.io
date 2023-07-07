@@ -122,11 +122,23 @@ function initEgaWithoutDeclarations() {
         }
 
         ptToPt(x1,y1,z1,x2,y2,z2) {
-            this[0] = 1.
-            this[1] = (x2 - x1) * .5
-            this[2] = (y2 - y1) * .5
-            this[3] = (z2 - z1) * .5
-            this[4] = 0.; this[5] = 0.; this[6] = 0.; this[7] = 0.;
+
+            if ( typeof x1 === `number` ) {
+                this[0] = 1.
+                this[1] = (x2 - x1) * .5
+                this[2] = (y2 - y1) * .5
+                this[3] = (z2 - z1) * .5
+                this[4] = 0.; this[5] = 0.; this[6] = 0.; this[7] = 0.;
+            }
+            else if(x1 instanceof Ega) {
+                if(x1[14] === 0. || y1[14] === 0.)
+                    console.error("ideal points cannot be translated to")
+                
+                this.ptToPt(
+                    x1[13] / x1[14], x1[12] / x1[14], x1[11] / x1[14], 
+                    y1[13] / y1[14], y1[12] / y1[14], y1[11] / y1[14])
+            }
+
             return this
         }
 
@@ -358,6 +370,21 @@ function initEgaWithoutDeclarations() {
 
         constructor() {
             super(16)
+        }
+
+        //multiplies by reverse
+        transformToSquared(b, target) {
+            let thisReverse = this.reverse(newEga)
+            b.mul(thisReverse, target)
+            return target
+        }
+
+        sqrtSelf() {
+            let asDq = newDq
+            this.cast(asDq)
+            asDq.sqrtSelf()
+            asDq.cast(this)
+            return this
         }
 
         separationRatio(that, target) {

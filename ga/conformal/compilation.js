@@ -8,6 +8,10 @@
 
     would be nice to have a guarantee that everything user makes is always well-defined
 
+    If you have 5 and 6 in cells B1 and B2
+        you can write (1+(B1:B2)*e01)
+        and get two translations. Same with anything else
+
     Less certain
         sin, cos, arcsin, arcos
         Sum over... integral? Differential?
@@ -75,7 +79,8 @@ function initCompilation() {
 
     compile = ( parsedTokens ) => {
 
-        //things aren't being freed! Also where even is the result!
+        if(parsedTokens.length === 0) //not sure how this is happenning, but it does for eg `B`
+            return null
             
         const stack = evaluateToStack( parsedTokens )
 
@@ -262,7 +267,6 @@ function initCompilation() {
     //yes, we might want to put this in a shader
     evaluateToStack = (tokens) => {
 
-
         let stack = []
 
         let tokenIndex = 0
@@ -271,13 +275,19 @@ function initCompilation() {
             let token = tokens[tokenIndex]
 
             let isCgaMethod = cgaMethods.includes(token)
-            // let isThing = meshVizes.find( thing => thing.name === token )
+            let isMesh = isMeshName(token)
 
             if ( !isNaN(parseFloat(token[0])) ) {
 
                 let numberCga = unusedThingies.pop(); numberCga.zero(); numberCga[0] = parseFloat(token)
                 stack.push(numberCga)
 
+            }
+            else if (isMesh) {
+                    
+                let meshCga = unusedThingies.pop(); meshCga.copy(oneCga);
+                meshCga.meshName = token
+                stack.push(meshCga)
             }
             else if (isCgaMethod && token.numArgs === 2 ) {
 
@@ -286,7 +296,15 @@ function initCompilation() {
                 if (operand1 === undefined)
                     break
 
-                stack.push(operand1[token.name](operand2, unusedThingies.pop()) )
+                let result = unusedThingies.pop()
+                if (token.name === `sandwich` && operand2.meshName !== `` ) {
+                    result.copy(operand1)
+                    result.meshName = operand2.meshName
+                }
+                else
+                    operand1[token.name](operand2, result)
+
+                stack.push( result )
 
                 operand1.free()
                 operand2.free()
@@ -309,10 +327,10 @@ function initCompilation() {
 
                 if (token === `time`)
                     extraCga.fromFloatAndIndex( clock.getElapsedTime() * .1, 0 )
-                else if(token === `hand`) {
+                else if (token === `random`)
+                    extraCga.fromFloatAndIndex(Math.random(), 0)
+                else if(token === `hand`)
                     cga0.fromEga(mousePlanePosition).flatPpToConformalPoint(extraCga)
-                    // log(extraCga)
-                }
                 else if (/^[A-Z][0-9]+$/.test(token)) {
                     //spreadsheet entry
                     let spreadsheet = spreadsheets[letterSymbols.indexOf(token[0])]
@@ -322,7 +340,7 @@ function initCompilation() {
                     if (cell.viz === null )
                         extraCga.copy(zeroCga)
                     else {
-                        
+
                         cell.refresh() //actually only want to do this under certain circumstances
                         setSecondarySelectionBox(spreadsheet, row)
                         cell.setVizVisibility(true)

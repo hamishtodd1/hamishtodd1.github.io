@@ -80,9 +80,9 @@ class Multivector extends Float32Array {
         for(let i = 0; i < this.constructor.size; ++i) {
             if(this[i] !== 0.) {
                 let extraGrade = this.constructor.indexGrades[i]
-                if (grade === -1 || grade === extraGrade)
+                if (grade === -1 )
                     grade = extraGrade
-                else
+                else if(grade !== extraGrade) //it's some kind of combination. Hopefully a rotor
                     grade = -2
             }
         }

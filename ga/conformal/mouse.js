@@ -56,45 +56,15 @@ function initMouse() {
         }
     })
 
-    let scaleMode = false
-    document.addEventListener(`mousedown`,function(event) {
-        if(event.button !== 1)
-            return
-
-        scaleMode = !scaleMode
-
-        event.preventDefault()
-    })
-
-    let mouseMvmt = new Dq()
     let workingPlane = new Ega().copy(e3e)
     function onMouseMove(event) {
         updateRay(event)
-
-        if (grabbed !== null) {
-            if (scaleMode) {
-                log("scaaaaale")
-            }
-            else {
-                mousePlanePosition.mul(mousePlanePositionOld, ega0).cast(mouseMvmt).sqrtSelf()
-                mouseMvmt.multiplyScalar(-1.) //because negative scalar part causes bizarre alternation! So, hack!
-                grabbed.dq.prepend(mouseMvmt)
-            }
-        }
 
         event.preventDefault()
     }
 
     document.addEventListener('mousemove', onMouseMove, false)
-
-    document.addEventListener('mouseup', function (event) {
-        if (event.button !== 0)
-            return
-
-        grabbed = null
-
-        event.preventDefault()
-    })
+    document.addEventListener('mousedown', onMouseMove, false)
 
     // updateMouseIntersections = () => {
     //     grabbables.forEach((grabbable)=>{
