@@ -374,6 +374,10 @@ function initCga() {
             super(5)
         }
 
+        isPlane() {
+            return !this.isZero() && (this[3] === this[4])
+        }
+
         //upSphere is a special case
         fromCenterAndRadius(x,y,z,r) {
             let infFactor = 0.5 * (sq(x) + sq(y) + sq(z) - sq(r))

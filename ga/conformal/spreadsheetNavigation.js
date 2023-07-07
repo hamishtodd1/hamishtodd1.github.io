@@ -205,6 +205,7 @@ function initSpreadsheetNavigation(initial) {
         }
     })
 
+    let allVisibleMode = false
     document.addEventListener(`keydown`, (event) => {
 
         //also "you're done entering into that box", so we finalize the string
@@ -225,16 +226,25 @@ function initSpreadsheetNavigation(initial) {
                 case `Backspace`:
                     clearCurrentCell(); 
                     break
+                case `Alt`:
+                    let newSymbolness = !spreadsheets[0].cells[0].symbol.visible
+                    spreadsheets.forEach(ss=>{
+                        ss.cells.forEach(cell=>{cell.setSymbolness(newSymbolness)})
+                    })
+                    break
                 case `Tab`:
+                    allVisibleMode = !allVisibleMode
                     spreadsheets.forEach(ss => {
-                        ss.cells.forEach(cell => cell.setVizVisibility(true))
+                        ss.cells.forEach(cell => cell.setVizVisibility(allVisibleMode))
                     })
                     break
             }
 
+            event.preventDefault()
+
             return
         }
-        log(event.key)
+        
 
         if (!currentlyTyping)
             clearCurrentCell()

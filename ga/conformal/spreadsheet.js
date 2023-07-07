@@ -37,14 +37,15 @@ function updatePanel(){}
 
 function initSpreadsheet() {
 
-    let gridThickness = .09 * cellHeight
-    let gridMat = new THREE.MeshBasicMaterial({ color: 0xAAAAAA, side:THREE.DoubleSide })
+    const symbolScale = cellHeight * .75
+    const gridThickness = .09 * cellHeight
+    const gridMat = new THREE.MeshBasicMaterial({ color: 0xAAAAAA, side:THREE.DoubleSide })
 
-    let MAX_CELLS = 30 //based on nothing right now
+    const MAX_CELLS = 30 //based on nothing right now
 
-    let cellWidthMax = 1.9 // trying to squee
-    let textMeshHeight = cellHeight * .7 //you get a .3 padding on all four sides
-    let canvasYRez = 64 //eyeballed
+    const cellWidthMax = 1.9 // trying to squee
+    const textMeshHeight = cellHeight * .7 //you get a .3 padding on all four sides
+    const canvasYRez = 64 //eyeballed
 
     function canvasXRezToCellWidth(canvasXRez) {
         let textMeshWidth = canvasXRez / canvasYRez * textMeshHeight
@@ -63,15 +64,16 @@ function initSpreadsheet() {
     let textMeshWidthMax = cellWidthToTextMeshWidth(cellWidthMax)
 
     //maybe want an eye button at the top of each spreadsheet, to show/hide all
-    let buttonNames = [`mesh`, `sphere`, `plane`, `rotor`]
-    let buttonStrings = [`1 > cow`,`ep`,`e1`,`e12`]
-    let buttonMats = Array(buttonNames.length)
-    for (let i = 0; i < buttonNames.length; ++i)
-        buttonMats[i] = new THREE.MeshBasicMaterial({ transparent: true })
-    buttonNames.forEach( (name, i) => {
+    let symbolNames =       [`mesh`, `sphere`, `plane`, `rotor`]
+    let symbolVizTypes =    [MESH,   SPHERE,   SPHERE,  ROTOR  ]
+    let symbolStrings = [`1 > cow`,`ep`,`e1`,`e12`]
+    let symbolMats = Array(symbolNames.length)
+    for (let i = 0; i < symbolNames.length; ++i)
+        symbolMats[i] = new THREE.MeshBasicMaterial({ transparent: true })
+    symbolNames.forEach( (name, i) => {
         textureLoader.load( `data/icons/` + name + `.png`, (texture) => {
-            buttonMats[i].map = texture
-            buttonMats[i].needsUpdate = true
+            symbolMats[i].map = texture
+            symbolMats[i].needsUpdate = true
         })  
     })
 
@@ -98,15 +100,17 @@ function initSpreadsheet() {
             }
         }
 
-        class Cell extends THREE.Mesh {
+        class Cell extends THREE.Group {
             constructor(spreadsheet) {
                 let canvas = document.createElement("canvas")
                 let context = canvas.getContext("2d")
                 let map = new THREE.CanvasTexture(canvas)
 
-                super(spreadsheet.cellGeo, new THREE.MeshBasicMaterial({ map: map, transparent: true }))
-
+                super()
                 this.spreadsheet = spreadsheet
+
+                this.textMesh = new THREE.Mesh(spreadsheet.cellGeo, new THREE.MeshBasicMaterial({ map: map, transparent: true }))
+                this.add(this.textMesh)
 
                 this.minCellWidth = cellHeight
 
@@ -116,7 +120,7 @@ function initSpreadsheet() {
 
                 this.canvas.height = canvasYRez
                 this.canvas.width = canvasXRezMax
-                this.scale.y = textMeshHeight
+                this.textMesh.scale.y = textMeshHeight
                 //scale.x handled by spreadsheet
 
                 this.viz = null //so vis type is NO_VIZ_TYPE
@@ -126,7 +130,17 @@ function initSpreadsheet() {
                 this.lastParsedText = ``
                 this.parsedTokens = []
 
+                this.symbol = new THREE.Mesh(unchangingUnitSquareGeometry,symbolMats[0])
+                this.symbol.scale.setScalar(symbolScale)
+                this.add(this.symbol)
+                this.symbol.visible = false
+
                 this.setVizVisibility(false)
+            }
+
+            setSymbolness(symbolness) {
+                this.symbol.visible = symbolness
+                this.textMesh.material.opacity = symbolness ? 0. : 1.
             }
 
             getVizType() {
@@ -185,6 +199,16 @@ function initSpreadsheet() {
                         if (result.meshName !== ``)
                             this.viz.set(result.meshName)
 
+                        let vizType = this.getVizType()
+                        let symbolIndex = symbolVizTypes.indexOf(vizType)
+                        if(symbolIndex === -1)
+                            symbolIndex = 0
+                        if (vizType === SPHERE && this.viz.getMv().isPlane() )
+                            symbolIndex = 2
+                        this.symbol.material = symbolMats[symbolIndex]
+                        if(this.symbol.material === undefined)
+                            log(symbolIndex)
+
                         result.free()
                     }
                 }
@@ -226,6 +250,8 @@ function initSpreadsheet() {
         window.Cell = Cell
     }
 
+    // document.addEventListener(`keydown`)
+
     class Tab extends THREE.Group {
         constructor(mat) {
             super()
@@ -263,8 +289,9 @@ function initSpreadsheet() {
     class Button extends THREE.Group {
         constructor(mat, buttonString) {
             super()
+            
             this.symbol = new THREE.Mesh(unchangingUnitSquareGeometry, mat)
-            this.symbol.scale.setScalar(cellHeight * .7)
+            this.symbol.scale.setScalar(symbolScale)
             this.add(this.symbol)
 
             this.tab = new Tab(spandrelMat)
@@ -302,8 +329,8 @@ function initSpreadsheet() {
             this.add(this.bg)
 
             this.buttons = []
-            buttonMats.forEach((mat, i) => {
-                let btn = new Button(mat, buttonStrings[i])
+            symbolMats.forEach((mat, i) => {
+                let btn = new Button(mat, symbolStrings[i])
                 this.add(btn)
                 this.buttons.push(btn)                
             })
@@ -379,7 +406,7 @@ function initSpreadsheet() {
 
             let newTextMeshWidth = cellWidthToTextMeshWidth(bgScaleX)
             this.cells.forEach( cell => {
-                cell.scale.x = newTextMeshWidth
+                cell.textMesh.scale.x = newTextMeshWidth
             })
 
             //the uv x coords of the top right and bottom right corners
