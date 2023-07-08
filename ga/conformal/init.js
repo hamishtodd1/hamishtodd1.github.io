@@ -1,6 +1,15 @@
 /*
-    TODO Chris
-        Blinking cursor
+    TODO for puppet show:
+        Sketching of 3D shapes obv
+        Need essentially skeletal animation
+        Hold the puppet with one hand and control some aspect of it with the other
+        Automatic eyeballs
+        Automatic feet?
+        Need to be able to grab the controls of different puppets quickly
+        Analogue button
+            Mouth opening
+            Eyebrows furrowing
+
 
     More able to do stuff without typing!
         Buttons at the bottom to make new objects
@@ -83,8 +92,6 @@ async function init() {
     // scene.add(nc)
 
     
-
-
     
     initEga()
 
@@ -92,6 +99,7 @@ async function init() {
     initRotorVizes()
 
     initMouse()
+    initButtons()
 
     initMeshes()
 
@@ -102,6 +110,7 @@ async function init() {
 
     let initial = [
         [
+            `e1 + digital * e0`,
             `2e12`,
             //want something that affects itself Or two affecting each other
             `-0.5e123m + 0.5e123p`,
@@ -166,6 +175,7 @@ async function init() {
         ++frameCount
 
         blankFunction()
+        buttonWhileDowns()
         refreshActiveCells()
         handleDrawing()
         obj3dsWithOnBeforeRenders.forEach(obj3d => obj3d.onBeforeRender())

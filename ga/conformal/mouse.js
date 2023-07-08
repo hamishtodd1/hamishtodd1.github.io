@@ -3,6 +3,7 @@ function initMouse() {
     mouseRay = new Ega().copy(e12e)
     mousePlanePosition = new Ega().copy(e123e)
     mousePlanePositionOld = new Ega().copy(e123e)
+    
     let mouseRayOld = new Ega()
 
     let raycaster = new THREE.Raycaster()

@@ -206,46 +206,34 @@ function initSpreadsheetNavigation(initial) {
     })
 
     let allVisibleMode = false
-    document.addEventListener(`keydown`, (event) => {
+
+    bindButton(`ArrowUp`,    ()=>incrementCell(-1) )
+    bindButton(`ArrowDown`,  ()=>incrementCell( 1) )
+    bindButton(`ArrowRight`, ()=>incrementSs(-1) )
+    bindButton(`ArrowLeft`,  ()=>incrementSs( 1) )
+    bindButton(`Backspace`,  clearCurrentCell )
+    bindButton(`Alt`, ()=>{
+        let newSymbolness = !spreadsheets[0].cells[0].symbol.visible
+        spreadsheets.forEach(ss => {
+            ss.cells.forEach(cell => { cell.setSymbolness(newSymbolness) })
+            ss.resizeFromCellWidths()
+        })
+    })
+    bindButton(`Tab`, ()=>{
+        allVisibleMode = !allVisibleMode
+        spreadsheets.forEach(ss => {
+            ss.cells.forEach(cell => cell.setVizVisibility(allVisibleMode))
+        })
+    } )
+    
+    function onLetterKey(event) {
 
         //also "you're done entering into that box", so we finalize the string
         if (event.key.length > 1) {
-            switch (event.key) {
-                case `ArrowUp`:
-                    incrementCell(-1); 
-                    break
-                case `ArrowDown`:
-                    incrementCell(1); 
-                    break
-                case `ArrowRight`:
-                    incrementSs(-1); 
-                    break
-                case `ArrowLeft`:
-                    incrementSs(1); 
-                    break
-                case `Backspace`:
-                    clearCurrentCell(); 
-                    break
-                case `Alt`:
-                    let newSymbolness = !spreadsheets[0].cells[0].symbol.visible
-                    spreadsheets.forEach(ss=>{
-                        ss.cells.forEach(cell=>{cell.setSymbolness(newSymbolness)})
-                    })
-                    break
-                case `Tab`:
-                    allVisibleMode = !allVisibleMode
-                    spreadsheets.forEach(ss => {
-                        ss.cells.forEach(cell => cell.setVizVisibility(allVisibleMode))
-                    })
-                    break
-            }
-
             event.preventDefault()
-
             return
         }
         
-
         if (!currentlyTyping)
             clearCurrentCell()
         else
@@ -253,5 +241,6 @@ function initSpreadsheetNavigation(initial) {
 
         let selectedCell = selectedSpreadsheet.cells[selectedRow]
         selectedCell.setText(selectedCell.currentText + translateExpression(event.key))
-    })
+    }
+    document.addEventListener(`keydown`, onLetterKey)
 }

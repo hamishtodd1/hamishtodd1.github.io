@@ -28,6 +28,13 @@
 
 function initCompilation() {
 
+    let hashButtonPressed = false
+    bindButton(`Shift`, () => {
+        hashButtonPressed = true
+    }, () => {}, false, () => {
+        hashButtonPressed = false
+    })
+
     const tests = [
         // `2 + 3`, new Cga().fromFloatAndIndex(5, 0),
         // `(2 + 3) * 5`, new Cga().fromFloatAndIndex(25, 0),
@@ -75,24 +82,6 @@ function initCompilation() {
             delete tokens.pop()
 
         return parsedTokens
-    }
-
-    compile = ( parsedTokens ) => {
-
-        if(parsedTokens.length === 0) //not sure how this is happenning, but it does for eg `B`
-            return null
-            
-        const stack = evaluateToStack( parsedTokens )
-
-        if (stack.length === 1 || !cgaMethods.includes(stack[0]) ) 
-            ret = stack.pop()
-        else {
-            clearStack(stack)
-            ret = null
-        }
-
-        delete stack
-        return ret //to be freed!
     }
 
     let specialSymbols = [`(`, `)`]
@@ -265,7 +254,10 @@ function initCompilation() {
     // }
 
     //yes, we might want to put this in a shader
-    evaluateToStack = (tokens) => {
+    compile = (tokens) => {
+
+        if (tokens.length === 0) //not sure how this is happenning, but it does for eg `B`
+            return null
 
         let stack = []
 
@@ -331,6 +323,10 @@ function initCompilation() {
                     extraCga.fromFloatAndIndex(Math.random(), 0)
                 else if(token === `hand`)
                     cga0.fromEga(mousePlanePosition).flatPpToConformalPoint(extraCga)
+                else if (token === `digital`)
+                    cga0.fromFloatAndIndex(hashButtonPressed?1.:0., 0)
+                // else if (token === `analogue`)
+                //     cga0.fromEga(mousePlanePosition).flatPpToConformalPoint(extraCga)
                 else if (/^[A-Z][0-9]+$/.test(token)) {
                     //spreadsheet entry
                     let spreadsheet = spreadsheets[letterSymbols.indexOf(token[0])]
@@ -364,15 +360,24 @@ function initCompilation() {
             }
         }
 
-        if (tokenIndex !== numTokens ) {
-
+        let allIsWell = tokenIndex === numTokens && stack.length === 1 && stack[0].type !== cgaMethods.includes(stack[0])    
+        
+        if (allIsWell )  
+            ret = stack.pop()
+        else {
             clearStack(stack)
-            let justAComment = numTokens === 1 && tokens[0] !== `e`
-            if(!justAComment)
+            ret = null
+
+            let innocentFailure =
+                (numTokens === 1 && tokens[0] !== `e`) ||
+                stack.length === 0 ||
+                (stack.length === 1 && cgaMethods.includes(stack[0]))
+            if(!innocentFailure)
                 console.error(`Evaluation error at "` + tokens[tokenIndex] + `", tokens having been `, tokens)
         }
 
-        return stack
+        delete stack
+        return ret //to be freed!
     }
 
     //perform tests if there are any

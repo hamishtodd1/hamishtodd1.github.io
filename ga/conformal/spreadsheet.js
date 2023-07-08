@@ -65,7 +65,7 @@ function initSpreadsheet() {
 
     //maybe want an eye button at the top of each spreadsheet, to show/hide all
     let symbolNames =       [`mesh`, `sphere`, `plane`, `rotor`]
-    let symbolVizTypes =    [MESH,   SPHERE,   SPHERE,  ROTOR  ]
+    let symbolVizTypes =    [ MESH,   SPHERE,   SPHERE,  ROTOR ]
     let symbolStrings = [`1 > cow`,`ep`,`e1`,`e12`]
     let symbolMats = Array(symbolNames.length)
     for (let i = 0; i < symbolNames.length; ++i)
@@ -132,6 +132,7 @@ function initSpreadsheet() {
 
                 this.symbol = new THREE.Mesh(unchangingUnitSquareGeometry,symbolMats[0])
                 this.symbol.scale.setScalar(symbolScale)
+                this.symbol.position.z = layerWidth
                 this.add(this.symbol)
                 this.symbol.visible = false
 
@@ -256,15 +257,18 @@ function initSpreadsheet() {
         constructor(mat) {
             super()
 
-            this.plaque = new THREE.Mesh(unchangingUnitSquareGeometry, mat)
+            this.plaque = new THREE.Mesh( unchangingUnitSquareGeometry, mat )
+            this.plaque.castShadow = true
             this.plaque.scale.y = cellHeight
             this.plaque.position.z = -layerWidth
             this.add(this.plaque)
 
-            this.leftSpandrel = new THREE.Mesh(spandrelGeo, mat)
+            this.leftSpandrel = new THREE.Mesh( spandrelGeo, mat )
+            this.leftSpandrel.castShadow = true
             this.leftSpandrel.scale.x = spandrelWidth
             this.leftSpandrel.scale.y = cellHeight
-            this.rightSpandrel = new THREE.Mesh(spandrelGeo, mat)
+            this.rightSpandrel = new THREE.Mesh( spandrelGeo, mat )
+            this.rightSpandrel.castShadow = true
             this.rightSpandrel.scale.x = spandrelWidth
             this.rightSpandrel.scale.y = cellHeight
             this.rightSpandrel.rotation.y = Math.PI
@@ -398,10 +402,14 @@ function initSpreadsheet() {
         resizeFromCellWidths() {
 
             let maxCellWidth = this.cells.reduce(
-                (accumulator, cell) => Math.max(accumulator, cell.minCellWidth),
+                (currentMax, cell) => Math.max(currentMax, cell.minCellWidth),
                 cellHeight)
 
             let bgScaleX = Math.max(maxCellWidth, .85)
+                
+            let inSymbolMode = spreadsheets[0].cells[0].symbol.visible
+            if(inSymbolMode)
+                bgScaleX = cellHeight
             this.bg.scale.set(bgScaleX, cellHeight * this.cells.length, 1.)
 
             let newTextMeshWidth = cellWidthToTextMeshWidth(bgScaleX)
