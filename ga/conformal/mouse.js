@@ -10,7 +10,7 @@ function initMouse() {
     let mouseWheelTransform = new Dq().copy(oneDq)
     selectorRay = new Dq()
     let selectorRayViz = new DqViz()
-    scene.add(selectorRayViz)
+    // scene.add(selectorRayViz)
 
     let raycaster = new THREE.Raycaster()
     let mouse2d = new THREE.Vector2()
@@ -88,7 +88,7 @@ function initMouse() {
 
         let mouseTransform = getMousePositionAndWheelDq(dq0)
         mouseTransform.sandwich(e13e, ega0).cast(selectorRay)
-        selectorRayViz.dq.copy(selectorRay)
+        // selectorRayViz.dq.copy(selectorRay)
         // mouseTransform.sandwich(e2e, something)
     }
     
