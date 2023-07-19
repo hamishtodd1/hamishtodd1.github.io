@@ -3,8 +3,6 @@
 
     should be able to hover within a cell, over eg the "e2" in "2e1 + 5e2", and see that thing
 
-    A little "+" symbol at the bottom when you want another row
-
     These things will be "minimized" for the average user
         Won't be able to (or want to) read the text but will be able to copy around
 
@@ -28,9 +26,6 @@
             BUT the boxes themselves only re-inflate if you select
         So, you're only looking at the definition of one of the things at a time
 
-    call your boost-generators, aka imaginary lines, "dual point pairs"
-    Zero radius sphere ^ zero radius sphere = dual point pair
-    Zero radius sphere ^ dual point pair = 
  */
 
 function updatePanel(){}
@@ -42,10 +37,14 @@ function initSpreadsheet() {
     const gridMat = new THREE.MeshBasicMaterial({ color: 0xAAAAAA, side:THREE.DoubleSide })
 
     const MAX_CELLS = 30 //based on nothing right now
+    let numberMats = Array(MAX_CELLS)
+    for(let i = 0; i < MAX_CELLS; i++)
+        numberMats[i] = text(i+1, true, `#000000`)
+    let numberWidth = cellHeight*numberMats.reduce((a,b)=>Math.max(a,b.getAspect()),0)
 
     const cellWidthMax = 1.9 // trying to squee
     const textMeshHeight = cellHeight * .7 //you get a .3 padding on all four sides
-    const canvasYRez = 64 //eyeballed
+    const canvasYRez = 32 //eyeballed
 
     function canvasXRezToCellWidth(canvasXRez) {
         let textMeshWidth = canvasXRez / canvasYRez * textMeshHeight
@@ -123,6 +122,10 @@ function initSpreadsheet() {
                 this.textMesh.scale.y = textMeshHeight
                 //scale.x handled by spreadsheet
 
+                this.number = new THREE.Mesh(unchangingUnitSquareGeometry, numberMats[0])
+                this.number.scale.y = cellHeight
+                this.add(this.number)
+
                 this.viz = null //so vis type is NO_VIZ_TYPE
 
                 //"Σ√A∧B∨⋅a*sβα" //if you want ǁ it gets a bit taller
@@ -171,7 +174,7 @@ function initSpreadsheet() {
                     let vizType = NO_VIZ_TYPE
 
                     if (result === null)
-                        log("couldn't parse")
+                        log("couldn't parse: " + this.currentText)
                     else {
 
                         if (result.meshName !== ``)
@@ -251,8 +254,6 @@ function initSpreadsheet() {
         window.Cell = Cell
     }
 
-    // document.addEventListener(`keydown`)
-
     class Tab extends THREE.Group {
         constructor(mat) {
             super()
@@ -314,7 +315,7 @@ function initSpreadsheet() {
     let capitalAlphabet = `ABCDEFGHIJKLMNOPQRSTUVWXYZ`
     class Spreadsheet extends THREE.Object3D {
 
-        constructor(numRows) {
+        constructor(numRows, title) {
 
             if(spreadsheets.length === 26) {
                 console.error("Too many spreadsheets!")
@@ -325,12 +326,19 @@ function initSpreadsheet() {
             spreadsheets.push(this)
             this.position.set( 0., 1.6, .01 )
 
+            this.editable = true
+
             this.cellGeo = unchangingUnitSquareGeometry.clone()
 
             this.bg = new THREE.Mesh(unchangingUnitSquareGeometry, bgMat)
             this.bg.castShadow = true
             this.bg.position.z = -layerWidth
             this.add(this.bg)
+
+            this.numbersBg = new THREE.Mesh(unchangingUnitSquareGeometry, spandrelMat)
+            this.numbersBg.scale.x = numberWidth
+            this.numbersBg.position.z = -layerWidth
+            this.add(this.numbersBg)
 
             this.buttons = []
             symbolMats.forEach((mat, i) => {
@@ -340,7 +348,8 @@ function initSpreadsheet() {
             })
 
             {
-                let title = capitalAlphabet[spreadsheets.indexOf(this)]
+                if(title === undefined)
+                    title = capitalAlphabet[spreadsheets.indexOf(this)]
                 this.sign = text(title, false, `#000000`)
                 this.sign.scale.multiplyScalar(cellHeight)
                 this.add(this.sign)
@@ -351,10 +360,8 @@ function initSpreadsheet() {
             }
 
             this.cells = []
-            for (let row = 0; row < numRows; ++row) {
-                this.cells[row] = new Cell(this)
-                this.add(this.cells[row])
-            }
+            for (let row = 0; row < numRows; ++row) 
+                this.makeExtraCell()
             this.resizeFromCellWidths()
 
             let gridLinesHorizontalNum = MAX_CELLS + 1
@@ -393,6 +400,7 @@ function initSpreadsheet() {
             let row = this.cells.length
             let cell = new Cell(this)
             this.add( cell )
+            cell.number.material = numberMats[row]
             cell.position.set(0., this.getCellY(row), 0.)
             this.cells[row] = cell
 
@@ -412,9 +420,15 @@ function initSpreadsheet() {
                 bgScaleX = cellHeight
             this.bg.scale.set(bgScaleX, cellHeight * this.cells.length, 1.)
 
+            let numberX = -this.bg.scale.x / 2. - numberWidth / 2.
+            this.numbersBg.scale.y = this.bg.scale.y
+            this.numbersBg.position.x = numberX
+
             let newTextMeshWidth = cellWidthToTextMeshWidth(bgScaleX)
             this.cells.forEach( cell => {
                 cell.textMesh.scale.x = newTextMeshWidth
+                cell.number.position.x = numberX
+                cell.number.scale.x = cell.number.material.getAspect() * cellHeight
             })
 
             //the uv x coords of the top right and bottom right corners

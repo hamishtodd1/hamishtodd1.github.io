@@ -1,4 +1,16 @@
 /*
+    Trivector-circle
+        an example of a bivector point pair is e45. Dual is e123 which looks the same
+        so, claim: e12's dual imaginary ztrivector, e345, looks like e12
+        it's kind of scale-toward-origin-then-reflect-in-e3. So yes, dotted line through origin orth to e3
+        e34 is the unit circle straddling e12. "wedge" that with e5 to get this shit, ugh
+        zero-radius point pair is dual to zero radius circle
+
+        you can make a transflection in 2D by GPing a line and a point
+        How about a circle and a point? Again 2D?
+        That's a hyperbolic trans starting at the point, going toward circle center, and with a 
+
+
     you only need the one arrow for a rotor, so maybe for sphere, plane etc too?
 
     better way of doing the circles
@@ -69,7 +81,9 @@ async function initCgaVizes() {
         }
     ]
 
-    let sphereGeo = new THREE.IcosahedronGeometry(1., 5)
+    let magicNumberRadius = 8. //hacky. Empirically, this is the radius outside of which things look like shit
+    let sphereGeo = new THREE.IcosahedronGeometry(magicNumberRadius, 5)
+    let startingSphere = sphere0.fromCenterAndRadius(0.,0.,0.,magicNumberRadius).cast(new Cga())
     let asCga = new Cga()
     let approximatelyInfinity = e0c.addScaled(ep,.003,new Cga()) //eyeballed
     class SphereViz extends THREE.Mesh {
@@ -78,7 +92,8 @@ async function initCgaVizes() {
             
             let mat = new THREE.MeshPhong2Material({ 
                 side: THREE.DoubleSide, 
-                map: bourkeTexture 
+                map: bourkeTexture,
+                transparent: true,
             })
             mat.injections = sphereMatInjections
 
@@ -90,12 +105,19 @@ async function initCgaVizes() {
 
         onBeforeRender() {
 
+            //inner product with point at infinity, get point pair of its center and point at infinity
+            //geometric product of that with e123, got the translation part
+            //apply that to unit circle, geometric product with current value to get scalor?
+
+            //coooooooould just use position and radius
+            //if you don't want to do that, you need to 
+
             let radius = this.sphere.getRadius()
 
             if( radius < 0.001 || this.sphere.isZero() )
-                this.visible = false
+                this.material.opacity = 0.
             else {
-                this.visible = true
+                this.material.opacity = 1.
 
                 //need to do something in the radius zero situation
                 // if(radius < .01) {
@@ -105,7 +127,7 @@ async function initCgaVizes() {
 
                 let isAtInfinity = true
                 if(asCga[4] == 0. || asCga[5] === 0. || Math.abs(asCga[4] - asCga[5]) > .0001)
-                isAtInfinity = false
+                    isAtInfinity = false
                 for(let i = 0; i < 32; ++i) {
                     if(i !== 4 && i !== 5 && asCga[i] !== 0.)
                         isAtInfinity = false
@@ -113,7 +135,7 @@ async function initCgaVizes() {
                 if(isAtInfinity)
                     asCga.copy(approximatelyInfinity)
                 
-                ep.rotorTo( asCga, this.material.rotor )
+                startingSphere.rotorTo( asCga, this.material.rotor )
             }
         }
 
@@ -123,13 +145,10 @@ async function initCgaVizes() {
     }
     window.SphereViz = SphereViz
 
-    // let ourCircle = e1p.cast( new Circle() )
     // let sphere1 = new SphereViz()
-    // e1c.cast( sphere1.sphere )
-    // let sphere2 = new SphereViz()
-    // // ep.cast( sphere2.sphere )
-    // ourCircle.exp(sphere2.material.rotor, .75 )
-    // e1c.add(ep, cga0).cast(sphere2.sphere)
+    // let mrh = (ep.add(e0c))
+    // mrh.cast( sphere1.sphere )
+    // sphere1.sphere.fromCenterAndRadius(0.,0.,0.,2)
 
     let pointGeo = new THREE.IcosahedronGeometry(.03,2)
     let pointMat = new THREE.MeshPhongMaterial( { color:0x000000 } )

@@ -1,4 +1,4 @@
-function initCga() {
+function initCgaWithoutDeclarations() {
 
     smallerInLarger.Cga = {
         Sphere: new Uint8Array([1, 2, 3, 4, 5]),
@@ -68,7 +68,7 @@ function initCga() {
 
                 let thisInverse = thisCga.inverse(localCga3)
 
-                localCga0.copy(thisWedgeThis).multiplyScalar(.5)
+                localCga0.copy(thisWedgeThis).multiplyScalar(.5, localCga0)
                 let lambda1 = .5 * (iss + rightPart)
                 localCga0[0] += lambda1
                 localCga0.mul(thisInverse, targetCga1)
@@ -78,7 +78,7 @@ function initCga() {
                     return [targetCga1]
                 }
                 else {
-                    localCga0.copy(thisWedgeThis).multiplyScalar(.5)
+                    localCga0.copy(thisWedgeThis).multiplyScalar(.5, localCga0)
                     let lambda2 = .5 * (iss - rightPart)
                     localCga0[0] += lambda2
                     localCga0.mul(thisInverse, targetCga2)
@@ -379,8 +379,10 @@ function initCga() {
         }
 
         //upSphere is a special case
+        //don't fucking get it.
+        //Take your coords -> ega point
         fromCenterAndRadius(x,y,z,r) {
-            let infFactor = 0.5 * (sq(x) + sq(y) + sq(z) - sq(r))
+            let infFactor = -0.5 * (sq(x) + sq(y) + sq(z) - sq(r))
 
             this[0] = x
             this[1] = y
@@ -401,7 +403,8 @@ function initCga() {
                 return Infinity //because it's a plane
             else {
                 let radiusSq = 2. * (this[3] + this[4]) / overallScalar - ((sq(this[0]) + sq(this[1]) + sq(this[2])) / sq(overallScalar))
-                return Math.sign(radiusSq) * Math.sqrt(Math.abs(radiusSq))
+                return Math.sqrt(Math.abs(radiusSq))
+                //sign should tell you something, you'd think
             }
         }
     }
@@ -423,6 +426,12 @@ function initCga() {
 
         constructor() {
             super(32)
+        }
+
+        transformToSquared(b, target) {
+            let thisReverse = this.reverse(localCga0)
+            b.mul(thisReverse, target)
+            return target
         }
 
         //currently we just care about sphere, or rotor, or anything else
@@ -466,13 +475,15 @@ function initCga() {
         ppToConformalPoints(pAdd, pSub) {
             //tortured appeal to hyperbolic PGA
             let directionTowardNullPt = em.meet(this, localCga5)
-            directionTowardNullPt.multiplyScalar(1. / Math.sqrt(sq(directionTowardNullPt[27]) + sq(directionTowardNullPt[28]) + sq(directionTowardNullPt[29]) + sq(directionTowardNullPt[30])))
+            directionTowardNullPt.multiplyScalar(
+                1. / Math.sqrt(sq(directionTowardNullPt[27]) + sq(directionTowardNullPt[28]) + sq(directionTowardNullPt[29]) + sq(directionTowardNullPt[30])),
+                directionTowardNullPt)
 
             let imaginaryPtBetweenPts = e123p.projectOn(this, localCga6)
-            imaginaryPtBetweenPts.multiplyScalar(1. / imaginaryPtBetweenPts[26])
+            imaginaryPtBetweenPts.multiplyScalar(1. / imaginaryPtBetweenPts[26], imaginaryPtBetweenPts)
 
             let currentEDistFromHyperbolicCenterSq = sq(imaginaryPtBetweenPts[27]) + sq(imaginaryPtBetweenPts[28]) + sq(imaginaryPtBetweenPts[29]) + sq(imaginaryPtBetweenPts[30])
-            directionTowardNullPt.multiplyScalar(Math.sqrt((1. - currentEDistFromHyperbolicCenterSq)))
+            directionTowardNullPt.multiplyScalar(Math.sqrt((1. - currentEDistFromHyperbolicCenterSq)), directionTowardNullPt)
 
             imaginaryPtBetweenPts.add(directionTowardNullPt, pAdd)
             if (pSub !== undefined)
@@ -498,7 +509,7 @@ function initCga() {
 
             this.reverse(target)
             let factor = Math.abs(1. / this.innerSelfScalar()) //so, potentially 0
-            target.multiplyScalar(factor)
+            target.multiplyScalar(factor, target)
             return target
         }
 
@@ -701,7 +712,7 @@ function initCga() {
 
             // let ks = cgaToBeSandwiched.grade() * this.grade()
             // if (ks % 2 === 0)
-            //     target.multiplyScalar(-1.)
+            //     target.multiplyScalar(-1., target)
 
             return target
         }
@@ -907,6 +918,11 @@ function initCga() {
             target[30] =  this[1];
             target[31] =  this[0];
             return target;
+        }
+
+        selfSelfReverseScalar() {
+            let b = this.reverse(localCga0)
+            return b[0] * this[0] + b[1] * this[1] + b[2] * this[2] + b[3] * this[3] + b[4] * this[4] - b[5] * this[5] - b[6] * this[6] - b[7] * this[7] - b[8] * this[8] + b[9] * this[9] - b[10] * this[10] - b[11] * this[11] + b[12] * this[12] - b[13] * this[13] + b[14] * this[14] + b[15] * this[15] - b[16] * this[16] - b[17] * this[17] + b[18] * this[18] - b[19] * this[19] + b[20] * this[20] + b[21] * this[21] - b[22] * this[22] + b[23] * this[23] + b[24] * this[24] + b[25] * this[25] + b[26] * this[26] - b[27] * this[27] - b[28] * this[28] - b[29] * this[29] - b[30] * this[30] - b[31] * this[31];
         }
 
         innerSelfScalar() {
@@ -1138,5 +1154,4 @@ function initCga() {
 
     let localSphere0 = new Sphere()
 
-    /*END*/
-}
+/*END*/}

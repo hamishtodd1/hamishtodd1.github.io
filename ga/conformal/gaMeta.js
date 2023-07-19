@@ -1,34 +1,55 @@
+async function initCga() {
+
+    let fullFuncString = initCgaWithoutDeclarations.toString()
+    let funcString = fullFuncString
+        .slice(0, fullFuncString.indexOf(`/*END*/}`))
+
+    let i = 0
+    let declarations = ``
+    function replacementNews(bigStr, str) {
+        return bigStr.replaceAll(`new` + str, () => {
+            declarations += `\n    let new` + str + i + ` = new ` + str + `()`
+            return `new` + str + (i++)
+        })
+    }
+    let withoutDeclarations = replacementNews(replacementNews(funcString, `Rotor`), `Cga`)
+
+    var strToEval =
+        `(` +
+        withoutDeclarations +
+        declarations +
+        `})()`
+
+    eval(strToEval)
+}
+
 async function initEga() {  
 
     let [jsSharedFunctionsString, glslSharedFunctionsString] = createSharedFunctionDeclarationsStrings()
-    //newEga is not a variable name. It is equivalent to `new Ega()`
-
     glslEga = glslSharedFunctionsString + glslEga
+    
+    //newEga is not a variable name. It is equivalent to `new Ega()`
+    let fullFuncString = initEgaWithoutDeclarations.toString()
+    let funcString = fullFuncString
+        .slice(0, fullFuncString.indexOf(`/*END*/}`))
+        .replace(`/*EXTRA FUNCTIONS ADDED HERE*/`, jsSharedFunctionsString)
 
-    //javascript part
-    {
-        let fullFuncString = initEgaWithoutDeclarations.toString()
-        let funcString = fullFuncString
-            .slice(0, fullFuncString.indexOf(`/*END*/}`))
-            .replace(`/*EXTRA FUNCTIONS ADDED HERE*/`, jsSharedFunctionsString)
+    let i = 0
+    let declarations = ``
 
-        let i = 0
-        let declarations = ``
-
-        function thingy(bigStr, str) {
-            return bigStr.replaceAll(`new` + str, () => {
-                declarations += `\n    let new` + str + i + ` = new ` + str + `()`
-                return `new` + str + (i++)
-            })
-        }
-        let withoutDeclarations = thingy( thingy(funcString, `Dq`), `Ega`)
-
-        var strToEval =
-            `(` +
-            withoutDeclarations +
-            declarations +
-            `})()`
+    function replacementNews(bigStr, str) {
+        return bigStr.replaceAll(`new` + str, () => {
+            declarations += `\n    let new` + str + i + ` = new ` + str + `()`
+            return `new` + str + (i++)
+        })
     }
+    let withoutDeclarations = replacementNews( replacementNews(funcString, `Dq`), `Ega`)
+
+    var strToEval =
+        `(` +
+        withoutDeclarations +
+        declarations +
+        `})()`
 
     eval(strToEval)
 }

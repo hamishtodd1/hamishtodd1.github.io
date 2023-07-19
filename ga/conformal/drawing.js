@@ -18,8 +18,7 @@ function initDrawing () {
         selectedCell = newSelectedCell
         drawingMode = vizType
 
-        wheelTransform.copy(oneDq)
-        orbitControls.enableZoom = false
+        resetMouseWheelTransform()
 
         mousePlanePositionOnStart.copy(mousePlanePosition)
     }
@@ -28,18 +27,7 @@ function initDrawing () {
         if (event.button === 0){
             handleDrawing()
             drawingMode = -1
-
-            orbitControls.enableZoom = true
         }
-    })
-
-    let angle = .3
-    let turnRight = new Dq().set(Math.cos(angle), 0., 0., 0., Math.sin(angle), 0., 0., 0.)
-    let turnLeft = new Dq().set(Math.cos(-angle), 0., 0., 0., Math.sin(-angle), 0., 0., 0.)
-    let wheelTransform = new Dq()
-    document.addEventListener('wheel', function (event) {
-        let mouseTurn = event.deltaY < 0 ? turnLeft : turnRight
-        wheelTransform.append(mouseTurn)
     })
 
     let drawnCga = new Cga()
@@ -59,10 +47,11 @@ function initDrawing () {
                     newText += `ep`
                 }
                 else {
-                    // let radius = mousePlanePositionOnStart.distanceTo(mousePlanePosition)
-                    // mousePlanePositionOnStart.pointToVec3(v1)
-                    // sphere0.fromCenterAndRadius(v1.x,v1.y,v1.z, radius)
-                    // newText += translateExpression(sphere0.toString(5))
+                    let radius = mousePlanePositionOnStart.distanceTo(mousePlanePosition)
+                    mousePlanePositionOnStart.pointToVec3(v1)
+                    sphere0.fromCenterAndRadius(v1.x,v1.y,v1.z, radius)
+                    sphere0.log(4)
+                    newText += translateExpression(sphere0.toString(5))
 
                     // cga0.fromEga(mousePlanePosition).flatPpToConformalPoint(cga1).dual()
                 }
@@ -92,8 +81,7 @@ function initDrawing () {
                 break
             
             case MESH:
-                mousePlanePosition.log()
-                e123e.transformToSquared(mousePlanePosition, ega0).cast(dq0).sqrtSelf().append(wheelTransform)
+                getMousePositionAndWheelDq(dq0)
                 dq0.cast(ega0)
                 drawnCga.fromEga(ega0)
                 newText += translateExpression(`(` + drawnCga.toString(3) + `) > cow` )

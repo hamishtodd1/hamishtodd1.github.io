@@ -1,6 +1,18 @@
+/*
+    Interesting: you might be best off visualizing arrows in the sky
+        Rotation arrows in the sky, sure
+        Translation arrows in the sky, yes
+            But how long? Maybe the length of the distance where you are, superimposed on the sky
 
-/**
+
     For any circle, you can get the plane which contains it
+
+    Conformal point idea:
+        You have a sphere and a center point for it (is it a center point?)
+        The idea is that the thing is a point reflection in that point followed by a reflection in that sphere
+        inner product with point at infinity
+        Nice because that point is canonical with your choice of point-at-infinity
+        
 
     3 arrows arranged in a triangle?
         There's a sphere, which could be a plane, which they poke through
@@ -32,7 +44,6 @@
 
 function initRotorVizes() {
 
-
     let pointGeo = new THREE.IcosahedronGeometry(.03, 2)
     let pointMat = new THREE.MeshPhongMaterial({ color: 0x000000 })
 
@@ -56,7 +67,53 @@ function initRotorVizes() {
     }
     window.ConformalPointViz = ConformalPointViz
 
-    new Cga().upPt(0., 0., 0.).downPt()
+    let cylRadius = .02
+    let rotAxisGeo = new THREE.CylinderGeometry(cylRadius,       cylRadius,       camera.far * 10., 5, 1, true)
+    let trnAxisGeo = new THREE.CylinderGeometry(cylRadius * 15., cylRadius * 15., camera.far * 10., 5, 1, true)
+    let dqMat = new THREE.MeshPhongMaterial({color:0xFF0000})
+    let rotAxis = new Dq()
+    let trnAxis = new Dq()
+    //maaaaybe it could be a similarity viz
+    class DqViz extends THREE.Group {
+        constructor() {
+            super()
+            scene.add(this)
+
+            this.dq = new Dq()
+
+            this.rotAxisMesh = new DqMesh(rotAxisGeo, dqMat)
+            this.add(this.rotAxisMesh)
+
+            this.trnAxisMesh = new DqMesh(trnAxisGeo, dqMat)
+            this.add(this.trnAxisMesh)
+
+            obj3dsWithOnBeforeRenders.push(this)
+            this.onBeforeRender = () => {
+
+                this.dq.invariantDecomposition( rotAxis, trnAxis )
+                rotAxis[0] = 0.
+                e13e.transformToAsDq( rotAxis.cast(ega0), this.rotAxisMesh.dq )
+                // this.rotAxisMesh.dq.log()
+
+                if(trnAxis.approxEquals(oneDq))
+                    this.trnAxisMesh.visible = false
+                else {
+                    this.trnAxisMesh.visible = true
+
+                    let planeOrthogonalToRotationAxis = rotAxis.cast(ega0).inner(camera.mvs.pos, ega1)
+                    planeOrthogonalToRotationAxis.meet( camera.frustum.far, ega2 ).cast(trnAxis)
+                    trnAxis.mul(e13e.cast(dq0), this.trnAxisMesh.dq).sqrtSelf()
+                }
+            }
+        }
+    }
+    window.DqViz = DqViz
+
+    // let myDqViz = new DqViz()
+    // let littleTranslation = Translator(4., 0., 0.)
+    // e23e.cast(new Dq()).mul( littleTranslation, myDqViz.dq )
+
+
 
     let circleGeo = new THREE.PlaneGeometry(1.,1.,63,5)
     circleGeo.translate(.5,.5,0.)
@@ -73,7 +130,6 @@ function initRotorVizes() {
 
     //you wanna send a vertex to the correct place and rotate them out from there
 
-
     circleMat.injections = [
         {
             type: `vertex`,
@@ -89,17 +145,19 @@ function initRotorVizes() {
                 //rotor needs to take the z unit circle to the place the circle is
                 float majorAngle = transformed.x;
                 float minorAngle = transformed.y;
-                float minorRadius = .02;
-                
+                float minorRadius = `+cylRadius+`;
+        
+                //the e3p circle
                 vec3 center = vec3( cos(majorAngle     ), sin(majorAngle     ), 0. );
+                
+                vec3 helper = vec3( cos(majorAngle+.001), sin(majorAngle+.001), 0. );
+                center = sandwichRotorPoint( rotor, center );
+                helper = sandwichRotorPoint( rotor, helper );
+
                 if(center.x == 999. && center.y == 999. && center.z == 999.)
                     drawability = 0.;
                 else
                     drawability = 1.;
-
-                vec3 helper = vec3( cos(majorAngle+.001), sin(majorAngle+.001), 0. );
-                center = sandwichRotorPoint( rotor, center );
-                helper = sandwichRotorPoint( rotor, helper );
                 
                 //if this doesn't work, just use lineloop
                 vec3 axis = normalize( helper - center );
@@ -174,7 +232,11 @@ function initRotorVizes() {
             // let circles = this.rotor.cast(circle0).decompose(cgaCircles[0], cgaCircles[1])
             // cgaCircles[0].log()
 
-            // debugger
+            //ok so this is shit
+            //You can do circles and lines with PGA
+            //big pile of if statements is not great
+
+            // this.rotor.log()
             
             this.rotor.cast(cga0).selectGrade(2, cgaCircles[0])
             cgaCircles[1].copy(zeroCga) //because we're not using it at all yet

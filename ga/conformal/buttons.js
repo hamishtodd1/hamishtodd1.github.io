@@ -6,6 +6,8 @@
 		Subtleties in interactive learning is your raison d'etre, but here we are, making something non-interactive
 */
 
+buttonWhileDowns = () => { }
+
 function initButtons() {
 	let buttons = {}
 	let modifiedButtons = {}
@@ -28,6 +30,8 @@ function initButtons() {
 
 	//don't use ctrl or other things that conflict
 	document.addEventListener('keydown', function (event) {
+
+		log(event.key)
 
 		let button = event.ctrlKey ? modifiedButtons[event.key] : buttons[event.key]
 

@@ -1,3 +1,4 @@
+
 function initMouse() {
 
     mouseRay = new Ega().copy(e12e)
@@ -5,6 +6,11 @@ function initMouse() {
     mousePlanePositionOld = new Ega().copy(e123e)
     
     let mouseRayOld = new Ega()
+
+    let mouseWheelTransform = new Dq().copy(oneDq)
+    selectorRay = new Dq()
+    let selectorRayViz = new DqViz()
+    scene.add(selectorRayViz)
 
     let raycaster = new THREE.Raycaster()
     let mouse2d = new THREE.Vector2()
@@ -14,7 +20,7 @@ function initMouse() {
     let mouseOrigin = new Ega()
     let mouseDirection = new Ega()
 
-    function updateRay(event) {
+    function updateMouseRay(event) {
         mouse2d.x = (event.clientX / window.innerWidth) * 2 - 1;
         mouse2d.y = -(event.clientY / window.innerHeight) * 2 + 1;
         raycaster.setFromCamera(mouse2d, camera)
@@ -28,13 +34,15 @@ function initMouse() {
         mousePlanePositionOld.copy(mousePlanePosition)
         workingPlane.meet(mouseRay, mousePlanePosition)
         mousePlanePosition.normalize()
+
+        updateSelectorMvs()
     }
     
-    document.addEventListener('mousedown', function (event) {
+    function onMouseDown(event) {
         if(event.button !== 0)
             return
 
-        updateRay(event)
+        updateMouseRay(event)
         mousePlanePositionOld.copy(mousePlanePosition) //because we've just started
 
         let intersects = raycaster.intersectObjects(grabbables)
@@ -43,7 +51,9 @@ function initMouse() {
         }
 
         event.preventDefault()
-    }, false)
+    }
+    document.addEventListener('mousedown', onMouseDown, false)
+    document.addEventListener('pointerdown', onMouseDown, false)
 
     let angle = .3
     let turnRight = new Dq().set(Math.cos( angle), 0., 0., 0., Math.sin( angle), 0., 0., 0.)
@@ -59,17 +69,47 @@ function initMouse() {
 
     let workingPlane = new Ega().copy(e3e)
     function onMouseMove(event) {
-        updateRay(event)
+        updateMouseRay(event)
 
         event.preventDefault()
     }
 
     document.addEventListener('mousemove', onMouseMove, false)
     document.addEventListener('mousedown', onMouseMove, false)
+    document.addEventListener('pointermove', onMouseMove, false)
 
     // updateMouseIntersections = () => {
     //     grabbables.forEach((grabbable)=>{
     //         if(grabbable)
     //     })
     // } 
+
+    function updateSelectorMvs() {
+
+        let mouseTransform = getMousePositionAndWheelDq(dq0)
+        mouseTransform.sandwich(e13e, ega0).cast(selectorRay)
+        selectorRayViz.dq.copy(selectorRay)
+        // mouseTransform.sandwich(e2e, something)
+    }
+    
+    {
+        getMousePositionAndWheelDq = (dq) => {
+            e123e.transformToSquared(mousePlanePosition, ega0).cast(dq).sqrtSelf().append(mouseWheelTransform)
+            return dq
+        }
+
+        resetMouseWheelTransform = () => {
+            mouseWheelTransform.copy(oneDq)
+        }
+
+        let angle = .15
+        let turnRight = new Dq().set(Math.cos(angle), 0., 0., 0., Math.sin(angle), 0., 0., 0.)
+        let turnLeft = new Dq().set(Math.cos(-angle), 0., 0., 0., Math.sin(-angle), 0., 0., 0.)
+        document.addEventListener('wheel', function (event) {
+            let mouseTurn = event.deltaY < 0 ? turnLeft : turnRight
+            mouseWheelTransform.append(mouseTurn)
+
+            updateSelectorMvs()
+        })
+    }
 }

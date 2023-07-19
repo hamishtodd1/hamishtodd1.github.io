@@ -123,8 +123,11 @@ class Multivector extends Float32Array {
     }
 
     multiplyScalar(s, target) {
-        if(target === undefined)
-            target = this
+        if(target === undefined) {
+            if(frameCount > 0)
+                console.error("no target at " + getWhereThisWasCalledFrom(1))
+            target = new this.constructor()
+        }
 
         for (let i = 0; i < this.constructor.size; ++i)
             target[i] = s * this[i]
@@ -221,7 +224,7 @@ class Multivector extends Float32Array {
     addScaled(v, scale, target) { //by default, applies to itself
         
         if(target === undefined)
-            target = this
+            target = new this.constructor()
         
         if (!basicallySameType(this, v) )
             console.error("type error")

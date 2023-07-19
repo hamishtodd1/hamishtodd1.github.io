@@ -14,54 +14,54 @@ function initEgaWithoutDeclarations() {
         Number: new Uint8Array([0])
     }
 
-    class Line extends Multivector {
-        static get size() { return 6 }
+    // class Line extends Multivector {
+    //     static get size() { return 6 }
 
-        constructor() {
-            super(6)
-        }
+    //     constructor() {
+    //         super(6)
+    //     }
 
-        intersectPlane(plane, target) {
-            //plane and output point are mvs
-            target[11] = - plane[3] * this[0] + plane[2] * this[1] - plane[1] * this[3]
-            target[12] = + plane[4] * this[0] - plane[2] * this[2] - plane[1] * this[4]
-            target[13] = - plane[4] * this[1] + plane[3] * this[2] - plane[1] * this[5]
-            target[14] = + plane[4] * this[3] + plane[3] * this[4] + plane[2] * this[5]
+    //     intersectPlane(plane, target) {
+    //         //plane and output point are mvs
+    //         target[11] = - plane[3] * this[0] + plane[2] * this[1] - plane[1] * this[3]
+    //         target[12] = + plane[4] * this[0] - plane[2] * this[2] - plane[1] * this[4]
+    //         target[13] = - plane[4] * this[1] + plane[3] * this[2] - plane[1] * this[5]
+    //         target[14] = + plane[4] * this[3] + plane[3] * this[4] + plane[2] * this[5]
 
-            return target
-        }
+    //         return target
+    //     }
 
-        exp(target) {
-            if (target === undefined)
-                target = new Dq()
+    //     exp(target) {
+    //         if (target === undefined)
+    //             target = new Dq()
 
-            let l = (this[3] * this[3] + this[4] * this[4] + this[5] * this[5])
-            let angle = sqrt(l)
-            let sincAngle = angle == 0. ? 1. : sin(angle) / angle
-            let cosAngle = sqrt(1. - sincAngle * sincAngle * l) //Simon had a formula but it assumed smaller range
+    //         let l = (this[3] * this[3] + this[4] * this[4] + this[5] * this[5])
+    //         let angle = sqrt(l)
+    //         let sincAngle = angle === 0. ? 1. : sin(angle) / angle
+    //         let cosAngle = sqrt(1. - sincAngle * sincAngle * l) //Simon had a formula but it assumed smaller range
             
-            let m = (this[0] * this[5] + this[1] * this[4] + this[2] * this[3])
-            let t = m * (cosAngle - sincAngle) / l
-            return target.set(
-                cosAngle, 
-                sincAngle * this[0] + t * this[5], 
-                sincAngle * this[1] + t * this[4], 
-                sincAngle * this[2] + t * this[3], 
-                sincAngle * this[3], 
-                sincAngle * this[4], 
-                sincAngle * this[5], 
-                m * sincAngle)
-        }
+    //         let m = (this[0] * this[5] + this[1] * this[4] + this[2] * this[3])
+    //         let t = m * (cosAngle - sincAngle) / l
+    //         return target.set(
+    //             cosAngle, 
+    //             sincAngle * this[0] + t * this[5], 
+    //             sincAngle * this[1] + t * this[4], 
+    //             sincAngle * this[2] + t * this[3], 
+    //             sincAngle * this[3], 
+    //             sincAngle * this[4], 
+    //             sincAngle * this[5], 
+    //             m * sincAngle)
+    //     }
 
-        distanceToPoint(pt) {
-            //join plane magnitude
-            let planeX = pt[11] * this[4] - pt[12] * this[3] + pt[14] * this[0]
-            let planeZ = pt[12] * this[5] - pt[13] * this[4] + pt[14] * this[2]
-            let planeY = pt[13] * this[3] - pt[11] * this[5] + pt[14] * this[1]
-            return Math.sqrt(sq(planeX) + sq(planeY) + sq(planeZ))
-        }
-    }
-    window.Line = Line
+    //     distanceToPoint(pt) {
+    //         //join plane magnitude
+    //         let planeX = pt[11] * this[4] - pt[12] * this[3] + pt[14] * this[0]
+    //         let planeZ = pt[12] * this[5] - pt[13] * this[4] + pt[14] * this[2]
+    //         let planeY = pt[13] * this[3] - pt[11] * this[5] + pt[14] * this[1]
+    //         return Math.sqrt(sq(planeX) + sq(planeY) + sq(planeZ))
+    //     }
+    // }
+    // window.Line = Line
 
     // class Pt extends Multivector {
     //     static get size() { return 4 }
@@ -121,6 +121,46 @@ function initEgaWithoutDeclarations() {
             super(8)
         }
 
+        getDistanceSq() {
+            let rotation = newDq
+            let translation = newDq
+            this.invariantDecomposition(rotation, translation)
+            return translation[1] * translation[1] + translation[2] * translation[2] + translation[3] * translation[3]
+        }
+
+        invariantDecomposition(rotationTarget, translationTarget) {
+
+            let normalized = this.getNormalization(newDq)
+
+            if(normalized[7] === 0.) {
+                if (normalized[4] === 0. && normalized[5] === 0. && normalized[6] === 0.) {
+                    //pure translation
+                    translationTarget.copy(normalized)
+                    rotationTarget.copy(oneDq)
+                }
+                else {
+                    rotationTarget.copy(normalized)
+                    translationTarget.copy(oneDq)
+                }
+            }
+            else {
+                let numerator   = normalized.selectGrade(4, newDq)
+                let denominator = normalized.selectGrade(2, newDq)
+                numerator.mul(denominator.reverse(newDq), translationTarget)
+                translationTarget[0] += 1.
+    
+                let translationReverse = translationTarget.reverse(newDq)
+                normalized.mul(translationReverse, rotationTarget)
+            }
+        }
+
+        fromEgaAxisAngle(egaAxis, angle) {
+            egaAxis.cast(this)
+            this.multiplyScalar(Math.sin(angle), this)
+            this[0] = Math.cos(angle)
+            return this
+        }
+
         ptToPt(x1,y1,z1,x2,y2,z2) {
 
             if ( typeof x1 === `number` ) {
@@ -142,33 +182,55 @@ function initEgaWithoutDeclarations() {
             return this
         }
 
-        logarithm(r) {
-            // if (r[0] == 1.) 
-            //     return bivector(r[1], r[2], r[3], 0., 0., 0.);
-            // let a = 1. / (1. - r[0] * r[0])  // inv squared length. -infinity   if translation,   
-            // let b = acos(r[0]) * sqrt(a)       // rotation scale      -infinity*0 if translation, we want to be 1
-            // let c = r[7] * a * (1. - r[0] * b) // translation scale   -infinity*0*(1-1*1) if translation, we want to be 0
-            // return bivector(
-            //     c * r[6] + b * r[1],
-            //     c * r[5] + b * r[2],
-            //     c * r[4] + b * r[3],
-            //     b * r[4],
-            //     b * r[5],
-            //     b * r[6])
+        exp(target) {
+            if (target === undefined)
+                target = new Dq()
+
+            let l = (this[4] * this[4] + this[5] * this[5] + this[6] * this[6])
+            let angle = sqrt(l)
+            let sincAngle = angle === 0. ? 1. : sin(angle) / angle
+            let cosAngle = sqrt(1. - sincAngle * sincAngle * l) //Simon had a formula but it assumed smaller range
+
+            let m = (this[1] * this[6] + this[2] * this[5] + this[3] * this[4])
+            let t = m * (cosAngle - sincAngle) / l
+            return target.set(
+                cosAngle,
+                sincAngle * this[1] + t * this[6],
+                sincAngle * this[2] + t * this[5],
+                sincAngle * this[3] + t * this[4],
+                sincAngle * this[4],
+                sincAngle * this[5],
+                sincAngle * this[6],
+                m * sincAngle)
+        }
+
+        // logarithm(r) {
+        //     // if (r[0] == 1.) 
+        //     //     return bivector(r[1], r[2], r[3], 0., 0., 0.);
+        //     // let a = 1. / (1. - r[0] * r[0])  // inv squared length. -infinity   if translation,   
+        //     // let b = acos(r[0]) * sqrt(a)       // rotation scale      -infinity*0 if translation, we want to be 1
+        //     // let c = r[7] * a * (1. - r[0] * b) // translation scale   -infinity*0*(1-1*1) if translation, we want to be 0
+        //     // return bivector(
+        //     //     c * r[6] + b * r[1],
+        //     //     c * r[5] + b * r[2],
+        //     //     c * r[4] + b * r[3],
+        //     //     b * r[4],
+        //     //     b * r[5],
+        //     //     b * r[6])
 
                 
-            // You want to compress the entire branch into the sinc, that'd be nice. But you seemingly can't
-            let aReciprocal = 1. - r[0]*r[0]                                        //0 if translation          s is cos, 1-s*s is sin
-            let b = 1. / sinc( Math.acos(r[0]) )                                    //1 if translation
-            let c = r[7] * (1. - r[0] * b) * (r[0]==1.?1.:1./aReciprocal)    //0 if translation. By leaving branch to the last minute, MAYBE it's known to be 0 ASAP
-            return bivector(
-                c * r[6] + b * r[1],
-                c * r[5] + b * r[2],
-                c * r[4] + b * r[3],
-                b * r[4],
-                b * r[5],
-                b * r[6])
-        }
+        //     // You want to compress the entire branch into the sinc, that'd be nice. But you seemingly can't
+        //     let aReciprocal = 1. - r[0]*r[0]                                        //0 if translation          s is cos, 1-s*s is sin
+        //     let b = 1. / sinc( Math.acos(r[0]) )                                    //1 if translation
+        //     let c = r[7] * (1. - r[0] * b) * (r[0]==1.?1.:1./aReciprocal)    //0 if translation. By leaving branch to the last minute, MAYBE it's known to be 0 ASAP
+        //     return bivector(
+        //         c * r[6] + b * r[1],
+        //         c * r[5] + b * r[2],
+        //         c * r[4] + b * r[3],
+        //         b * r[4],
+        //         b * r[5],
+        //         b * r[6])
+        // }
 
         //aliasing allowed
         reverse(target) {
@@ -190,7 +252,7 @@ function initEgaWithoutDeclarations() {
         }
 
         sandwich(toBeSandwiched, target) {
-            let thisEga = this.toEga(newEga)
+            let thisEga = this.cast(newEga)
 
             if (toBeSandwiched.constructor === Ega) {
                 if (target === undefined)
@@ -202,7 +264,7 @@ function initEgaWithoutDeclarations() {
                 if (target === undefined)
                     target = new Dq()
 
-                let operandEga = toBeSandwiched.toEga(newEga)
+                let operandEga = toBeSandwiched.cast(newEga)
                 let targetEga = thisEga.sandwich(operandEga, newEga)
                 target.cast(targetEga)
             }
@@ -308,12 +370,12 @@ function initEgaWithoutDeclarations() {
                 target[i] *= -1.
         }
 
-        fromMat4(mat) {
-            mat.decompose(v1, q1, v2)
-            let asEga = newEga.fromPosQuat(v1, q1)
-            asEga.cast(this)
-            return this
-        }
+        // fromMat4(mat) {
+        //     mat.decompose(v1, q1, v2)
+        //     let asEga = newEga.fromPosQuat(v1, q1)
+        //     asEga.cast(this)
+        //     return this
+        // }
 
         //there were bugs with this! Could be minus signs in the wrong places!
         toMat4(target) {
@@ -339,12 +401,20 @@ function initEgaWithoutDeclarations() {
                 0., 0., 0., 1.);
         }
 
-        fromPosQuat(p, q) {
-            let asEga = newEga
-            this.cast(asEga)
-            asEga.fromPosQuat(p, q)
-            asEga.covert(this)
+        fromQuaternion(q) {
+            this.zero()
+
+            this[ 6] = -q.x
+            this[ 5] = -q.y
+            this[ 4] = -q.z
+            this[ 0] = q.w
             return this
+        }
+
+        fromPosQuat(p, q) {
+            let qPart = newDq.fromQuaternion(q)
+            let pPart = newDq.translator( p.x, p.y, p.z )
+            return qPart.mul(pPart, this)
         }
     }
     window.Dq = Dq
@@ -372,10 +442,31 @@ function initEgaWithoutDeclarations() {
             super(16)
         }
 
+        pointPointDistance(that) {
+            let x = this[13] / this[14] - that[13] / that[14]
+        }
+
+        projectOn(toBeProjectedOn, target) {
+            if (target === undefined)
+                target = new Ega()
+
+            let numerator = this.inner(toBeProjectedOn, newEga)
+            let rev = toBeProjectedOn.reverse(newEga)
+            numerator.mul(rev, target)
+
+            return target
+        }
+
         //multiplies by reverse
         transformToSquared(b, target) {
             let thisReverse = this.reverse(newEga)
             b.mul(thisReverse, target)
+            return target
+        }
+
+        transformToAsDq(b, target) {
+            this.transformToSquared(b, newEga).cast(target)
+            target.sqrtSelf()
             return target
         }
 
@@ -387,14 +478,9 @@ function initEgaWithoutDeclarations() {
             return this
         }
 
-        separationRatio(that, target) {
-            let thatReverse = that.reverse(newEga)
-            return this.mul(thatReverse, target)
-        }
-
         //UNTESTED
         // orientationTo(that) {
-        //     let ratio = this.separationRatio(that, newEga)
+        //     let ratio = this.transformToSquared(that, newEga)
         //     let g = Math.abs(this.grade() - that.grade())
 
         //     let angleNumeratorSq = ratio.selectGrade(g + 2, newEga).eNormSquared()
@@ -414,7 +500,7 @@ function initEgaWithoutDeclarations() {
         // }
 
         angleTo(that) {
-            let ratio = this.separationRatio(that, newEga)
+            let ratio = this.transformToSquared(that, newEga)
             let g = Math.abs(this.grade() - that.grade())
             
             let angleNumeratorSq   = ratio.selectGrade(g + 2, newEga).eNormSquared()
@@ -429,7 +515,7 @@ function initEgaWithoutDeclarations() {
         }
 
         distanceTo(that) {
-            let ratio = this.separationRatio(that, newEga)
+            let ratio = this.transformToSquared(that, newEga)
             let g = Math.abs(this.grade() - that.grade())
             
             let angleNumeratorSq = ratio.selectGrade(g + 2, newEga).eNormSquared()
@@ -482,20 +568,10 @@ function initEgaWithoutDeclarations() {
             return target
         }
 
-        fromQuaternion(q) {
-            this.copy(zeroEga)
-
-            this[10] = -q.x
-            this[9] = -q.y
-            this[8] = -q.z
-            this[0] = q.w
-            return this
-        }
-
         normalize() {
             let ourNorm = this.eNorm()
             if(ourNorm !== 0.) {
-                this.multiplyScalar(1./ourNorm)
+                this.multiplyScalar(1./ourNorm, this)
             }
             return this
         }
@@ -516,7 +592,7 @@ function initEgaWithoutDeclarations() {
         }
 
         point(x, y, z, w) {
-            this.copy(zeroEga)
+            this.zero()
             if (w === undefined)
                 w = 1.
             this[14] = w
@@ -551,7 +627,7 @@ function initEgaWithoutDeclarations() {
         }
 
         plane(e0Coef, e1Coef, e2Coef, e3Coef) {
-            this.copy(zeroEga)
+            this.zero()
             this[1] = e0Coef
             this[2] = e1Coef
             this[3] = e2Coef
@@ -629,8 +705,8 @@ function initEgaWithoutDeclarations() {
     // Dq.onesWithMinus = []
     // Line.onesWithMinus = []
 
-    Line.indexGrades = [2,2,2,2,2,2]
-    Line.basisNames = [`01`, `02`, `03`, `12`, `31`, `23`]
+    // Line.indexGrades = [2,2,2,2,2,2]
+    // Line.basisNames = [`01`, `02`, `03`, `12`, `31`, `23`]
 
     Ega.indexGrades = [
         0,

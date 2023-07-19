@@ -28,13 +28,6 @@
 
 function initCompilation() {
 
-    let hashButtonPressed = false
-    bindButton(`Shift`, () => {
-        hashButtonPressed = true
-    }, () => {}, false, () => {
-        hashButtonPressed = false
-    })
-
     const tests = [
         // `2 + 3`, new Cga().fromFloatAndIndex(5, 0),
         // `(2 + 3) * 5`, new Cga().fromFloatAndIndex(25, 0),
@@ -323,8 +316,6 @@ function initCompilation() {
                     extraCga.fromFloatAndIndex(Math.random(), 0)
                 else if(token === `hand`)
                     cga0.fromEga(mousePlanePosition).flatPpToConformalPoint(extraCga)
-                else if (token === `digital`)
-                    cga0.fromFloatAndIndex(hashButtonPressed?1.:0., 0)
                 // else if (token === `analogue`)
                 //     cga0.fromEga(mousePlanePosition).flatPpToConformalPoint(extraCga)
                 else if (/^[A-Z][0-9]+$/.test(token)) {

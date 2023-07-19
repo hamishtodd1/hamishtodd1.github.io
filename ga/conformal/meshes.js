@@ -13,6 +13,7 @@ function initMeshes() {
             super(unchangingUnitSquareGeometry, defaultMat)
             
             scene.add(this)
+            this.castShadow = true
 
             this.cga = new Cga().copy(oneCga)
             this.visible = false
@@ -39,7 +40,7 @@ function initMeshes() {
         cowGeo.scale(.5, .5, .5)
         textureLoader.load(`data/cow.png`, (texture) => {
             
-            let cowMat = new THREE.MeshPhongMaterial({ map: texture })
+            let cowMat = new THREE.MeshPhongMaterial({ map: texture, side: THREE.DoubleSide })
 
             matGeoPairs.cow = { mat: cowMat, geo: cowGeo }
 
