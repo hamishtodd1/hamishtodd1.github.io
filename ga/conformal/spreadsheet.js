@@ -42,7 +42,7 @@ function initSpreadsheet() {
         numberMats[i] = text(i+1, true, `#000000`)
     let numberWidth = cellHeight*numberMats.reduce((a,b)=>Math.max(a,b.getAspect()),0)
 
-    const cellWidthMax = 1.9 // trying to squee
+    const cellWidthMax = 1.9 // based on nothing probably
     const textMeshHeight = cellHeight * .7 //you get a .3 padding on all four sides
     const canvasYRez = 32 //eyeballed
 
@@ -100,6 +100,7 @@ function initSpreadsheet() {
         }
 
         class Cell extends THREE.Group {
+
             constructor(spreadsheet) {
                 let canvas = document.createElement("canvas")
                 let context = canvas.getContext("2d")
@@ -138,8 +139,6 @@ function initSpreadsheet() {
                 this.symbol.position.z = layerWidth
                 this.add(this.symbol)
                 this.symbol.visible = false
-
-                this.setVizVisibility(false)
             }
 
             setSymbolness(symbolness) {
@@ -174,7 +173,7 @@ function initSpreadsheet() {
                     let vizType = NO_VIZ_TYPE
 
                     if (result === null)
-                        log("couldn't parse: " + this.currentText)
+                        log("couldn't compile: " + this.currentText)
                     else {
 
                         if (result.meshName !== ``)
@@ -193,7 +192,6 @@ function initSpreadsheet() {
                         unusedVizes[oldVizType].push(this.viz)
 
                         this.viz = unusedVizes[vizType].pop()
-                        this.setVizVisibility(true)
                     }
 
                     //now give it the value
@@ -291,23 +289,23 @@ function initSpreadsheet() {
         }
     }
 
-    class Button extends THREE.Group {
-        constructor(mat, buttonString) {
-            super()
+    // class Button extends THREE.Group {
+    //     constructor(mat, buttonString) {
+    //         super()
             
-            this.symbol = new THREE.Mesh(unchangingUnitSquareGeometry, mat)
-            this.symbol.scale.setScalar(symbolScale)
-            this.add(this.symbol)
+    //         this.symbol = new THREE.Mesh(unchangingUnitSquareGeometry, mat)
+    //         this.symbol.scale.setScalar(symbolScale)
+    //         this.add(this.symbol)
 
-            this.tab = new Tab(spandrelMat)
-            this.tab.rotation.z = Math.PI
-            this.tab.position.z = -layerWidth
-            this.tab.setPlaqueWidth(cellHeight)
-            this.add(this.tab)
+    //         this.tab = new Tab(spandrelMat)
+    //         this.tab.rotation.z = Math.PI
+    //         this.tab.position.z = -layerWidth
+    //         this.tab.setPlaqueWidth(cellHeight)
+    //         this.add(this.tab)
 
-            this.buttonString = buttonString
-        }
-    }
+    //         this.buttonString = buttonString
+    //     }
+    // }
     
     let spandrelMat = new THREE.MeshBasicMaterial({ color: 0xD8D8D8, side: THREE.DoubleSide })
     let spandrelWidth = cellHeight * .6
@@ -340,12 +338,12 @@ function initSpreadsheet() {
             this.numbersBg.position.z = -layerWidth
             this.add(this.numbersBg)
 
-            this.buttons = []
-            symbolMats.forEach((mat, i) => {
-                let btn = new Button(mat, symbolStrings[i])
-                this.add(btn)
-                this.buttons.push(btn)                
-            })
+            // this.buttons = []
+            // symbolMats.forEach((mat, i) => {
+            //     let btn = new Button(mat, symbolStrings[i])
+            //     this.add(btn)
+            //     this.buttons.push(btn)                
+            // })
 
             {
                 if(title === undefined)
@@ -409,22 +407,20 @@ function initSpreadsheet() {
 
         resizeFromCellWidths() {
 
-            let maxCellWidth = this.cells.reduce(
+            let minWidth = Math.max(this.bg.scale.x, cellHeight, .85)
+            this.bg.scale.x = this.cells.reduce(
                 (currentMax, cell) => Math.max(currentMax, cell.minCellWidth),
-                cellHeight)
-
-            let bgScaleX = Math.max(maxCellWidth, .85)
-                
+                minWidth)
             let inSymbolMode = spreadsheets[0].cells[0].symbol.visible
             if(inSymbolMode)
-                bgScaleX = cellHeight
-            this.bg.scale.set(bgScaleX, cellHeight * this.cells.length, 1.)
+                this.bg.scale.x = cellHeight
+            this.bg.scale.y = cellHeight * this.cells.length
 
             let numberX = -this.bg.scale.x / 2. - numberWidth / 2.
             this.numbersBg.scale.y = this.bg.scale.y
             this.numbersBg.position.x = numberX
 
-            let newTextMeshWidth = cellWidthToTextMeshWidth(bgScaleX)
+            let newTextMeshWidth = cellWidthToTextMeshWidth(this.bg.scale.x)
             this.cells.forEach( cell => {
                 cell.textMesh.scale.x = newTextMeshWidth
                 cell.number.position.x = numberX
@@ -441,10 +437,10 @@ function initSpreadsheet() {
             this.titleTab.position.y = this.sign.position.y
             this.titleTab.setTotalWidth(this.bg.scale.x)
 
-            this.buttons.forEach( (btn, i) => {
-                btn.position.y = -this.bg.scale.y / 2. - cellHeight / 2.
-                btn.position.x = (cellHeight*1.9) * (i - this.buttons.length / 2. + .5)
-            })
+            // this.buttons.forEach( (btn, i) => {
+            //     btn.position.y = -this.bg.scale.y / 2. - cellHeight / 2.
+            //     btn.position.x = (cellHeight*1.9) * (i - this.buttons.length / 2. + .5)
+            // })
         }
 
         getCellY(row) {
@@ -452,6 +448,17 @@ function initSpreadsheet() {
         }
     }
     window.Spreadsheet = Spreadsheet
+
+    setSpreadsheetsFromStringArrays = (initial) => {
+        initial.forEach((cellContentses, i) => {
+            let ss = new Spreadsheet(cellContentses.length)
+            ss.position.x = i * 1.6 - 1.6 * (initial.length - 1) / 2.
+            cellContentses.forEach((cellContents, j) => {
+                translated = translateExpression(cellContents)
+                ss.cells[j].setText(translated)
+            })
+        })
+    }
 
     class SelectionBox extends THREE.InstancedMesh {
 

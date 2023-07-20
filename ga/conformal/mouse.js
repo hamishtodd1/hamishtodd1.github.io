@@ -10,7 +10,7 @@ function initMouse() {
     let mouseWheelTransform = new Dq().copy(oneDq)
     selectorRay = new Dq()
     let selectorRayViz = new DqViz()
-    // scene.add(selectorRayViz)
+    scene.add(selectorRayViz)
 
     let raycaster = new THREE.Raycaster()
     let mouse2d = new THREE.Vector2()
@@ -52,7 +52,7 @@ function initMouse() {
 
         event.preventDefault()
     }
-    document.addEventListener('mousedown', onMouseDown, false)
+    document.addEventListener('pointerdown', onMouseDown, false)
     document.addEventListener('pointerdown', onMouseDown, false)
 
     let angle = .3
@@ -74,8 +74,8 @@ function initMouse() {
         event.preventDefault()
     }
 
-    document.addEventListener('mousemove', onMouseMove, false)
-    document.addEventListener('mousedown', onMouseMove, false)
+    document.addEventListener('pointermove', onMouseMove, false)
+    document.addEventListener('pointerdown', onMouseMove, false)
     document.addEventListener('pointermove', onMouseMove, false)
 
     // updateMouseIntersections = () => {
@@ -88,8 +88,7 @@ function initMouse() {
 
         let mouseTransform = getMousePositionAndWheelDq(dq0)
         mouseTransform.sandwich(e13e, ega0).cast(selectorRay)
-        // selectorRayViz.dq.copy(selectorRay)
-        // mouseTransform.sandwich(e2e, something)
+        selectorRayViz.dq.copy(selectorRay)
     }
     
     {

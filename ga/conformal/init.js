@@ -1,6 +1,8 @@
 /*
     Something for PAF, 5th Aug
         Just the spheres and tubes maybe?
+        Ability to make a stick figure puppet and move it
+        Ability to record a series of movements
 
     TODO for October 2021:
         Cubes m8!
@@ -134,35 +136,57 @@ async function init() {
 
     initDrawing()
 
-    // initRigging()
-
     initMeshes()
+    
+    initRigging()
+
     initCompilation()
     initSpreadsheet()
 
+    initNotation()
+    initSpreadsheetControl()
+    initSpreadsheetEntryAndFocus()
+
+    // let initial = [
+    //     [
+    //         `ep`,
+    //         `2e12`,
+    //         //want something that affects itself Or two affecting each other
+    //         `-0.5e123m + 0.5e123p`,
+    //         `e1 - e0`,
+    //         `ep - em + time * e0`,
+    //         `e23 - e03`,
+    //         `(1+time*e01) > e1`,
+    //         `e123`,
+    //         `e0`, `ep`, `e2`, `e23`
+    //     ],
+    //     [
+    //         `exp( time * (e12 + e01) )`,
+    //         `B1 > hand`,
+    //         `e23 - time * e13`,
+    //         `hand & e123`,
+    //         `B3 + B4`,
+    //         `hand`,
+    //     ]
+    // ]
+
     let initial = [
         [
-            `ep`,
-            `2e12`,
-            //want something that affects itself Or two affecting each other
-            `-0.5e123m + 0.5e123p`,
-            `e1 - e0`,
-            `ep - em + time * e0`,
-            `e23 - e03`,
-            `(1+time*e01) > e1`,
-            `e123`,
-            `e0`, `ep`, `e2`, `e23`
-        ],
-        [
-            `exp( time * (e12 + e01) )`,
-            `B1 > hand`,
-            `e23 - time * e13`,
-            `hand & e123`,
-            `B3 + B4`,
-            `hand`,
+            `(1+time*e01) > bone`,
+            `B1*(1-0.2*e02) > bone`
         ]
     ]
-    initSpreadsheetNavigation(initial)
+    new THREE.OBJLoader().load(`data/cow.obj`, (obj) => {
+        let geo = obj.children[0].geometry
+        textureLoader.load(`data/cow.png`, (texture) => {
+            let mat = new THREE.MeshPhongMaterial({ map: texture, side: THREE.DoubleSide })
+            registerMesh(`cow`, geo, mat)
+
+            setSpreadsheetsFromStringArrays(initial)
+        })
+    })
+
+    
 
     // controllers
     {
@@ -209,9 +233,9 @@ async function init() {
         updateHandSpreadsheet()
         blankFunction()
         buttonWhileDowns()
-        refreshActiveCells()
         handleDrawing()
         updateRigging()
+        updateVisibilitiesAndRefresh()
         obj3dsWithOnBeforeRenders.forEach(obj3d => obj3d.onBeforeRender())
 
         renderer.render(scene, camera)

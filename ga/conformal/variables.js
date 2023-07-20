@@ -1,8 +1,10 @@
 let selectedSpreadsheet = null
+let selectedRow = 0
 const grabbables = []
 const spreadsheets = []
 const cellHeight = 0.11
 const meshVizes = []
+let allVisibleMode = true
 
 //enum
 const spandrelGeo = new THREE.ShapeGeometry(

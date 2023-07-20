@@ -1,6 +1,9 @@
-function initMeshes() {
+async function initMeshes() {
 
     let matGeoPairs = {}
+    registerMesh = (name, geo, mat) => {
+        matGeoPairs[name] = { geo, mat }
+    }
     isMeshName = (name) => {
         return matGeoPairs[name] !== undefined
     }
@@ -34,21 +37,4 @@ function initMeshes() {
         }
     }
     window.MeshViz = MeshViz
-
-    new THREE.OBJLoader().load(`data/cow.obj`,(obj)=>{
-        let cowGeo = obj.children[0].geometry
-        cowGeo.scale(.5, .5, .5)
-        textureLoader.load(`data/cow.png`, (texture) => {
-            
-            let cowMat = new THREE.MeshPhongMaterial({ map: texture, side: THREE.DoubleSide })
-
-            matGeoPairs.cow = { mat: cowMat, geo: cowGeo }
-
-            let cell = selectedSpreadsheet.makeExtraCell()
-            cell.setText(translateExpression(`(1+time*e01) > cow`))
-            // selectCell(cell)
-
-        })
-    })
-    
 }

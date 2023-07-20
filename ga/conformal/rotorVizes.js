@@ -1,4 +1,6 @@
 /*
+    For the points, have a think about them as circles
+
     Interesting: you might be best off visualizing arrows in the sky
         Rotation arrows in the sky, sure
         Translation arrows in the sky, yes

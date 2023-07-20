@@ -328,9 +328,9 @@ function initCompilation() {
                         extraCga.copy(zeroCga)
                     else {
 
-                        cell.refresh() //actually only want to do this under certain circumstances
+                        if (!allVisibleMode)
+                            cell.refresh()
                         setSecondarySelectionBox(spreadsheet, row)
-                        cell.setVizVisibility(true)
 
                         cell.viz.getMv().cast(extraCga)
 

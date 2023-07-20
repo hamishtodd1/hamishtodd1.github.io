@@ -31,8 +31,6 @@ function initButtons() {
 	//don't use ctrl or other things that conflict
 	document.addEventListener('keydown', function (event) {
 
-		log(event.key)
-
 		let button = event.ctrlKey ? modifiedButtons[event.key] : buttons[event.key]
 
 		// event.preventDefault()
@@ -43,8 +41,10 @@ function initButtons() {
 
 			// if(event.key !== "v") //paste
 			// 	event.preventDefault()
+
+			event.stopImmediatePropagation()
 		}
-		// log(event.key)
+
 	}, false);
 	function buttonUpper(event, set) {
 		for (buttonKey in set) {

@@ -23,7 +23,7 @@ function initDrawing () {
         mousePlanePositionOnStart.copy(mousePlanePosition)
     }
 
-    document.addEventListener(`mouseup`, (event) => {
+    document.addEventListener(`pointerup`, (event) => {
         if (event.button === 0){
             handleDrawing()
             drawingMode = -1

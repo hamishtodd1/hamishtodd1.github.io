@@ -1,6 +1,8 @@
 /*
     Put your hand IN the bone and grab, you can move it
     Point at the bone and grab, you've made another
+    That creates another line in the spreadsheet
+
  */
 
 updateRigging = () => {}
@@ -11,9 +13,11 @@ function initRigging() {
     let bones = []
     let heldBone = null
 
-    let boneGeo = new THREE.BoxGeometry(.25,.25,.25)
-    let highlightedColor = new THREE.Color(0xFF0000)
     let unhighlightedColor = new THREE.Color(0x000000)
+    let highlightedColor = new THREE.Color(0xFF0000)
+    let boneGeo = new THREE.BoxGeometry(.25,.25,.25)
+    let boneMat = new THREE.MeshPhongMaterial({ color: unhighlightedColor })
+    registerMesh( 'bone', boneGeo, boneMat )
    
     function sphereFullyInFrontOfPlane(sphereCga, planeCga) {
         sphereCga.transformToSquared(planeCga, cga0)
@@ -35,7 +39,7 @@ function initRigging() {
         return num > 0.
     }
     
-    let bonesInstances = new THREE.InstancedMesh(boneGeo, new THREE.MeshPhongMaterial(),64)
+    let bonesInstances = new THREE.InstancedMesh(boneGeo, boneMat,64)
     bonesInstances.setColorAt(0, unhighlightedColor)
     bonesInstances.count = 0
     scene.add(bonesInstances)
@@ -98,7 +102,6 @@ function initRigging() {
             }
         })
 
-        // log(highlightedBone)
         bones.forEach(bone=>{
             bonesInstances.setColorAt(bone.index, bone === highlightedBone ? 
                 highlightedColor : 
@@ -116,23 +119,23 @@ function initRigging() {
             heldBone.dq.copy(dq0)
     }
 
-    document.addEventListener('mousedown', (event) => {
-        if(event.button !== 0)
-            return
+    // document.addEventListener('pointerdown', (event) => {
+    //     if(event.button !== 0)
+    //         return
 
-        let clickedBone = bones.find( bone => bone !== heldBone && sphereCutsPp(bone.colliderSphere, cga2.fromEga(mousePlanePosition) ) )
-        if (clickedBone)
-            heldBone = clickedBone
-        else {
-            heldBone = new Bone()
-            if(highlightedBone)
-                heldBone.parent = highlightedBone
+    //     let clickedBone = bones.find( bone => bone !== heldBone && sphereCutsPp(bone.colliderSphere, cga2.fromEga(mousePlanePosition) ) )
+    //     if (clickedBone)
+    //         heldBone = clickedBone
+    //     else {
+    //         heldBone = new Bone()
+    //         if(highlightedBone)
+    //             heldBone.parent = highlightedBone
             
-            resetMouseWheelTransform() //do you even need this?
-        }
-    })
+    //         resetMouseWheelTransform() //do you even need this?
+    //     }
+    // })
 
-    document.addEventListener('mouseup', (event) => {
+    document.addEventListener('pointerup', (event) => {
         heldBone = null
     })
 }
