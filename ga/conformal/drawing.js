@@ -81,10 +81,63 @@ function initDrawing () {
                 break
             
             case MESH:
+
+                /**
+                    When you give it some extra movement, you're giving it movment on top of what it already has
+                    so, suppose it's currently `B1 > bone`. You're going to change that to `(B1*handMotion)>bone`
+                    if there's an inline dq in there already, like `B1*(1+e01)>bone`, you're chaging that.
+                    Your
+                    
+                    Detecting that:
+                        alright so you're looking through currentText, and getting the last occurrence of `(` and `)`
+                        also it has to be just before the arrow
+
+                        We're assuming that the structure of this cell is [X] > bone
+                        The most basic thing that could work is: detect whether X is [X] * (Y) > bone
+                            If you don't have it, make it that way with * (Y)
+                            If you do have it, replace Y
+
+                        This idea of extracting specific stuff you want from the cell isn't something the user could easily do
+                            Could split bones across two cells: the transform cell and the mesh cell
+                            Grab the transform cell and you're doing stuff with it you'd be doing with any transform
+                            Grab a mesh cell and...
+                                hmm, maybe you should be able to change the mesh? That's a two-hand thing
+                                it changes what was in the cell referring to this one?
+                                It composes with an extra transform?
+                                It replaces this cell with A*B and shifts the mesh cell one lower?
+                                Think not in terms of the spreadsheet, think in terms of the user's view!
+
+                            Emitting new cells will OF COURSE be an ordinary thing
+                            It's only one line of code man. This is the way to go
+
+                            Kinda suggests one ss for the transforms and another for the meshes
+
+                    T
+
+                    A mesh has a natural center of mass and so acts as its own symbol
+                    So does a point/scaling. Not so much a plane or line. Hmm, maybe the arrow of the plane/line?
+
+
+                        
+                 */
+
+                
+                log( selectedCell.parsedTokens )
+
+
+                //and by the way, when you don't have the spreadsheets around and everything is visible,
+                //you select using nearest, eg using the code in rigging.js
+
+
+                let currentMeshName = `cow`
+                for (meshName in userMeshesData) {
+                    if(selectedCell.currentText.indexOf(meshName) !== -1)
+                        currentMeshName = meshName
+                }
                 getMousePositionAndWheelDq(dq0)
                 dq0.cast(ega0)
                 drawnCga.fromEga(ega0)
-                newText += translateExpression(`(` + drawnCga.toString(3) + `) > cow` )
+                newText += translateExpression(`(` + drawnCga.toString(3) + `) > ` + currentMeshName )
                 break
         }
 

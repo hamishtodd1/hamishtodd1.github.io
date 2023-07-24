@@ -4,15 +4,19 @@ const grabbables = []
 const spreadsheets = []
 const cellHeight = 0.11
 const meshVizes = []
-let allVisibleMode = true
+let userMeshesData = {}
 
-//enum
+let allCellsVisible = false //false: meshes, selected cell, and selected cell's dependencies; true: everything visible
+
+
 const spandrelGeo = new THREE.ShapeGeometry(
 	new THREE.Shape()
 		.bezierCurveTo(1., 0., 0., 1., 1., 1.)
 		.lineTo(1., 0.)
 		.lineTo(0., 0.)).translate(0.,-.5,0.)
 const layerWidth = .001
+
+//enum
 const NO_VIZ_TYPE = 0
 const SPHERE = 1
 const ROTOR = 2 //grade wise that's more like a circle but this will do for now

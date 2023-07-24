@@ -17,7 +17,7 @@ function initCgaWithoutDeclarations() {
         //seems like no matter what you do, there's negatives involved
         //and REALLY you should think about the canonical clifford bundle
     }
-    smallerInLarger.Thingy = smallerInLarger.Cga
+    smallerInLarger.Thing = smallerInLarger.Cga
     smallerInLarger.Rotor = {
         Circle: new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]),
         Number: new Uint8Array([0])

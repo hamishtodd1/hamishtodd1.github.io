@@ -1,11 +1,12 @@
+/*
+    The natural origin for meshes is hovering in front of your chest?
+    Infrequently, it moves. When this happens, all the transforms move with it?
+ */
+
 async function initMeshes() {
 
-    let matGeoPairs = {}
-    registerMesh = (name, geo, mat) => {
-        matGeoPairs[name] = { geo, mat }
-    }
-    isMeshName = (name) => {
-        return matGeoPairs[name] !== undefined
+    addUserMeshData = (name, geo, mat) => {
+        userMeshesData[name] = { geo, mat }
     }
 
     let ourEga = new Ega()
@@ -24,8 +25,8 @@ async function initMeshes() {
         }
 
         set(name) {
-            this.geometry = matGeoPairs[name].geo
-            this.material = matGeoPairs[name].mat
+            this.geometry = userMeshesData[name].geo
+            this.material = userMeshesData[name].mat
         }
 
         onBeforeRender() {

@@ -17,6 +17,26 @@
             Eye direction
             Mouth opening
             Eyebrows furrowing
+
+    One idea for how control is going to look, generally:
+        Say there are two points A and B added to get C
+        There'll be directed wires coming down from A and B, from player's POV, which go into an add symbol, and an arrow coming from there into C
+        In spreadsheet mode that's two cells and a third cell A+B
+        So really they can be thought of on a sphere surrounding you
+        Meshes/mesh pieces are a little palette you hold in your hand
+        rendering:
+            Y shape is bum-like. Two arcs coming together into a directed CGA point
+            wires don't change thickness and always have chevrons going down them from your pov
+            Rendered on top of everything
+            Given three points and a directed Y shape, probably easy to find a natural way to put that on a sphere
+            Circular arcs, ideally all the same length and not overlapping
+        But is this a good idea?
+            Spreadsheets and indeed lines of code let you do multiple things in one line. Maybe that's bad
+            It does give you an idea of WHEN this will happen, which is nice
+            Spaghetti should be avoided by only seeing a few of these at a time
+                even if you've got everything visible, that doesn't mean you have to have their wires visible
+                Remember you are doing more basic things than many computer programs
+
         
     sculpting, - rigging must happen automatically (so sculptVR approach doesn't work great)
         Press buttons with your controller, it's making a triangle
@@ -138,14 +158,13 @@ async function init() {
 
     initMeshes()
     
+    // initCompilation()
+    // initSpreadsheet()
+    // initNotation()
+    // initSpreadsheetControl()
+    // initSpreadsheetEntryAndFocus()
+
     initRigging()
-
-    initCompilation()
-    initSpreadsheet()
-
-    initNotation()
-    initSpreadsheetControl()
-    initSpreadsheetEntryAndFocus()
 
     // let initial = [
     //     [
@@ -170,21 +189,26 @@ async function init() {
     //     ]
     // ]
 
-    let initial = [
-        [
-            `(1+time*e01) > bone`,
-            `B1*(1-0.2*e02) > bone`
-        ]
-    ]
-    new THREE.OBJLoader().load(`data/cow.obj`, (obj) => {
-        let geo = obj.children[0].geometry
-        textureLoader.load(`data/cow.png`, (texture) => {
-            let mat = new THREE.MeshPhongMaterial({ map: texture, side: THREE.DoubleSide })
-            registerMesh(`cow`, geo, mat)
+    // let initial = [
+    //     [
+    //         `(1+time*e01)`,
+    //         `B1*(1-0.2*e02)`,
+    //     // ],
+    //     // [
+    //         `B1 > bone`,
+    //         `B2 > bone`,
+    //     ]
+    // ]
+    // new THREE.OBJLoader().load(`data/cow.obj`, (obj) => {
+    //     let geo = obj.children[0].geometry
+    //     geo.scale(0.2, 0.2, 0.2)
+    //     textureLoader.load(`data/cow.png`, (texture) => {
+    //         let mat = new THREE.MeshPhongMaterial({ map: texture, side: THREE.DoubleSide })
+    //         addUserMeshData(`cow`, geo, mat)
 
-            setSpreadsheetsFromStringArrays(initial)
-        })
-    })
+    //         setSpreadsheetsFromStringArrays(initial)
+    //     })
+    // })
 
     
 

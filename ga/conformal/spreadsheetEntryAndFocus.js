@@ -124,7 +124,7 @@ function initSpreadsheetEntryAndFocus() {
     })
 
     // bindButton(`'`, () => {
-    //     allVisibleMode = !allVisibleMode
+    //     allCellsVisible = !allCellsVisible
     // })
     function clearCurrentCell() {
         selectedSpreadsheet.cells[selectedRow].setText(``)
@@ -148,20 +148,23 @@ function initSpreadsheetEntryAndFocus() {
             }
         }
 
-        if (allVisibleMode) {
+
+        if (allCellsVisible) {
             spreadsheets.forEach(ss => ss.cells.forEach(cell => {
                 cell.setVizVisibility(true)
-                if (cell !== selectedCell) //because this one is handled above
+                if (cell !== selectedCell) //see above; this one should NOT necessarily be refreshed
                     cell.refresh()
             }))
         }
         else {
             spreadsheets.forEach(ss => ss.cells.forEach((cell, row) => {
-                cell.setVizVisibility(false)
+                let visible = cell.getVizType() === MESH ? true : false
+                cell.setVizVisibility(visible)
             }))
             
             selectedCell.setVizVisibility(true)
 
+            //only know what is impacting the selected cell via the selection boxes, which is a bit crap
             usedSecondarySelectionBoxes.forEach(ssb => {
                 let cell = ssb.spreadsheet.cells[ssb.row]
                 cell.setVizVisibility(true)

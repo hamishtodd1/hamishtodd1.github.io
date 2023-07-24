@@ -28,13 +28,15 @@
 
 function initCompilation() {
 
+    const potentialNameRegex = /^[a-zA-Z0-9₀₁₂₃₄₅ₚₘ𝅘]+$/
+
     const tests = [
         // `2 + 3`, new Cga().fromFloatAndIndex(5, 0),
         // `(2 + 3) * 5`, new Cga().fromFloatAndIndex(25, 0),
         // `(e1 ∧ e2) ∧ e3`, e123c,
     ]
 
-    class Thingy extends Cga {
+    class Thing extends Cga {
         constructor() {
             super()
             this.meshName = ``
@@ -50,16 +52,14 @@ function initCompilation() {
     let numThingies = 32
     let unusedThingies = Array(numThingies)
     for (let i = 0; i < numThingies; ++i)
-        unusedThingies[i] = new Thingy()
+        unusedThingies[i] = new Thing()
     function clearStack(stack) {
         while (stack.length !== 0) {
-            let thingy = stack.pop()
-            if (!cgaMethods.includes(thingy))
-                thingy.free() //because all there ever is is Thingies and cgaMethods
+            let thing = stack.pop()
+            if (!cgaMethods.includes(thing))
+                thing.free() //because all there ever is is Thingies and cgaMethods
         }
     }
-
-    const potentialNameRegex = /^[a-zA-Z0-9₀₁₂₃₄₅ₚₘ𝅘]+$/
 
     reparseTokens = ( expression, parsedTokens, doLog ) => {
 
@@ -92,21 +92,31 @@ function initCompilation() {
         }
     }
     
-    let mulMethod = new SpreadsheetMethod(`mul`,2, 2, [`*`] )
-    let subMethod = new SpreadsheetMethod(`sub`,2, 1 )
-    new SpreadsheetMethod(`selectGradeWithCga`, 2, 3, [`_`] )
-    new SpreadsheetMethod(`meet`,               2, 2, [`∧`,`^`] )
-    new SpreadsheetMethod(`join`,               2, 2, [`∨`,`&`] )
-    new SpreadsheetMethod(`inner`,              2, 2, [`·`,`'`] )
-    new SpreadsheetMethod(`sandwich`,           2, 2, [`⤳`, `>`,`→`] )
-    new SpreadsheetMethod(`add`,                2, 1, [`+`] )
-    new SpreadsheetMethod(`negate`,             1, 2, [`-`] )
-    new SpreadsheetMethod(`projectOn`,          2 )
-    new SpreadsheetMethod(`dual`,               1 )
-    new SpreadsheetMethod(`reverse`,            1 ) //You do not use it so often you need a symbol. Fuck prefix.
-    new SpreadsheetMethod(`exp`,                1 )
-    new SpreadsheetMethod(`sqrt`,               1 ) //TODO what if they put in unnormalized thing?    
+    let mulPrecedence = 2
+    let mulMethod = new SpreadsheetMethod(`mul`,                2, mulPrecedence, [`*`] )
+    let subMethod = new SpreadsheetMethod(`sub`,                2, mulPrecedence-1 )
+    let sndMethod = new SpreadsheetMethod(`sandwich`,           2, 0, [`⤳`, `>`,`→`] ) //precedence low because blah blah > cow
+    new SpreadsheetMethod(`selectGradeWithCga`,                 2, mulPrecedence+1, [`_`] )
+    new SpreadsheetMethod(`meet`,                               2, mulPrecedence, [`∧`,`^`] )
+    new SpreadsheetMethod(`join`,                               2, mulPrecedence, [`∨`,`&`] )
+    new SpreadsheetMethod(`inner`,                              2, mulPrecedence, [`·`,`'`] )
+    new SpreadsheetMethod(`add`,                                2, mulPrecedence-1, [`+`] )
+    new SpreadsheetMethod(`negate`,                             1, mulPrecedence, [`-`] )
+    new SpreadsheetMethod(`projectOn`,                          2 )
+    new SpreadsheetMethod(`dual`,                               1 )
+    new SpreadsheetMethod(`reverse`,                            1 ) //You do not use it so often you need a symbol. Fuck prefix.
+    new SpreadsheetMethod(`exp`,                                1 )
+    new SpreadsheetMethod(`sqrt`,                               1 ) //TODO what if they put in unnormalized thing?    
     //and user-made methods would probably be added too
+
+    cellIsBone = (cell) => {
+        let tokens = parsedTokens
+        let endIndex = tokens.length-1
+        return
+            tokens[endIndex-0] === sndMethod &&
+            tokens[endIndex-1] === `bone` &&
+            tokens[endIndex-2] === mulMethod
+    }
 
     const letterSymbols = `ABCDEFGHIJKLMNOPQRSTUVWXYZ`
     const numberSymbols = `0123456789.`
@@ -260,7 +270,7 @@ function initCompilation() {
             let token = tokens[tokenIndex]
 
             let isCgaMethod = cgaMethods.includes(token)
-            let isMesh = isMeshName(token)
+            let isMesh = userMeshesData[token] !== undefined
 
             if ( !isNaN(parseFloat(token[0])) ) {
 
@@ -328,7 +338,11 @@ function initCompilation() {
                         extraCga.copy(zeroCga)
                     else {
 
-                        if (!allVisibleMode)
+                        //the correct thing to be doing here is:
+                        //do NOT refresh here;
+                        //in each frame, start from the cell after the currently-focussed cell,
+                        //and refresh, looping back at the end, until you get to currently-focussed cell
+                        if (!allCellsVisible && cell !== selectedSpreadsheet.cells[selectedRow])
                             cell.refresh()
                         setSecondarySelectionBox(spreadsheet, row)
 
@@ -347,7 +361,7 @@ function initCompilation() {
 
             if (unusedThingies.length === 0) {
                 console.error(`needed more unusedThingies`)
-                unusedThingies.push(new Thingy())
+                unusedThingies.push(new Thing())
             }
         }
 

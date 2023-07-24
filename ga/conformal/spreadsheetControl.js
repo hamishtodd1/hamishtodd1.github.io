@@ -31,6 +31,10 @@ function initSpreadsheetControl() {
         }
 
         selectedSpreadsheet = handSs
+
+        // let meshSs = new Spreadsheet(0, `MESHES`)
+        // meshSs.position.x = -handSs.position.x
+        // meshSs.position.y = handSs.position.y
     }
 
     ////////////////

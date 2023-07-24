@@ -311,6 +311,7 @@ function initSpreadsheet() {
     let spandrelWidth = cellHeight * .6
     let bgMat = new THREE.MeshBasicMaterial({ color: 0xFFFFFF, side: THREE.DoubleSide })
     let capitalAlphabet = `ABCDEFGHIJKLMNOPQRSTUVWXYZ`
+    let lowestUnusedAlphabetIndex = 0
     class Spreadsheet extends THREE.Object3D {
 
         constructor(numRows, title) {
@@ -346,8 +347,8 @@ function initSpreadsheet() {
             // })
 
             {
-                if(title === undefined)
-                    title = capitalAlphabet[spreadsheets.indexOf(this)]
+                if(title === undefined) 
+                    title = capitalAlphabet[lowestUnusedAlphabetIndex++]
                 this.sign = text(title, false, `#000000`)
                 this.sign.scale.multiplyScalar(cellHeight)
                 this.add(this.sign)
@@ -394,13 +395,16 @@ function initSpreadsheet() {
             }
         }
 
-        makeExtraCell() {
+        makeExtraCell(text) {
             let row = this.cells.length
             let cell = new Cell(this)
             this.add( cell )
             cell.number.material = numberMats[row]
             cell.position.set(0., this.getCellY(row), 0.)
             this.cells[row] = cell
+
+            if(text)
+                cell.setText(text)
 
             return cell
         }
