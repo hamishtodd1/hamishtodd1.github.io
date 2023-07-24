@@ -158,76 +158,34 @@ async function init() {
 
     initMeshes()
     
-    // initCompilation()
-    // initSpreadsheet()
-    // initNotation()
-    // initSpreadsheetControl()
-    // initSpreadsheetEntryAndFocus()
-
     initRigging()
 
-    // let initial = [
-    //     [
-    //         `ep`,
-    //         `2e12`,
-    //         //want something that affects itself Or two affecting each other
-    //         `-0.5e123m + 0.5e123p`,
-    //         `e1 - e0`,
-    //         `ep - em + time * e0`,
-    //         `e23 - e03`,
-    //         `(1+time*e01) > e1`,
-    //         `e123`,
-    //         `e0`, `ep`, `e2`, `e23`
-    //     ],
-    //     [
-    //         `exp( time * (e12 + e01) )`,
-    //         `B1 > hand`,
-    //         `e23 - time * e13`,
-    //         `hand & e123`,
-    //         `B3 + B4`,
-    //         `hand`,
-    //     ]
-    // ]
-
-    // let initial = [
-    //     [
-    //         `(1+time*e01)`,
-    //         `B1*(1-0.2*e02)`,
-    //     // ],
-    //     // [
-    //         `B1 > bone`,
-    //         `B2 > bone`,
-    //     ]
-    // ]
-    // new THREE.OBJLoader().load(`data/cow.obj`, (obj) => {
-    //     let geo = obj.children[0].geometry
-    //     geo.scale(0.2, 0.2, 0.2)
-    //     textureLoader.load(`data/cow.png`, (texture) => {
-    //         let mat = new THREE.MeshPhongMaterial({ map: texture, side: THREE.DoubleSide })
-    //         addUserMeshData(`cow`, geo, mat)
-
-    //         setSpreadsheetsFromStringArrays(initial)
-    //     })
-    // })
-
-    
+    new THREE.OBJLoader().load(`data/cow.obj`, (obj) => {
+        let geo = obj.children[0].geometry
+        geo.scale(0.2, 0.2, 0.2)
+        textureLoader.load(`data/cow.png`, (texture) => {
+            let mat = new THREE.MeshPhongMaterial({ map: texture, side: THREE.DoubleSide })
+            addUserMeshData(`cow`, geo, mat)
+        })
+    })
 
     // controllers
     {
-        let controller1 = renderer.xr.getController(0)
-        // controller1.addEventListener('selectstart', onSelectStart)
-        // controller1.addEventListener('selectend', onSelectEnd)
+        var controller1 = renderer.xr.getController(0)
         scene.add(controller1)
-
-        let controller2 = renderer.xr.getController(1)
-        // controller2.addEventListener('selectstart', onSelectStart)
-        // controller2.addEventListener('selectend', onSelectEnd)
+        
+        var controller2 = renderer.xr.getController(1)
         scene.add(controller2)
 
-        const laserGeo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 0, -5)])
-        const laser = new THREE.Line(laserGeo)
-        controller1.add(laser.clone())
-        controller2.add(laser.clone())
+        // const controllerModelFactory = new XRControllerModelFactory();
+        // let controllerGrip1 = renderer.xr.getControllerGrip(0);
+        // controller1.add(handModelFactory.createHandModel(controller1) )
+        // controller1.position.set(0.,1.6,0.)
+
+        // const laserGeo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 0, -5)])
+        // const laser = new THREE.Line(laserGeo)
+        // controller1.add(laser.clone())
+        // controller2.add(laser.clone())
     }
 
     window.addEventListener('resize', () => {
@@ -254,12 +212,12 @@ async function init() {
 
         updateCameraMvs()
 
-        updateHandSpreadsheet()
+        log(controller1.position)
+
         blankFunction()
         buttonWhileDowns()
         handleDrawing()
         updateRigging()
-        updateVisibilitiesAndRefresh()
         obj3dsWithOnBeforeRenders.forEach(obj3d => obj3d.onBeforeRender())
 
         renderer.render(scene, camera)

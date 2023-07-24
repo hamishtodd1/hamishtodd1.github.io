@@ -1,6 +1,3 @@
-let selectedSpreadsheet = null
-let selectedRow = 0
-const grabbables = []
 const spreadsheets = []
 const cellHeight = 0.11
 const meshVizes = []
