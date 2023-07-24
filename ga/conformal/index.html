@@ -26,7 +26,7 @@
         import { XRControllerModelFactory } from 'https://threejs.org/examples/jsm/webxr/XRControllerModelFactory.js';
         import { XRHandModelFactory }       from 'https://threejs.org/examples/jsm/webxr/XRHandModelFactory.js';
 
-        controller1 = renderer.xr.getController(0);
+        let controller1 = renderer.xr.getController(0);
         scene.add(controller1);
 
         const controllerModelFactory = new XRControllerModelFactory();
