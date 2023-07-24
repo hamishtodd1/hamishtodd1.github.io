@@ -212,7 +212,6 @@ async function init() {
 
         updateCameraMvs()
 
-        log(controller1.position)
 
         blankFunction()
         buttonWhileDowns()
