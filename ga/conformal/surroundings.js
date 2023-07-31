@@ -19,7 +19,7 @@ function initSurroundings() {
     })
     const floor = new THREE.Mesh(floorGeometry, floorMaterial)
     floor.rotation.x = - Math.PI / 2
-    floor.position.y = -.01
+    floor.position.y = -.001 //because z fight with y plane
     floor.receiveShadow = true
     scene.add(floor)
 

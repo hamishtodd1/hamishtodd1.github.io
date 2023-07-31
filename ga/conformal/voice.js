@@ -18,6 +18,7 @@ function initVoice() {
             recognition.start()
 
             currentTextGroup = new THREE.Group()
+            textGroups.push(currentTextGroup)
             scene.add(currentTextGroup)
             currentTextGroup.bg = new THREE.Mesh(unchangingUnitSquareGeometry, new THREE.MeshBasicMaterial({
                 color: 0xCCCCCC,
@@ -34,8 +35,6 @@ function initVoice() {
 
     recognition.onresult = function (event) {
 
-        
-
         if (currentTextGroup === null)
             return
 
@@ -48,8 +47,9 @@ function initVoice() {
         for (let i = 0; i < event.results.length; ++i)
             interimTranscript += event.results[i][0].transcript
 
-        let lines = interimTranscript.split(/new line |uline |newline |you lying |you line |\n/g)
-        // log(lines)
+        // let lines = interimTranscript.split(/(new line|uline|newline|you lying|you line|\n)\s?/gmi)
+        let linesInclEmpties = interimTranscript.split(/new line |uline |newline |you lying |you line |\n|new line|newline/g)
+        let lines = linesInclEmpties.filter(line => line != ``)
 
         while(lines.length > currentTextGroup.children.length-1) {
             let newLine = new THREE.Mesh(unchangingUnitSquareGeometry, new THREE.MeshBasicMaterial({

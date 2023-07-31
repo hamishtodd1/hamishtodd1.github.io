@@ -12,6 +12,9 @@ document.body.appendChild(container)
 const zeroVector = new THREE.Vector3(0., 0., 0.)
 const zeroMatrix = new THREE.Matrix4().set(0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.)
 
+let textureLoader = new THREE.TextureLoader()
+let objLoader = new THREE.OBJLoader()
+
 const clock = new THREE.Clock(true)
 
 const v1 = new THREE.Vector3()
@@ -24,6 +27,19 @@ const q1 = new THREE.Quaternion()
 const q2 = new THREE.Quaternion()
 
 const unchangingUnitSquareGeometry = new THREE.PlaneGeometry(1., 1.)
+
+const outOfSightVec3 = new THREE.Vector3(999., 999., 999.)
+const discreteViridis = [
+	{ hex: 0xFCE51E, color: new THREE.Color(0.984375, 0.89453125, 0.1171875) },
+	{ hex: 0x49BE54, color: new THREE.Color(0.28515625, 0.7421875, 0.328125) },
+	{ hex: 0x2A477A, color: new THREE.Color(0.1640625, 0.27734375, 0.4765625) },
+	{ hex: 0x340042, color: new THREE.Color(0.203125, 0., 0.2578125) }]
+
+const spandrelGeo = new THREE.ShapeGeometry(
+	new THREE.Shape()
+		.bezierCurveTo(1., 0., 0., 1., 1., 1.)
+		.lineTo(1., 0.)
+		.lineTo(0., 0.)).translate(0., -.5, 0.)
 
 var debugSphere = new THREE.Mesh(new THREE.SphereGeometry(.0431),new THREE.MeshBasicMaterial({color:0xCCCCCC}))
 scene.add(debugSphere)
@@ -44,5 +60,3 @@ THREE.Matrix4.prototype.log = function() {
 	})
 	log(str)
 }
-
-let textureLoader = new THREE.TextureLoader()

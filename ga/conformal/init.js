@@ -151,7 +151,7 @@ async function init() {
     await initCgaVizes()
     initRotorVizes()
 
-    initMouse()
+    await initHands()
     initButtons()
 
     initDrawing()
@@ -159,34 +159,6 @@ async function init() {
     initMeshes()
     
     initRigging()
-
-    new THREE.OBJLoader().load(`data/cow.obj`, (obj) => {
-        let geo = obj.children[0].geometry
-        geo.scale(0.2, 0.2, 0.2)
-        textureLoader.load(`data/cow.png`, (texture) => {
-            let mat = new THREE.MeshPhongMaterial({ map: texture, side: THREE.DoubleSide })
-            addUserMeshData(`cow`, geo, mat)
-        })
-    })
-
-    // controllers
-    {
-        var controller1 = renderer.xr.getController(0)
-        scene.add(controller1)
-        
-        var controller2 = renderer.xr.getController(1)
-        scene.add(controller2)
-
-        // const controllerModelFactory = new XRControllerModelFactory();
-        // let controllerGrip1 = renderer.xr.getControllerGrip(0);
-        // controller1.add(handModelFactory.createHandModel(controller1) )
-        // controller1.position.set(0.,1.6,0.)
-
-        // const laserGeo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 0, -5)])
-        // const laser = new THREE.Line(laserGeo)
-        // controller1.add(laser.clone())
-        // controller2.add(laser.clone())
-    }
 
     window.addEventListener('resize', () => {
 
@@ -211,12 +183,16 @@ async function init() {
         ++frameCount
 
         updateCameraMvs()
-
+        updateHandMvs()
 
         blankFunction()
+
         buttonWhileDowns()
+
         handleDrawing()
+
         updateRigging()
+
         obj3dsWithOnBeforeRenders.forEach(obj3d => obj3d.onBeforeRender())
 
         renderer.render(scene, camera)

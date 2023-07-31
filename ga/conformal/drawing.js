@@ -12,7 +12,7 @@ function initDrawing () {
     let drawingMode = -1
     let selectedCell = null //you're going to be making this a global at some point
 
-    let mousePlanePositionOnStart = new Ega()
+    let handPositionOnStart = new Ega()
 
     startDrawing = (newSelectedCell,vizType)=>{
         selectedCell = newSelectedCell
@@ -20,7 +20,7 @@ function initDrawing () {
 
         resetMouseWheelTransform()
 
-        mousePlanePositionOnStart.copy(mousePlanePosition)
+        handPositionOnStart.copy(handPosition)
     }
 
     document.addEventListener(`pointerup`, (event) => {
@@ -43,32 +43,32 @@ function initDrawing () {
                 break
             
             case SPHERE:
-                if(mousePlanePositionOnStart.equals(mousePlanePosition)) {
+                if(handPositionOnStart.equals(handPosition)) {
                     newText += `ep`
                 }
                 else {
-                    let radius = mousePlanePositionOnStart.distanceTo(mousePlanePosition)
-                    mousePlanePositionOnStart.pointToVec3(v1)
+                    let radius = handPositionOnStart.distanceTo(handPosition)
+                    handPositionOnStart.pointToVec3(v1)
                     sphere0.fromCenterAndRadius(v1.x,v1.y,v1.z, radius)
                     sphere0.log(4)
                     newText += translateExpression(sphere0.toString(5))
 
-                    // cga0.fromEga(mousePlanePosition).flatPpToConformalPoint(cga1).dual()
+                    // cga0.fromEga(handPosition).flatPpToConformalPoint(cga1).dual()
                 }
                 break
             
             case ROTOR:
-                cga0.fromEga(mousePlanePosition).flatPpToConformalPoint(cga1).join(e012c, drawnCga)
+                cga0.fromEga(handPosition).flatPpToConformalPoint(cga1).join(e012c, drawnCga)
                 newText += translateExpression(drawnCga.toString(3))
                 break
             
             case PP:
-                if(mousePlanePositionOnStart.equals(mousePlanePosition))
-                    drawnCga.fromEga(mousePlanePositionOnStart)
+                if(handPositionOnStart.equals(handPosition))
+                    drawnCga.fromEga(handPositionOnStart)
                 else {
                     
-                    cga0.fromEga(mousePlanePosition).flatPpToConformalPoint(cga1)
-                    cga0.fromEga(mousePlanePositionOnStart).flatPpToConformalPoint(cga2)
+                    cga0.fromEga(handPosition).flatPpToConformalPoint(cga1)
+                    cga0.fromEga(handPositionOnStart).flatPpToConformalPoint(cga2)
                     cga1.join(cga2, drawnCga)
 
                 }
@@ -76,7 +76,7 @@ function initDrawing () {
                 break
             
             case CONFORMAL_POINT:
-                cga0.fromEga(mousePlanePosition).flatPpToConformalPoint(drawnCga)
+                cga0.fromEga(handPosition).flatPpToConformalPoint(drawnCga)
                 newText += translateExpression(drawnCga.toString(3))
                 break
             
@@ -134,8 +134,7 @@ function initDrawing () {
                     if(selectedCell.currentText.indexOf(meshName) !== -1)
                         currentMeshName = meshName
                 }
-                getMousePositionAndWheelDq(dq0)
-                dq0.cast(ega0)
+                handDq.cast(ega0)
                 drawnCga.fromEga(ega0)
                 newText += translateExpression(`(` + drawnCga.toString(3) + `) > ` + currentMeshName )
                 break

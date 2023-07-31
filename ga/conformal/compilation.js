@@ -325,9 +325,9 @@ function initCompilation() {
                 else if (token === `random`)
                     extraCga.fromFloatAndIndex(Math.random(), 0)
                 else if(token === `hand`)
-                    cga0.fromEga(mousePlanePosition).flatPpToConformalPoint(extraCga)
+                    cga0.fromEga(handPosition).flatPpToConformalPoint(extraCga)
                 // else if (token === `analogue`)
-                //     cga0.fromEga(mousePlanePosition).flatPpToConformalPoint(extraCga)
+                //     cga0.fromEga(handPosition).flatPpToConformalPoint(extraCga)
                 else if (/^[A-Z][0-9]+$/.test(token)) {
                     //spreadsheet entry
                     let spreadsheet = spreadsheets[letterSymbols.indexOf(token[0])]

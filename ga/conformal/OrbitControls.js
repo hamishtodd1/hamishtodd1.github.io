@@ -74,8 +74,8 @@ class OrbitControls extends THREE.EventDispatcher {
 		// Mouse buttons
 		this.mouseButtons = { 
 			LEFT: null, 
-			MIDDLE: null, 
-			RIGHT: THREE.MOUSE.ROTATE };
+			MIDDLE: THREE.MOUSE.ROTATE, 
+			RIGHT: null };
 
 		// Touch fingers
 		this.touches = { ONE: THREE.TOUCH.ROTATE, TWO: THREE.TOUCH.DOLLY_PAN };
@@ -859,6 +859,9 @@ class OrbitControls extends THREE.EventDispatcher {
 		}
 
 		function onPointerMove( event ) {
+
+			if (event.button == -1 && event.buttons == 2 && isSketch)
+				return
 
 			if ( scope.enabled === false ) return;
 

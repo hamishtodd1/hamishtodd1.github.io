@@ -15,20 +15,23 @@ class CollideableRect extends THREE.Mesh {
         super(unchangingUnitSquareGeometry, mat)
     }
     mouseInside() {
-        let x = mousePlanePosition[13]
-        let y = mousePlanePosition[12]
+        let x = handPosition[13]
+        let y = handPosition[12]
         return x > this.position.x - this.scale.x / 2. && x < this.position.x + this.scale.x / 2.
             && y > this.position.y - this.scale.y / 2. && y < this.position.y + this.scale.y / 2.
     }
 }
 
+isSketch = true
+
 async function init() {
 
     initEga()
 
+    initCamera()
     initRotorVizes()
 
-    initMouse()
+    initMouse(true)
     initButtons()
     
     camera.position.set(0, 0., 4.)

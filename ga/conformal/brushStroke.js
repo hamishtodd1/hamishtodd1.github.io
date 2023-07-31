@@ -65,6 +65,9 @@ function initBrushStroke()
             }
             else if(name == `mic`)
                 startVoiceInput()
+            // else if (name == `paste`) {
+
+            // }
         }
 
         textureLoader.load( `data/icons/` + name + `.png`, texture => {
@@ -115,13 +118,13 @@ function initBrushStroke()
             strokeMeshes.push(this)
 
             this.curve = new THREE.SplineCurve([
-                new THREE.Vector2(mousePlanePosition[13], mousePlanePosition[12])
+                new THREE.Vector2(handPosition[13], handPosition[12])
             ])
             this.color = new THREE.Color()
         }
 
         extendToMouse(){
-            let newPt = new THREE.Vector2(mousePlanePosition[13], mousePlanePosition[12])
+            let newPt = new THREE.Vector2(handPosition[13], handPosition[12])
             this.curve.points.push(newPt)
 
             let radius = .02
@@ -157,17 +160,17 @@ function initBrushStroke()
         else if(currentTextGroup)
             endVoiceInput()
     })
-    document.addEventListener(`pointermove`, () => {
+    document.addEventListener(`pointermove`, (event) => {
 
         if (currentStroke) 
             currentStroke.extendToMouse()
         else if (currentTextGroup) {
-            currentTextGroup.position.x = mousePlanePosition[13]
-            currentTextGroup.position.y = mousePlanePosition[12]
+            currentTextGroup.position.x = handPosition[13]
+            currentTextGroup.position.y = handPosition[12]
         }
         else if(deleteMode) {
 
-            mousePlanePosition.pointToVec3(v1)
+            handPosition.pointToVec3(v1)
 
             strokeMeshes.forEach(stroke => {
                 let hit = false
@@ -178,24 +181,55 @@ function initBrushStroke()
                 if (hit)
                     stroke.dispose()
             })
+
+            textGroups.forEach(group => {
+                group.children.forEach(child => {
+                    v2.copy(v1)
+                    child.updateMatrixWorld()
+                    child.worldToLocal(v2)
+                    if (v2.x > -.5 && v2.x < .5 &&
+                        v2.y > -.5 && v2.y < .5) {
+                        group.remove(child)
+                        child.geometry.dispose()
+                        child.material.dispose()
+                    }
+                })
+            })
+
+            event.stopPropagation()
         }
     })
 
+    document.addEventListener(`paste`, event => {
+        log(event.clipboardData)
+        // takes clipboardData and puts it into a threejs texture
+        
+        // let texture = new THREE.Texture()
+        // texture.image = event.clipboardData
+        // texture.needsUpdate = true
+        
+    })
 
-    function onPointerDownLowerButton() {
+
+    function onPointerDownLowerButton(event) {
         if (currentStroke)
             return
 
         deleteMode = true
+
+        event.stopPropagation()
     }
-    function onPointerDownUpperButton() {
+    function onPointerDownUpperButton(event) {
+        
         if (currentStroke)
             return //this one could theoretically work but the other doesn't so fuck it
 
         deleteMode = true
+
+        event.stopPropagation()
     }
     
-    function onPointerDownNoButtons() {
+    function onPointerDownNoButtons(event) {
 
         if(currentStroke) {
             //got one already? it's a pinch!
@@ -206,7 +240,7 @@ function initBrushStroke()
 
         let inButton = false
 
-        mousePlanePosition.pointToVec3(v1)
+        handPosition.pointToVec3(v1)
         buttons.forEach((btn, i) => {
             v2.copy(v1)
             buttons[i].worldToLocal(v2)
@@ -226,16 +260,15 @@ function initBrushStroke()
     }
 
 
-    let lowerButtonProfile = { button: 5, buttons: 32 }
-    let upperButtonProfile = { button: 2, buttons: 2 }
+    
     document.addEventListener(`pointerdown`, event=>{
-        log(event.button, event.buttons)
+        // log(event.button, event.buttons)
 
-        if(event.button == lowerButtonProfile.button && event.buttons == lowerButtonProfile.buttons)
-            onPointerDownLowerButton()
-        else if (event.button == upperButtonProfile.button && event.buttons == upperButtonProfile.buttons)
-            onPointerDownUpperButton()
+        if(event.button == lowerPenButtonProfile.button && event.buttons == lowerPenButtonProfile.buttons)
+            onPointerDownLowerButton(event)
+        else if (event.button == upperPenButtonProfile.button && event.buttons == upperPenButtonProfile.buttons)
+            onPointerDownUpperButton(event)
         else
-            onPointerDownNoButtons()
+            onPointerDownNoButtons(event)
     })
 }

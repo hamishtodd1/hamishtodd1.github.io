@@ -69,10 +69,78 @@ function initRotorVizes() {
     }
     window.ConformalPointViz = ConformalPointViz
 
+    let dqCol = 0xFF0000
+    let dqArrowMat = new THREE.MeshPhong2Material({ side: THREE.DoubleSide, color: dqCol })
+    /*
+        Each vertex has two floats, its u (distance around) and v (distance along)
+        You're sending in:
+            a point at the center of the base of the arrow
+            an AROUND axis tangent to the spine at that point
+            an AWAY axis taking that point away from the spine
+                Could be trans. But if rotor is a scale it could be rotation!
+                Will definitely have an axis that lies on the around axis but not necessarily on the spine
+            So
+        Apply the rotor by the amount v to get different pt, around axis, away axis
+
+        Somewhat tempted to calculate vertebrae on the CPU and send those in
+        
+
+        Always same shaft radi
+        always same
+
+        if for whatever reason the thing isn't long enough for the head, you truncate the head
+
+        The thing has a spine, which is at its most complex a spiral-screw
+        Along the spine are cross sections where the vertices are
+        Though note a cross section's surface is in general spherical
+        So the vertices need to be rotated out
+
+        Translation, rotation, scale
+     */
+    dqArrowMat.injections = [
+        {
+            type: `vertex`,
+            precedes: ``,
+            str: `
+            float TAU = 6.283185307179586;
+            \n`
+        },
+        {
+            type: `vertex`,
+            precedes: `	#include <project_vertex>`,
+            str: `
+                vec4 start = vec4(modelMatrix[3].xyz,1.);
+                float alongness  = position.x;
+                float aroundness = position.y * TAU;
+                float awayness = //it's a function of alongness! Though don't forget the truncation including head truncation
+                //just try to do a y axis one for now
+
+                //sending in two log-dqs, the 6 floats in the 4x4 matrix
+                // Dq awayAxis = Dq(0.,
+                //     awayness * modelMatrix[0].xyz,
+                //     awayness * modelMatrix[1].xyz,
+                //     0.);
+                // Dq aroundAxis = Dq(0.,
+                //     aroundness * modelMatrix[2].xyz,
+                //     aroundness * vec3(modelMatrix[0].w, modelMatrix[1].w, modelMatrix[2].w),
+                //     0.);
+
+                // vec4 mrh = applySimilarityPoint( start);
+                // vec4 thingy = applyDqPoint(awayAxis, start)
+
+                transformed = start.xyz;
+                transformed.x += awayness;
+                transformed.y += aroundness;
+            `,
+            //` transformed.y += 0.; vNormal.x += 0.;\n`
+        },
+    ]
     let cylRadius = .02
     let rotAxisGeo = new THREE.CylinderGeometry(cylRadius,       cylRadius,       camera.far * 10., 5, 1, true)
     let trnAxisGeo = new THREE.CylinderGeometry(cylRadius * 15., cylRadius * 15., camera.far * 10., 5, 1, true)
-    let dqMat = new THREE.MeshPhongMaterial({color:0xFF0000})
+    let arrowGeo = new THREE.PlaneGeometry(1.,1.,64,64)
+    arrowGeo.translate(.5,.5,0.)
+    let dqMat = new THREE.MeshPhongMaterial({color:dqCol})
     let rotAxis = new Dq()
     let trnAxis = new Dq()
     //maaaaybe it could be a similarity viz
@@ -89,8 +157,15 @@ function initRotorVizes() {
             this.trnAxisMesh = new DqMesh(trnAxisGeo, dqMat)
             this.add(this.trnAxisMesh)
 
+            this.arrow = new THREE.Mesh(arrowGeo, dqArrowMat)
+            this.arrow.matrixAutoUpdate = false
+            this.add(this.arrow)
+
             obj3dsWithOnBeforeRenders.push(this)
             this.onBeforeRender = () => {
+
+                //"start"
+                this.arrow.matrix.setPosition(0.,.7,0.)
 
                 this.dq.invariantDecomposition( rotAxis, trnAxis )
                 rotAxis[0] = 0.
@@ -103,17 +178,20 @@ function initRotorVizes() {
                     this.trnAxisMesh.visible = true
 
                     let planeOrthogonalToRotationAxis = rotAxis.cast(ega0).inner(camera.mvs.pos, ega1)
-                    planeOrthogonalToRotationAxis.meet( camera.frustum.far, ega2 ).cast(trnAxis)
-                    trnAxis.mul(e13e.cast(dq0), this.trnAxisMesh.dq).sqrtSelf()
+                    let trnAxisEga = planeOrthogonalToRotationAxis.meet( camera.frustum.far, ega2 )
+                    // trnAxisEga.multiplyScalar(-1., trnAxisEga)
+                    e31e.transformToAsDq( trnAxisEga, this.trnAxisMesh.dq )
+
+                    // trnAxis.log()
                 }
             }
         }
     }
     window.DqViz = DqViz
 
-    // let myDqViz = new DqViz()
-    // let littleTranslation = Translator(4., 0., 0.)
-    // e23e.cast(new Dq()).mul( littleTranslation, myDqViz.dq )
+    let myDqViz = new DqViz()
+    let littleTranslation = Translator(4., 0., 0.)
+    e23e.cast(new Dq()).mul( littleTranslation, myDqViz.dq )
 
 
 

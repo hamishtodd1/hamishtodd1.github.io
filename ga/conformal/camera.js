@@ -28,7 +28,7 @@ function initCamera() {
     for (let planeName in camera.frustum)
         frustumUntransformed[planeName] = new Ega()
 
-    frustumUntransformed.far.plane(camera.far * -.9, 0., 0., 1.)
+    frustumUntransformed.far.plane(camera.far * .8, 0., 0., 1.) //eyeballed. Which is not great.
     frustumUntransformed.near.plane(camera.near * -1.03, 0., 0., 1.)
     frameQuatHorizontal.sandwich( e1e, frustumUntransformed.left )
     frameQuatVertical.sandwich(   e2e, frustumUntransformed.bottom )
@@ -41,12 +41,10 @@ function initCamera() {
         camera.mvs.pos.pointFromVec3(   camera.position )
         camera.mvs.quat.fromQuaternion( camera.quaternion )
         camera.mvs.motor.fromPosQuat(   camera.position, camera.quaternion )
-        // debugger
 
         for (let planeName in camera.frustum) {
             camera.mvs.motor.sandwich(frustumUntransformed[planeName], camera.frustum[planeName])
             camera.frustum[planeName].normalize()
         }
-        // camera.frustum.far.log()
     }
 }

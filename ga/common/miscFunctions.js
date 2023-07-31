@@ -14,6 +14,17 @@ function forEachPropt(obj,func) {
 	})
 }
 
+function otherFov(inputFov, aspectRatio, inputIsVertical) {
+	var centerToFrameInput = centerToFrameDistanceAtOneUnitAway(inputFov, 1)
+	var centerToFrameOutput = centerToFrameInput;
+	if (inputIsVertical)
+		centerToFrameOutput *= aspectRatio;
+	else
+		centerToFrameOutput /= aspectRatio;
+	var outputFov = fovGivenCenterToFrameDistanceAtOneUnitAway(centerToFrameOutput)
+	return outputFov;
+}
+
 function getWhereThisWasCalledFrom(depth) {
 	let actualDepth = (depth || 0) + 3
 	let splitIntoLines = Error().stack.split("\n")

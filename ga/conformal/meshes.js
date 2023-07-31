@@ -38,4 +38,13 @@ async function initMeshes() {
         }
     }
     window.MeshViz = MeshViz
+
+    objLoader.load(`data/cow.obj`, (obj) => {
+        let geo = obj.children[0].geometry
+        geo.scale(0.2, 0.2, 0.2)
+        textureLoader.load(`data/cow.png`, (texture) => {
+            let mat = new THREE.MeshPhongMaterial({ map: texture, side: THREE.DoubleSide })
+            addUserMeshData(`cow`, geo, mat)
+        })
+    })
 }

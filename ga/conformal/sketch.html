@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="utf-8">
-    <title>Conformal</title>
+    <title>Simple Whiteboard</title>
     <style>
         body {
             margin: 0;
@@ -16,19 +16,7 @@
     <!-- <input type="text" id="textbox"><br><br> -->
     <!-- beziers dude! Can CGA make nice beziers? -->
 
-    <script>
-        function sq(a) {
-            return a * a
-        }
-        const TAU = Math.PI * 2.
-        const HS3 = Math.sqrt(3.) / 2.
-        const PHI = (1. + Math.sqrt(5.)) / 2.
-        const smallerInLarger = {}
-
-        var frameDelta = 0.
-        var frameCount = 0
-        const log = console.log
-    </script>
+    <script src="variables.js"></script>
 
     <script src="Multivector.js"></script>
     <script src="gaMeta.js"></script>
@@ -43,9 +31,10 @@
     <script src="rotorVizes.js"></script>
     
     <script src="three.js"></script>
+    <script src="camera.js"></script>
     <script src="miscFunctions.js"></script>
-    <script src="variables.js"></script>
     <script src="OrbitControls.js"></script>
+    <script src="OBJLoader.js"></script>
     <script src="threejsVariables.js"></script>
 
     <script src="voice.js"></script>

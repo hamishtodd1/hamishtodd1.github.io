@@ -21,7 +21,7 @@ function initSpreadsheetControl() {
         })
         updateHandSpreadsheet = () => {
 
-            cga0.fromEga(mousePlanePosition).flatPpToConformalPoint(cga1)
+            cga0.fromEga(handPosition).flatPpToConformalPoint(cga1)
             let handString = translateExpression(cga1.toString(2))
             handSs.cells[0].setText(handString)
 
@@ -83,7 +83,7 @@ function initSpreadsheetControl() {
         //first of all we do need the position of the "mouse"
         let clickedSpreadsheet = false
         spreadsheets.forEach(ss => {
-            mousePlanePosition.pointToVec3(v1)
+            handPosition.pointToVec3(v1)
             ss.worldToLocal(v1)
             if (inRect(v1, zeroVector, ss.bg.scale.x, ss.bg.scale.y)) {
                 ss.cells.forEach((cell, row) => {

@@ -5,12 +5,8 @@ let userMeshesData = {}
 
 let allCellsVisible = false //false: meshes, selected cell, and selected cell's dependencies; true: everything visible
 
+let gotVr = false
 
-const spandrelGeo = new THREE.ShapeGeometry(
-	new THREE.Shape()
-		.bezierCurveTo(1., 0., 0., 1., 1., 1.)
-		.lineTo(1., 0.)
-		.lineTo(0., 0.)).translate(0.,-.5,0.)
 const layerWidth = .001
 
 //enum
@@ -23,11 +19,22 @@ const MESH = 5
 const vizTypes = [NO_VIZ_TYPE, SPHERE, ROTOR, PP, CONFORMAL_POINT, MESH]
 //want a mesh type, and a curve type
 
+function sq(a) {
+	return a * a
+}
+const TAU = Math.PI * 2.
+const HS3 = Math.sqrt(3.) / 2.
+const PHI = (1. + Math.sqrt(5.)) / 2.
+const smallerInLarger = {}
+
+var frameDelta = 0.
+var frameCount = 0
+const log = console.log
+
 const obj3dsWithOnBeforeRenders = []
-const outOfSightVec3 = new THREE.Vector3(999., 999., 999.)
 let mouse = null
-const discreteViridis = [
-	{ hex: 0xFCE51E, color: new THREE.Color(0.984375, 0.89453125, 0.1171875) },
-	{ hex: 0x49BE54, color: new THREE.Color(0.28515625, 0.7421875, 0.328125) },
-	{ hex: 0x2A477A, color: new THREE.Color(0.1640625, 0.27734375, 0.4765625) },
-	{ hex: 0x340042, color: new THREE.Color(0.203125, 0., 0.2578125) }]
+
+let lowerPenButtonProfile = { button: 5, buttons: 32 }
+let upperPenButtonProfile = { button: 2, buttons: 2 }
+
+let isSketch = false

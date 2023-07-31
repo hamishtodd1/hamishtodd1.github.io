@@ -15,53 +15,16 @@
 <body>
     
     <script type="importmap">
-			{
-				"imports": {
-					"three": "https://threejs.org/build/three.module.js",
-					"three/addons/": "./jsm/"
-				}
-			}
-		</script>
-    <script type="module">
-        import { XRControllerModelFactory } from 'https://threejs.org/examples/jsm/webxr/XRControllerModelFactory.js';
-        import { XRHandModelFactory }       from 'https://threejs.org/examples/jsm/webxr/XRHandModelFactory.js';
-
-        let controller1 = renderer.xr.getController(0);
-        scene.add(controller1);
-
-        const controllerModelFactory = new XRControllerModelFactory();
-        const handModelFactory = new XRHandModelFactory();
-
-        let controllerGrip1 = renderer.xr.getControllerGrip(0);
-        controllerGrip1.add(controllerModelFactory.createControllerModel(controllerGrip1));
-        scene.add(controllerGrip1);
-
-        let hand1 = renderer.xr.getHand(0);
-        hand1.add(handModelFactory.createHandModel(hand1));
-        scene.add(hand1);
-
-
-
-        // controllerGrip1.add(controllerModelFactory.createControllerModel(controllerGrip1));
-        // scene.add(controllerGrip1);
-        // controllerGrip1.position.y = 1.6
-        // controllerGrip1.visible = true
-
-    </script>
-
-    <script>
-        function sq(a) {
-            return a * a
+        {
+            "imports": {
+                "three": "https://threejs.org/build/three.module.js",
+                "three/addons/": "./jsm/"
+            }
         }
-        const TAU = Math.PI * 2.
-        const HS3 = Math.sqrt(3.) / 2.
-        const PHI = (1. + Math.sqrt(5.)) / 2.
-        const smallerInLarger = {}
-
-        var frameDelta = 0.
-        var frameCount = 0
-        const log = console.log
     </script>
+    <script type="module" src="xrControllers.module.js"></script>
+
+    <script src="variables.js"></script>
 
     <script src="Multivector.js"></script>
     <script src="gaMeta.js"></script>
@@ -78,7 +41,6 @@
     <script src="three.js"></script>
     <script src="miscFunctions.js"></script>
     <script src="OBJLoader.js"></script>
-    <script src="variables.js"></script>
     <script src="OrbitControls.js"></script>
     <script src="threejsVariables.js"></script>
     <script src="VRButton.js"></script>
@@ -99,12 +61,9 @@
 
     <script src="init.js"></script>
 
-    <!-- probably controller model related -->
+    <!-- probably controller model related. Remove? -->
     <script async src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"></script>
     
-    <script>
-        init()
-    </script>
 
     <!-- <script type="importmap">
         {

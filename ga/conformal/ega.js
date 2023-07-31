@@ -378,6 +378,7 @@ function initEgaWithoutDeclarations() {
         // }
 
         //there were bugs with this! Could be minus signs in the wrong places!
+        //Requires normalization!
         toMat4(target) {
             if(target === undefined)
                 target = new THREE.Matrix4()
