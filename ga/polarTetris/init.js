@@ -1,6 +1,6 @@
 async function init() {
     let movingPiece = null
-    let fall = false
+    let fall = true
 
     {
         let currentY = .8
@@ -230,11 +230,13 @@ async function init() {
         if (goneLeft && goneRight && rotated)
             removeText()
     })
-    bindButton("ArrowDown",()=>{},``, () => {
-        if(frameCount%5 !== 0)
-            return
-        
-        moveDown()
+    let fallMoreOften = false
+    bindButton("ArrowDown",()=>{
+        fallMoreOften = true
+        if(!fall)
+            moveDown()
+    },``,()=>{},false,()=>{
+        fallMoreOften = false
     })
 
     function newRandomPiece() {
@@ -308,10 +310,8 @@ async function init() {
                 toAdd.applyQuaternion(q1)
                 piece.children.forEach(square => {
                     square.getWorldPosition(v1)
-                    if (v1.y > y) {
+                    if (v1.y > y)
                         square.position.addVectors(square.position, toAdd)
-                        square.apparentSquare.position.copy(square.position)
-                    }
                 })
             })
         }
@@ -319,15 +319,24 @@ async function init() {
         newRandomPiece()
     }
 
+    let timeSinceLastFall = 0.
     updateFunctions.push(()=>{
-        if (fall && frameCount % 55 === 0)
+        timeSinceLastFall += frameDelta
+        let maxTime = fallMoreOften ? .04:.55
+        if (fall && timeSinceLastFall > maxTime ) {
             moveDown()
+            timeSinceLastFall = 0.
+        }
 
         pieces.forEach(piece => {
             piece.updatePolars()
 
             piece.apparentSelf.position.lerp(piece.position, .1)
             piece.apparentSelf.quaternion.slerp(piece.quaternion, .1)
+
+            piece.children.forEach(square => {
+                square.apparentSquare.position.lerp(square.position,.1)
+            })
         })
     })
 }
