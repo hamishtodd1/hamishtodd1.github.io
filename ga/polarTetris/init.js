@@ -1,5 +1,6 @@
 async function init() {
     let movingPiece = null
+    let fall = false
 
     {
         let currentY = .8
@@ -18,6 +19,7 @@ async function init() {
         addText("Polar Tetris")
         addText("Arrow keys to move")
         addText("Spacebar to toggle help")
+        addText("Enter to toggle gravity")
 
         function removeText() {
             texts.forEach(text=>{
@@ -33,6 +35,9 @@ async function init() {
 
             removeText()
         })
+        bindButton("Enter", () => {
+            fall = !fall
+        })
 
     }
 
@@ -44,8 +49,10 @@ async function init() {
     tetrisGroup.scale.multiplyScalar(.5)
     scene.add(tetrisGroup)
 
-    let ptsPerSq = 4
-    let squareGeo = new THREE.PlaneGeometry(.5, .5, Math.sqrt(ptsPerSq)-1, Math.sqrt(ptsPerSq)-1)
+    let ptsPerSq = 1
+    let squareGeo = ptsPerSq === 1 ?
+        new THREE.BufferGeometry().setFromPoints([new THREE.Vector3()]) :
+        new THREE.PlaneGeometry(.5, .5, Math.sqrt(ptsPerSq)-1, Math.sqrt(ptsPerSq)-1)
     let polarPts = Array(ptsPerSq * 2)
     for(let i = 0; i < ptsPerSq*2; ++i)
         polarPts[i] = new THREE.Vector3()
@@ -73,7 +80,7 @@ async function init() {
             this.apparentSelf.scale.copy(this.scale)
 
             let color = col.setHSL(hue||Math.random(),1.,.5).getHex()
-            let squareMat = new THREE.PointsMaterial({ color, size: 3.5 })
+            let squareMat = new THREE.PointsMaterial({ color, size: window.innerHeight / 100 })
             let polarMat = new THREE.LineBasicMaterial({ color })
             coords.forEach(coordPair=>{
                 let square = new THREE.Object3D()
@@ -89,7 +96,6 @@ async function init() {
                     
                 scene.add(square.polar)
             })
-            this.updatePolars()
         }
 
         updatePolars() {
@@ -104,7 +110,6 @@ async function init() {
                 let geoPosArray = square.polar.geometry.attributes.position.array
                 
                 for (let i = 0; i < ptsPerSq; ++i) {
-                    // debugger
 
                     v1.set(0., 0., 0.)
                     v1.toArray(geoPosArray, i * 6)
@@ -117,27 +122,32 @@ async function init() {
 
                     point.dual(line)
 
-                    let hadOne = false
+                    v1.set(0.,0.,0.)
+                    v2.set(0., 0., 0.)
+                    let v = v1
                     cameraLinesHorizontal.forEach(cl => {
                         cl.meet(line, point)
                         if (point[6] !== 0.) {
-                            point.pointToVec(v1)
-                            if (camera.left - .01 < v1.x && v1.x < camera.right + .01) {
-                                v1.toArray(geoPosArray, i * 6 + (hadOne ? 3:0))
-                                hadOne = true
-                            }
+                            point.pointToVec(v)
+                            if (camera.left   - .001 < v.x && v.x < camera.right + .001 &&
+                                camera.bottom - .001 < v.y && v.y < camera.top   + .001) 
+                                v = v === v1? v2:v3
                         }
                     })
                     cameraLinesVertical.forEach(cl => {
                         cl.meet(line, point)
                         if (point[6] !== 0.) {
-                            point.pointToVec(v1)
-                            if (camera.bottom - .01 < v1.y && v1.y < camera.top + .01) {
-                                v1.toArray(geoPosArray, i * 6 + (hadOne ? 3 : 0))
-                                hadOne = true
-                            }
+                            point.pointToVec(v)
+                            if (camera.left   - .001 < v.x && v.x < camera.right + .001 &&
+                                camera.bottom - .001 < v.y && v.y < camera.top + .001)
+                                v = v === v1 ? v2 : v3
                         }
                     })
+
+                    if(!v1.equals(zeroVector) && !v2.equals(zeroVector)) {
+                        v1.toArray(geoPosArray, i * 6)
+                        v2.toArray(geoPosArray, i * 6 + 3)
+                    }
                 }
             })
         }
@@ -150,24 +160,22 @@ async function init() {
     let floor = new Piece(floorCoords, surroundingsHue)
     floor.position.y = -1
     floor.apparentSelf.position.copy(floor.position)
-    floor.updatePolars()
 
     let wallCoords = []
     let wallHeight = 19
+
     for(let i = 0; i < wallHeight; ++i)
         wallCoords[i] = [-5.5,i+1.5]
     let leftWall = new Piece(wallCoords,surroundingsHue)
     leftWall.position.y = -1
     leftWall.apparentSelf.position.copy(leftWall.position)
-    leftWall.updatePolars()
     
     for (let i = 0; i < wallHeight; ++i)
         wallCoords[i][0] = 5.5
     let rightWall = new Piece(wallCoords,surroundingsHue)
     rightWall.position.y = -1
     rightWall.apparentSelf.position.copy(rightWall.position)
-    rightWall.updatePolars()
-
+    
     let bg = new THREE.Mesh(unchangingUnitSquareGeometry, new THREE.MeshBasicMaterial({ color: 0x000000 }))
     bg.scale.set(.1 * floorWidth, .1 * (wallHeight+1),1.)
     bg.position.z = -.1
@@ -236,7 +244,6 @@ async function init() {
         // movingPiece = new Piece(squareLayouts.square)
         movingPiece.position.y = 1.
         movingPiece.apparentSelf.position.copy(movingPiece.position)
-        movingPiece.updatePolars()
     }
     newRandomPiece()
     
@@ -298,7 +305,6 @@ async function init() {
                 toAdd = v2.set(0.,-1.,0.)
                 q1.copy(piece.quaternion)
                 q1.invert()
-                log(toAdd)
                 toAdd.applyQuaternion(q1)
                 piece.children.forEach(square => {
                     square.getWorldPosition(v1)
@@ -310,23 +316,19 @@ async function init() {
             })
         }
 
-        pieces.forEach(piece=>{
-            piece.updatePolars()
-        })
-
         newRandomPiece()
     }
 
     updateFunctions.push(()=>{
-        pieces.forEach(piece => {
-            piece.apparentSelf.position.lerp(piece.position,.1)
-            piece.apparentSelf.quaternion.slerp(piece.quaternion,.1)
-        })
-
-        if(frameCount % 55 === 0)
+        if (fall && frameCount % 55 === 0)
             moveDown()
 
-        movingPiece.updatePolars()
+        pieces.forEach(piece => {
+            piece.updatePolars()
+
+            piece.apparentSelf.position.lerp(piece.position, .1)
+            piece.apparentSelf.quaternion.slerp(piece.quaternion, .1)
+        })
     })
 }
 
