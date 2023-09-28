@@ -59,6 +59,7 @@ async function initHands() {
         }
 
         function updateMouseRay(event) {
+            // debugger
             mouse2d.x = (event.clientX / window.innerWidth) * 2 - 1;
             mouse2d.y = -(event.clientY / window.innerHeight) * 2 + 1;
             raycaster.setFromCamera(mouse2d, camera)
@@ -70,6 +71,7 @@ async function initHands() {
 
             workingPlane.meet(rayToMouse, handPosition)
             handPosition.normalize()
+            // log(handPosition)
 
             if (!isSketch)
                 updateSelectorMvs()

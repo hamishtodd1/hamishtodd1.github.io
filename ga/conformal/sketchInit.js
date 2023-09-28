@@ -31,7 +31,7 @@ async function init() {
     initCamera()
     initRotorVizes()
 
-    initMouse(true)
+    initHands()
     initButtons()
     
     camera.position.set(0, 0., 4.)

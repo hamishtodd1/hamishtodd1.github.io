@@ -115,6 +115,8 @@ function initRotorVizes() {
                 float awayness = //it's a function of alongness! Though don't forget the truncation including head truncation
                 //just try to do a y axis one for now
 
+                //the arclength is objectively important because you need the head to always be same length
+
                 //sending in two log-dqs, the 6 floats in the 4x4 matrix
                 // Dq awayAxis = Dq(0.,
                 //     awayness * modelMatrix[0].xyz,
@@ -189,9 +191,9 @@ function initRotorVizes() {
     }
     window.DqViz = DqViz
 
-    let myDqViz = new DqViz()
-    let littleTranslation = Translator(4., 0., 0.)
-    e23e.cast(new Dq()).mul( littleTranslation, myDqViz.dq )
+    // let myDqViz = new DqViz()
+    // let littleTranslation = Translator(4., 0., 0.)
+    // e23e.cast(new Dq()).mul( littleTranslation, myDqViz.dq )
 
 
 

@@ -1,8 +1,16 @@
 /*
-    Something for PAF, 5th Aug
-        Just the spheres and tubes maybe?
-        Ability to make a stick figure puppet and move it
-        Ability to record a series of movements
+    The casting shit is VERY annoying
+        Maybe you should use typescript...
+
+    A typescript library
+        for 2D CGA
+        That has separate blades
+        And separate thingy and dual
+    
+    Still kinda wanna do scaling! How about:
+        To dual, you reflect in e3, do the intersection with e0
+        To undual, reflect in e3, do the inner with 
+        Do wanna have the gauges at some point
 
     TODO for October 2021:
         Cubes m8!

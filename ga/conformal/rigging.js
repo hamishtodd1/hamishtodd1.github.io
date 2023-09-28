@@ -6,6 +6,32 @@
     You don't want to have to put your hand inside one to pick it up
     One button for grabbing, one for making anew
 
+    Sketching wise: to make bones is to make mesh, don't want to break with that
+        One idea was "generalized triangle" patches defined by spheres
+        Spheres isn't such a good idea, because spheres have positions and scales but not orientations
+        Tetrahedrons better?
+        Tubes may be a good starting point
+        How about... plane-bundle-looking things, to which the surfaces attach
+        Do you want surface to be partnerable to one bone or two?
+        Triangles where it varies smoothly might be the way to go
+        Yes, bones are on the outside
+            But don't go thinking they're rivets, a rivet lacks an extra twist
+
+        How do you lay down these triangles?
+            When you make a new bone attached to an existing one, it makes a tube
+            Not hard to make a tube-like tool, just two triangles together
+            Just has two of the vertices on one of the bones, two on the other
+            The radius of the tube is an arbitrary decision you, the designer, are going to make
+
+        But then what? To edit, you manually peel away the triangles? Looong
+        People do seem to want clay. But that's not attached to the bones
+
+    Philosophical
+        Is "bones" a restrictive idea, less fundamental than transforms?
+        They have a position and an orientation, i.e. they split the thing up. That's kinda bad.
+
+    Spore!
+
  */
 
 updateRigging = () => {}
@@ -16,11 +42,50 @@ function initRigging() {
     let bones = []
     let heldBone = null
 
-    let unhighlightedColor = new THREE.Color(0x000000)
+    let unhighlightedColor = new THREE.Color(0xFFFFFF)
     let highlightedColor = new THREE.Color(0xFF0000)
     let boneGeo = new THREE.BoxGeometry(.25,.25,.25)
-    let boneMat = new THREE.MeshPhongMaterial()
+    // let boneMat = new THREE.MeshPhongMaterial()
     // addUserMeshData(`bone`, boneGeo, boneMat)
+
+    {
+        // let icoGeo = new THREE.IcosahedronBufferGeometry(.25, 0)
+        // let p = icoGeo.attributes.position.array
+        // let numTris = p.length / 9
+        // let ptsArr = [] // Array(numTris * 8)
+        // for (let i = 0; i < numTris; ++i) {
+        //     v1.fromArray(p, i * 9 + 0)
+        //     v2.fromArray(p, i * 9 + 3)
+        //     v3.fromArray(p, i * 9 + 6)
+
+        //     ptsArr.push(v1.clone(), v2.clone(), zeroVector.clone())
+        //     ptsArr.push(v2.clone(), v3.clone(), zeroVector.clone())
+        //     ptsArr.push(v3.clone(), v1.clone(), zeroVector.clone())
+        // }
+        // icoGeo.dispose()
+        // var boneGeo = new THREE.BufferGeometry().setFromPoints(ptsArr)
+        // ptsArr.length = 0
+        // boneGeo.computeVertexNormals()
+
+        // a point-reflection is implicitly a point AND a plane
+            //it has e0 included (just the plane, not the line/point field e0), because it stays there
+            //that sounds a fuck of a lot like the point-and-sphere you have for e123+
+            //
+
+        let xGeo = new THREE.CircleGeometry(1., 30)
+        log(xGeo)
+        xGeo.rotateY(TAU / 4.)
+        let yGeo = new THREE.CircleGeometry(1., 30)
+        yGeo.rotateX(TAU / 4.)
+        let zGeo = new THREE.CircleGeometry(1., 30)
+        scene.add(new THREE.Mesh(xGeo,boneMat))
+
+        var boneMat = new THREE.MeshPhongMaterial({
+            side:THREE.FrontSide, 
+            envMap: scene.background,
+            reflectivity: .75,
+        })
+    }
 
     function sphereFullyInFrontOfPlane(sphereCga, planeCga) {
         sphereCga.transformToSquared(planeCga, cga0)
@@ -54,7 +119,7 @@ function initRigging() {
 
             this.index = bonesInstances.count++
             this.colliderSphere = new Sphere()
-            this.viz = new SphereViz()
+            // this.viz = new SphereViz()
             this.dq = new Dq().copy(oneDq)
 
             this.parent = null
@@ -112,7 +177,7 @@ function initRigging() {
             worldDq.toMat4(m1)
             bonesInstances.setMatrixAt(bone.index, m1)
 
-            bone.viz.sphere.copy(bone.colliderSphere)
+            // bone.viz.sphere.copy(bone.colliderSphere)
         })
 
         handDq.cast(handEga)

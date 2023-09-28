@@ -97,8 +97,8 @@ function initEgaWithoutDeclarations() {
     //     }
 
     //     fromEga(ega) {
-    //         this[0] = ega[13]; this[1] = ega[12]; this[2] = ega[11];
-    //         this[3] = ega[14]
+    //         this[0] = egthis[13]; this[1] = egthis[12]; this[2] = egthis[11];
+    //         this[3] = egthis[14]
     //         return this
     //     }
     //     toEga(ega) {
@@ -107,8 +107,8 @@ function initEgaWithoutDeclarations() {
 
     //         ega.copy(zeroEga)
 
-    //         ega[13] = this[0]; ega[12] = this[1]; ega[11] = this[2];
-    //         ega[14] = this[3]
+    //         egthis[13] = this[0]; egthis[12] = this[1]; egthis[11] = this[2];
+    //         egthis[14] = this[3]
 
     //         return ega
     //     }
@@ -377,8 +377,8 @@ function initEgaWithoutDeclarations() {
         //     return this
         // }
 
-        //there were bugs with this! Could be minus signs in the wrong places!
         //Requires normalization!
+        //There MAY have been bugs with this, but it has been tested with rotations and translations
         toMat4(target) {
             if(target === undefined)
                 target = new THREE.Matrix4()
@@ -395,11 +395,14 @@ function initEgaWithoutDeclarations() {
             let r05 = this[0] * this[5]
             let r06 = this[0] * this[6]
 
-            return target.set(
-                1. + 2. * (-r44 - r55), 2. * (r04 + r56), 2. * (r46 - r05), 2. * (this[3] * this[5] - this[2] * this[4] - this[0] * this[1] - this[7] * this[6]),
-                2. * (r56 - r04), 1. + 2. * (-r44 - r66), 2. * (r06 + r45), 2. * (this[1] * this[4] - this[3] * this[6] - this[0] * this[2] - this[7] * this[5]),
-                2. * (r05 + r46), 2. * (r45 - r06), 1. + 2. * (-r55 - r66), 2. * (this[2] * this[6] - this[1] * this[5] - this[0] * this[3] - this[7] * this[4]),
-                0., 0., 0., 1.);
+            target.set(
+                -r44 - r55,  r04 + r56,  r46 - r05, this[3] * this[5] - this[2] * this[4] - this[0] * this[1] - this[7] * this[6],
+                 r56 - r04, -r44 - r66,  r06 + r45, this[1] * this[4] - this[3] * this[6] - this[0] * this[2] - this[7] * this[5],
+                 r05 + r46,  r45 - r06, -r55 - r66, this[2] * this[6] - this[1] * this[5] - this[0] * this[3] - this[7] * this[4],
+                0., 0., 0., 0.);
+            target.multiplyScalar(2.)
+            target.elements[0] += 1.; target.elements[5] += 1.; target.elements[10] += 1.; target.elements[15] += 1.
+            return target
         }
 
         fromQuaternion(q) {
@@ -857,7 +860,7 @@ function createVerboseSharedFunctions(createFunction) {
     target[ 1] = a[ 1] * b[15] + a[ 5] * b[13] + a[ 6] * b[12] + a[ 7] * b[11] - a[11] * b[ 7] - a[12] * b[ 6] - a[13] * b[ 5] + a[15] * b[ 1];
     target[ 0] = a[ 0] * b[15] + a[ 1] * b[14] + a[ 2] * b[13] + a[ 3] * b[12] - a[ 4] * b[11] + a[ 5] * b[10] + a[ 6] * b[ 9] + a[ 7] * b[ 8]
                + a[ 8] * b[ 7] + a[ 9] * b[ 6] + a[10] * b[ 5] + a[11] * b[ 4] + a[12] * b[ 3] + a[13] * b[ 2] + a[14] * b[ 1] + a[15] * b[ 0];`)
-    
+
     createFunction(`reverse`, [`mv`], `
     target[ 0] =  mv[ 0];
                 
@@ -901,7 +904,7 @@ function createNonVerboseSharedFunctions(createFunction) {
 
     // createFunction(`multiplyScalar`, [`inout float[16] a`, `in float scalar`], `
     // for(int i = 0; i < 16; ++i) {
-    //     a[i] *= scalar;
+    //     this[i] *= scalar;
     // }`,
     //     `void`)
 

@@ -46,8 +46,13 @@ function initVoice() {
         let interimTranscript = ``;
         for (let i = 0; i < event.results.length; ++i)
             interimTranscript += event.results[i][0].transcript
+        
+        interimTranscript = interimTranscript
+            .replace(`in a product`, `inner product`)
+            .replace(`In a product`, `inner product`)
+            .replace(`duo`, `dual`)
+            .replace(`duel`, `dual`)
 
-        // let lines = interimTranscript.split(/(new line|uline|newline|you lying|you line|\n)\s?/gmi)
         let linesInclEmpties = interimTranscript.split(/new line |uline |newline |you lying |you line |\n|new line|newline/g)
         let lines = linesInclEmpties.filter(line => line != ``)
 
@@ -55,7 +60,7 @@ function initVoice() {
             let newLine = new THREE.Mesh(unchangingUnitSquareGeometry, new THREE.MeshBasicMaterial({
                 transparent: true
             }))
-            newLine.scale.set(0.35, 0.35, 1)
+            newLine.scale.set(0.25, 0.25, 1)
             currentTextGroup.add(newLine)
         }
 
@@ -68,7 +73,7 @@ function initVoice() {
             let lineMesh = currentTextGroup.children[index+1]
             lineMesh.material.map = mat.map
             lineMesh.scale.x = mat.getAspect() * lineMesh.scale.y
-            lineMesh.position.y = - index * 0.35
+            lineMesh.position.y = - index * 0.22
             lineMesh.position.x = lineMesh.scale.x / 2.
             
             mat.dispose()

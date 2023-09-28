@@ -14,7 +14,7 @@ function initBrushStroke()
     scene.add(buttonGroup)
 
     let col = new THREE.Color()
-    let buttonWidth = .15
+    let buttonWidth = .18
     let hueDivisions = 9
     let greyDivisions = 3
     let numButtons = hueDivisions + greyDivisions
@@ -32,7 +32,7 @@ function initBrushStroke()
         buttons.push(btn)
         btn.position.set(
             (i - numButtons / 2. + .5) * buttonWidth * 1.1,
-            -.61,
+            -.5,
             0.)
         buttonGroup.add(btn)
 
@@ -42,7 +42,7 @@ function initBrushStroke()
     }
     currentColorBtn = buttons[0]
 
-    let buttonNames = [`undo`,`redo`, `mic`]
+    let buttonNames = [`undo`,`redo`, `mic`,`eraser`]//,`paste`]
     let undoneStrokes = []
     buttonNames.forEach((name, i) => {
         let button = new THREE.Mesh(unchangingUnitSquareGeometry, new THREE.MeshBasicMaterial({
@@ -50,7 +50,7 @@ function initBrushStroke()
         }))
         buttons.push(button)
 
-        button.onClick = () => {
+        button.onClick = (event) => {
             if(name == `undo`) {
                 if(strokeMeshes.length > 0) {
                     undoneStrokes.push(strokeMeshes.pop())
@@ -65,8 +65,10 @@ function initBrushStroke()
             }
             else if(name == `mic`)
                 startVoiceInput()
+            else if(name === `eraser`)
+                deleteMode = true
             // else if (name == `paste`) {
-
+            //     pasteFromClipboard(event)
             // }
         }
 
@@ -113,6 +115,8 @@ function initBrushStroke()
             super(
                 new THREE.BufferGeometry(),
                 new THREE.MeshBasicMaterial({ color: currentColorBtn.material.color }))
+            this.material.depthTest = false
+            this.material.depthWrite = false
             scene.add(this)
 
             strokeMeshes.push(this)
@@ -125,9 +129,10 @@ function initBrushStroke()
 
         extendToMouse(){
             let newPt = new THREE.Vector2(handPosition[13], handPosition[12])
+            log(newPt)
             this.curve.points.push(newPt)
 
-            let radius = .02
+            let radius = .01
             const path = new Dummy();
             const newGeo = new THREE.TubeGeometry(path, 512, radius, 4, false);
             currentStroke.geometry.copy(newGeo)
@@ -150,9 +155,6 @@ function initBrushStroke()
     document.addEventListener(`pointerup`, () => {
         deleteMode = false
         if(currentStroke) {
-            strokeMeshes.forEach(stroke => {
-                stroke.position.z -= .005
-            })
             currentStroke = null
 
             undoneStrokes.length = 0
@@ -200,16 +202,44 @@ function initBrushStroke()
         }
     })
 
-    document.addEventListener(`paste`, event => {
-        log(event.clipboardData)
-        // takes clipboardData and puts it into a threejs texture
-        
-        // let texture = new THREE.Texture()
-        // texture.image = event.clipboardData
-        // texture.needsUpdate = true
-        
-    })
+    // function pasteFromClipboard (event) {
+    //     log(event.clipboardData)
+    //     const items = (event.clipboardData || event.originalEvent.clipboardData).items;
 
+    //     // Check if clipboard contains an image
+    //     for (const item of items) {
+    //         if (item.type.indexOf('image') !== -1) {
+    //             const file = item.getAsFile();
+    //             const reader = new FileReader();
+
+    //             reader.onload = function (event) {
+    //                 const img = new Image();
+    //                 img.onload = function () {
+    //                     const canvas = document.createElement("canvas")                        
+    //                     const ctx = canvas.getContext('2d');
+    //                     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    //                     ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+    //                     createImageBitmap(img).then(function (bitmap) {
+    //                         ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+
+    //                         let material = new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(canvas) })
+    //                         let mesh = new THREE.Mesh(unchangingUnitSquareGeometry, material)
+    //                         scene.add(mesh)
+    //                         mesh.scale.x = img.naturalWidth / img.naturalHeight
+    //                         mesh.position.x = camera.position.x
+    //                         mesh.position.y = camera.position.y
+    //                     });
+    //                 };
+    //                 img.src = event.target.result;
+    //             };
+
+    //             reader.readAsDataURL(file);
+    //         }
+    //     }
+    // }
+
+    // document.addEventListener(`paste`, pasteFromClipboard)
 
     function onPointerDownLowerButton(event) {
         if (currentStroke)
@@ -247,7 +277,7 @@ function initBrushStroke()
             if (v2.x > -.5 && v2.x < .5 &&
                 v2.y > -.5 && v2.y < .5) {
                 inButton = true
-                btn.onClick()
+                btn.onClick(event)
             }
         })
 
@@ -262,7 +292,6 @@ function initBrushStroke()
 
     
     document.addEventListener(`pointerdown`, event=>{
-        // log(event.button, event.buttons)
 
         if(event.button == lowerPenButtonProfile.button && event.buttons == lowerPenButtonProfile.buttons)
             onPointerDownLowerButton(event)

@@ -2,6 +2,10 @@ async function init() {
     let movingPiece = null
     let fall = true
 
+    let surroundingsHue = 1.
+    let movingHue = 0.75
+    let frozenHue = 0.55
+
     {
         let currentY = .8
         let texts = []
@@ -58,7 +62,6 @@ async function init() {
         polarPts[i] = new THREE.Vector3()
 
     let pieces = []
-    let col = new THREE.Color()
     let point = new Pga()
     let line = new Pga()
     let cameraLinesHorizontal = [new Pga(), new Pga()]
@@ -79,23 +82,32 @@ async function init() {
             tetrisGroup.add(this.apparentSelf)
             this.apparentSelf.scale.copy(this.scale)
 
-            let color = col.setHSL(hue||Math.random(),1.,.5).getHex()
-            let squareMat = new THREE.PointsMaterial({ color, size: window.innerHeight / 100 })
-            let polarMat = new THREE.LineBasicMaterial({ color })
+            this.color = new THREE.Color()
+            
+            this.squareMat = new THREE.PointsMaterial({size: window.innerHeight / 100 })
+            this.polarMat = new THREE.LineBasicMaterial()
+            this.setHue(hue || Math.random())
+
             coords.forEach(coordPair=>{
                 let square = new THREE.Object3D()
                 self.add(square)
                 square.position.set(coordPair[0], coordPair[1], 0.)
                 
-                square.apparentSquare = new THREE.Points(squareGeo, squareMat)
+                square.apparentSquare = new THREE.Points(squareGeo, this.squareMat)
                 self.apparentSelf.add(square.apparentSquare)
                 square.apparentSquare.position.copy(square.position)
 
                 let polarGeo = new THREE.BufferGeometry().setFromPoints(polarPts)
-                square.polar = new THREE.LineSegments(polarGeo.clone(), polarMat)
+                square.polar = new THREE.LineSegments(polarGeo.clone(), this.polarMat)
                     
                 scene.add(square.polar)
             })
+        }
+
+        setHue(hue) {
+            this.color.setHSL(hue, 1., .5).getHex()
+            this.squareMat.color.copy(this.color)
+            this.polarMat.color.copy(this.color)
         }
 
         updatePolars() {
@@ -152,7 +164,6 @@ async function init() {
             })
         }
     }
-    let surroundingsHue = 1.
     let floorCoords = []
     let floorWidth = 12
     for(let i = 0; i < floorWidth; ++i)
@@ -240,9 +251,14 @@ async function init() {
     })
 
     function newRandomPiece() {
+        if(movingPiece)
+            movingPiece.setHue(frozenHue)
+
         let randomIndex = Math.floor(Math.random() * Object.keys(squareLayouts).length)
         let layout = squareLayouts[Object.keys(squareLayouts)[randomIndex]]
         movingPiece = new Piece(layout)
+        movingPiece.setHue(movingHue)
+        
         // movingPiece = new Piece(squareLayouts.square)
         movingPiece.position.y = 1.
         movingPiece.apparentSelf.position.copy(movingPiece.position)
