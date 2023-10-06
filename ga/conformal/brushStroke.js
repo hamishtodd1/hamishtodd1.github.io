@@ -77,7 +77,7 @@ function initBrushStroke()
             button.material.needsUpdate = true
             button.position.set(
                 (i - buttonNames.length / 2. + .5) * buttonWidth * 1.1,
-                .61,
+                .625,
                 0.
             )
             button.scale.setScalar(buttonWidth)
@@ -129,7 +129,6 @@ function initBrushStroke()
 
         extendToMouse(){
             let newPt = new THREE.Vector2(handPosition[13], handPosition[12])
-            log(newPt)
             this.curve.points.push(newPt)
 
             let radius = .01

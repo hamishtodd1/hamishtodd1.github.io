@@ -39,8 +39,8 @@ async function init() {
     orbitControls = new OrbitControls(camera, container)
     orbitControls.target.set(0, 0., 0)
     orbitControls.update()
-    orbitControls.enableZoom = true //change whenever you like!
     orbitControls.enableRotate = false
+    orbitControls.enableZoom = true
 
     initVoice()
 
@@ -76,6 +76,23 @@ async function init() {
     renderer.outputEncoding = THREE.sRGBEncoding
     renderer.shadowMap.enabled = true
     container.appendChild(renderer.domElement)
+
+    // let numContactPoints = 0
+    // document.addEventListener(`pointerdown`,()=>{
+    //     ++numContactPoints
+    // })
+    // document.addEventListener(`pointerup`, () => {
+    //     --numContactPoints
+    // })
+    // document.addEventListener(`pointermove`, event => {
+    //     if(numContactPoints === 2) {
+    //         let dx = event.movementX
+    //         let dy = event.movementY
+    //         // camera.position.x -= dx * .003
+    //         // camera.position.y -= dy * .003
+    //     }
+    // })
+
 
     function render() {
         let clockDelta = clock.getDelta()
