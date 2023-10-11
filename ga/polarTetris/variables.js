@@ -1,1 +1,1 @@
-const camera = new THREE.OrthographicCamera(-1., 1., 1., -1., 0.01, 10)
+const camera = new THREE.OrthographicCamera(-1., 1., 1., -1., 0.01, 10) 

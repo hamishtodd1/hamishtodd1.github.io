@@ -4,7 +4,7 @@ async function init() {
 
     let surroundingsHue = 1.
     let movingHue = 0.75
-    let frozenHue = 0.55
+    let frozenHue = 0.55 
 
     {
         let currentY = .8

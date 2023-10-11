@@ -1,4 +1,4 @@
-/*
+/* 
     A given square is a bunch of
 
     A line segment is a pair of points connected by part of a line
