@@ -1,4 +1,10 @@
 /*
+    An e4 idea
+        It is a 
+
+    An inertia tensor could be visualized as a mapping of lines to lines
+    A screw motion is one of those. Bu
+
     Trivector-circle
         an example of a bivector point pair is e45. Dual is e123 which looks the same
         so, claim: e12's dual imaginary ztrivector, e345, looks like e12
