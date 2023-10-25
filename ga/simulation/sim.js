@@ -12,61 +12,84 @@
 
 updateSim = ()=>{}
 
-function initSim() {
+async function initSim() {
     
     let boxGeo = new THREE.BoxGeometry(1., 1., 1.)
+    boxGeo.translate(.5,.5,.5)
     const wireframeGeo = new THREE.WireframeGeometry(boxGeo);
     const wireframeCube = new THREE.LineSegments(wireframeGeo);
-    wireframeCube.position.y = 1.6
-    wireframeCube.position.x = .5
-    wireframeCube.position.z = 1.3
+    wireframeCube.position.y = 1.1
+    wireframeCube.position.x = 0.
+    wireframeCube.position.z = 0.8
     scene.add(wireframeCube);
 
-    let mat = new THREE.MeshBasicMaterial({ color: 0xFF0000 })
+    // let mat = new THREE.MeshBasicMaterial({ color: 0xFF0000 })
+    // let a = new THREE.Mesh(boxGeo, mat)
+    // a.position.copy(wireframeCube.position)
+    // scene.add(a)
 
-    let a = new THREE.Mesh(boxGeo, mat)
-    a.position.copy(wireframeCube.position)
-    scene.add(a)
+    /////////
+    // SIM //
+    /////////
 
-    initBasicSimulation()
+    let voxelsWide = 64
+    let w = voxelsWide.toString() + `.`
+    let tSpaceESpaceConversion = `
+
+vec2 eSpaceToTSpace(in vec3 eSpace ) {
+
+    float sx = eSpace.x + floor(eSpace.z * ` + w + `); //stacked space
+    float tx = sx / ` + w + `;
+    return vec2( tx, eSpace.y );
+
 }
+vec3 tSpaceToESpace(in vec2 tSpace ) {
 
-function assignShader(fileName, materialToReceiveAssignment, vertexOrFragment) {
-    var propt = vertexOrFragment + "Shader"
-    var fullFileName = "shaders/" + fileName + ".glsl"
+    float sx = tSpace.x * ` + w + `;
+    float ex = sx - floor(sx);
+    float ez = (floor(sx) + 0.5) / ` + w + `;
+    return vec3(ex, tSpace.y, ez);
 
-    return new Promise(resolve => {
-        var xhr = new XMLHttpRequest();
-        xhr.open("GET", fullFileName, true);
-        xhr.onload = function (e) {
-            materialToReceiveAssignment[propt] = xhr.response
-            resolve();
-        };
-        xhr.onerror = function () {
-            console.error(fullFileName, "didn't load");
-        };
-        xhr.send();
-    })
 }
+`
+    let jsStr = tSpaceESpaceConversion
+        .replaceAll(`in vec2`, ``).replaceAll(`in vec3`, ``)
+        .replaceAll(`float`, `let`)
+        .replaceAll(`\nvec2`, `\nfunction`).replaceAll(`\nvec3`, `\nfunction`)
+        .replaceAll(`    vec2`, `    let`).replaceAll(`    vec3`, `    let`)
+        .replaceAll(`floor`, `Math.floor`)
+        .replaceAll(`vec3`, `v1.set`).replaceAll(`vec2`, `v1_2d.set`)
+    eval(jsStr)
 
-async function initBasicSimulation() {
-    let dimensions = new THREE.Vector2(11, 7);
+    // function doSampling(pos) {
+    //     let tSpace = eSpaceToTSpace(pos);
+    //     let ret = texture2D(simulationTexture, tSpace);
+    //     return ret.r;
+    // }
+    // doSampling()
 
-    let initialState = new Float32Array(dimensions.x * dimensions.y * 4);
-    for (let row = 0; row < dimensions.y; row++)
+    let dimensions = new THREE.Vector2(voxelsWide * voxelsWide, voxelsWide);
+    let initialState = new Float32Array(dimensions.x * dimensions.y * 4)
+    let tCoords = new THREE.Vector2()
+    for (let row = 0; row < dimensions.y; row++) {
         for (let column = 0; column < dimensions.x; column++) {
-            let firstIndex = (row * dimensions.x + column) * 4;
 
-            initialState[firstIndex + 0] = Math.random();
-            initialState[firstIndex + 1] = 0.;
-            initialState[firstIndex + 2] = 0.;
-            initialState[firstIndex + 3] = 0.;
+            tCoords.set( (column+.5) / dimensions.x, (row+.5) / dimensions.y )
 
-            if (column == 1)
-                initialState[firstIndex + 0] = 0.;
-            if (row == 2)
-                initialState[firstIndex + 0] = 0.;
+            // debugger
+            tSpaceToESpace(tCoords) //now in v1
+
+            // log(v1.clone().multiplyScalar(voxelsWide))
+            let val = v1.distanceTo(v2.set( 0.5, 0.5, 0.5 )) < 0.25 ? 1. : 0.
+
+            let firstIndex = (row * dimensions.x + column) * 4
+            initialState[firstIndex + 0] = val //Math.random()
+            initialState[firstIndex + 1] = 0.
+            initialState[firstIndex + 2] = 0.
+            initialState[firstIndex + 3] = 0.
+            
         }
+    }
 
     let displayMaterial = new THREE.ShaderMaterial({
         blending: 0, //prevent default premultiplied alpha values
@@ -74,151 +97,73 @@ async function initBasicSimulation() {
         {
             simulationTexture: { value: null },
         },
-        vertexShader: `precision highp float;
-            varying vec2 vUV;
+        vertexShader: `
+            precision highp float;
+            varying vec4 entry;
+            varying vec4 rayDirection;
 
             void main (void) {
-                vUV = uv; //necessary? Needs to be vec2
+                entry = vec4( position, 1.0 );
+
+                mat4 modelMatrixInverse = inverse( modelMatrix );
+                vec4 cameraPositionInObjectSpace = modelMatrixInverse * vec4(cameraPosition,1.);
+                rayDirection = entry - cameraPositionInObjectSpace;
+                rayDirection.w = 0.;
+
                 gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
             }`,
         fragmentShader: `
             precision highp float;
-            varying vec2 vUV;
+            varying vec4 entry;
+            varying vec4 rayDirection;
+
             uniform sampler2D simulationTexture;
+            
+            `+ tSpaceESpaceConversion + egaVerboseGlsl + egaGlsl + `
+
+            float doSampling(vec4 pos) {
+                // float distToCenter = length(pos.xyz - vec3(0.5,0.5,0.5));
+                // return distToCenter > 0.2 ? 0. : 1.;
+
+                vec2 tSpace = eSpaceToTSpace( pos.xyz / pos.w );
+                vec4 ret = texture2D( simulationTexture, tSpace );
+                return ret.r;
+            }
 
             void main (void) {
-                vec3 simulationRgb = texture2D(simulationTexture, vUV).rgb;
 
-                float shadeOfGrey = clamp(simulationRgb.r,0.,1.);
+                gl_FragColor = vec4( 1., 0., 0., 0. );
 
-                gl_FragColor = vec4( shadeOfGrey, shadeOfGrey, shadeOfGrey, 1.0 );
+                float numSteps = 40.;
+                float stepLength = 1.75 / numSteps; // max thickness of cube is sqrt(3) = 1.75ish
+                vec4 stepVec = stepLength * normalize(rayDirection);
+
+                for(float i = 0.; i < numSteps; ++i) {
+
+                    vec4 p = entry + i * stepVec;
+
+                    float val = doSampling( p );
+                    bool stillInCube = p.x >= 0. && p.x <= 1. && p.y >= 0. && p.y <= 1. && p.z >= 0. && p.z <= 1.;
+                    if(val > 0.1 && stillInCube)
+                        gl_FragColor.a = 1.;
+
+                }
+
+                if(gl_FragColor.a == 0.)
+                    discard;
+
             }`
     });
 
+    // log(displayMaterial.fragmentShader)
+
     let numStepsPerFrame = 1;
-    await Simulation(dimensions, "basicSimulation", "clamped", initialState, numStepsPerFrame, displayMaterial.uniforms.simulationTexture)
+    await Simulation(dimensions, `basicSimulation`, `clamped`, initialState, numStepsPerFrame, displayMaterial.uniforms.simulationTexture)
 
-    let displayMesh = new THREE.Mesh(
-        new THREE.PlaneGeometry( 0.8 * dimensions.x / dimensions.y, 0.8),
-        displayMaterial);
-    scene.add(displayMesh);
-    displayMesh.position.y = 1.6
-    displayMesh.position.x = -1.5
-}
+    let displayBox = new THREE.Mesh(boxGeo, displayMaterial)
+    displayBox.position.copy(wireframeCube.position)
+    scene.add(displayBox)
 
-async function Simulation(
-    dimensions, simulationShaderFilename,
-    boundaryConditions,
-    stateArray,
-    numStepsPerFrameSpecification,
-    objectToAssignSimulationTexture,
-    extraUniforms,
-    filter) {
-        
-    let wrap = boundaryConditions === "periodic" ? THREE.RepeatWrapping : THREE.ClampToEdgeWrapping
-
-    //would be good to make it always nearest in simulation, always linear in viz
-    if (filter === undefined)
-        filter = THREE.NearestFilter
-
-    let params = {
-        minFilter: filter,
-        magFilter: filter,
-        wrapS: wrap,
-        wrapT: wrap,
-        format: THREE.RGBAFormat,
-        stencilBuffer: false,
-        depthBuffer: false,
-        premultiplyAlpha: false,
-        type: THREE.FloatType // THREE.HalfFloat for speed
-    }
-    let pingFramebuffer = new THREE.WebGLRenderTarget(dimensions.x, dimensions.y, params)
-    let pongFramebuffer = new THREE.WebGLRenderTarget(dimensions.x, dimensions.y, params)
-
-    let initialStateTexture = new THREE.DataTexture(stateArray, dimensions.x, dimensions.y, THREE.RGBAFormat)
-    initialStateTexture.wrapS = wrap
-    initialStateTexture.wrapT = wrap
-    initialStateTexture.type = params.type
-    initialStateTexture.needsUpdate = true
-
-    let simulationMaterial = new THREE.ShaderMaterial({ //not raw coz you need position
-        uniforms:
-        {
-            "oldState": { value: null },
-            "deltaTime": { value: null },
-            "dimensions": { value: dimensions }
-        },
-        vertexShader: [
-            'varying vec2 vUV;',
-
-            'void main (void) {',
-            'vUV = position.xy * 0.5 + 0.5;',
-            'gl_Position = vec4(position, 1.0 );',
-            '}'
-        ].join('\n'),
-        blending: 0, //prevent default premultiplied alpha values
-        depthTest: false
-    });
-
-    if (extraUniforms !== undefined) {
-        Object.assign(simulationMaterial.uniforms, extraUniforms)
-        log(simulationMaterial.uniforms)
-    }
-
-    await assignShader(simulationShaderFilename, simulationMaterial, "fragment")
-
-    let ping = true
-    let simScene = new THREE.Scene()
-    let simCamera = new THREE.OrthographicCamera()
-    simCamera.position.z = 1
-    renderer.clearColor(0xffffff) //hmm
-    let simulationMesh = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), simulationMaterial)
-    simScene.add(simulationMesh)
-
-    let renderTarget = null
-
-    let simulation = {
-        // simulationTexture: null,
-        speed: 10.,
-        paused: false,
-        stateArray,
-        updateStateArray: function () {
-            renderer.readRenderTargetPixels(renderTarget, 0, 0, 64, 64, stateArray)
-        }
-    }
-
-    let initial = true;
-    updateSim = () => {
-        let numStepsPerFrame = typeof numStepsPerFrameSpecification === "number" ? numStepsPerFrameSpecification : numStepsPerFrameSpecification.value;
-
-        if (simulation.paused || numStepsPerFrame === 0)
-            return;
-
-        let nonSimulationRenderTarget = renderer.getRenderTarget();
-        {
-            for (let i = 0; i < numStepsPerFrame; i++) {
-                if (initial) {
-                    simulationMaterial.uniforms.oldState.value = initialStateTexture;
-                    initial = false;
-                }
-                else {
-                    simulationMaterial.uniforms.oldState.value = ping ? pingFramebuffer.texture : pongFramebuffer.texture;
-                }
-
-                simulationMaterial.uniforms.deltaTime.value = clamp(frameDelta, 0., 1. / 30) * simulation.speed;
-
-                renderTarget = ping ? pongFramebuffer : pingFramebuffer
-                renderer.setRenderTarget(renderTarget);
-                renderer.render(simScene, simCamera);
-                simulationMaterial.uniforms.oldState.value = renderTarget.texture;
-
-                ping = !ping;
-            }
-
-            objectToAssignSimulationTexture.value = renderTarget.texture;
-        }
-        renderer.setRenderTarget(nonSimulationRenderTarget);
-    }
-
-    return simulation
+    v1.copy(camera.position)
+    displayBox.worldToLocal(v1)
 }

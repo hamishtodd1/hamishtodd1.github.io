@@ -6,6 +6,11 @@ float atan2(in float y, in float x)
     return mix(1.5707963267948966 - atan(x,y), atan(y,x), s);
 }
 
+void zeroOut(out float[8] target) {
+    target[0] = 0.; target[1] = 0.; target[2] = 0.; target[3] = 0.;
+    target[4] = 0.; target[5] = 0.; target[6] = 0.; target[7] = 0.;
+}
+
 ////////////////
 // Conversion //
 ////////////////
@@ -23,44 +28,14 @@ vec4 flToPoint(in float[8] a ) {
     return vec4(a[6], a[5], a[4], a[7]);
 }
 
+void Plane(in float e0Coef, in float e1Coef, in float e2Coef, in float e3Coef, out float[8] target) {
+    target[0] = e0Coef; target[1] = e1Coef; target[2] = e2Coef; target[3] = e3Coef;
+    target[4] = 0.; target[5] = 0.; target[6] = 0.; target[7] = 0.;
+}
+
 ////////////////
-// Sandwiches //
+// General //
 ////////////////
-
-//why the hell is it inout? Idk. Switch to out if you can't think of anything
-void sandwichDqDq(in float[8] a, in float[8] b, inout float[8] target) {
-    float[8] aReverse; getReverseDq(a,aReverse);
-    float[8] intermediate; mulDqDq(a,b, intermediate); //result is Dq
-    mulDqDq(intermediate, aReverse, target);
-}
-
-void sandwichDqFl(in float[8] a, in float[8] b, inout float[8] target) {
-    float[8] aReverse; getReverseDq(a,aReverse);
-    float[8] intermediate; mulDqFl(a,b, intermediate); //result is Fl
-    mulFlDq(intermediate, aReverse, target);
-}
-
-void sandwichFlDq(in float[8] a, in float[8] b, inout float[8] target) {
-    float[8] aReverse; getReverseFl(a,aReverse);
-    float[8] intermediate; mulFlDq(a,b, intermediate); //result is Fl
-    mulFlFl(intermediate, aReverse, target);
-}
-
-void sandwichFlFl(in float[8] a, in float[8] b, inout float[8] target) {
-    float[8] aReverse; getReverseFl(a,aReverse);
-    float[8] intermediate; mulFlFl(a,b, intermediate); //result is Dq
-    mulDqFl(intermediate, aReverse, target);
-}
-
-vec4 sandwichDqPoint(in float[8] a, in vec4 b) {
-    float[8] asFl; flFromPoint(b, asFl);
-    sandwichDqFl(a, asFl, asFl);
-    return flToPoint(asFl);
-}
-vec3 sandwichDqVertex(in float[8] a, in vec3 b) {
-    vec4 ret4 = sandwichDqPoint(a, vec4(b,1.));
-    return ret4.xyz / ret4.w;
-}
 
 void joinPt(in vec4 a, in vec4 b, out float[8] target) {
 
@@ -123,5 +98,43 @@ void fromUnitAxisAndSeparation( in float[8] axis, in float separation, out float
     dqExp(logResult, target);
 }
 
+////////////////
+// Sandwiches //
+////////////////
+
+//why the hell is it inout? Idk. Switch to out if you can't think of anything
+void sandwichDqDq(in float[8] a, in float[8] b, inout float[8] target) {
+    float[8] aReverse; getReverseDq(a,aReverse);
+    float[8] intermediate; mulDqDq(a,b, intermediate); //result is Dq
+    mulDqDq(intermediate, aReverse, target);
+}
+
+void sandwichDqFl(in float[8] a, in float[8] b, inout float[8] target) {
+    float[8] aReverse; getReverseDq(a,aReverse);
+    float[8] intermediate; mulDqFl(a,b, intermediate); //result is Fl
+    mulFlDq(intermediate, aReverse, target);
+}
+
+void sandwichFlDq(in float[8] a, in float[8] b, inout float[8] target) {
+    float[8] aReverse; getReverseFl(a,aReverse);
+    float[8] intermediate; mulFlDq(a,b, intermediate); //result is Fl
+    mulFlFl(intermediate, aReverse, target);
+}
+
+void sandwichFlFl(in float[8] a, in float[8] b, inout float[8] target) {
+    float[8] aReverse; getReverseFl(a,aReverse);
+    float[8] intermediate; mulFlFl(a,b, intermediate); //result is Dq
+    mulDqFl(intermediate, aReverse, target);
+}
+
+vec4 sandwichDqPoint(in float[8] a, in vec4 b) {
+    float[8] asFl; flFromPoint(b, asFl);
+    sandwichDqFl(a, asFl, asFl);
+    return flToPoint(asFl);
+}
+vec3 sandwichDqVertex(in float[8] a, in vec3 b) {
+    vec4 ret4 = sandwichDqPoint(a, vec4(b,1.));
+    return ret4.xyz / ret4.w;
+}
 
 `

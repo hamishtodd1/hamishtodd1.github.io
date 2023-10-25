@@ -17,6 +17,8 @@ let objLoader = new THREE.OBJLoader()
 
 const clock = new THREE.Clock(true)
 
+const v1_2d = new THREE.Vector2()
+
 const v1 = new THREE.Vector3()
 const v2 = new THREE.Vector3()
 const v3 = new THREE.Vector3()

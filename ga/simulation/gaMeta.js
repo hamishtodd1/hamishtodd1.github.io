@@ -59,8 +59,6 @@ async function initEga() {
         .replace(`getReverse`,`getReverseDq`)
         .replace(`getDual`,`getDualDq`)
         .replace(`joinPt`,`joinDqPt`)
-
-    // log(egaVerboseGlsl)
 }
 
 function initDqMeshes()
