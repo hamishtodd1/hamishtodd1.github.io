@@ -7,11 +7,25 @@ function blankFunction(){}
 
 async function init() {
 
-    initSim()
+    let stateArray = initUserDefinedField()
+    simBox = await initSimAppearance()
+    putSphereInField(v3.set(.5,.5,.5))
+    let numStepsPerFrame = 1;
+    let sim = await GpuSim(
+        `basicSimulation`,
+        `clamped`,
+        stateArray,
+        numStepsPerFrame, 
+        simBox.material.uniforms.simulationTexture)
 
-    document.addEventListener(`keydown`,event=>{
-        if(event.key === " ")
-            simulatingPaintingHand = !simulatingPaintingHand
+    let painting = false
+    document.addEventListener('mousedown', event => {
+        if(event.button === 0)
+            painting = true
+    })
+    document.addEventListener('mouseup', event => {
+        if (event.button === 0)
+            painting = false
     })
 
     initCamera()
@@ -46,7 +60,8 @@ async function init() {
         updateHandMvs()
 
         blankFunction()
-        updateSim()
+        
+        sim.update(painting)
         
         buttonWhileDowns()
 
