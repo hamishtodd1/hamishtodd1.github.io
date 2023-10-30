@@ -1,4 +1,6 @@
 /*
+    Grade selection is a "snap" sound
+
     TODO for November:
         Numbers on measurer
         "Parenting" somehow
@@ -9,10 +11,6 @@
 
     Little lizard creatures that rate your animations, with different preferences
         Make an animation with the smallest number of bones, so it's doing a complex thing
-
-    Just have a dual quat class and a flection class
-        You never cast between those
-    Gauges
 
     IF you were to do the inertia tensor
         First thing would be, for the sclptables, getting the inertia tensor
@@ -140,6 +138,9 @@
             pA = p0*t+p1*(1-t)     pB = p1*t+p2*(1-t)     pC = p2*t+p3*(1-t)
             pi = pA*t+pB*(1-t)     pj = pB*t+pC*(1-t)
             pf = pi*t+pj*(1-t)
+
+    Philosophy
+        If you have arrows you can put end-to-end, do you need gauges?
  */
 
 function blankFunction(){}

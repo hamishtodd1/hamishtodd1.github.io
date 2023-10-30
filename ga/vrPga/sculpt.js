@@ -1,13 +1,17 @@
 /*
     When you're working on it, dq transform is shown (axis in world, and angle+distance window)
 
+    NEXT: how to "make a new one of these" vs add to one that's already there?
+    Adjacency, dude!
+    How to decide what one is hovered is a little hard
+
     TODO
         Want a "preview" of where the next thing you're about to lay is
 
     If you're     holding a  thing in your other hand and you hold the paint button
         it adds to that object
     If you're NOT holding anything in your other hand and you hold the paint button,
-        it makes a new object
+        it makes a new object 
         Probably if you press the grab button while holding the paint button, you're now holding the new object
     If you were holding a transform, great, we're adding it to that transform
     If you were holding a point/line/plane, erm, maybe not
@@ -32,6 +36,9 @@
         "Forward" is B
         Pushing in joystick is pushing in joystick 
         Wheel is rotating
+        You do have that one other button just behind the mouswheel
+
+    could make a shell of cubes, and always be subtracting ones from the center
  */
 
 function initSclptables()
@@ -93,6 +100,10 @@ function initSclptables()
             return this.dqViz.dq.sandwich(this.com, target)
         }
 
+        brushStrokeWouldBeConnected(pos) {
+
+        }
+
         brushStroke(pos) {
             
             if(pos === undefined)
@@ -100,13 +111,13 @@ function initSclptables()
 
             hidePalette()
 
+            pos.pointToVertex(v1)
+            this.worldToLocal(v1)
+
             let cs = this.children[currentColor]
 
             cs.vAttr.updateRange.offset = cs.lowestUnusedCube * 3
             cs.vAttr.updateRange.count = 0
-
-            pos.pointToVertex(v1)
-            this.worldToLocal(v1)
 
             // let distanceGone = handPosition.distanceToPt(handPositionOld)
             // let numSteps = Math.max(1,Math.floor(distanceGone / VOXEL_WIDTH * .9))
@@ -115,10 +126,7 @@ function initSclptables()
             //     cs.fillCubePosition(step.pointToVertex(v2))
             // }
 
-            //one thought is that you couldmake a shell of cubes, and always be subtracting ones from the center
-
             //both of these are in voxels
-
             // let radiusSq = sq(numWide / 2.)
             let start = -(numWide - 1) / 2.
             for (let i = 0; i < numWide; ++i) {

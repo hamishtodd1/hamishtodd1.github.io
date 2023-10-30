@@ -1,6 +1,7 @@
 /*
     TODO
-        Hovering a thing changes its color and shows related things
+        Hovering a thing shows its affecters
+        Sculpting can create new things or add to what's already there, depending on whether your paint is touching it
         You can hold two and it shows you different ones you could create from them
 
     You may well want a laser, but not sure yet, and it raises many questions
@@ -18,6 +19,22 @@ function initControl() {
 
     let heldTranslator = null
     let sclptableBeingSculpted = null
+    let highlightedTranslator = null
+
+    blankFunction = () => {
+        snappables.forEach(translator => {
+            if (translator === highlightedTranslator)
+                translator.setColor(0x00FF00)
+            else
+                translator.setColor()
+        })
+
+        let dqVizWithCircuitShowing = highlightedTranslator || heldTranslator
+        if (dqVizWithCircuitShowing === null)
+            hideCircuit()
+        else
+            showCircuit(dqVizWithCircuitShowing)
+    }
 
     updatePainting = () => {
         if (sclptableBeingSculpted && simulatingPaintingHand)
@@ -57,12 +74,21 @@ function initControl() {
     document.addEventListener("pointermove", event => {
 
         if (heldTranslator !== null) {
+            highlightedTranslator = heldTranslator
+            
             heldTranslator.dq.ptToPt(heldTranslator.arrowStart, handPosition)
             snap(heldTranslator)
         }
         else {
-            //we hover
-            // let nearest = getNearestThingToHand() 
+            
+            if (sclptableBeingSculpted !== null)
+                highlightedTranslator = null
+            else {
+                //this should do sculptables too
+                //it should only highlight if clicking would result in you picking up that thing
+                let [nearestSnappable, nearestSnappableDist] = getNearestSnappableToPt(handPosition)
+                highlightedTranslator = nearestSnappable
+            }
         }
     })
 
@@ -70,8 +96,6 @@ function initControl() {
 
         let isLeftButton = event.button === 0
         let isRightButton = event.button === 2
-        
-        dqVizWithCircuitShowing = null
 
         if (simulatingPaintingHand && isLeftButton)
             sclptableBeingSculpted = null

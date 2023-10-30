@@ -1,11 +1,5 @@
 /*
-    Next priority is that the circuits appear on hovering. Both coming from and going to
-
-    Call the plane contianing a translation axis and the camera point the "nice-plane"
-        For any pair of non-parallel translations
-            you can always compose both the arrows while keeping them in their nice-plane
-
-    Alright how do you want this to look? You're assuming that there are positions for the start and end in space
+    You're assuming that there are positions for the start and end in space
     Have it on the camera plane
  */
 
@@ -15,30 +9,21 @@ function initCircuits() {
     // could even animate chevrons going along
     // let chevronWire = new THREE
     
-    let opMeshes = {
-        "mul": text("AB", false, "#000000"),
-        "mulReverse": text("AB̃", false, "#000000"),
-        "add": text("A+B", false, "#000000"),
+    let opMats = {
+        "mul": text("AB", true, "#000000"),
+        "mulReverse": text("AB̃", true, "#000000"),
+        "add": text("A+B", true, "#000000"),
     }
     operators.forEach(op=>{
-        if(opMeshes[op] === undefined)
+        if(opMats[op] === undefined)
             console.error("need to make a new opmat for ", op)
-
-        opMeshes[op].scale.setScalar(.35)
-        scene.add(opMeshes[op])
-        opMeshes[op].visible = false
-
-        makeThingOnTop(opMeshes[op])
     })
 
-    dqVizWithCircuitShowing = null
-
-    blankFunction = () => {
-        if (dqVizWithCircuitShowing === null)
-            hideCircuit()
-        else
-            showCircuit(dqVizWithCircuitShowing)
-    }
+    let opMesh = new THREE.Mesh(unchangingUnitSquareGeometry, opMats["mul"])
+    opMesh.scale.setScalar(.35)
+    opMesh.visible = false
+    makeThingOnTop(opMesh)
+    scene.add(opMesh)
 
     let inWire0 = new LineSegment(0xFF0000)
     let inWire1 = new LineSegment(0xFF0000)
@@ -53,19 +38,21 @@ function initCircuits() {
         })
         
         operators.forEach(op => {
-            opMeshes[op].visible = false
+            opMesh.visible = false
         })
     }
 
     let centerOfAllThree = new Fl()
     showCircuit = (dqViz) => {
-        if(dqViz.affecters[0] === null)
+        if(dqViz.affecters[0] === null) {
+            hideCircuit()
             return
+        }
 
         if (opIsSingleArgument(dqViz.affecters[2]))
             console.warn("gotta do something")
 
-        opMesh = opMeshes[operators[dqViz.affecters[2]]]
+        opMesh.material = opMats[operators[dqViz.affecters[2]]]
 
         allWires.forEach(wire => {
             wire.visible = true
@@ -124,9 +111,6 @@ function initMarkup() {
     resetMarkup()
 
     setMarkup = (dqVizToSnap) => {
-
-        dqVizWithCircuitShowing = dqVizToSnap || null
-        return
 
         let a0 = dqVizToSnap.affecters[0]
         let a1 = dqVizToSnap.affecters[1]

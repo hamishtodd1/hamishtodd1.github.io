@@ -58,7 +58,7 @@ function initEgaWithoutDeclarations() {
                 target.y = this[5] / this[7]
                 target.x = this[6] / this[7]
             }
-
+ 
             return target
         }
 

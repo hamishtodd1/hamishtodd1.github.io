@@ -43,6 +43,8 @@ function initSnapping() {
         for (let i = 0, il = snappables.length; i < il; i++) {
 
             let translator0 = snappables[i]
+            if(translator0 === dqVizToSnap)
+                continue
 
             for (let k = 0, kl = operators.length; k < kl; k++) {
 
@@ -54,6 +56,9 @@ function initSnapping() {
                 }
                 else {
                     for (let j = 0, jl = snappables.length; j < jl; j++) {
+
+                        if (snappables[j] === dqVizToSnap)
+                            continue
     
                         if( i === j )
                             continue //mulReverse would get identity, add would do nothing, mul covered by log
@@ -67,13 +72,12 @@ function initSnapping() {
             }
         }
         
-        if (Math.abs(l1NormLowest) > tolerance) {
+        let gonnaSnap = Math.abs(l1NormLowest) < tolerance
+        if (!gonnaSnap) {
             resetMarkup()
             dqVizToSnap.affecters[0] = null
             dqVizToSnap.affecters[1] = null
             dqVizToSnap.affecters[2] = -1
-
-            dqVizWithCircuitShowing = null
         }
         else {
 
@@ -82,11 +86,9 @@ function initSnapping() {
             dqVizToSnap.affecters[0] = snappables[potentialAffecters[0]]
             dqVizToSnap.affecters[1] = potentialAffecters[1] === -1 ? null : snappables[potentialAffecters[1]]
             dqVizToSnap.affecters[2] = potentialAffecters[2]
-
-            dqVizWithCircuitShowing = dqVizToSnap
             
         }
-    }
 
-    
+        return gonnaSnap
+    }    
 }

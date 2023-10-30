@@ -1,11 +1,10 @@
 /*
-    Don't forget the happy faces on vizes
-    Could have things vibrate depending on their norm, because they "want to move"?
+    Call the plane contianing a translation axis and the camera point the "nice-plane"
+        For any pair of non-parallel translations
+            you can always compose both the arrows while keeping them in their nice-plane
 
-    Hey, maybe even your rotoreflections and transflections need arrows
+    Hey, even your rotoreflections and transflections need arrows
     They are also gaugeable
-
-    If you have arrows you can put end-to-end, do you need gauges?
 
     The idea is you're going to REMEMBER how the things got made
         If you're looking at the wires for a thing, could press a button to see how those things got made
@@ -23,6 +22,9 @@
         The further away the axis, the more distant from it is the arrow
         SOMETIMES you may WELL want to put them end-to-end. So it may be an "art"
         Could all originate at your hand
+
+    Happy faces on vizes
+    Could have things vibrate depending on their norm, because they "want to move"?
 */
 
 function initVizes() {
@@ -71,10 +73,10 @@ function initVizes() {
             type: `vertex`,
             precedes: ``,
             str: egaVerboseGlsl + egaGlsl + `
-            float TAU = 6.283185307179586;
-            uniform float[8] dq;
-            uniform vec3 extraVec1;
-            uniform vec3 extraVec2;
+                float TAU = 6.283185307179586;
+                uniform float[8] dq;
+                uniform vec3 extraVec1;
+                uniform vec3 extraVec2;
             \n`
         },
         {
