@@ -34,10 +34,6 @@ const log = console.log
 const obj3dsWithOnBeforeRenders = []
 let mouse = null
 
-let lowerPenButtonProfile = { button: 5, buttons: 32 }
-let upperPenButtonProfile = { button: 2, buttons: 2 }
-
-
 const socket = io()
 
 const VOXEL_WIDTH = .03
@@ -46,5 +42,6 @@ let selectorRayCone = null
 
 let simulatingPaintingHand = false //true
 
-const snappables = []
-const sculptables = []
+let painting = false
+
+const voxelsWide = 32 // it doesn't like more than 128. 128 is fine but slow to load

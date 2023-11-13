@@ -1,3 +1,28 @@
+async function initCga() {
+
+    let fullFuncString = initCgaWithoutDeclarations.toString()
+    let funcString = fullFuncString
+        .slice(0, fullFuncString.indexOf(`/*END*/}`))
+
+    let i = 0
+    let declarations = ``
+    function replacementNews(bigStr, str) {
+        return bigStr.replaceAll(`new` + str, () => {
+            declarations += `\n    let new` + str + i + ` = new ` + str + `()`
+            return `new` + str + (i++)
+        })
+    }
+    let withoutDeclarations = replacementNews(replacementNews(funcString, `Rotor`), `Cga`)
+
+    var strToEval =
+        `(` +
+        withoutDeclarations +
+        declarations +
+        `})()`
+
+    eval(strToEval)
+}
+
 async function initEga() {
 
     //newEga is not a variable name. It is equivalent to `new Ega()`
@@ -18,9 +43,9 @@ async function initEga() {
         strToEval += replacementNews(replacementNews(startStr, `Dq`), `Fl`)
     }
 
-    newify(initMultivectorWithoutDeclarations.toString())
+    newify(initEgaWithoutDeclarations.toString())
 
-    let fullFuncString = initEgaWithoutDeclarations.toString()
+    let fullFuncString = initDqFlWithoutDeclarations.toString()
     let funcString = fullFuncString
         .replace(`/*flVerbose*/`, flVerbose)
         .replace(`/*dqVerbose*/`, dqVerbose)

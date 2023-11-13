@@ -46,6 +46,12 @@ async function GpuSim(
     }
     let pingFramebuffer = new THREE.WebGLRenderTarget(dimensions.x, dimensions.y, params)
     let pongFramebuffer = new THREE.WebGLRenderTarget(dimensions.x, dimensions.y, params)
+    function setFilter(filter) {
+        pingFramebuffer.texture.minFilter = filter
+        pingFramebuffer.texture.magFilter = filter
+        pongFramebuffer.texture.minFilter = filter
+        pongFramebuffer.texture.magFilter = filter
+    }
 
     let userDefinedTexture = new THREE.DataTexture( stateArray, dimensions.x, dimensions.y, THREE.RGBAFormat)
     userDefinedTexture.wrapS = wrap
@@ -102,7 +108,8 @@ async function GpuSim(
             userDefinedTexture.needsUpdate = true
             updateFromStateArray = true
         },
-        update: (painting) => {
+        update: () => {
+            // setFilter(THREE.NearestFilter)
             let numStepsPerFrame = typeof numStepsPerFrameSpecification === "number" ? numStepsPerFrameSpecification : numStepsPerFrameSpecification.value;
 
             if (simulation.paused || numStepsPerFrame === 0)
@@ -137,8 +144,10 @@ async function GpuSim(
                 }
 
                 objectToAssignSimulationTexture.value = renderTarget.texture;
+                //might want to change between linear and nearest filter! One for simulation, one for viz
             }
             renderer.setRenderTarget(nonSimulationRenderTarget);
+            // setFilter(THREE.LinearFilter)
         }
     }
 

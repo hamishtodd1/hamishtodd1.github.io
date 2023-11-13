@@ -1,8 +1,15 @@
 /*
+    Just do magntidue of F
+
     Long term
         It's the electromagnetic field
         Control the color scheme
-        Could be "patchy" even, not continuously varying. You could control the limits of "red colored"
+        Could be "patchy" scheme, not continuously varying
+            You could control the limits of "red colored"
+        Show Gauss's law for magnetism:
+            you can make a surface with your hands,
+            and color at each point based on the flux through that point,
+            and the colors will "add up" to 0
 
     You want to get this working, but there are two research avenues for reformulating this
         STAP
@@ -31,6 +38,7 @@ async function initSimAppearance() {
         uniforms:
         {
             simulationTexture: { value: null },
+            handPosition: { value: new THREE.Vector3() }
         },
         vertexShader: `
             precision highp float;
@@ -51,24 +59,45 @@ async function initSimAppearance() {
             precision highp float;
             varying vec4 entry;
             varying vec4 rayDirection;
-
+            
+            uniform vec3 handPosition;
             uniform sampler2D simulationTexture;
             
             `+ tSpaceESpaceConversion + egaVerboseGlsl + egaGlsl + `
 
-            float sampleSimulation(vec4 pos) {
+            vec4 doubleSample(in vec3 eSpace) {
+
+                float ezw = eSpace.z * `+ voxelsWide + `.;
+
+                float sxAddition1 = floor(ezw);
+                float sxAddition2 = sxAddition1 + 1.;
+                float tx1 = (eSpace.x + sxAddition1) / `+ voxelsWide + `.;
+                float tx2 = (eSpace.x + sxAddition2) / `+ voxelsWide + `.;
+                vec4 ret1 = texture2D( simulationTexture, vec2(tx1, eSpace.y) );
+                vec4 ret2 = texture2D( simulationTexture, vec2(tx2, eSpace.y) );
+
+                return mix( ret1, ret2, fract( ezw ) );
+            }
+
+            vec3 sampleSimulation(vec4 pos) {
+
                 //debug
                 // float distToCenter = length(pos.xyz - vec3(0.5,0.5,0.5));
                 // return distToCenter > 0.2 ? 0. : 1.;
 
-                vec2 tSpace = eSpaceToTSpace( pos.xyz / pos.w );
-                vec4 ret = texture2D( simulationTexture, tSpace );
-                return ret.r;
+                //single sample
+                // vec2 tSpace = eSpaceToTSpace( pos.xyz / pos.w );
+                // vec4 ret = texture2D( simulationTexture, tSpace );
+                // return ret.r;
+
+                //double sample
+                vec4 ret = doubleSample(pos.xyz / pos.w);
+                return ret.xyz;
             }
 
             void main (void) {
 
-                gl_FragColor = vec4( 1., 0., 0., 0. );
+                gl_FragColor = vec4( 0., 0., 0., 1. );
 
                 float numSteps = 30.;
                 float stepLength = 1.75 / numSteps; // max thickness of cube is sqrt(3) = 1.75ish
@@ -77,15 +106,21 @@ async function initSimAppearance() {
                 for(float i = 0.; i < numSteps; ++i) {
 
                     vec4 p = entry + (i+1.) * stepVec; //+1 solved a problem with wrapping. Can change back if you find a different solution
-
-                    float val = sampleSimulation( p );
                     bool stillInCube = p.x >= 0. && p.x <= 1. && p.y >= 0. && p.y <= 1. && p.z >= 0. && p.z <= 1.;
-                    if(val > 0.1 && stillInCube)
-                        gl_FragColor.a = 1.;
+
+                    //did/did not hit
+                    // float val = sampleSimulation( p );
+                    // if(val > 0.1 && stillInCube)
+                    //     gl_FragColor = vec4(1.,0.,0.,1.);
+
+                    //gas
+                    vec3 val = sampleSimulation( p );
+                    if(stillInCube)
+                        gl_FragColor.rgb += val.rgb;
 
                 }
 
-                if(gl_FragColor.a == 0.)
+                if(gl_FragColor.xyz == vec3(0.,0.,0.))
                     discard;
 
             }`
@@ -98,9 +133,26 @@ async function initSimAppearance() {
     simBox.position.x = 0.
     simBox.position.z = 0. - .5 * simBox.scale.y
 
+    simBox.onBeforeRender = () => {
+        if (!painting)
+            mat.uniforms.handPosition.value.set(-.5, -.5, -.5)
+        else {
+            handPosition.pointToVertex(v3)
+            simBox.worldToLocal(v3)
+            mat.uniforms.handPosition.value.copy(v3)
+        }
+    }
+
     const wireframeGeo = new THREE.WireframeGeometry(boxGeo);
+    // let geo = new THREE.BufferAttribute
     const wireframeCube = new THREE.LineSegments(wireframeGeo);
+    wireframeCube.scale.setScalar(1.006)
+    wireframeCube.position.setScalar(-0.5 * (wireframeCube.scale.x - 1.))
     simBox.add(wireframeCube);
+    let backs = new THREE.Mesh(boxGeo, new THREE.MeshBasicMaterial({ color: 0x000000, side: THREE.BackSide }))
+    // backs.scale.setScalar(1.003)
+    // backs.position.setScalar(-0.5 * (backs.scale.x - 1.))
+    simBox.add(backs)
 
     return simBox
 }

@@ -1,6 +1,6 @@
-function initEgaWithoutDeclarations() {
+function initDqFlWithoutDeclarations() {
 
-    class Fl extends Multivector {
+    class Fl extends Ega {
 
         constructor() {
             super(8)
@@ -80,7 +80,7 @@ function initEgaWithoutDeclarations() {
     }
     window.Fl = Fl
 
-    class Dq extends Multivector {
+    class Dq extends Ega {
 
         constructor() {
             super(8)

@@ -10,13 +10,13 @@ uniform vec3 handPosition;
 
 void main (void)
 {
-	float oldValue = texture2D(oldState, vUV).r;
+	vec4 oldValue = texture2D(oldState, vUV);
 
-	float newValue = clamp( oldValue - 0.0008, 0.,1.);
+	vec4 newValue = clamp( oldValue - 0.0004, 0.,1.);
 
 	vec3 pos = tSpaceToESpace(vUV);
 	if(length(pos-handPosition) < 0.1)
-		newValue += .03;
+		newValue.r += .013;
 
-	gl_FragColor = vec4(newValue, 0.0, 0.0, 1.0); //can you get anything into alpha? Dunno
+	gl_FragColor = newValue;
 }

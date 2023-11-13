@@ -74,7 +74,7 @@ class OrbitControls extends THREE.EventDispatcher {
 		// Mouse buttons
 		this.mouseButtons = { 
 			LEFT: null, 
-			MIDDLE: THREE.MOUSE.ROTATE, 
+			MIDDLE: THREE.MOUSE.ROTATE,
 			RIGHT: null };
 
 		// Touch fingers

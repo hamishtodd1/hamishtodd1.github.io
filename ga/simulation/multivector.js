@@ -1,19 +1,20 @@
-function initMultivectorWithoutDeclarations() {
+function getWhereThisWasCalledFrom(depth) {
+    let actualDepth = (depth || 0) + 3
+    let splitIntoLines = Error().stack.split("\n")
+    if (actualDepth >= splitIntoLines.length)
+        actualDepth = splitIntoLines.length - 1
+    let lineOfStackTrace = splitIntoLines[actualDepth]
+
+    let splitBySlash = lineOfStackTrace.split("/")
+    let stillGotColons = splitBySlash[splitBySlash.length - 1]
+    let splitByColons = stillGotColons.split(":")
+    return splitByColons[0] + ":" + splitByColons[1]
+}
+
+function initEgaWithoutDeclarations() {
     
-    function getWhereThisWasCalledFrom(depth) {
-        let actualDepth = (depth || 0) + 3
-        let splitIntoLines = Error().stack.split("\n")
-        if (actualDepth >= splitIntoLines.length)
-            actualDepth = splitIntoLines.length - 1
-        let lineOfStackTrace = splitIntoLines[actualDepth]
 
-        let splitBySlash = lineOfStackTrace.split("/")
-        let stillGotColons = splitBySlash[splitBySlash.length - 1]
-        let splitByColons = stillGotColons.split(":")
-        return splitByColons[0] + ":" + splitByColons[1]
-    }
-
-    class Multivector extends Float32Array {
+    class Ega extends Float32Array {
 
         //pretty confusing: append causes a transformation to be done BEFORE the current transformation
         append(b) {
@@ -409,6 +410,6 @@ function initMultivectorWithoutDeclarations() {
             return str
         }
     }
-    window.Multivector = Multivector
+    window.Ega = Ega
     
 /*END*/}
