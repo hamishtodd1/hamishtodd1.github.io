@@ -6,6 +6,19 @@ function initDqFlWithoutDeclarations() {
             super(8)
         }
 
+        lerpSelf(a, t) {
+            let omt = 1. - t
+            this[0] = this[0] * omt + a[0] * t
+            this[1] = this[1] * omt + a[1] * t
+            this[2] = this[2] * omt + a[2] * t
+            this[3] = this[3] * omt + a[3] * t
+            this[4] = this[4] * omt + a[4] * t
+            this[5] = this[5] * omt + a[5] * t
+            this[6] = this[6] * omt + a[6] * t
+            this[7] = this[7] * omt + a[7] * t
+            return this
+        }
+
         distanceToPt(pt) {
             return Math.sqrt(this.joinPt(pt, newFl).eNormSq())
         }

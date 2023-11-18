@@ -9,6 +9,8 @@ function initSurroundings() {
             cubeTexture.generateMipmaps = true;
             cubeTexture.minFilter = THREE.LinearMipmapLinearFilter;
             scene.background = cubeTexture
+
+
         })
 
     const floorGeometry = new THREE.CircleGeometry(5., 31)
@@ -26,13 +28,16 @@ function initSurroundings() {
     scene.add(new THREE.HemisphereLight(0x808080, 0x606060))
 
     const light = new THREE.DirectionalLight(0xffffff)
-    light.position.set(-.5, 2., 2.)
+    light.position.set(-1., 3., 2.)
     light.lookAt(0.,1.6,0.)
     light.castShadow = true
-    light.shadow.camera.top = 2
-    light.shadow.camera.bottom = - 2
-    light.shadow.camera.right = 2
-    light.shadow.camera.left = - 2
+    let cameraSize = 3.
+    light.shadow.camera.top = cameraSize
+    light.shadow.camera.bottom = - cameraSize
+    light.shadow.camera.right = cameraSize
+    light.shadow.camera.left = - cameraSize
     light.shadow.mapSize.set(4096, 4096)
     scene.add(light)
+
+    scene.add(new THREE.AmbientLight(0x222222))
 }

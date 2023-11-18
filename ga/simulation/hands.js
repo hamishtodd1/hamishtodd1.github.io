@@ -125,6 +125,7 @@ async function initHands() {
         geo.rotateX(-TAU / 8. * 3.)
         geo.rotateY(TAU / 2.)
         let mesh = new THREE.Mesh(geo, new THREE.MeshPhongMaterial({ color: 0xFFFFFF }))
+        mesh.castShadow = true
         selectorRayCone.add(mesh)
     })
 
