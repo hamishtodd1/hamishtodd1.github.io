@@ -138,6 +138,12 @@ function initVizes() {
             this.trnAxisMesh = new DqMesh(trnAxisGeo, axisMat)
             this.add(this.trnAxisMesh)
 
+            this.boxHelper = new THREE.BoxHelper()
+            this.boundingBox = new THREE.Box3()
+            // this.boxHelper.visible = false
+            this.boxHelper.matrixAutoUpdate = false
+            scene.add(this.boxHelper)
+
             this.affecters = [
                 null, null, -1
             ]
@@ -203,6 +209,19 @@ function initVizes() {
                         let fakeLineAtInfinity = fl0.meet(camera.frustum.far, dq0)
                         e31.dqTo(fakeLineAtInfinity, this.trnAxisMesh.dq)
                     }
+                }
+
+                {
+                    this.boundingBox.makeEmpty()
+                    let numSamples = 4
+                    for (let i = 0; i < numSamples; ++i) {
+                        this.dq.pow(i / (numSamples-1), dq0)
+                        dq0.sandwichFl(this.arrowStart, fl0).pointToVertex(v1)
+                        this.boundingBox.expandByPoint(v1)
+                    }
+                    this.boundingBox.min.subScalar(arrowRadius*2.)
+                    this.boundingBox.max.addScalar(arrowRadius*2.)
+                    updateBoxHelper(this.boxHelper,this.boundingBox)
                 }
             }
         }

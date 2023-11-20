@@ -89,10 +89,10 @@ function initSclptables()
             this.matrixAutoUpdate = false
 
             this.boundingBox = new THREE.Box3()
-            this.bbViz = new THREE.BoxHelper()
-            this.bbViz.visible = false
-            this.bbViz.matrixAutoUpdate = false
-            scene.add(this.bbViz)
+            this.boxHelper = new THREE.BoxHelper()
+            this.boxHelper.visible = false
+            this.boxHelper.matrixAutoUpdate = false
+            scene.add(this.boxHelper)
 
             coloredPointMats.forEach(mat => {
                 let cs = new ColoredSection(mat)
@@ -100,6 +100,7 @@ function initSclptables()
             })
 
             this.dqViz = new DqViz()
+            snappables.push(this.dqViz)
             //well, it makes sense to have the thing be at the tip of an arrow
 
             this.com = new Fl() //NOT NORMALIZED AND NO REASON TO CHANGE THAT!
@@ -109,7 +110,7 @@ function initSclptables()
 
             this.onBeforeRender = () => {
                 this.dqViz.dq.toMat4(this.matrix)
-                this.bbViz.matrix.copy(this.matrix)
+                this.boxHelper.matrix.copy(this.matrix)
             }
         }
 
@@ -170,23 +171,7 @@ function initSclptables()
                 }
             }
 
-            //update box helper
-            {
-                const array = this.bbViz.geometry.attributes.position.array;
-
-                let max = this.boundingBox.max
-                let min = this.boundingBox.min
-                array[0] = max.x; array[1] = max.y; array[2] = max.z;
-                array[3] = min.x; array[4] = max.y; array[5] = max.z;
-                array[6] = min.x; array[7] = min.y; array[8] = max.z;
-                array[9] = max.x; array[10] = min.y; array[11] = max.z;
-                array[12] = max.x; array[13] = max.y; array[14] = min.z;
-                array[15] = min.x; array[16] = max.y; array[17] = min.z;
-                array[18] = min.x; array[19] = min.y; array[20] = min.z;
-                array[21] = max.x; array[22] = min.y; array[23] = min.z;
-
-                this.bbViz.geometry.attributes.position.needsUpdate = true
-            }
+            updateBoxHelper(this.boxHelper, this.boundingBox)
 
         }
     }

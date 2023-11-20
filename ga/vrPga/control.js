@@ -2,13 +2,13 @@
     You grab the thing, and its arrow moves such that its tip is where you just grabbed
     You move it, and that creates a further, separate arrow
     Which is then composed with the first arrow at the end
+    This is a good idea because it emphasizes to the user how they should think about things:
+        movements create arrows, composing arrows is how you control things generally
 
     TODO
         Hovering a thing shows its affecters
         Sculpting can create new things or add to what's already there, depending on whether your paint is touching it
         You can hold two and it shows you different ones you could create from them
-
-    Could try to highlight the transforms in the same way: a cuboid
 
     You may well want a laser, but not sure yet, and it raises many questions
 
@@ -29,22 +29,19 @@ function initControl() {
     let highlightedSclptable = null
 
     updateHighlighting = () => {
-        snappables.forEach(translator => {
-            if (translator === highlightedTranslator)
-                translator.setColor(0x00FF00)
-            else
-                translator.setColor()
-        })
-
+        
         let dqVizWithCircuitShowing = highlightedTranslator || heldTranslator
         if (dqVizWithCircuitShowing === null)
             hideCircuit()
         else
             showCircuit(dqVizWithCircuitShowing)
         
-        sclptables.forEach(sclptable => sclptable.bbViz.visible = false)
-        if (highlightedSclptable !== null)
-            highlightedSclptable.bbViz.visible = true
+        snappables.forEach(snappable => {
+            snappable.boxHelper.visible = snappable === highlightedTranslator
+        })
+        sclptables.forEach(sclptable => {
+            sclptable.boxHelper.visible = sclptable === highlightedSclptable
+        })
     }
 
     updatePainting = () => {
@@ -70,9 +67,11 @@ function initControl() {
         else if(isLeftButton) {
             //this is about creation, depends on hand
             if (simulatingPaintingHand) {
-                //or could make a new one, if there's nothing in a certain radius
-                let [nearestSclptable, nearestSclptableDist] = getNearestSclptableToPt(handPosition)
-                sclptableBeingSculpted = nearestSclptable
+                
+                if (highlightedSclptable!==null)
+                    sclptableBeingSculpted = highlightedSclptable
+                else
+                    sclptableBeingSculpted = new Sclptable()
             }
             else {
                 heldTranslator = new DqViz()
