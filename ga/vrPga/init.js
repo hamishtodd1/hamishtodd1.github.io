@@ -47,17 +47,8 @@
 
         
     sculpting, - rigging must happen automatically (so sculptVR approach doesn't work great)
-        Press buttons with your controller, it's making a triangle
-        Starts out as a sphere. You're 
-        Would it be possible to add bones and shape at the same time? Like, if you know the bones you know the shape?
-            Maybe yes because you can scale bones. So all bones are spheres maybe?
-            You can give them colors too, which it interpolates
-        Remember, the animation/mvmt is more important than the coloring
-        Hmm sounds like sdfs. Buuuut, you probably want texturing.
         When making the thing, it's attached to one arm and you sculpt with the other surely
             Use analogue stick to move your grip point on it around
-        EXTREMELY SIMPLE DUDE, THIS IS FOR KIDS. As simple as a crayon!
-        Separate shapes = automatically separate bones?
         An idea
             Point at a bone and press the button
             It makes a new bone where your hand is, which you can move and resize until you let go of the button
@@ -209,6 +200,8 @@ async function init() {
         updateHandMvs()
 
         blankFunction()
+
+        updateHighlighting()
         
         updatePalette()
 

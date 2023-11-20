@@ -1,4 +1,10 @@
 /*
+    What we want next is the ability to check if you're ADDING to a blob or making a new one
+        If two things don't 
+
+    Alright these things need bounding boxes,
+        If you're inside two of them, just gotta search through their points and see which has the closer one
+
     When you're working on it, dq transform is shown (axis in world, and angle+distance window)
 
     NEXT: how to "make a new one of these" vs add to one that's already there?
@@ -37,6 +43,9 @@
         Pushing in joystick is pushing in joystick 
         Wheel is rotating
         You do have that one other button just behind the mouswheel
+
+    Optimized version
+        Want to have a fast "inside shape" query, and a fast 
 
     could make a shell of cubes, and always be subtracting ones from the center
  */
@@ -79,8 +88,15 @@ function initSclptables()
             scene.add(this)
             this.matrixAutoUpdate = false
 
+            this.boundingBox = new THREE.Box3()
+            this.bbViz = new THREE.BoxHelper()
+            this.bbViz.visible = false
+            this.bbViz.matrixAutoUpdate = false
+            scene.add(this.bbViz)
+
             coloredPointMats.forEach(mat => {
-                this.add(new ColoredSection(mat))
+                let cs = new ColoredSection(mat)
+                this.add(cs)
             })
 
             this.dqViz = new DqViz()
@@ -93,6 +109,7 @@ function initSclptables()
 
             this.onBeforeRender = () => {
                 this.dqViz.dq.toMat4(this.matrix)
+                this.bbViz.matrix.copy(this.matrix)
             }
         }
 
@@ -115,9 +132,9 @@ function initSclptables()
             this.worldToLocal(v1)
 
             let cs = this.children[currentColor]
-
             cs.vAttr.updateRange.offset = cs.lowestUnusedCube * 3
             cs.vAttr.updateRange.count = 0
+            cs.vAttr.needsUpdate = true
 
             // let distanceGone = handPosition.distanceToPt(handPositionOld)
             // let numSteps = Math.max(1,Math.floor(distanceGone / VOXEL_WIDTH * .9))
@@ -143,16 +160,34 @@ function initSclptables()
                         if(fillable) {
 
                             cs.fillCubePosition(v2)
-
+                            
                             fl0.pointFromVertex(v2)
                             this.com.add(fl0,this.com)
-
+                            this.boundingBox.expandByPoint(v2)
+                            
                         }
                     }
                 }
             }
 
-            cs.vAttr.needsUpdate = true
+            //update box helper
+            {
+                const array = this.bbViz.geometry.attributes.position.array;
+
+                let max = this.boundingBox.max
+                let min = this.boundingBox.min
+                array[0] = max.x; array[1] = max.y; array[2] = max.z;
+                array[3] = min.x; array[4] = max.y; array[5] = max.z;
+                array[6] = min.x; array[7] = min.y; array[8] = max.z;
+                array[9] = max.x; array[10] = min.y; array[11] = max.z;
+                array[12] = max.x; array[13] = max.y; array[14] = min.z;
+                array[15] = min.x; array[16] = max.y; array[17] = min.z;
+                array[18] = min.x; array[19] = min.y; array[20] = min.z;
+                array[21] = max.x; array[22] = min.y; array[23] = min.z;
+
+                this.bbViz.geometry.attributes.position.needsUpdate = true
+            }
+
         }
     }
     window.Sclptable = Sclptable

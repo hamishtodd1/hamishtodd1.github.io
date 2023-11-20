@@ -1,8 +1,14 @@
 /*
+    You grab the thing, and its arrow moves such that its tip is where you just grabbed
+    You move it, and that creates a further, separate arrow
+    Which is then composed with the first arrow at the end
+
     TODO
         Hovering a thing shows its affecters
         Sculpting can create new things or add to what's already there, depending on whether your paint is touching it
         You can hold two and it shows you different ones you could create from them
+
+    Could try to highlight the transforms in the same way: a cuboid
 
     You may well want a laser, but not sure yet, and it raises many questions
 
@@ -20,8 +26,9 @@ function initControl() {
     let heldTranslator = null
     let sclptableBeingSculpted = null
     let highlightedTranslator = null
+    let highlightedSclptable = null
 
-    blankFunction = () => {
+    updateHighlighting = () => {
         snappables.forEach(translator => {
             if (translator === highlightedTranslator)
                 translator.setColor(0x00FF00)
@@ -34,6 +41,10 @@ function initControl() {
             hideCircuit()
         else
             showCircuit(dqVizWithCircuitShowing)
+        
+        sclptables.forEach(sclptable => sclptable.bbViz.visible = false)
+        if (highlightedSclptable !== null)
+            highlightedSclptable.bbViz.visible = true
     }
 
     updatePainting = () => {
@@ -87,7 +98,16 @@ function initControl() {
                 //this should do sculptables too
                 //it should only highlight if clicking would result in you picking up that thing
                 let [nearestSnappable, nearestSnappableDist] = getNearestSnappableToPt(handPosition)
-                highlightedTranslator = nearestSnappable
+                let [nearestSclptable, nearestSclptableDist] = getNearestSclptableToPt(handPosition)
+
+                if(nearestSnappableDist < nearestSclptableDist) {
+                    highlightedTranslator = nearestSnappable
+                    highlightedSclptable = null
+                }
+                else {
+                    highlightedSclptable = nearestSclptable
+                    highlightedTranslator = null
+                }
             }
         }
     })
