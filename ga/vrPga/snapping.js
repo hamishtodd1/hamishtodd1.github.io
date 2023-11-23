@@ -43,7 +43,7 @@ function initSnapping() {
         for (let i = 0, il = snappables.length; i < il; i++) {
 
             let translator0 = snappables[i]
-            if(translator0 === dqVizToSnap)
+            if (translator0 === dqVizToSnap || translator0.dependsOn(dqVizToSnap) || translator0.dq.equals(oneDq) )
                 continue
 
             for (let k = 0, kl = operators.length; k < kl; k++) {
@@ -57,13 +57,14 @@ function initSnapping() {
                 else {
                     for (let j = 0, jl = snappables.length; j < jl; j++) {
 
-                        if (snappables[j] === dqVizToSnap)
+                        let translator1 = snappables[j]
+                        if (translator1 === dqVizToSnap || translator1.dependsOn(dqVizToSnap) || translator1.dq.equals(oneDq))
                             continue
     
                         if( i === j )
                             continue //mulReverse would get identity, add would do nothing, mul covered by log
                         
-                        translator0.dq[operators[k]](snappables[j].dq, potentialSnap).normalize()
+                        translator0.dq[operators[k]](translator1.dq, potentialSnap).normalize()
                         if( rate(operators[k]) ) {
                             potentialAffecters[0] = i; potentialAffecters[1] = j; potentialAffecters[2] = k;
                         }

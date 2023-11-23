@@ -1,11 +1,3 @@
-/*
-	Send to haxiomic/mrdoob/wannerstedt, get "make it nicer looking for free by doing this:"
-	
-	Make something with bloody puzzles
-	The youtube thing is a colossal perverse incentive
-		Subtleties in interactive learning is your raison d'etre, but here we are, making something non-interactive
-*/
-
 buttonWhileDowns = () => { }
 
 function initButtons() {

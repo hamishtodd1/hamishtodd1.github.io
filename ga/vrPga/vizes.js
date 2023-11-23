@@ -1,4 +1,7 @@
-/*
+ /*
+    It's probably quite fun just to look at dq arrow compositions
+    Like the vector picture but a bit more fun because you can curve
+
     Call the plane contianing a translation axis and the camera point the "nice-plane"
         For any pair of non-parallel translations
             you can always compose both the arrows while keeping them in their nice-plane
@@ -9,7 +12,7 @@
     The idea is you're going to REMEMBER how the things got made
         If you're looking at the wires for a thing, could press a button to see how those things got made
 
-    The only "subjective" part is where to START the arrow
+    Where to START the arrow
         Ideally no "if" statement about rotation and translation
         The arrow should be cut in half by the axis maybe
             That puts it in a plane
@@ -23,7 +26,6 @@
         SOMETIMES you may WELL want to put them end-to-end. So it may be an "art"
         Could all originate at your hand
 
-    Happy faces on vizes
     Could have things vibrate depending on their norm, because they "want to move"?
 */
 
@@ -75,8 +77,9 @@ function initVizes() {
             str: egaVerboseGlsl + egaGlsl + `
                 float TAU = 6.283185307179586;
                 uniform float[8] dq;
-                uniform vec3 extraVec1;
-                uniform vec3 extraVec2;
+                uniform vec3 extraVec1; //start
+                uniform vec3 extraVec2; //"out vector" at base
+                uniform vec3 extraVec3;
             \n`
         },
         {
@@ -88,8 +91,16 @@ function initVizes() {
 
                 vec4 start = vec4(extraVec1,1.);
 
-                float alongness = position.y;
-                float outness = alongness == 1. ? 0. : 1.;
+                bool isShaft = position.y <= 1.;
+                bool isTip = position.y >= 2.;
+                float headStart = extraVec3.y; //it's a proportion
+                float alongness = isShaft ? headStart * position.y : headStart + (1.-headStart) * (position.y - 1.);
+                alongness = alongness < 0. ? 0. : alongness;
+                float headOutnessAtArrowBase = extraVec3.x; //this should come in from the uniforms
+                float outness = isShaft ? 1. : isTip ? 0. : headOutnessAtArrowBase * (1.-alongness);
+                bool noShaft = headStart < 0.;
+                if(noShaft && isShaft)
+                    outness = 0.;
 
                 float[8] alongLog; dqLog( dq, alongLog );
                 multiplyScalar( alongLog, alongness, alongLog );
@@ -101,7 +112,7 @@ function initVizes() {
 
                 float[8] aroundAxisUnnormalized; joinPt(start, sandwichDqPoint(dq, start), aroundAxisUnnormalized);
                 float[8] aroundAxis; dqNormalize(aroundAxisUnnormalized, aroundAxis);
-                float angleAround = alongness == 1. ? 0. : atan(transformed.z,transformed.x);
+                float angleAround = isTip ? 0. : atan(transformed.z,transformed.x) / 2.;
                 float[8] around; fromUnitAxisAndSeparation( aroundAxis, angleAround, around );
 
                 vec4 outed = sandwichDqPoint( outDq, start );
@@ -111,14 +122,31 @@ function initVizes() {
                 
                 // transformed.xyz += ;
 
-                vNormal = alongness == 1. ? vec3(0.,1.,0.) : (arounded - start).xyz;
+                vNormal = 
+                    isTip ? vec3(0.,0.,0.) : 
+                    (arounded - start).xyz;
             `,
             //` transformed.y += 0.; vNormal.x += 0.;\n`
         },
     ]
-    let arrowRadius = .04
-    let dqArrowGeo = new THREE.ConeGeometry(arrowRadius, 1., 16, 3, false)
-    dqArrowGeo.translate(0., .5, 0.)
+    let arrowRadius = .06
+    {
+        let radialSegments = 9
+        let heightSegments = 1*24+1
+        let height = 2.
+        let segmentHeight = height / (heightSegments - 1)
+        let ySubtraction = segmentHeight - .001
+        var dqArrowGeo = new THREE.ConeGeometry(arrowRadius, height+segmentHeight, radialSegments, heightSegments, false) //first half is shaft, second is head
+        for (let i = 0; i < dqArrowGeo.attributes.position.count; ++i) {
+            let y = dqArrowGeo.attributes.position.array[i * 3 + 1]
+            y += (height + segmentHeight)/2. // so we start from 0
+            if (y > 1.)
+                y -= ySubtraction
+            dqArrowGeo.attributes.position.array[i * 3 + 1] = y
+        }
+        log(dqArrowGeo.attributes.position.array.length)
+    }
+    
     let cylRadius = .02
     let rotAxisGeo = new THREE.CylinderGeometry(cylRadius,       cylRadius,       camera.far * 10., 5, 1, true)
     let trnAxisGeo = new THREE.CylinderGeometry(cylRadius * 15., cylRadius * 15., camera.far * 10., 5, 1, true)
@@ -172,9 +200,36 @@ function initVizes() {
                 }
                 
                 this.rotAxisMesh.visible = true; this.trnAxisMesh.visible = true; this.arrow.visible = true
-                
-                this.arrowStart.pointToVertex(this.arrow.material.extraVec1)
+
+                //bounding box and sampling
+                let arrowArcLength = 0.
                 {
+                    this.boundingBox.makeEmpty()
+                    let numSamples = 8
+                    let previous = v2
+                    for (let i = 0; i < numSamples; ++i) {
+                        this.dq.pow(i / (numSamples - 1), dq0)
+                        dq0.sandwichFl(this.arrowStart, fl0).pointToVertex(v1)
+                        this.boundingBox.expandByPoint(v1)
+
+                        if(i > 0)
+                            arrowArcLength += v1.distanceTo(previous)
+                        previous.copy(v1)
+                    }
+                    this.boundingBox.min.subScalar(arrowRadius)
+                    this.boundingBox.max.addScalar(arrowRadius)
+                    updateBoxHelper(this.boxHelper, this.boundingBox)
+                }
+                
+                //arrow
+                {
+                    this.arrowStart.pointToVertex(this.arrow.material.extraVec1)
+                    
+                    let headArcLength = .25
+                    let headStart = (1.-headArcLength/arrowArcLength)
+                    let headOutnessAtArrowBase = arrowArcLength * 8.5 //magic number proprotional to the headRadius
+                    this.arrow.material.extraVec3.set(headOutnessAtArrowBase,headStart,0.)
+
                     this.dq.pow(0.01, dq0)
                     let movedAlongSlightly = dq0.sandwichFl(this.arrowStart, fl0) //alternatively, commutator with log
 
@@ -183,7 +238,7 @@ function initVizes() {
                     this.arrow.material.extraVec2.set(
                         outDqAtStartLog[1],
                         outDqAtStartLog[2],
-                        outDqAtStartLog[3]).multiplyScalar(arrowRadius)
+                        outDqAtStartLog[3]).multiplyScalar(arrowRadius/2.)
                     // log(this.arrow.material.extraVec2)
                 }
                 //this gets the displacement from the start
@@ -210,20 +265,21 @@ function initVizes() {
                         e31.dqTo(fakeLineAtInfinity, this.trnAxisMesh.dq)
                     }
                 }
-
-                {
-                    this.boundingBox.makeEmpty()
-                    let numSamples = 4
-                    for (let i = 0; i < numSamples; ++i) {
-                        this.dq.pow(i / (numSamples-1), dq0)
-                        dq0.sandwichFl(this.arrowStart, fl0).pointToVertex(v1)
-                        this.boundingBox.expandByPoint(v1)
-                    }
-                    this.boundingBox.min.subScalar(arrowRadius*2.)
-                    this.boundingBox.max.addScalar(arrowRadius*2.)
-                    updateBoxHelper(this.boxHelper,this.boundingBox)
-                }
             }
+        }
+
+        dependsOn(viz) {
+            let ret = false
+            if (this.affecters[0] === viz ||
+                this.affecters[1] === viz)
+                ret = true
+
+            if (ret === false && this.affecters[0] !== null)
+                ret = this.affecters[0].dependsOn(viz)
+            if (ret === false && this.affecters[1] !== null)
+                ret = this.affecters[1].dependsOn(viz)
+
+            return ret
         }
 
         updateFromAffecters() {

@@ -1,22 +1,16 @@
 /*
-    You grab the thing, and its arrow moves such that its tip is where you just grabbed
-    You move it, and that creates a further, separate arrow
-    Which is then composed with the first arrow at the end
-    This is a good idea because it emphasizes to the user how they should think about things:
-        movements create arrows, composing arrows is how you control things generally
-
     TODO
         Hovering a thing shows its affecters
         Sculpting can create new things or add to what's already there, depending on whether your paint is touching it
         You can hold two and it shows you different ones you could create from them
+        Change the way your hand movement changes heldTranslator
+            You grab the thing, and its arrow moves such that its tip is where you just grabbed. It is frozen
+            You move your hand, and that creates a further, separate arrow
+            AND another arrow which is your current motion composed
+            This is a good idea because it emphasizes to the user how they should think about things:
+                movements create arrows, composing arrows is how you control things generally
 
-    You may well want a laser, but not sure yet, and it raises many questions
-
-    To duplicate: grab an object with two hands, pull them apart, it makes a duplicate
-    And press some button to increase the number of them you have between your hands
-    Want some way of making a bunch of random displacements
-
-    We want wires, in a camera plane
+    You probably want a laser, but not sure yet, and it raises many questions
 
     Your "go to next snap" button, if there IS no snap, could just try to do shit with whatever's visible
  */
@@ -25,22 +19,22 @@ function initControl() {
 
     let heldTranslator = null
     let sclptableBeingSculpted = null
-    let highlightedTranslator = null
-    let highlightedSclptable = null
+    let hoveredTranslator = null
+    let hoveredSclptable = null
 
     updateHighlighting = () => {
         
-        let dqVizWithCircuitShowing = highlightedTranslator || heldTranslator
+        let dqVizWithCircuitShowing = hoveredTranslator || heldTranslator
         if (dqVizWithCircuitShowing === null)
             hideCircuit()
         else
             showCircuit(dqVizWithCircuitShowing)
         
         snappables.forEach(snappable => {
-            snappable.boxHelper.visible = snappable === highlightedTranslator
+            snappable.boxHelper.visible = snappable === hoveredTranslator
         })
         sclptables.forEach(sclptable => {
-            sclptable.boxHelper.visible = sclptable === highlightedSclptable
+            sclptable.boxHelper.visible = sclptable === hoveredSclptable
         })
     }
 
@@ -68,8 +62,8 @@ function initControl() {
             //this is about creation, depends on hand
             if (simulatingPaintingHand) {
                 
-                if (highlightedSclptable!==null)
-                    sclptableBeingSculpted = highlightedSclptable
+                if (hoveredSclptable!==null)
+                    sclptableBeingSculpted = hoveredSclptable
                 else
                     sclptableBeingSculpted = new Sclptable()
             }
@@ -84,7 +78,7 @@ function initControl() {
     document.addEventListener("pointermove", event => {
 
         if (heldTranslator !== null) {
-            highlightedTranslator = heldTranslator
+            hoveredTranslator = heldTranslator
             
             heldTranslator.dq.ptToPt(heldTranslator.arrowStart, handPosition)
             snap(heldTranslator)
@@ -92,20 +86,18 @@ function initControl() {
         else {
             
             if (sclptableBeingSculpted !== null)
-                highlightedTranslator = null
+                hoveredTranslator = null
             else {
-                //this should do sculptables too
-                //it should only highlight if clicking would result in you picking up that thing
                 let [nearestSnappable, nearestSnappableDist] = getNearestSnappableToPt(handPosition)
                 let [nearestSclptable, nearestSclptableDist] = getNearestSclptableToPt(handPosition)
 
                 if(nearestSnappableDist < nearestSclptableDist) {
-                    highlightedTranslator = nearestSnappable
-                    highlightedSclptable = null
+                    hoveredTranslator = nearestSnappable
+                    hoveredSclptable = null
                 }
                 else {
-                    highlightedSclptable = nearestSclptable
-                    highlightedTranslator = null
+                    hoveredSclptable = nearestSclptable
+                    hoveredTranslator = null
                 }
             }
         }

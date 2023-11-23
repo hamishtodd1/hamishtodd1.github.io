@@ -1,6 +1,10 @@
 /*
-    You're assuming that there are positions for the start and end in space
-    Have it on the camera plane
+    TODO
+        Have it on the camera plane
+        wires don't change thickness and always have chevrons going down them from your pov
+        Rendered on top of everything
+        Given three points and a directed Y shape, probably easy to find a natural way to put that on a sphere
+        Circular arcs, ideally all the same length and not overlapping
  */
 
 function initCircuits() {
