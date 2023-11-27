@@ -11,8 +11,6 @@ function text(initialText,materialOnly,textColorHex) {
 		if(currentText === text)
 			return
 
-		currentText = text
-
 		let font = "Arial"
 		let backgroundMargin = 43
 		let textSize = 85
@@ -41,6 +39,8 @@ function text(initialText,materialOnly,textColorHex) {
 
 		if( materialOnly === false)
 			sign.scale.x = material.getAspect() * sign.scale.y
+
+		currentText = text
 	}
 	material.getText = function() {
 		return currentText

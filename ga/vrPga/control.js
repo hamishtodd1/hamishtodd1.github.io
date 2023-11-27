@@ -17,24 +17,73 @@
 
 function initControl() {
 
+    //debug examples
+    {
+        // let verySimple = new DqViz()
+        // verySimple.dq.copy(Translator(0., 1., 0.))
+        // verySimple.markupPos.point(0., 0., 0.)
+
+        let viz1 = new DqViz()
+        snappables.push(viz1)
+        viz1.dq.copy(Translator(.8, 0., 0.))
+        viz1.markupPos.point(-.4, .9, 0.)
+
+        var sclptable = new Sclptable()
+        sclptable.brushStroke(fl0.point(0., 1.6, 0., 1.))
+
+        let viz2 = new DqViz()
+        snappables.push(viz2)
+        viz2.dq.copy(Translator(0., .6, 0.))
+        viz2.markupPos.point(-.4, 1.3, 0.)
+
+        let viz3 = new DqViz()
+        snappables.push(viz3)
+        viz3.markupPos.point(-.8, 1., 0.)
+        viz3.affecters[0] = viz2
+        viz3.affecters[1] = viz1
+        viz3.affecters[2] = 1
+    }
+
     let heldTranslator = null
     let sclptableBeingSculpted = null
-    let hoveredTranslator = null
-    let hoveredSclptable = null
+    let highlightedTranslator = null
+    let highlightedSclptable = null
+
+    function interdependencyExists(a, b) {
+        return a.dependsOn(b) || b.dependsOn(a)
+    }
 
     updateHighlighting = () => {
         
-        let dqVizWithCircuitShowing = hoveredTranslator || heldTranslator
-        if (dqVizWithCircuitShowing === null)
-            hideCircuit()
-        else
-            showCircuit(dqVizWithCircuitShowing)
-        
-        snappables.forEach(snappable => {
-            snappable.boxHelper.visible = snappable === hoveredTranslator
-        })
+        // let dqVizWithCircuitShowing = highlightedTranslator || heldTranslator
+        // if (dqVizWithCircuitShowing === null)
+        //     hideCircuit()
+        // else
+        //     showCircuit(dqVizWithCircuitShowing)
+
         sclptables.forEach(sclptable => {
-            sclptable.boxHelper.visible = sclptable === hoveredSclptable
+            sclptable.boxHelper.visible = sclptable === highlightedSclptable
+            sclptable.dqViz.visible = 
+                sclptable.boxHelper.visible ? true :
+                highlightedTranslator === null ? false :
+                interdependencyExists(sclptable.dqViz, highlightedTranslator)
+            sclptable.dqViz.boxHelper.visible = sclptable.dqViz === highlightedTranslator  
+        })
+
+        snappables.forEach(snappable => {
+
+            if(snappable.sclptable)
+                return
+
+            snappable.boxHelper.visible = snappable === highlightedTranslator
+        })
+
+        snappables.forEach(snappable => {
+            snappable.circuitVisible = 
+                highlightedTranslator === null ? 
+                    false : 
+                    snappable === highlightedTranslator ||
+                    interdependencyExists(snappable, highlightedTranslator)
         })
     }
 
@@ -56,21 +105,21 @@ function initControl() {
 
             heldTranslator = nearest.constructor === DqViz ? nearest : nearest.dqViz
             if (heldTranslator.dq.isScalarMultipleOf(oneDq))
-                heldTranslator.arrowStart.copy(handPosition)
+                heldTranslator.markupPos.copy(handPosition)
         }
         else if(isLeftButton) {
             //this is about creation, depends on hand
             if (simulatingPaintingHand) {
                 
-                if (hoveredSclptable!==null)
-                    sclptableBeingSculpted = hoveredSclptable
+                if (highlightedSclptable!==null)
+                    sclptableBeingSculpted = highlightedSclptable
                 else
                     sclptableBeingSculpted = new Sclptable()
             }
             else {
                 heldTranslator = new DqViz()
                 snappables.push(heldTranslator)
-                heldTranslator.arrowStart.copy(handPosition)
+                heldTranslator.markupPos.copy(handPosition)
             }
         }
     })
@@ -78,26 +127,26 @@ function initControl() {
     document.addEventListener("pointermove", event => {
 
         if (heldTranslator !== null) {
-            hoveredTranslator = heldTranslator
+            highlightedTranslator = heldTranslator
             
-            heldTranslator.dq.ptToPt(heldTranslator.arrowStart, handPosition)
+            heldTranslator.dq.ptToPt(heldTranslator.markupPos, handPosition)
             snap(heldTranslator)
         }
         else {
             
             if (sclptableBeingSculpted !== null)
-                hoveredTranslator = null
+                highlightedTranslator = null
             else {
-                let [nearestSnappable, nearestSnappableDist] = getNearestSnappableToPt(handPosition)
+                let [nearestSnappable, nearestSnappableDist] = getNearestSnappableToPt(handPosition, false)
                 let [nearestSclptable, nearestSclptableDist] = getNearestSclptableToPt(handPosition)
 
                 if(nearestSnappableDist < nearestSclptableDist) {
-                    hoveredTranslator = nearestSnappable
-                    hoveredSclptable = null
+                    highlightedTranslator = nearestSnappable
+                    highlightedSclptable = null
                 }
                 else {
-                    hoveredSclptable = nearestSclptable
-                    hoveredTranslator = null
+                    highlightedSclptable = nearestSclptable
+                    highlightedTranslator = null
                 }
             }
         }
@@ -111,8 +160,16 @@ function initControl() {
         if (simulatingPaintingHand && isLeftButton)
             sclptableBeingSculpted = null
         else if ( heldTranslator !== null && (isRightButton||isLeftButton)) { //remember middle button exists
+
+            if (heldTranslator.sclptable) {
+                heldTranslator.dq
+                    .getReverse(dq0)
+                    .sandwich(
+                        heldTranslator.dq.sandwich(heldTranslator.sclptable.com,fl0),
+                        heldTranslator.markupPos)
+            }
+
             heldTranslator = null
-            resetMarkup()
         }
     })
 
@@ -142,11 +199,17 @@ function initControl() {
         return [nearest, nearestDist]
     }
 
-    function getNearestSnappableToPt(pt) {
+    function getNearestSnappableToPt(pt, includeSculptables) {
 
         let nearest = null
         let nearestDist = Infinity
         snappables.forEach(snappable => {
+
+            if (!includeSculptables) {
+                let isAttachedToSclptable = sclptables.find(sc=>sc.dqViz === snappable)
+                if (isAttachedToSclptable)
+                    return
+            }
 
             snappable.getArrowTip(fl0)
             let dist = pt.distanceToPt(fl0)
@@ -162,7 +225,7 @@ function initControl() {
     }
 
     function getNearestThingToHand() {
-        let [nearestSnappable, nearestSnappableDist] = getNearestSnappableToPt(handPosition)
+        let [nearestSnappable, nearestSnappableDist] = getNearestSnappableToPt(handPosition, true)
         let [nearestSclptable, nearestSclptableDist] = getNearestSclptableToPt(handPosition)
 
         if (nearestSnappableDist === Infinity && nearestSclptableDist === Infinity)

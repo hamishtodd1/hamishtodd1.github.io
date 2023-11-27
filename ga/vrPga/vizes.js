@@ -1,4 +1,4 @@
- /*
+/*
     It's probably quite fun just to look at dq arrow compositions
     Like the vector picture but a bit more fun because you can curve
 
@@ -60,15 +60,6 @@ function initVizes() {
             an AWAY axis taking that point away from the spine
                 Could be trans. But if rotor is a scale it could be rotation!
                 Will definitely have an axis that lies on the around axis but not necessarily on the spine
-            So
-        Apply the rotor by the amount v to get different pt, around axis, away axis
-
-        The thing has a spine, which is at its most complex a spiral-screw
-        Along the spine are cross sections where the vertices are
-        Though note a cross section's surface is in general spherical
-        So the vertices need to be rotated out
-
-        Translation, rotation, scale
      */
     let dqArrowMatInjections = [
         {
@@ -79,7 +70,7 @@ function initVizes() {
                 uniform float[8] dq;
                 uniform vec3 extraVec1; //start
                 uniform vec3 extraVec2; //"out vector" at base
-                uniform vec3 extraVec3;
+                uniform vec3 extraVec3; //x and y do separate things
             \n`
         },
         {
@@ -154,14 +145,20 @@ function initVizes() {
     let translationPart = new Dq()
     let randomPt = new Fl().point(0.2448657087518873, 0.07640275431752674, 0.360207610338215, 1.)
     class DqViz extends THREE.Group {
+        
         constructor(col = dqCol) {
+
             super()
             scene.add(this)
-            this.dq = new Dq()
+            this.dq = new Dq() //better to say mv really, disambiguate from dqMeshes
 
             let axisMat = new THREE.MeshPhongMaterial({ color: dqCol })
             this.rotAxisMesh = new DqMesh(rotAxisGeo, axisMat)
             this.add(this.rotAxisMesh)
+
+            this.circuitVisible = false
+
+            this.sclptable = null
 
             this.trnAxisMesh = new DqMesh(trnAxisGeo, axisMat)
             this.add(this.trnAxisMesh)
@@ -171,6 +168,10 @@ function initVizes() {
             // this.boxHelper.visible = false
             this.boxHelper.matrixAutoUpdate = false
             scene.add(this.boxHelper)
+
+            this.scalarSign = changeableText()
+            this.scalarSign.scale.multiplyScalar(.4)
+            scene.add(this.scalarSign)
 
             this.affecters = [
                 null, null, -1
@@ -182,7 +183,7 @@ function initVizes() {
 
             this.arrow = new THREE.Mesh(dqArrowGeo, arrowMat)
             // this.arrow.castShadow = true //would be nice but it doesn't use the vertex shader
-            this.arrowStart = new Fl().copy(e123)
+            this.markupPos = new Fl().copy(e123)
             this.arrow.matrixAutoUpdate = false
             this.add(this.arrow)
 
@@ -190,26 +191,40 @@ function initVizes() {
             this.onBeforeRender = () => {
 
                 // visibility is *controlled* at the group level
-                // ASSUMING you're group-level visible
+                // below ASSUMES you're group-level visible
 
                 this.updateFromAffecters()
 
-                if(this.dq.equals(oneDq) || this.dq.isZero()) {
+                let hasBivPart = this.dq[1] !== 0. || this.dq[2] !== 0. || this.dq[3] !== 0. || this.dq[4] !== 0. || this.dq[5] !== 0. || this.dq[6] !== 0.
+                if (!hasBivPart) {
                     this.rotAxisMesh.visible = false; this.trnAxisMesh.visible = false; this.arrow.visible = false
+                    this.scalarSign.visible = true
+
+                    if (this.dq[0] === 1.)
+                        this.scalarSign.visible = false
+                    else {
+                        this.markupPos.pointToVertex(this.scalarSign.position)
+                        this.scalarSign.lookAt(camera.position)
+                        
+                        this.scalarSign.setText(this.dq[0])
+                        this.scalarSign.visible = true
+                    } 
+
                     return
                 }
                 
                 this.rotAxisMesh.visible = true; this.trnAxisMesh.visible = true; this.arrow.visible = true
+                this.scalarSign.visible = false
 
-                //bounding box and sampling
                 let arrowArcLength = 0.
+                //bounding box and determination of arrow arclength
                 {
                     this.boundingBox.makeEmpty()
                     let numSamples = 8
                     let previous = v2
                     for (let i = 0; i < numSamples; ++i) {
                         this.dq.pow(i / (numSamples - 1), dq0)
-                        dq0.sandwichFl(this.arrowStart, fl0).pointToVertex(v1)
+                        dq0.sandwichFl(this.markupPos, fl0).pointToVertex(v1)
                         this.boundingBox.expandByPoint(v1)
 
                         if(i > 0)
@@ -223,7 +238,7 @@ function initVizes() {
                 
                 //arrow
                 {
-                    this.arrowStart.pointToVertex(this.arrow.material.extraVec1)
+                    this.markupPos.pointToVertex(this.arrow.material.extraVec1)
                     
                     let headArcLength = .25
                     let headStart = (1.-headArcLength/arrowArcLength)
@@ -231,9 +246,9 @@ function initVizes() {
                     this.arrow.material.extraVec3.set(headOutnessAtArrowBase,headStart,0.)
 
                     this.dq.pow(0.01, dq0)
-                    let movedAlongSlightly = dq0.sandwichFl(this.arrowStart, fl0) //alternatively, commutator with log
+                    let movedAlongSlightly = dq0.sandwichFl(this.markupPos, fl0) //alternatively, commutator with log
 
-                    let randomPlaneContainingSpineAxisAtStart = this.arrowStart.joinPt(movedAlongSlightly, dq0).joinPt(randomPt, fl1)
+                    let randomPlaneContainingSpineAxisAtStart = this.markupPos.joinPt(movedAlongSlightly, dq0).joinPt(randomPt, fl1)
                     let outDqAtStartLog = randomPlaneContainingSpineAxisAtStart.meet(e0, dq0).normalize()
                     this.arrow.material.extraVec2.set(
                         outDqAtStartLog[1],
@@ -241,7 +256,6 @@ function initVizes() {
                         outDqAtStartLog[3]).multiplyScalar(arrowRadius/2.)
                     // log(this.arrow.material.extraVec2)
                 }
-                //this gets the displacement from the start
 
                 this.dq.invariantDecomposition( rotationPart, translationPart )
                 {
@@ -300,12 +314,12 @@ function initVizes() {
 
         //it's a vec3 going in there
         getArrowTip(target) {
-            this.dq.sandwichFl(this.arrowStart, target)
+            this.dq.sandwichFl(this.markupPos, target)
             return target
         }
 
         getArrowCenter(target) {
-            return this.dq.sqrt(dq0).sandwichFl(this.arrowStart, target)
+            return this.dq.sqrt(dq0).sandwichFl(this.markupPos, target)
         }
 
         getNicePlane(target) {
@@ -323,4 +337,53 @@ function initVizes() {
 
     }
     window.DqViz = DqViz
+
+    let scalarBgMat = new THREE.MeshBasicMaterial({ color: 0xCCCCCC })
+    function changeableText() {
+
+        let canvas = document.createElement("canvas")
+        let context = canvas.getContext("2d")
+        let material = new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(canvas), transparent: true })
+
+        let font = "Arial"
+        let padding = 43
+        let textSize = 85
+        canvas.height = textSize + padding
+        canvas.width = 200. //more an estimate of the required resolution
+
+        let ret = new THREE.Group()
+
+        let currentText = ""
+        ret.setText = function (text) {
+            if (currentText === text)
+                return
+
+            context.font = "bold " + textSize + "px " + font
+            context.textAlign = "center"
+            context.textBaseline = "middle"
+
+            context.clearRect(
+                0, 0,
+                canvas.width,
+                canvas.height)
+            context.fillStyle = "#000000"
+            context.fillText(text, canvas.width / 2., canvas.height / 2. + 8) //8 is eyeballed. These are numbers
+
+            let textWidth = context.measureText(text).width + padding
+            bg.scale.x = bg.scale.y * textWidth / canvas.height
+
+            material.map.needsUpdate = true
+
+            currentText = text
+        }
+
+        let bg = new THREE.Mesh(unchangingUnitSquareGeometry, scalarBgMat)
+        bg.position.z = -.01
+        ret.add(bg)
+        let sign = new THREE.Mesh(unchangingUnitSquareGeometry, material);
+        sign.scale.x = canvas.width / canvas.height
+        ret.add(sign)
+
+        return ret
+    }
 }

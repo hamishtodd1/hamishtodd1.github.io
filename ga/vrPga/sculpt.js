@@ -1,18 +1,7 @@
 /*
     What we want next is the ability to check if you're ADDING to a blob or making a new one
-        If two things don't 
-
-    Alright these things need bounding boxes,
-        If you're inside two of them, just gotta search through their points and see which has the closer one
-
-    When you're working on it, dq transform is shown (axis in world, and angle+distance window)
-
-    NEXT: how to "make a new one of these" vs add to one that's already there?
-    Adjacency, dude!
-    How to decide what one is hovered is a little hard
-
-    TODO
-        Want a "preview" of where the next thing you're about to lay is
+        Adjacency is an option: if your thing is connected to an existing thing, then yes, that's it
+        But apparently bounding boxes go a long way
 
     If you're     holding a  thing in your other hand and you hold the paint button
         it adds to that object
@@ -21,9 +10,6 @@
         Probably if you press the grab button while holding the paint button, you're now holding the new object
     If you were holding a transform, great, we're adding it to that transform
     If you were holding a point/line/plane, erm, maybe not
-
-    Soooo, sometimes you want the same mesh with several different transforms.
-        Aaaaand you may want that mesh to be updated 
 
     Other hand:
         Top finger: create point, line, plane, transform... scalar (appears on a double cover plot). First three act as a rigid bodies
@@ -36,16 +22,13 @@
     Mouse:
         Mouse wheel press is for rotating the camera
         Joystick is joystick
-        Click is index
+        Click is index finger button
         Right click is side button (probably "hold"/grab)
         "Rewind" is A
         "Forward" is B
         Pushing in joystick is pushing in joystick 
         Wheel is rotating
         You do have that one other button just behind the mouswheel
-
-    Optimized version
-        Want to have a fast "inside shape" query, and a fast 
 
     could make a shell of cubes, and always be subtracting ones from the center
  */
@@ -100,6 +83,7 @@ function initSclptables()
             })
 
             this.dqViz = new DqViz()
+            this.dqViz.sclptable = this
             snappables.push(this.dqViz)
             //well, it makes sense to have the thing be at the tip of an arrow
 
@@ -161,15 +145,24 @@ function initSclptables()
                         if(fillable) {
 
                             cs.fillCubePosition(v2)
-                            
+
                             fl0.pointFromVertex(v2)
                             this.com.add(fl0,this.com)
-                            this.boundingBox.expandByPoint(v2)
                             
+                            this.boundingBox.min.x = Math.min(this.boundingBox.min.x, v2.x - 1.5*VOXEL_WIDTH)
+                            this.boundingBox.min.y = Math.min(this.boundingBox.min.y, v2.y - 1.5*VOXEL_WIDTH)
+                            this.boundingBox.min.z = Math.min(this.boundingBox.min.z, v2.z - 1.5*VOXEL_WIDTH)
+                            this.boundingBox.max.x = Math.max(this.boundingBox.max.x, v2.x + 1.5*VOXEL_WIDTH)
+                            this.boundingBox.max.y = Math.max(this.boundingBox.max.y, v2.y + 1.5*VOXEL_WIDTH)
+                            this.boundingBox.max.z = Math.max(this.boundingBox.max.z, v2.z + 1.5*VOXEL_WIDTH)
                         }
                     }
                 }
             }
+
+            this.dqViz.dq.getReverse(dq0)
+            this.com.getNormalization(fl0)
+            dq0.sandwichFl(fl0, this.dqViz.markupPos)
 
             updateBoxHelper(this.boxHelper, this.boundingBox)
 

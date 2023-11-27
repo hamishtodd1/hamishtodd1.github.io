@@ -34,9 +34,9 @@ function initSnapping() {
             }
 
             let lowest = l1Norm < l1NormLowest
-            if (lowest) {
+            if (lowest)
                 l1NormLowest = l1Norm
-            }
+            
             return lowest
         }
         
@@ -75,7 +75,6 @@ function initSnapping() {
         
         let gonnaSnap = Math.abs(l1NormLowest) < tolerance
         if (!gonnaSnap) {
-            resetMarkup()
             dqVizToSnap.affecters[0] = null
             dqVizToSnap.affecters[1] = null
             dqVizToSnap.affecters[2] = -1

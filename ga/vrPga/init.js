@@ -1,19 +1,11 @@
 /*
-    One idea for visibility
-        Your most-recently-created things are visible
-        There's max 7 of them at a time
-        Make a new thing visible (eg create a thing or grab a thing) and that thing becomes visible
-        But something else is now invisible
-        You can "scroll back", making your new thing invisible and the thing that just disappeared visible
-        Put this on futureofcoding slack
-
     TODO for "show" demo:
-        Rotations as well as translations
+        MAKE *A* PROPERLY RIGGED PUPPET!
+        Rotations/screws as well as translations
         Circuits need to be a bit more readable, see notes in markup.js
-        Numbers on measurer
         Some way for a sclptable to be affected by the buttons you are pressing
-        Not so hard to animate a tentacle
-        Recording your hand motion somehow. Probably it is automatically turned into a loop
+        Animate a tentacle
+        Recording your hand motion somehow? Probably it is automatically turned into a loop
         Audience view
             no markup visible
             MAYBE pupeteer view should be the same angle, maybe not, make it optional for now
@@ -28,6 +20,7 @@
         Little lizard creatures that rate your animations, with different preferences
             Make an animation with the smallest number of bones, so it's doing a complex thing
         Some levels!!!!!!
+        Are you using the measurer for anything? If so, some numbers...
     Beyond:
         Roblox addon for importing the animal you made
             Don't market it. This is the start, a way to get investment for further things
@@ -41,6 +34,13 @@
         IF you were to do the inertia tensor
             First thing would be, for the sclptables, getting the inertia tensor
             And having you move a line L around, and showing you the I[L]
+        One idea for visibility
+            Your most-recently-created things are visible
+            There's max 7 of them at a time
+            Make a new thing visible (eg create a thing or grab a thing) and that thing becomes visible
+            But something else is now invisible
+            You can "scroll back", making your new thing invisible and the thing that just disappeared visible
+            Put this on futureofcoding slack
         
     Philosophy
         If you have arrows you can put end-to-end, do you need gauges?
@@ -63,7 +63,6 @@ async function init() {
     initSnapping()
     initControl()
 
-    initMarkup()
     initCircuits()
 
     window.addEventListener('resize', () => {
@@ -83,26 +82,6 @@ async function init() {
 
     document.body.appendChild(VRButton.createButton(renderer))
 
-    //debug examples
-    {
-        // let verySimple = new DqViz()
-        // verySimple.dq.copy(Translator(0., 1., 0.))
-        // verySimple.arrowStart.point(0., 0., 0.)
-
-        let viz1 = new DqViz()
-        snappables.push(viz1)
-        viz1.dq.copy(Translator(.8, 0., 0.))
-        viz1.arrowStart.point(-.4, .9, 0.)
-
-        var sclptable = new Sclptable()
-        sclptable.brushStroke(fl0.point(0., 1.6, 0., 1.))
-
-        let viz2 = new DqViz()
-        snappables.push(viz2)
-        viz2.dq.copy(Translator(0., .6, 0.))
-        viz2.arrowStart.point(-.4, 1.3, 0.)
-    }
-
     function render() {
         let clockDelta = clock.getDelta()
         frameDelta = clockDelta < .1 ? clockDelta : .1 //clamped because debugger pauses create weirdness
@@ -113,13 +92,15 @@ async function init() {
 
         blankFunction()
 
+        buttonWhileDowns()
+
+        updatePainting()
+        
         updateHighlighting()
         
         updatePalette()
 
-        buttonWhileDowns()
-
-        updatePainting()
+        updateCircuitAppearances()
 
         obj3dsWithOnBeforeRenders.forEach(obj3d => obj3d.onBeforeRender())
 
