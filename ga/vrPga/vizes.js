@@ -122,8 +122,8 @@ function initVizes() {
     ]
     let arrowRadius = .06
     {
-        let radialSegments = 9
-        let heightSegments = 1*24+1
+        let radialSegments = 10
+        let heightSegments = 1*26+1
         let height = 2.
         let segmentHeight = height / (heightSegments - 1)
         let ySubtraction = segmentHeight - .001
@@ -135,7 +135,6 @@ function initVizes() {
                 y -= ySubtraction
             dqArrowGeo.attributes.position.array[i * 3 + 1] = y
         }
-        log(dqArrowGeo.attributes.position.array.length)
     }
     
     let cylRadius = .02

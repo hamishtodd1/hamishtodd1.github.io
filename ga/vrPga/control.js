@@ -10,6 +10,35 @@
             This is a good idea because it emphasizes to the user how they should think about things:
                 movements create arrows, composing arrows is how you control things generally
 
+    If you're     holding a  thing in your other hand and you hold the paint button
+        it adds to that object
+    If you're NOT holding anything in your other hand and you hold the paint button,
+        it makes a new object 
+        Probably if you press the grab button while holding the paint button, you're now holding the new object
+    If you were holding a transform, great, we're adding it to that transform
+    If you were holding a point/line/plane, erm, maybe not
+
+    Probably want a delete action
+
+    Other hand:
+        Top finger: create point, line, plane, transform... scalar (appears on a double cover plot). First three act as a rigid bodies
+        Transformation: Grab in one place, move hand. Most important, do first! This is animation!
+        They snap. Use analogue stick to flick to different ones to snap to. Push in to turn off snapping
+        Translations are arrows
+            But there's the line at infinity to help stabilize thm ofc
+            Possibly the start and end of them should be connected to that line
+
+    Mouse:
+        Mouse wheel press is for rotating the camera
+        Joystick is joystick
+        Click is index finger button
+        Right click is side button (probably "hold"/grab)
+        "Rewind" is A
+        "Forward" is B
+        Pushing in joystick is pushing in joystick 
+        Wheel is rotating
+        You do have that one other button just behind the mouswheel
+
     You probably want a laser, but not sure yet, and it raises many questions
 
     Your "go to next snap" button, if there IS no snap, could just try to do shit with whatever's visible

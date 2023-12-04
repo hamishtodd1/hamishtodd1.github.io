@@ -1,7 +1,13 @@
+function smoothstep(x) {
+	x = clamp(x,0.,1.)
+	return x * x * (3. - 2. * x)
+}
+
 function makeThingOnTop(thing) {
-	thing.renderOrder = 999
+	thing.renderOrder = 99999
 	thing.material.depthTest = false
 	thing.material.depthWrite = false
+	thing.onBeforeRender = function (renderer) { renderer.clearDepth(); };
 }
 
 class LineSegment extends THREE.Line {

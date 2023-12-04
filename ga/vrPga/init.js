@@ -1,17 +1,18 @@
 /*
     TODO for "show" demo:
-        MAKE *A* PROPERLY RIGGED PUPPET!
         Rotations/screws as well as translations
-        Circuits need to be a bit more readable, see notes in markup.js
-        Some way for a sclptable to be affected by the buttons you are pressing
-        Animate a tentacle
+        Circuits better
+        Grabbing and moving is nice, but maybe want a way for a sclptable to be affected by other buttons during the show
+        Make a properly rigged puppet! A tentacle or something
         Recording your hand motion somehow? Probably it is automatically turned into a loop
+            Probably "idle" animations
+            How to control multiple puppets in lockstep
         Audience view
             no markup visible
             MAYBE pupeteer view should be the same angle, maybe not, make it optional for now
-        How to control multiple puppets in lockstep? Probably "idle" animations
-        https://english.lem.pl/works/novels/the-cyberiad/146-how-the-world-was-saved
     Jon demo:
+        Levels
+        Chevrons
         "Undo". Should probably rewind "time"
         Eyeballs, maybe faces, on vizes!
         Wanna have gauging animations

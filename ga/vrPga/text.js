@@ -1,4 +1,4 @@
-function text(initialText,materialOnly,textColorHex) {
+function text(initialText,materialOnly,textColorHex, clear) {
 	if (materialOnly === undefined) materialOnly = false
 
 	//potential speedup? really canvases everywhere?
@@ -23,13 +23,23 @@ function text(initialText,materialOnly,textColorHex) {
 		context.textAlign = "center"
 		context.textBaseline = "middle"
 
-		context.fillStyle = "#CCCCCC"
+		if (clear) {
+			context.clearRect(
+				canvas.width / 2 - textWidth / 2 - backgroundMargin / 2,
+				canvas.height / 2 - textSize / 2 - backgroundMargin / 2,
+				textWidth + backgroundMargin,
+				textSize + backgroundMargin)	
+		}
+		else {
+			context.fillStyle = "#CCCCCC"
+			
+			context.fillRect(
+				canvas.width / 2 - textWidth / 2 - backgroundMargin / 2, 
+				canvas.height / 2 - textSize / 2 - backgroundMargin / 2,
+				textWidth + backgroundMargin, 
+				textSize + backgroundMargin)
+		}
 		
-		context.fillRect(
-			canvas.width / 2 - textWidth / 2 - backgroundMargin / 2, 
-			canvas.height / 2 - textSize / 2 - backgroundMargin / 2,
-			textWidth + backgroundMargin, 
-			textSize + backgroundMargin)
 		
 		let textColor = textColorHex || "#FFFFFF"
 		context.fillStyle = textColor
