@@ -44,7 +44,8 @@ function initCircuits() {
 
     let plane1 = new Fl()
     let plane2 = new Fl()
-    let bigWireGeo = new THREE.PlaneGeometry(1.,1.,10,10)
+    // let bigWireGeo = new THREE.PlaneGeometry(1.,1.,10,10)
+    let bigWireGeo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(),new THREE.Vector3()])
     class BigWire extends THREE.Line {
         constructor(isOut) {
             super(bigWireGeo, isOut?bigWireMat1:bigWireMat2)

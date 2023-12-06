@@ -89,46 +89,13 @@ function initEgaWithoutDeclarations() {
             return a.exp(target)
         }
 
-        getDistanceSq() {
-            let [rotation, translation] = this.invariantDecomposition(newDq, newDq)
-            return translation[1] * translation[1] + translation[2] * translation[2] + translation[3] * translation[3]
-        }
-
-        //translation axis if pure translation, rotation axis otherwise
-        getStrippedAxis(target) {
-            let rotationPart = newDq
-            let translationPart = newDq
-            this.invariantDecomposition(rotationPart, translationPart)
-
-            if (rotationPart.approxEquals(oneDq)) {}
-
-
-
-            {
-                if (rotationPart.approxEquals(oneDq))
-                    this.rotAxisMesh.visible = false
-                else {
-                    this.rotAxisMesh.visible = true
-
-                    rotationPart[0] = 0.
-                    e31.dqTo(rotationPart, this.rotAxisMesh.dq)
-                }
-
-                if (translationPart.approxEquals(oneDq))
-                    this.trnAxisMesh.visible = false
-                else {
-                    this.trnAxisMesh.visible = true
-
-                    translationPart[0] = 0.
-                    translationPart.joinPt(camera.mvs.pos, fl0)
-                    let fakeLineAtInfinity = fl0.meet(camera.frustum.far, dq0)
-                    e31.dqTo(fakeLineAtInfinity, this.trnAxisMesh.dq)
-                }
-            }
-        }
-
         //operates on Dqs, not bivectors. Might be simpler for bivectors: check for scalar square
         invariantDecomposition(rotnTarget, trnsTarget) {
+
+            if (rotnTarget === undefined)
+                rotnTarget = new Dq()
+            if (trnsTarget === undefined)
+                trnsTarget = new Dq()
 
             let normalized = this.getNormalization(newDq)
 
@@ -272,7 +239,7 @@ function initEgaWithoutDeclarations() {
                 if (iNormSq !== 0.)
                     return this.multiplyScalar(1. / Math.sqrt(iNormSq), target)
                 else {
-                    console.warn("zero dual quaternion, probably. isZero value:", this.isZero() )
+                    console.warn("zero dual quaternion" )
                     return target.copy(oneDq)
                 }
             }

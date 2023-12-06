@@ -1,10 +1,5 @@
 egaGlsl = `
 
-float atan2(in float y, in float x)
-{
-    bool s = (abs(x) > abs(y));
-    return mix(1.5707963267948966 - atan(x,y), atan(y,x), s);
-}
 
 ////////////////
 // Conversion //
@@ -60,6 +55,20 @@ vec4 sandwichDqPoint(in float[8] a, in vec4 b) {
 vec3 sandwichDqVertex(in float[8] a, in vec3 b) {
     vec4 ret4 = sandwichDqPoint(a, vec4(b,1.));
     return ret4.xyz / ret4.w;
+}
+
+//////////
+// Misc //
+//////////
+
+vec4 commutator(in vec4 a, in float[8] rateBivector) {
+    float[8] asFl; flFromPoint(a, asFl);
+    float[8] ab; mulFlDq(asFl,rateBivector,ab);
+    float[8] ba; mulDqFl(rateBivector,asFl,ba);
+    float[8] targetFl;
+    for(int i = 0; i < 8; ++i)
+        targetFl[i] = .5 * (ab[i] - ba[i]);
+    return flToPoint( targetFl );
 }
 
 void joinPt(in vec4 a, in vec4 b, out float[8] target) {

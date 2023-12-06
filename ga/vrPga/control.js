@@ -71,6 +71,25 @@ function initControl() {
         viz3.affecters[0] = viz2
         viz3.affecters[1] = viz1
         viz3.affecters[2] = 1
+
+        let viz4 = new DqViz()
+        snappables.push(viz4)
+        viz4.markupPos.point(.4, 1.3, 0.)
+        viz4.dq[0] = Math.cos(TAU / 8. * .5)
+        viz4.dq[4] = Math.sin(TAU / 8. * .5)
+        // let axis = new Dq()
+        // axis[4] = 1.
+        // axis[1] = 1.3
+        // axis[2] = -1.2
+        // let studyNum = new Dq()
+        // blankFunction = () => {
+        //     // studyNum[0] = Math.sin(.02 * frameCount)
+        //     // // studyNum[7] = Math.sin(.015 * frameCount+50)
+        //     // axis.mul(studyNum,dq0).exp(viz4.dq)
+
+        //     axis.multiplyScalar(Math.sin(.02 * frameCount), viz4.dq)
+        //     viz4.dq[0] = -1.
+        // }
     }
 
     let heldTranslator = null

@@ -2,6 +2,11 @@
     It's probably quite fun just to look at dq arrow compositions
     Like the vector picture but a bit more fun because you can curve
 
+    The box should be at the center of the circle that all three points fall on
+        Unless two of the floor points are within a certain distance of each other
+            Then you get the circle
+        To get a CGA point at a certain position, take the origin point and translate it by the translation
+
     Call the plane contianing a translation axis and the camera point the "nice-plane"
         For any pair of non-parallel translations
             you can always compose both the arrows while keeping them in their nice-plane
@@ -87,26 +92,25 @@ function initVizes() {
                 float headStart = extraVec3.y; //it's a proportion
                 float alongness = isShaft ? headStart * position.y : headStart + (1.-headStart) * (position.y - 1.);
                 alongness = alongness < 0. ? 0. : alongness;
-                float headOutnessAtArrowBase = extraVec3.x; //this should come in from the uniforms
+                float headOutnessAtArrowBase = extraVec3.x;
                 float outness = isShaft ? 1. : isTip ? 0. : headOutnessAtArrowBase * (1.-alongness);
                 bool noShaft = headStart < 0.;
                 if(noShaft && isShaft)
                     outness = 0.;
 
-                float[8] alongLog; dqLog( dq, alongLog );
-                multiplyScalar( alongLog, alongness, alongLog );
+                //get the correct alongness and the slight alongness
+                float[8] myDqLog; dqLog( dq, myDqLog );
+                float[8] alongLog; multiplyScalar( myDqLog, alongness, alongLog );
                 float[8] along; dqExp( alongLog, along );
-                
-                float[8] outLog; zeroOut(outLog);
-                outLog[1] = outness * extraVec2.x; outLog[2] = outness * extraVec2.y; outLog[3] = outness * extraVec2.z;
-                float[8] outDq; dqExp( outLog, outDq );
 
-                float[8] aroundAxisUnnormalized; joinPt(start, sandwichDqPoint(dq, start), aroundAxisUnnormalized);
-                float[8] aroundAxis; dqNormalize(aroundAxisUnnormalized, aroundAxis);
-                float angleAround = isTip ? 0. : atan(transformed.z,transformed.x) / 2.;
-                float[8] around; fromUnitAxisAndSeparation( aroundAxis, angleAround, around );
+                // vec4 startAlonged = sandwichDqPoint(dq, start);
+                vec4 startDerivative = commutator(start, myDqLog);
+                float[8] aroundLogUnnormalized; joinPt(start, startDerivative, aroundLogUnnormalized);
+                float[8] aroundLog; dqNormalize(aroundLogUnnormalized, aroundLog);
+                float angleAround = isTip ? 0. : .5 * atan(transformed.z,transformed.x);
+                float[8] around; fromUnitAxisAndSeparation( aroundLog, angleAround, around );
 
-                vec4 outed = sandwichDqPoint( outDq, start );
+                vec4 outed = vec4(extraVec1 + outness*extraVec2,1.);
                 vec4 arounded = sandwichDqPoint( around, outed );
                 vec4 alonged = sandwichDqPoint( along, arounded ); //purposefully last
                 transformed = alonged.xyz / alonged.w;
@@ -122,27 +126,34 @@ function initVizes() {
     ]
     let arrowRadius = .06
     {
-        let radialSegments = 10
-        let heightSegments = 1*26+1
-        let height = 2.
-        let segmentHeight = height / (heightSegments - 1)
-        let ySubtraction = segmentHeight - .001
-        var dqArrowGeo = new THREE.ConeGeometry(arrowRadius, height+segmentHeight, radialSegments, heightSegments, false) //first half is shaft, second is head
-        for (let i = 0; i < dqArrowGeo.attributes.position.count; ++i) {
-            let y = dqArrowGeo.attributes.position.array[i * 3 + 1]
-            y += (height + segmentHeight)/2. // so we start from 0
-            if (y > 1.)
-                y -= ySubtraction
-            dqArrowGeo.attributes.position.array[i * 3 + 1] = y
+        let radialSegments = 14
+        let headSegments = 6
+        let shaftSegments = 34
+        let heightSegments = headSegments + shaftSegments + 1
+        var dqArrowGeo = new THREE.ConeGeometry(
+            arrowRadius, //unused...
+            heightSegments, //we are about to modify y's
+            radialSegments, heightSegments, false) //first half is shaft, second is head
+        let attr = dqArrowGeo.attributes.position
+        for (let i = 0; i < attr.count; ++i) {
+
+            let y = attr.array[i * 3 + 1] + heightSegments / 2.
+            if(y <= shaftSegments)
+                y = y / shaftSegments
+            else
+                y = 1.001 + (y-shaftSegments-1)/headSegments
+            attr.array[i * 3 + 1] = y
         }
+        log(attr.array.length)
     }
     
-    let cylRadius = .02
+    let cylRadius = .04
     let rotAxisGeo = new THREE.CylinderGeometry(cylRadius,       cylRadius,       camera.far * 10., 5, 1, true)
-    let trnAxisGeo = new THREE.CylinderGeometry(cylRadius * 15., cylRadius * 15., camera.far * 10., 5, 1, true)
+    let trnAxisGeo = new THREE.CylinderGeometry(cylRadius * 8., cylRadius * 8., camera.far * 10., 5, 1, true)
     let rotationPart = new Dq()
     let translationPart = new Dq()
     let randomPt = new Fl().point(0.2448657087518873, 0.07640275431752674, 0.360207610338215, 1.)
+    let nonNetherDq = new Dq()
     class DqViz extends THREE.Group {
         
         constructor(col = dqCol) {
@@ -178,7 +189,6 @@ function initVizes() {
 
             let arrowMat = new THREE.MeshPhong2Material({ side: THREE.DoubleSide, color: col })
             arrowMat.injections = dqArrowMatInjections
-            arrowMat.dq = this.dq
 
             this.arrow = new THREE.Mesh(dqArrowGeo, arrowMat)
             // this.arrow.castShadow = true //would be nice but it doesn't use the vertex shader
@@ -194,18 +204,24 @@ function initVizes() {
 
                 this.updateFromAffecters()
 
-                let hasBivPart = this.dq[1] !== 0. || this.dq[2] !== 0. || this.dq[3] !== 0. || this.dq[4] !== 0. || this.dq[5] !== 0. || this.dq[6] !== 0.
+                nonNetherDq.copy(this.dq)
+                if ( this.dq[0] < 0. && this.dq[4] === 0. && this.dq[5] === 0. && this.dq[6] === 0.)
+                    nonNetherDq[0] *= -1.
+                // if(!nonNetherDq.equals(this.dq))
+                //     debugger
+
+                let hasBivPart = nonNetherDq[1] !== 0. || nonNetherDq[2] !== 0. || nonNetherDq[3] !== 0. || nonNetherDq[4] !== 0. || nonNetherDq[5] !== 0. || nonNetherDq[6] !== 0.
                 if (!hasBivPart) {
                     this.rotAxisMesh.visible = false; this.trnAxisMesh.visible = false; this.arrow.visible = false
                     this.scalarSign.visible = true
 
-                    if (this.dq[0] === 1.)
+                    if (nonNetherDq[0] === 1.)
                         this.scalarSign.visible = false
                     else {
                         this.markupPos.pointToVertex(this.scalarSign.position)
                         this.scalarSign.lookAt(camera.position)
                         
-                        this.scalarSign.setText(this.dq[0])
+                        this.scalarSign.setText(nonNetherDq[0])
                         this.scalarSign.visible = true
                     } 
 
@@ -222,7 +238,7 @@ function initVizes() {
                     let numSamples = 8
                     let previous = v2
                     for (let i = 0; i < numSamples; ++i) {
-                        this.dq.pow(i / (numSamples - 1), dq0)
+                        nonNetherDq.pow(i / (numSamples - 1), dq0)
                         dq0.sandwichFl(this.markupPos, fl0).pointToVertex(v1)
                         this.boundingBox.expandByPoint(v1)
 
@@ -237,26 +253,28 @@ function initVizes() {
                 
                 //arrow
                 {
-                    this.markupPos.pointToVertex(this.arrow.material.extraVec1)
+                    arrowMat.dq.copy(nonNetherDq)
+
+                    this.markupPos.pointToVertex(arrowMat.extraVec1)
                     
                     let headArcLength = .25
                     let headStart = (1.-headArcLength/arrowArcLength)
                     let headOutnessAtArrowBase = arrowArcLength * 8.5 //magic number proprotional to the headRadius
-                    this.arrow.material.extraVec3.set(headOutnessAtArrowBase,headStart,0.)
+                    arrowMat.extraVec3.set(headOutnessAtArrowBase,headStart,0.)
 
-                    this.dq.pow(0.01, dq0)
+                    nonNetherDq.pow(0.01, dq0)
                     let movedAlongSlightly = dq0.sandwichFl(this.markupPos, fl0) //alternatively, commutator with log
 
                     let randomPlaneContainingSpineAxisAtStart = this.markupPos.joinPt(movedAlongSlightly, dq0).joinPt(randomPt, fl1)
                     let outDqAtStartLog = randomPlaneContainingSpineAxisAtStart.meet(e0, dq0).normalize()
-                    this.arrow.material.extraVec2.set(
+                    arrowMat.extraVec2.set(
                         outDqAtStartLog[1],
                         outDqAtStartLog[2],
-                        outDqAtStartLog[3]).multiplyScalar(arrowRadius/2.)
-                    // log(this.arrow.material.extraVec2)
+                        outDqAtStartLog[3]).multiplyScalar(arrowRadius)
+                    // log(arrowMat.extraVec2)
                 }
 
-                this.dq.invariantDecomposition( rotationPart, translationPart )
+                nonNetherDq.invariantDecomposition( rotationPart, translationPart )
                 {
                     if (rotationPart.approxEquals(oneDq))
                         this.rotAxisMesh.visible = false
