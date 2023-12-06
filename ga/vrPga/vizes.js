@@ -156,13 +156,13 @@ function initVizes() {
     let nonNetherDq = new Dq()
     class DqViz extends THREE.Group {
         
-        constructor(col = dqCol) {
+        constructor(col = dqCol, transparent = false) {
 
             super()
             scene.add(this)
             this.dq = new Dq() //better to say mv really, disambiguate from dqMeshes
 
-            let axisMat = new THREE.MeshPhongMaterial({ color: dqCol })
+            let axisMat = new THREE.MeshPhongMaterial({ color: col })
             this.rotAxisMesh = new DqMesh(rotAxisGeo, axisMat)
             this.add(this.rotAxisMesh)
 
@@ -175,7 +175,7 @@ function initVizes() {
 
             this.boxHelper = new THREE.BoxHelper()
             this.boundingBox = new THREE.Box3()
-            // this.boxHelper.visible = false
+            this.boxHelper.visible = false
             this.boxHelper.matrixAutoUpdate = false
             scene.add(this.boxHelper)
 
@@ -187,7 +187,12 @@ function initVizes() {
                 null, null, -1
             ]
 
-            let arrowMat = new THREE.MeshPhong2Material({ side: THREE.DoubleSide, color: col })
+            let arrowMat = new THREE.MeshPhong2Material({
+                side: THREE.DoubleSide,
+                color: col,
+                transparent: transparent,
+                opacity: transparent ? .4 : 1.
+            })
             arrowMat.injections = dqArrowMatInjections
 
             this.arrow = new THREE.Mesh(dqArrowGeo, arrowMat)
@@ -205,10 +210,10 @@ function initVizes() {
                 this.updateFromAffecters()
 
                 nonNetherDq.copy(this.dq)
-                if ( this.dq[0] < 0. && this.dq[4] === 0. && this.dq[5] === 0. && this.dq[6] === 0.)
-                    nonNetherDq[0] *= -1.
-                // if(!nonNetherDq.equals(this.dq))
-                //     debugger
+                if ( this.dq[0] < 0. && this.dq[4] === 0. && this.dq[5] === 0. && this.dq[6] === 0.) {
+                    nonNetherDq.multiplyScalar(-1., nonNetherDq)
+                    log("mulling")
+                }
 
                 let hasBivPart = nonNetherDq[1] !== 0. || nonNetherDq[2] !== 0. || nonNetherDq[3] !== 0. || nonNetherDq[4] !== 0. || nonNetherDq[5] !== 0. || nonNetherDq[6] !== 0.
                 if (!hasBivPart) {

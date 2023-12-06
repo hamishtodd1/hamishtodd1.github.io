@@ -10,6 +10,7 @@
         Audience view
             no markup visible
             MAYBE pupeteer view should be the same angle, maybe not, make it optional for now
+        Get rid of "current hand position"; it stinks of the origin
     Jon demo:
         Levels
         Chevrons
@@ -95,7 +96,8 @@ async function init() {
 
         buttonWhileDowns()
 
-        updatePainting()
+        handleSculpting()
+        handleDqModification()
         
         updateHighlighting()
         

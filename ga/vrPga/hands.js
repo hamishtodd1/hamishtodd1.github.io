@@ -99,12 +99,16 @@ async function initHands() {
             mouseWheelTransform.copy(oneDq)
         }
 
-        let angle = .15
+        let angle = .025 * TAU
         let turnRight = new Dq().set(Math.cos( angle), 0., 0., 0., Math.sin(angle), 0., 0., 0.)
         let turnLeft  = new Dq().set(Math.cos(-angle), 0., 0., 0., Math.sin(-angle), 0., 0., 0.)
         function onMouseWheel(event) {
             let mouseTurn = event.deltaY < 0 ? turnLeft : turnRight
             mouseWheelTransform.append(mouseTurn)
+            if (Math.abs( 1. - mouseWheelTransform[0]) < .003)
+                mouseWheelTransform.copy(oneDq)
+            if (Math.abs(-1. - mouseWheelTransform[0]) < .003)
+                oneDq.multiplyScalar(-1, mouseWheelTransform)
 
             updateSelectorMvs()
         }
@@ -112,10 +116,12 @@ async function initHands() {
         document.addEventListener('pointermove', onMouseMove)
         document.addEventListener('wheel', onMouseWheel)
         
-        getHandDq = (dq, old) => {
-            dq.ptToPt(e123, old ? handPositionOld : handPosition)
-                .append(old ? mouseWheelTransformOld : mouseWheelTransform)
-                //yes, append, because algebra
+        //Actually it is problematic for your philosophy to speak of a "handDq"
+        //There is no "current position of your hand", there is only a movement of your hand
+        getHandDq = (dq, old = false) => {
+            e123.ptToPt(old ? handPositionOld : handPosition, dq)
+            dq.append(old ? mouseWheelTransformOld : mouseWheelTransform)
+            //yes, append, because algebra
             return dq
         }
     }

@@ -6,6 +6,11 @@ function initEgaWithoutDeclarations() {
             super(8)
         }
 
+        ptToPt(b, target) {
+            target.ptToPt(this,b)
+            return target
+        }
+
         eNormSq() {
             //inner product with its own reverse, guaranteed to be a scalar
             return this[1] * this[1] + this[2] * this[2] + this[3] * this[3] + this[7] * this[7]

@@ -3,7 +3,7 @@
         Hovering a thing shows its affecters
         Sculpting can create new things or add to what's already there, depending on whether your paint is touching it
         You can hold two and it shows you different ones you could create from them
-        Change the way your hand movement changes heldTranslator
+        Change the way your hand movement changes heldDqViz
             You grab the thing, and its arrow moves such that its tip is where you just grabbed. It is frozen
             You move your hand, and that creates a further, separate arrow
             AND another arrow which is your current motion composed
@@ -92,7 +92,13 @@ function initControl() {
         // }
     }
 
-    let heldTranslator = null
+    let oldViz = new DqViz(0xFF0000, true)
+    oldViz.visible = false
+    let dispViz = new DqViz(0xFF0000, true)
+    dispViz.visible = false
+    let handDqOnGrab = new Dq()
+
+    let heldDqViz = null
     let sclptableBeingSculpted = null
     let highlightedTranslator = null
     let highlightedSclptable = null
@@ -103,7 +109,7 @@ function initControl() {
 
     updateHighlighting = () => {
         
-        // let dqVizWithCircuitShowing = highlightedTranslator || heldTranslator
+        // let dqVizWithCircuitShowing = highlightedTranslator || heldDqViz
         // if (dqVizWithCircuitShowing === null)
         //     hideCircuit()
         // else
@@ -135,7 +141,7 @@ function initControl() {
         })
     }
 
-    updatePainting = () => {
+    handleSculpting = () => {
         if (sclptableBeingSculpted && simulatingPaintingHand)
             sclptableBeingSculpted.brushStroke()
     }
@@ -145,15 +151,22 @@ function initControl() {
         let isLeftButton = event.button === 0
         let isRightButton = event.button === 2
 
-        if (isRightButton) {//Grabbing is generic across both. Also you can grab two things eventually?
+        if (isRightButton) { //Grabbing is generic across both. Also you can grab two things eventually?
             //actually this was meant to be about lasers
             //maybe in mouse mode you should keep the controller in the bottom right and just be pointing it
 
             let nearest = getNearestThingToHand()
 
-            heldTranslator = nearest.constructor === DqViz ? nearest : nearest.dqViz
-            if (heldTranslator.dq.isScalarMultipleOf(oneDq))
-                heldTranslator.markupPos.copy(handPosition)
+            heldDqViz = nearest.constructor === DqViz ? nearest : nearest.dqViz
+            
+            oldViz.dq.copy(heldDqViz.dq)
+            oldViz.markupPos.copy(heldDqViz.markupPos)
+            oldViz.dq.sandwich(oldViz.markupPos, dispViz.markupPos)
+            dispViz.dq.copy(oneDq)
+            getHandDq(handDqOnGrab)
+
+            if (heldDqViz.dq.isScalarMultipleOf(oneDq))
+                heldDqViz.markupPos.copy(handPosition)
         }
         else if(isLeftButton) {
             //this is about creation, depends on hand
@@ -165,30 +178,35 @@ function initControl() {
                     sclptableBeingSculpted = new Sclptable()
             }
             else {
-                heldTranslator = new DqViz()
-                snappables.push(heldTranslator)
-                heldTranslator.markupPos.copy(handPosition)
+                heldDqViz = new DqViz()
+                snappables.push(heldDqViz)
+                heldDqViz.markupPos.copy(handPosition)
             }
         }
     })
 
-    document.addEventListener("pointermove", event => {
+    handleDqModification = () => {
+        if (heldDqViz !== null) {
+            highlightedTranslator = heldDqViz
 
-        if (heldTranslator !== null) {
-            highlightedTranslator = heldTranslator
-            
-            heldTranslator.dq.ptToPt(heldTranslator.markupPos, handPosition)
-            snap(heldTranslator)
+            let handDqCurrent = getHandDq(dq0)
+            handDqCurrent.mulReverse(handDqOnGrab, dispViz.dq)
+            dispViz.dq.mul(oldViz.dq, heldDqViz.dq)
+
+            dispViz.visible = !dispViz.dq.equals(oneDq)
+            oldViz.visible = dispViz.visible
+
+            snap(heldDqViz)
         }
         else {
-            
+
             if (sclptableBeingSculpted !== null)
                 highlightedTranslator = null
             else {
                 let [nearestSnappable, nearestSnappableDist] = getNearestSnappableToPt(handPosition, false)
                 let [nearestSclptable, nearestSclptableDist] = getNearestSclptableToPt(handPosition)
 
-                if(nearestSnappableDist < nearestSclptableDist) {
+                if (nearestSnappableDist < nearestSclptableDist) {
                     highlightedTranslator = nearestSnappable
                     highlightedSclptable = null
                 }
@@ -198,7 +216,7 @@ function initControl() {
                 }
             }
         }
-    })
+    }
 
     document.addEventListener("pointerup", event => {
 
@@ -207,17 +225,20 @@ function initControl() {
 
         if (simulatingPaintingHand && isLeftButton)
             sclptableBeingSculpted = null
-        else if ( heldTranslator !== null && (isRightButton||isLeftButton)) { //remember middle button exists
+        else if ( heldDqViz !== null && (isRightButton||isLeftButton)) { //remember middle button exists
 
-            if (heldTranslator.sclptable) {
-                heldTranslator.dq
+            if (heldDqViz.sclptable) {
+                heldDqViz.dq
                     .getReverse(dq0)
                     .sandwich(
-                        heldTranslator.dq.sandwich(heldTranslator.sclptable.com,fl0),
-                        heldTranslator.markupPos)
+                        heldDqViz.dq.sandwich(heldDqViz.sclptable.com,fl0),
+                        heldDqViz.markupPos)
             }
 
-            heldTranslator = null
+            heldDqViz = null
+
+            dispViz.visible = false
+            oldViz.visible = false
         }
     })
 
