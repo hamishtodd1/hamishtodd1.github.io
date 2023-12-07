@@ -1,4 +1,7 @@
 /*
+    When selecting, to make it less annoying,
+        could prioritize based on the bb volume
+
     TODO
         Hovering a thing shows its affecters
         Sculpting can create new things or add to what's already there, depending on whether your paint is touching it
@@ -17,8 +20,6 @@
         Probably if you press the grab button while holding the paint button, you're now holding the new object
     If you were holding a transform, great, we're adding it to that transform
     If you were holding a point/line/plane, erm, maybe not
-
-    Probably want a delete action
 
     Other hand:
         Top finger: create point, line, plane, transform... scalar (appears on a double cover plot). First three act as a rigid bodies
@@ -54,44 +55,52 @@ function initControl() {
 
         let viz1 = new DqViz()
         snappables.push(viz1)
-        viz1.dq.copy(Translator(.8, 0., 0.))
-        viz1.markupPos.point(-.4, .9, 0.)
+        // viz1.dq.copy(Translator(.8, 0., 0.))
+        // viz1.markupPos.point(-.4, 1.6, 0.)
 
-        var sclptable = new Sclptable()
-        sclptable.brushStroke(fl0.point(0., 1.6, 0., 1.))
+        viz1.markupPos.set(0, 0, 0, 0, 0, 1.6, -0.4, 1.)
+        viz1.dq.set(-0.9969173073768616, 0.1302703320980072, 0.02736310474574566, -0.025946244597434998, 0.07845909893512726, 0., 0., 0.002042013918980956)
+        // viz1.dq[0] = 0.
+        // viz1.dq[7] = 0.
+        // debugger
+        viz1.dq.normalize()
 
-        let viz2 = new DqViz()
-        snappables.push(viz2)
-        viz2.dq.copy(Translator(0., .6, 0.))
-        viz2.markupPos.point(-.4, 1.3, 0.)
+        // var sclptable = new Sclptable()
+        // sclptable.brushStroke(fl0.point(0., 1.6, 0., 1.))
 
-        let viz3 = new DqViz()
-        snappables.push(viz3)
-        viz3.markupPos.point(-.8, 1., 0.)
-        viz3.affecters[0] = viz2
-        viz3.affecters[1] = viz1
-        viz3.affecters[2] = 1
+        // let viz2 = new DqViz()
+        // snappables.push(viz2)
+        // viz2.dq.copy(Translator(0., .6, 0.))
+        // viz2.markupPos.point(-.4, 1.3, 0.)
 
-        let viz4 = new DqViz()
-        snappables.push(viz4)
-        viz4.markupPos.point(.4, 1.3, 0.)
-        viz4.dq[0] = Math.cos(TAU / 8. * .5)
-        viz4.dq[4] = Math.sin(TAU / 8. * .5)
+        // let viz3 = new DqViz()
+        // snappables.push(viz3)
+        // viz3.markupPos.point(-.8, 1., 0.)
+        // viz3.affecters[0] = viz2
+        // viz3.affecters[1] = viz1
+        // viz3.affecters[2] = 1
+
+        // let viz4 = new DqViz()
+        // snappables.push(viz4)
+        // viz4.markupPos.point(-.1, 1.6, 0.)
         // let axis = new Dq()
         // axis[4] = 1.
-        // axis[1] = 1.3
-        // axis[2] = -1.2
-        // let studyNum = new Dq()
+        // axis[1] = 1.6
+        // axis[2] = -.6
+        // axis.multiplyScalar(TAU/2. - .01, axis).exp(viz4.dq)
         // blankFunction = () => {
         //     // studyNum[0] = Math.sin(.02 * frameCount)
         //     // // studyNum[7] = Math.sin(.015 * frameCount+50)
         //     // axis.mul(studyNum,dq0).exp(viz4.dq)
 
-        //     axis.multiplyScalar(Math.sin(.02 * frameCount), viz4.dq)
-        //     viz4.dq[0] = -1.
+        //     // axis.multiplyScalar(Math.sin(.02 * frameCount), viz4.dq)
+        //     // viz4.dq[0] = -1.
+
+        //     viz4.markupPos.point(.3 * (1. + Math.cos(frameCount * .01)), 1.6, 0.)
         // }
     }
 
+    let showMarkupVizes = false
     let oldViz = new DqViz(0xFF0000, true)
     oldViz.visible = false
     let dispViz = new DqViz(0xFF0000, true)
@@ -181,20 +190,27 @@ function initControl() {
                 heldDqViz = new DqViz()
                 snappables.push(heldDqViz)
                 heldDqViz.markupPos.copy(handPosition)
+
+                getHandDq(handDqOnGrab)
             }
         }
     })
 
     handleDqModification = () => {
         if (heldDqViz !== null) {
-            highlightedTranslator = heldDqViz
+            // highlightedTranslator = heldDqViz
+            highlightedTranslator = null
 
             let handDqCurrent = getHandDq(dq0)
             handDqCurrent.mulReverse(handDqOnGrab, dispViz.dq)
             dispViz.dq.mul(oldViz.dq, heldDqViz.dq)
+            heldDqViz.dq.normalize()
+            // heldDqViz.dq.log()
 
-            dispViz.visible = !dispViz.dq.equals(oneDq)
-            oldViz.visible = dispViz.visible
+            if(showMarkupVizes) {
+                dispViz.visible = !dispViz.dq.equals(oneDq)
+                oldViz.visible = dispViz.visible
+            }
 
             snap(heldDqViz)
         }
@@ -275,7 +291,7 @@ function initControl() {
         snappables.forEach(snappable => {
 
             if (!includeSculptables) {
-                let isAttachedToSclptable = sclptables.find(sc=>sc.dqViz === snappable)
+                let isAttachedToSclptable = sclptables.find( sc => sc.dqViz === snappable )
                 if (isAttachedToSclptable)
                     return
             }

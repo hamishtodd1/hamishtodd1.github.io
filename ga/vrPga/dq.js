@@ -132,7 +132,7 @@ getReverse(target) {
 getDual(target) {
 
     if (target === undefined)
-        target = new Fl()
+        target = new Dq()
 
 	target[0] = this[7];
 	

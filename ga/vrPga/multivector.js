@@ -20,6 +20,10 @@ function initMultivectorWithoutDeclarations() {
             return Math.sqrt(this.joinPt(pt, this.constructor === Dq ? newFl : newDq).eNormSq())
         }
 
+        eNorm() {
+            return Math.sqrt(this.eNormSq())
+        }
+
         //pretty confusing: append causes a transformation to be done BEFORE the current transformation
         append(b) {
             let temp = this.mul(b, newDq)
@@ -32,6 +36,7 @@ function initMultivectorWithoutDeclarations() {
             return this
         }
 
+        //there might be a more literal name for this. Maybe "offset by"
         mulReverse(b, target) {
             let bReverse = b.getReverse(b.constructor === Fl ? newFl : newDq)
             return this.mul(bReverse, target)

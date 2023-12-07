@@ -1,12 +1,13 @@
 /*
     TODO for "show" demo:
-        Rotations/screws as well as translations
         Circuits better
-        Grabbing and moving is nice, but maybe want a way for a sclptable to be affected by other buttons during the show
+        More operations and stuff about snapping
+        Deleting sculptables
+        Maybe want a way for a sclptable to be affected by other buttons during the show?
         Make a properly rigged puppet! A tentacle or something
-        Recording your hand motion somehow? Probably it is automatically turned into a loop
-            Probably "idle" animations
-            How to control multiple puppets in lockstep
+            And if you want more than that, eg planes/pts or copying, decide AFTER you've tried that!
+        Recording your hand motion somehow?
+            Probably it is automatically turned into a loop, it is about "idle" animations
         Audience view
             no markup visible
             MAYBE pupeteer view should be the same angle, maybe not, make it optional for now
@@ -24,6 +25,7 @@
         Some levels!!!!!!
         Are you using the measurer for anything? If so, some numbers...
     Beyond:
+        Arrows should settle to being cut by the axes from your pov?
         Roblox addon for importing the animal you made
             Don't market it. This is the start, a way to get investment for further things
         Spreads:
@@ -46,6 +48,8 @@
         
     Philosophy
         If you have arrows you can put end-to-end, do you need gauges?
+        IRL, you can ONLY change things by moving something
+            Well, sort of. There's switches, and speaking. Both technically are movement. But, movement is irrelevant
  */
 
 function blankFunction(){}

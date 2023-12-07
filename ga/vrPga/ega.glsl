@@ -61,8 +61,8 @@ vec3 sandwichDqVertex(in float[8] a, in vec3 b) {
 // Misc //
 //////////
 
-vec4 commutator(in vec4 a, in float[8] rateBivector) {
-    float[8] asFl; flFromPoint(a, asFl);
+vec4 commutator(in vec4 pt, in float[8] rateBivector) {
+    float[8] asFl; flFromPoint(pt, asFl);
     float[8] ab; mulFlDq(asFl,rateBivector,ab);
     float[8] ba; mulDqFl(rateBivector,asFl,ba);
     float[8] targetFl;

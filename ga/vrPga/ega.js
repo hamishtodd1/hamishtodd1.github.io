@@ -6,6 +6,22 @@ function initEgaWithoutDeclarations() {
             super(8)
         }
 
+        momentumLine = (rotorDq, targetDq) => {
+
+            let rateBivector = rotorDq.logarithm(newDq)
+            let derivative = this.commutator(rateBivector, newFl)
+            this.joinPt(derivative, targetDq)
+            return targetDq
+        }
+
+        commutator(dq, target) {
+            let ab = this.mulDq(dq, newFl)
+            let ba = dq.mulFl(this, newFl)
+            for (let i = 0; i < 8; ++i)
+                target[i] = .5 * (ab[i] - ba[i])
+            return target
+        }
+
         ptToPt(b, target) {
             target.ptToPt(this,b)
             return target
@@ -88,6 +104,23 @@ function initEgaWithoutDeclarations() {
             this[0] = 1.
         }
 
+        pointTrajectoryArcLength(startPt) {
+
+            let ret = 0.
+            let numSamples = 8
+            let previous = v2
+            for (let i = 0; i < numSamples; ++i) {
+                let part = this.pow(i / (numSamples - 1), newDq)
+                part.sandwichFl(startPt, newFl).pointToVertex(v1)
+
+                if (i > 0)
+                    ret += v1.distanceTo(previous)
+                previous.copy(v1)
+            }
+
+            return ret
+        }
+
         pow(t, target) {
             let a = this.logarithm(newDq)
             a.multiplyScalar(t, a)
@@ -165,6 +198,7 @@ function initEgaWithoutDeclarations() {
         logarithm(target) {
             if (this[0] === 1.)
                 return target.set(0., this[1], this[2], this[3], 0., 0., 0., 0.)
+
             let a = 1. / (1. - this[0] * this[0]),
                 b = Math.acos(this[0]) * Math.sqrt(a),
                 c = a * this[7] * (1. - this[0] * b)
@@ -248,18 +282,17 @@ function initEgaWithoutDeclarations() {
                     return target.copy(oneDq)
                 }
             }
-            
-            let A = 1. / Math.sqrt(eNormSq)
-            let B = (this[7] * this[0] - (this[1] * this[6] + this[2] * this[5] + this[3] * this[4])) * A * A * A
-            return target.set(
-                A * this[0],
-                A * this[1] + B * this[6],
-                A * this[2] + B * this[5],
-                A * this[3] + B * this[4],
-                A * this[4],
-                A * this[5],
-                A * this[6],
-                A * this[7] - B * this[0])
+
+            target.copy(this)
+
+            let s = 1. / Math.sqrt(eNormSq)
+            let d = (target[7] * target[0] - (target[1] * target[6] + target[2] * target[5] + target[3] * target[4])) * s * s
+            target.multiplyScalar(s,target)
+            target[1] += target[6] * d
+            target[2] += target[5] * d
+            target[3] += target[4] * d
+            target[7] -= target[0] * d
+            return target
         }
 
         setBivectorPartFromMvAndScalarMultiple(mv, scalar) {
@@ -280,8 +313,18 @@ function initEgaWithoutDeclarations() {
 
         sqrtSelf() {
             //could do study stuff. But not even steven and martin thought beyond getting sqrt of unnormalized
-            this[0] += (this[0] < 0. ? -1. : 1.) * Math.sqrt(this.eNormSq())
-            this.normalize()
+
+            let ourENorm = this.eNorm()
+            if(this[0] + ourENorm !== 0.) {
+                this[0] += ourENorm
+                this.normalize()    
+            }
+            else {
+                this.multiplyScalar(-1., this)
+                this[0] += this.eNorm()
+                this.normalize()
+                this.multiplyScalar(-1., this)
+            }
             return this
         }
 

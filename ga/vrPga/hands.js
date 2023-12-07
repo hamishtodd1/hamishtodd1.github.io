@@ -99,7 +99,7 @@ async function initHands() {
             mouseWheelTransform.copy(oneDq)
         }
 
-        let angle = .025 * TAU
+        let angle = .0125 * TAU
         let turnRight = new Dq().set(Math.cos( angle), 0., 0., 0., Math.sin(angle), 0., 0., 0.)
         let turnLeft  = new Dq().set(Math.cos(-angle), 0., 0., 0., Math.sin(-angle), 0., 0., 0.)
         function onMouseWheel(event) {

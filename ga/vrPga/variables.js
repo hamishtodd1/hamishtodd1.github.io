@@ -51,6 +51,7 @@ const sclptables = []
 
 let operators = [
 	`mul`, `mulReverse`, `add`,
+    //copy to! Very important, this is how you make many things move at once
 	//`sqrt`,//`logarithm`
 	//later: wedge, join, projection, sandwich
 	//distances, angles
