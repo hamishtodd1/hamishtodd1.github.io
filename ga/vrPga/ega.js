@@ -6,15 +6,23 @@ function initEgaWithoutDeclarations() {
             super(8)
         }
 
-        momentumLine = (rotorDq, targetDq) => {
+        momentumLine( rateBivector, targetDq ) {
 
-            let rateBivector = rotorDq.logarithm(newDq)
             let derivative = this.commutator(rateBivector, newFl)
             this.joinPt(derivative, targetDq)
             return targetDq
+
+        }
+
+        momentumLineFromRotor( rotorDq, targetDq ) {
+
+            let rateBivector = rotorDq.logarithm(newDq)
+            return this.momentumLine(rateBivector, targetDq)
+            
         }
 
         commutator(dq, target) {
+
             let ab = this.mulDq(dq, newFl)
             let ba = dq.mulFl(this, newFl)
             for (let i = 0; i < 8; ++i)
@@ -23,6 +31,7 @@ function initEgaWithoutDeclarations() {
         }
 
         ptToPt(b, target) {
+            
             target.ptToPt(this,b)
             return target
         }
@@ -59,20 +68,28 @@ function initEgaWithoutDeclarations() {
         }
 
         pointFromVertex(v) {
+
             this.point(v.x, v.y, v.z, 1.)
             return this
         }
+
         pointFromNormal(v) {
+
             this.point(v.x, v.y, v.z, 0.)
             return this
         }
 
         pointToVertex(target) {
+
             if (target === undefined)
                 target = new THREE.Vector3()
             if (this[7] === 0.){
                 // debugger
-                console.error("ideal point cannot be converted to vec3")
+                console.error("ideal point should not be converted to vec3")
+                let norm = Math.sqrt(sq(this[4]) + sq(this[5]) + sq(this[6]))
+                target.z = this[4] / norm
+                target.y = this[5] / norm
+                target.x = this[6] / norm
             }
             else {
                 target.z = this[4] / this[7]
@@ -104,18 +121,39 @@ function initEgaWithoutDeclarations() {
             this[0] = 1.
         }
 
-        pointTrajectoryArcLength(startPt) {
+        align(startPoints,endPoints) {
+            
+            let P = newDq;
+            let Q = newDq;
+            let r1 = newDq;
+            let r2 = newDq;
+            P.zero(); P[7] = 1.
+            Q.zero(); Q[7] = 1.
+
+            this.copy(oneDq)
+            for (let i = 0, il = startPoints.length; i < il; ++i) {
+                Q.joinPt(this.sandwichFl(startPoints[i]), P)
+                Q.joinPt(endPoints[i])
+                P.normalize()
+                Q.normalize()
+                Q.mulReverse(P, r1)
+                r1[0] += 1.
+                this.copy(r1.normalize().mul(this, r2))
+            }
+            
+            return this            
+        }
+
+        pointTrajectoryArcLength(startPt, numSamples = 8) {
 
             let ret = 0.
-            let numSamples = 8
-            let previous = v2
             for (let i = 0; i < numSamples; ++i) {
                 let part = this.pow(i / (numSamples - 1), newDq)
                 part.sandwichFl(startPt, newFl).pointToVertex(v1)
 
                 if (i > 0)
-                    ret += v1.distanceTo(previous)
-                previous.copy(v1)
+                    ret += v1.distanceTo(v2)
+                v2.copy(v1)
             }
 
             return ret
@@ -311,6 +349,7 @@ function initEgaWithoutDeclarations() {
             return target.sqrtSelf()
         }
 
+        //assumes normalization
         sqrtSelf() {
             //could do study stuff. But not even steven and martin thought beyond getting sqrt of unnormalized
 

@@ -105,10 +105,10 @@ async function initHands() {
         function onMouseWheel(event) {
             let mouseTurn = event.deltaY < 0 ? turnLeft : turnRight
             mouseWheelTransform.append(mouseTurn)
-            if (Math.abs( 1. - mouseWheelTransform[0]) < .003)
-                mouseWheelTransform.copy(oneDq)
-            if (Math.abs(-1. - mouseWheelTransform[0]) < .003)
-                oneDq.multiplyScalar(-1, mouseWheelTransform)
+            // if (Math.abs( 1. - mouseWheelTransform[0]) < .003)
+            //     mouseWheelTransform.copy(oneDq)
+            // if (Math.abs(-1. - mouseWheelTransform[0]) < .003)
+            //     oneDq.multiplyScalar(-1, mouseWheelTransform)
 
             updateSelectorMvs()
         }

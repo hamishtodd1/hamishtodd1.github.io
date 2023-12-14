@@ -50,7 +50,7 @@ const snappables = []
 const sclptables = []
 
 let operators = [
-	`mul`, `mulReverse`, `add`,
+	`mul`, `mulReverse`, `add`, `sandwich`,
     //copy to! Very important, this is how you make many things move at once
 	//`sqrt`,//`logarithm`
 	//later: wedge, join, projection, sandwich

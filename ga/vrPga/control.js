@@ -40,6 +40,13 @@
         Wheel is rotating
         You do have that one other button just behind the mouswheel
 
+    Got so many "infrastructure" requirements that buttons might be taken up by that crap:
+        Undo and redo
+        Delete
+        Select
+        Duplicate
+        Change color
+
     You probably want a laser, but not sure yet, and it raises many questions
 
     Your "go to next snap" button, if there IS no snap, could just try to do shit with whatever's visible
@@ -49,36 +56,25 @@ function initControl() {
 
     //debug examples
     {
-        // let verySimple = new DqViz()
-        // verySimple.dq.copy(Translator(0., 1., 0.))
-        // verySimple.markupPos.point(0., 0., 0.)
-
-        let viz1 = new DqViz()
-        snappables.push(viz1)
-        // viz1.dq.copy(Translator(.8, 0., 0.))
-        // viz1.markupPos.point(-.4, 1.6, 0.)
-
-        viz1.markupPos.set(0, 0, 0, 0, 0, 1.6, -0.4, 1.)
-        viz1.dq.set(-0.9969173073768616, 0.1302703320980072, 0.02736310474574566, -0.025946244597434998, 0.07845909893512726, 0., 0., 0.002042013918980956)
-        // viz1.dq[0] = 0.
-        // viz1.dq[7] = 0.
-        // debugger
-        viz1.dq.normalize()
-
         // var sclptable = new Sclptable()
         // sclptable.brushStroke(fl0.point(0., 1.6, 0., 1.))
 
-        // let viz2 = new DqViz()
-        // snappables.push(viz2)
-        // viz2.dq.copy(Translator(0., .6, 0.))
-        // viz2.markupPos.point(-.4, 1.3, 0.)
+        let viz1 = new DqViz()
+        snappables.push(viz1)
+        viz1.dq.copy(Translator(.8, 0., 0.))
+        viz1.markupPos.point(-.4, 1.6, 0.)
 
-        // let viz3 = new DqViz()
-        // snappables.push(viz3)
-        // viz3.markupPos.point(-.8, 1., 0.)
-        // viz3.affecters[0] = viz2
-        // viz3.affecters[1] = viz1
-        // viz3.affecters[2] = 1
+        let viz2 = new DqViz()
+        snappables.push(viz2)
+        viz2.dq.copy(Translator(0., .6, 0.))
+        viz2.markupPos.point(-.4, 1.9, 0.)
+
+        let viz3 = new DqViz()
+        snappables.push(viz3)
+        viz3.markupPos.point(-.8, 1., 0.)
+        viz3.affecters[0] = viz2
+        viz3.affecters[1] = viz1
+        viz3.affecters[2] = 1
 
         // let viz4 = new DqViz()
         // snappables.push(viz4)
@@ -98,6 +94,14 @@ function initControl() {
 
         //     viz4.markupPos.point(.3 * (1. + Math.cos(frameCount * .01)), 1.6, 0.)
         // }
+
+        // let buggedViz = new DqViz()
+        // buggedViz.markupPos.set(0, 0, 0, 0, 0, 1.6, -0.4, 1.)
+        // buggedViz.dq.set(-0.9969173073768616, 0.1302703320980072, 0.02736310474574566, -0.025946244597434998, 0.07845909893512726, 0., 0., 0.002042013918980956)
+        // // buggedViz.dq[0] = 0.
+        // // buggedViz.dq[7] = 0.
+        // // debugger
+        // buggedViz.dq.normalize()
     }
 
     let showMarkupVizes = false
@@ -181,7 +185,7 @@ function initControl() {
             //this is about creation, depends on hand
             if (simulatingPaintingHand) {
                 
-                if (highlightedSclptable!==null)
+                if ( highlightedSclptable !== null )
                     sclptableBeingSculpted = highlightedSclptable
                 else
                     sclptableBeingSculpted = new Sclptable()

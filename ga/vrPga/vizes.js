@@ -7,6 +7,9 @@
             Then you get the circle
         To get a CGA point at a certain position, take the origin point and translate it by the translation
 
+    Might be better if you only see the start and end of the arrow
+    Or maybe you should get them moving a bit more to go to nicer-to-look-at positions
+
     Call the plane contianing a translation axis and the camera point the "nice-plane"
         For any pair of non-parallel translations
             you can always compose both the arrows while keeping them in their nice-plane
@@ -208,7 +211,6 @@ function initVizes() {
             ]
 
             let arrowMat = new THREE.MeshPhong2Material({
-                side: THREE.DoubleSide,
                 color: col,
                 transparent: transparent,
                 opacity: transparent ? .4 : 1.
@@ -250,7 +252,7 @@ function initVizes() {
                     return
                 }
 
-                this.rotAxisMesh.visible = this.trnAxisMesh.visible = this.arrow.visible = this.cup.visible = true
+                this.arrow.visible = this.cup.visible = true
                 this.scalarSign.visible = false
 
                 nonNetherDq.copy(this.dq)  
@@ -259,7 +261,6 @@ function initVizes() {
                     nonNetherDq.multiplyScalar(-1., nonNetherDq)
                 this.extraShaft.visible = false
 
-                let arrowArcLength = 0.
                 //bounding box and determination of arrow arclength
                 {
                     this.boundingBox.makeEmpty()
@@ -310,7 +311,7 @@ function initVizes() {
                     nonNetherArrowStart.pointToVertex(arrowMat.extraVec1)
                     
                     //if you're non-nether, you have an extraShaft, but that isn't "arrow" for these purposes
-                    arrowArcLength = arrowMat.dq.pointTrajectoryArcLength(nonNetherArrowStart)
+                    let arrowArcLength = arrowMat.dq.pointTrajectoryArcLength(nonNetherArrowStart, 16)
                     let headArcLength = .25
                     let headStart = (1. - headArcLength / arrowArcLength)
                     let headOutnessAtArrowBase = arrowArcLength * 10. //number we use to control head's radius
@@ -320,7 +321,7 @@ function initVizes() {
                     else
                         this.cup.scale.setScalar(1.)
 
-                    let spineLineAtNominalStart = nonNetherArrowStart.momentumLine(arrowMat.dq, dq0)
+                    let spineLineAtNominalStart = nonNetherArrowStart.momentumLineFromRotor(arrowMat.dq, dq0)
                     let randomPlaneContainingLine = spineLineAtNominalStart.joinPt(randomPt, fl1)
                     let outDqAtStartLog = randomPlaneContainingLine.meet(e0, dq0).normalize()
                     arrowMat.extraVec2.set(
@@ -338,8 +339,8 @@ function initVizes() {
                     else {
                         this.rotAxisMesh.visible = true
 
-                        rotationPart[0] = 0.
-                        e31.dqTo(rotationPart, this.rotAxisMesh.dq)
+                        rotationPart.selectGrade(2, dq0)
+                        e31.dqTo(dq0, this.rotAxisMesh.dq)
                     }
 
                     if (translationPart.approxEquals(oneDq))

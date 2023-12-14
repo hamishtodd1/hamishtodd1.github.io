@@ -1,7 +1,7 @@
 /*
     TODO for "show" demo:
         Circuits better
-        More operations and stuff about snapping
+        More operations and snapping should be accurate (possibly extra controls)
         Deleting sculptables
         Maybe want a way for a sclptable to be affected by other buttons during the show?
         Make a properly rigged puppet! A tentacle or something
