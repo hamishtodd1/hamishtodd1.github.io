@@ -7,6 +7,7 @@ function init31() {
         }
 
         lineToPlane(target) {
+            target.zero()
             target[1] = this[1]
             target[3] = this[2]
             target[0] = .5*(this[3] + this[4])
@@ -26,21 +27,22 @@ function init31() {
         // }
 
         sandwich(a, target) {
-            let intermediate = this.mul(a, newCga2d)
-            let thisReverse = this.getReverse(newCga2d)
+            let intermediate = this.mul(a, cgaA)
+            let thisReverse = this.getReverse(cgaB)
             return intermediate.mul(thisReverse, target)
         }
 
         tangentVector(xPos, yPos, xDir, yDir) {
+            this.zero()
             this.addScaled(e1oCga, xDir/2., this)
             this.addScaled(e2oCga, yDir/2., this)
 
-            let myTranslator = newCga2d.translatorToXy(xPos, yPos)
+            let myTranslator = cgaC.translatorToXy(xPos, yPos)
             return myTranslator.sandwich(this, this)
         }
 
-        zrcToVertex(target) {
-            let flatPt = this.inner(ptAtInf, newCga2d)
+        zrcToGibbsVec(target) {
+            let flatPt = this.inner(ptAtInf, cgaD)
             let div = 1. / (flatPt[5] * 2.)
             let x = (flatPt[6]+flatPt[7]) * div
             let y = (flatPt[8]+flatPt[9]) * div
@@ -48,13 +50,13 @@ function init31() {
         }
 
         flatPt(x,y) {
-            let myTranslator = newCga2d
+            let myTranslator = cgaE
             myTranslator.translatorToXy(x, y)
             return myTranslator.sandwich(e12Cga, this)
         }
 
-        zrc(x,y) { //zero radius circle
-            let myTranslator = newCga2d
+        zeroRadiusCircle(x,y) { //zero radius circle
+            let myTranslator = cgaF
             myTranslator.translatorToXy(x,y)
             return myTranslator.sandwich(eoCga,this)
         }
@@ -68,6 +70,46 @@ function init31() {
             this.addScaled(e20Cga, y/2., this)
 
             return this
+        }
+
+        log(label, numDecimalPlaces) {
+            let str = this.toString(label, numDecimalPlaces)
+
+            if (label !== undefined)
+                str = label + ": " + str
+            else {
+                label = getWhereThisWasCalledFrom()
+                str = label + ": " + str
+            }
+
+            console.log(str)
+        }
+
+        toString(numDecimalPlaces) {
+            if (numDecimalPlaces === undefined)
+                numDecimalPlaces = 1
+
+            let str = ""
+            for (let i = 0; i < 16; ++i) {
+
+                if (Math.abs(this[i]) > 0.05 || isNaN(this[i])) { // && this[i].toFixed() != 0) {
+
+                    if (str !== "")
+                        str += " + "
+
+                    let numString = this[i].toString()
+                    if (numString.length > numDecimalPlaces)
+                        numString = this[i].toFixed(numDecimalPlaces)
+
+                    let basisName = this.constructor.basisNames[i]
+                    str += numString + (basisName === `` ? `` : `e`) + basisName
+                }
+            }
+
+            if (str === ``)
+                str += `0.`
+
+            return str
         }
 
         addScaled(a, scalar,target) {
@@ -171,6 +213,9 @@ function init31() {
             return target;
         }
     }
+    Cga2d.basisNames = [
+        ``, `1`, `2`, `+`, `-`, `12`, `1+`, `1-`, `2+`, `2-`, `+-`, `12+`, `12-`, `1+-`, `2+-`, `12+-`
+    ]
 
     let eoCga = new Cga2d()
     eoCga[3] = 1.
@@ -178,10 +223,10 @@ function init31() {
     let e0Cga = new Cga2d()
     e0Cga[3] = 1.
     e0Cga[4] = 1.
-    let ptAtInf = eoCga.dual(new Cga2d())
+    let ptAtInf = eoCga.getDual(new Cga2d())
 
     let e1Cga = new Cga2d(); e1Cga[1] = 1.
-    let e2Cga = new Cga2d(); e1Cga[2] = 1.
+    let e2Cga = new Cga2d(); e2Cga[2] = 1.
     let e10Cga = e1Cga.meet(e0Cga, new Cga2d())
     let e20Cga = e2Cga.meet(e0Cga, new Cga2d())
     let e1oCga = e1Cga.meet(eoCga, new Cga2d())
@@ -196,6 +241,13 @@ function init31() {
     //For now, just done with line segments
 
     //but, maybe want a limit on the radius there
+
+    let cgaA = new Cga2d()
+    let cgaB = new Cga2d()
+    let cgaC = new Cga2d()
+    let cgaD = new Cga2d()
+    let cgaE = new Cga2d()
+    let cgaF = new Cga2d()
 
     let cga0 = new Cga2d()
     let cga1 = new Cga2d()
@@ -213,28 +265,38 @@ function init31() {
     let axisPp = new Cga2d()
     let plane1 = new Fl()
     let plane2 = new Fl()
-    function dqFromCircleAndZrcPoints(circle,p1,p2, target) {
-        
+    function dqFromCircleAndZrcs(circle,p1,p2, target) {
+
+        // debugger
         circle.inner(ptAtInf, axisPp)
         axisPp.inner(p1, cga4).lineToPlane(plane1)
         axisPp.inner(p2, cga5).lineToPlane(plane2)
+        // debugger
 
         return plane1.mulReverse(plane2, target).normalize().sqrtSelf()
     }
 
-    rotationThroughZrppAndPoint = (dx, dy, x1, y1, x2, y2) => {
+    rotationThroughZrppAndPoint = (dx, dy, x1, y1, x2, y2, target) => {
         
-        zrc1.zrc(x1, y1)
-        zrc2.zrc(x2, y2)
+        zrc1.zeroRadiusCircle(x1, y1)
+        zrc2.zeroRadiusCircle(x2, y2)
         zrpp.tangentVector(x1, y1, dx, dy)
-        let circle = zrpp.meet(zrc2, cga0).dual(cga1)
+        let circle = zrpp.meet(zrc2, cga0).getDual(cga1)
 
-        return dqFromCircleAndZrcPoints(circle, zrc1, zrc2, target)
+        return dqFromCircleAndZrcs(circle, zrc1, zrc2, target)
     }
+    
+    //test
+    // rotationThroughZrppAndPoint(
+    //     1.,0., 
+    //     0., 1., 
+    //     1., 0., dq0)
+    
+
     // rotationThroughPoints = (x1, y1, x2, y2, x3, y3, target) => {
-    //     zrc1.zrc(x1,y1)
-    //     zrc2.zrc(x2,y2)
-    //     zrc3.zrc(x3,y3)
+    //     zrc1.zeroRadiusCircle(x1,y1)
+    //     zrc2.zeroRadiusCircle(x2,y2)
+    //     zrc3.zeroRadiusCircle(x3,y3)
     //     let circle = zrc1.meet(zrc2, cga0).meet(zrc3, cga1).dual(cga2)
 
     //     //why 1 and 2? No reason right now

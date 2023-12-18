@@ -57,6 +57,7 @@ function blankFunction(){}
 async function init() {
 
     initDqMeshes()
+    init31()
 
     initCamera()
     initSurroundings()
@@ -101,13 +102,11 @@ async function init() {
         buttonWhileDowns()
 
         handleSculpting()
-        handleDqModification()
+        handleDqModificationAndUpdateFromCircuits()
         
         updateHighlighting()
         
         updatePalette()
-
-        updateCircuitAppearances()
 
         obj3dsWithOnBeforeRenders.forEach(obj3d => obj3d.onBeforeRender())
 

@@ -46,6 +46,8 @@ function initEgaWithoutDeclarations() {
             let adHocNormSq = this.eNormSq();
             if (adHocNormSq === 0.)
                 adHocNormSq = this.getDual(newFl).eNormSq()
+            if (adHocNormSq === 0.)
+                console.error("just tried to normalize: " + this.toString())
 
             let factor = 1. / Math.sqrt(adHocNormSq)
             return this.multiplyScalar(factor, target)
@@ -67,7 +69,7 @@ function initEgaWithoutDeclarations() {
             return this
         }
 
-        pointFromVertex(v) {
+        pointFromGibbsVec(v) {
 
             this.point(v.x, v.y, v.z, 1.)
             return this
@@ -79,24 +81,35 @@ function initEgaWithoutDeclarations() {
             return this
         }
 
-        pointToVertex(target) {
+        pointToGibbsVec(target) {
 
             if (target === undefined)
                 target = new THREE.Vector3()
-            if (this[7] === 0.){
-                // debugger
-                console.error("ideal point should not be converted to vec3")
-                let norm = Math.sqrt(sq(this[4]) + sq(this[5]) + sq(this[6]))
-                target.z = this[4] / norm
-                target.y = this[5] / norm
-                target.x = this[6] / norm
-            }
+
+            if (this[7] === 0.)
+                console.error("ideal point")
             else {
                 target.z = this[4] / this[7]
                 target.y = this[5] / this[7]
                 target.x = this[6] / this[7]
             }
  
+            return target
+        }
+
+        directionToGibbsVec(target) {
+
+            if (target === undefined)
+                target = new THREE.Vector3()
+
+            if (this[7] !== 0.)
+                console.error("non-ideal point")
+            else {
+                target.z = this[4]
+                target.y = this[5]
+                target.x = this[6]
+            }
+
             return target
         }
 
@@ -149,7 +162,7 @@ function initEgaWithoutDeclarations() {
             let ret = 0.
             for (let i = 0; i < numSamples; ++i) {
                 let part = this.pow(i / (numSamples - 1), newDq)
-                part.sandwichFl(startPt, newFl).pointToVertex(v1)
+                part.sandwichFl(startPt, newFl).pointToGibbsVec(v1)
 
                 if (i > 0)
                     ret += v1.distanceTo(v2)
@@ -234,7 +247,7 @@ function initEgaWithoutDeclarations() {
 
         //normalized only
         logarithm(target) {
-            if (this[0] === 1.)
+            if ( this[4] === 0. && this[5] === 0. && this[6] === 0. )
                 return target.set(0., this[1], this[2], this[3], 0., 0., 0., 0.)
 
             let a = 1. / (1. - this[0] * this[0]),
@@ -291,12 +304,6 @@ function initEgaWithoutDeclarations() {
             v.y = this[2] * factor
             v.z = this[3] * factor
             return v
-        }
-
-        applyToThreeVec(vecPt) {
-            this.toMat4(m1)
-            vecPt.applyMatrix4(m1)
-            return vecPt
         }
 
         eNormSq() {

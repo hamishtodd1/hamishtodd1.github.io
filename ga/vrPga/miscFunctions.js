@@ -1,3 +1,16 @@
+function getWhereThisWasCalledFrom(depth) {
+    let actualDepth = (depth || 0) + 3
+    let splitIntoLines = Error().stack.split("\n")
+    if (actualDepth >= splitIntoLines.length)
+        actualDepth = splitIntoLines.length - 1
+    let lineOfStackTrace = splitIntoLines[actualDepth]
+
+    let splitBySlash = lineOfStackTrace.split("/")
+    let stillGotColons = splitBySlash[splitBySlash.length - 1]
+    let splitByColons = stillGotColons.split(":")
+    return splitByColons[0] + ":" + splitByColons[1]
+}
+
 function smoothstep(x) {
 	x = clamp(x,0.,1.)
 	return x * x * (3. - 2. * x)
@@ -20,8 +33,8 @@ class LineSegment extends THREE.Line {
 	}
 
 	set(p1, p2) {
-		p1.pointToVertex(v1)
-		p2.pointToVertex(v2)
+		p1.pointToGibbsVec(v1)
+		p2.pointToGibbsVec(v2)
 		v1.toArray(this.geometry.attributes.position.array, 0)
 		v2.toArray(this.geometry.attributes.position.array, 3)
 

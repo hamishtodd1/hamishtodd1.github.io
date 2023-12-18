@@ -1,10 +1,13 @@
 function initCamera() {
 
-    camera.position.set(-.25, 1.6, 3.7)
+    // camera.position.set(-.25, 1.6, 3.7)
+    camera.position.set( 0., 1.6, 3.7)
     orbitControls = new OrbitControls(camera, container)
     orbitControls.target.set(0, 1.6, 0)
     orbitControls.update()
     orbitControls.enableZoom = false //change whenever you like!
+
+    camera.lookAtAngle = 0.
 
     camera.frustum = {
         left: new Fl(),
@@ -38,9 +41,11 @@ function initCamera() {
     frameQuatVertical.sandwich(  e2, frustumUntransformed.top )
 
     updateCameraMvs = () => {
-        camera.mvs.pos.pointFromVertex(   camera.position )
+        camera.mvs.pos.pointFromGibbsVec(   camera.position )
         camera.mvs.quat.fromQuaternion( camera.quaternion )
         camera.mvs.dq.fromPosQuat(   camera.position, camera.quaternion )
+
+        camera.lookAtAngle = Math.atan2(camera.position.x, camera.position.z)
 
         for (let planeName in camera.frustum) {
             camera.mvs.dq.sandwich(frustumUntransformed[planeName], camera.frustum[planeName])

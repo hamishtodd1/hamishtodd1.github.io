@@ -1,19 +1,14 @@
 function initMultivectorWithoutDeclarations() {
     
-    function getWhereThisWasCalledFrom(depth) {
-        let actualDepth = (depth || 0) + 3
-        let splitIntoLines = Error().stack.split("\n")
-        if (actualDepth >= splitIntoLines.length)
-            actualDepth = splitIntoLines.length - 1
-        let lineOfStackTrace = splitIntoLines[actualDepth]
-
-        let splitBySlash = lineOfStackTrace.split("/")
-        let stillGotColons = splitBySlash[splitBySlash.length - 1]
-        let splitByColons = stillGotColons.split(":")
-        return splitByColons[0] + ":" + splitByColons[1]
-    }
-
     class Multivector extends Float32Array {
+
+        directionTo(b, target) {
+
+            if (target === undefined)
+                target = new this.constructor()
+
+            return b.addScaled(this, -b[7] / this[7], target).normalize()
+        }
 
         //only thing this leaves out is plane-plane, plane-line, and line-line, which are the check-y ones
         distanceToPt(pt) {
@@ -372,8 +367,7 @@ function initMultivectorWithoutDeclarations() {
         }
 
         log(label, numDecimalPlaces) {
-
-            let str = this.toString(numDecimalPlaces)
+            let str = this.toString(label, numDecimalPlaces)
 
             if (label !== undefined)
                 str = label + ": " + str

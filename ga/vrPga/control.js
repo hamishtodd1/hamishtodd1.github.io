@@ -61,20 +61,20 @@ function initControl() {
 
         let viz1 = new DqViz()
         snappables.push(viz1)
-        viz1.dq.copy(Translator(.8, 0., 0.))
+        viz1.dq.copy(Translator(.8, .8, 0.))
         viz1.markupPos.point(-.4, 1.6, 0.)
 
         let viz2 = new DqViz()
         snappables.push(viz2)
-        viz2.dq.copy(Translator(0., .6, 0.))
+        viz2.dq.copy(Translator(-.8, .8, 0.))
         viz2.markupPos.point(-.4, 1.9, 0.)
 
         let viz3 = new DqViz()
         snappables.push(viz3)
-        viz3.markupPos.point(-.8, 1., 0.)
+        viz3.markupPos.point(1., 1.6, 0.)
         viz3.affecters[0] = viz2
         viz3.affecters[1] = viz1
-        viz3.affecters[2] = 1
+        viz3.affecters[2] = 0
 
         // let viz4 = new DqViz()
         // snappables.push(viz4)
@@ -200,7 +200,7 @@ function initControl() {
         }
     })
 
-    handleDqModification = () => {
+    handleDqModificationAndUpdateFromCircuits = () => {
         if (heldDqViz !== null) {
             // highlightedTranslator = heldDqViz
             highlightedTranslator = null
@@ -236,6 +236,10 @@ function initControl() {
                 }
             }
         }
+
+        snappables.forEach(s => {
+            s.updateFromAffecters()
+        })
     }
 
     document.addEventListener("pointerup", event => {

@@ -84,7 +84,7 @@ async function initHands() {
             raycaster.setFromCamera(mouse2d, camera)
 
             //would prefer to do this ourselves, using camera GA
-            mouseOrigin.pointFromVertex(raycaster.ray.origin)
+            mouseOrigin.pointFromGibbsVec(raycaster.ray.origin)
             mouseDirection.pointFromNormal(raycaster.ray.direction)
             mouseOrigin.joinPt(mouseDirection, rayToMouse)
         }
@@ -155,7 +155,7 @@ async function initHands() {
             handPositionOld.copy(handPosition)
             mouseWheelTransformOld.copy(mouseWheelTransform)
 
-            handPosition.pointFromVertex(hand1.position)
+            handPosition.pointFromGibbsVec(hand1.position)
         }
 
         updateOlds = () => {

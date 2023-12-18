@@ -49,6 +49,8 @@ let simulatingPaintingHand = false //true
 const snappables = []
 const sclptables = []
 
+const spectatorMode = false
+
 let operators = [
 	`mul`, `mulReverse`, `add`, `sandwich`,
     //copy to! Very important, this is how you make many things move at once

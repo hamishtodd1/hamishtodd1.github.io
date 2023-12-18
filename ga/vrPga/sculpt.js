@@ -86,7 +86,7 @@ function initSclptables()
 
             hidePalette()
 
-            pos.pointToVertex(v1)
+            pos.pointToGibbsVec(v1)
             this.worldToLocal(v1)
 
             let cs = this.children[currentColor]
@@ -98,7 +98,7 @@ function initSclptables()
             // let numSteps = Math.max(1,Math.floor(distanceGone / VOXEL_WIDTH * .9))
             // for (let i = 0; i < numSteps+1; ++i) {
             //     let step = handPositionOld.lerp(handPosition, i / numSteps, fl0)
-            //     cs.fillCubePosition(step.pointToVertex(v2))
+            //     cs.fillCubePosition(step.pointToGibbsVec(v2))
             // }
 
             //both of these are in voxels
@@ -119,7 +119,7 @@ function initSclptables()
 
                             cs.fillCubePosition(v2)
 
-                            fl0.pointFromVertex(v2)
+                            fl0.pointFromGibbsVec(v2)
                             this.com.add(fl0,this.com)
                             
                             this.boundingBox.min.x = Math.min(this.boundingBox.min.x, v2.x - 1.5*VOXEL_WIDTH)

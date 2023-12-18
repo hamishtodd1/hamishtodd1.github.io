@@ -2,6 +2,10 @@
     It's probably quite fun just to look at dq arrow compositions
     Like the vector picture but a bit more fun because you can curve
 
+    TODO:
+        A null bivector, hey man, that's still valid - it's a translation to infinity
+        So, Just the beginning of the arrow, going off into the sky
+
     The box should be at the center of the circle that all three points fall on
         Unless two of the floor points are within a certain distance of each other
             Then you get the circle
@@ -242,7 +246,7 @@ function initVizes() {
                     if (this.dq[0] === 1.)
                         this.scalarSign.visible = false
                     else {
-                        this.markupPos.pointToVertex(this.scalarSign.position)
+                        this.markupPos.pointToGibbsVec(this.scalarSign.position)
                         this.scalarSign.lookAt(camera.position)
                         
                         this.scalarSign.setText(this.dq[0])
@@ -267,7 +271,7 @@ function initVizes() {
                     let numSamples = 8
                     for (let i = 0; i < numSamples; ++i) {
                         nonNetherDq.pow(i / (numSamples - 1), dq0)
-                        dq0.sandwichFl(this.markupPos, fl0).pointToVertex(v1)
+                        dq0.sandwichFl(this.markupPos, fl0).pointToGibbsVec(v1)
                         this.boundingBox.expandByPoint(v1)
                     }
                     this.boundingBox.min.subScalar(arrowRadius)
@@ -277,7 +281,7 @@ function initVizes() {
 
                 //cup
                 {
-                    this.markupPos.pointToVertex(this.cup.position)
+                    this.markupPos.pointToGibbsVec(this.cup.position)
 
                     let joinedPlane = bivPart.joinPt(this.markupPos, fl0)
                     joinedPlane.mulReverse(e2, dq0).sqrtSelf().toQuaternion(this.cup.quaternion)
@@ -291,7 +295,7 @@ function initVizes() {
                     } 
                     else {
                         this.extraShaft.visible = true
-                        this.markupPos.pointToVertex(this.extraShaft.position)
+                        this.markupPos.pointToGibbsVec(this.extraShaft.position)
 
                         let joinedPlane = bivPart.joinPt(e123, fl0)
                         joinedPlane.mulReverse(e2, dq0).sqrtSelf().toQuaternion(this.extraShaft.quaternion)
@@ -308,7 +312,7 @@ function initVizes() {
                         nonNetherDq.mulReverse(offseterDq, arrowMat.dq )
                     }
 
-                    nonNetherArrowStart.pointToVertex(arrowMat.extraVec1)
+                    nonNetherArrowStart.pointToGibbsVec(arrowMat.extraVec1)
                     
                     //if you're non-nether, you have an extraShaft, but that isn't "arrow" for these purposes
                     let arrowArcLength = arrowMat.dq.pointTrajectoryArcLength(nonNetherArrowStart, 16)
