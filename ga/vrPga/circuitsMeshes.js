@@ -63,15 +63,16 @@ function initCircuitsMeshes() {
         let geo = new THREE.PlaneGeometry(1., 1., 1, 100)
         geo.rotateX(Math.PI / 2.)
         geo.translate(0.,0.,.5)
-        let mat = new THREE.MeshPhong2Material({
-            color: 0xFFFF00,
-            side:THREE.DoubleSide //not ideal but needed for now
-        })
-        mat.injections = injections
 
         class FloorWire extends THREE.Mesh {
 
-            constructor() {
+            constructor(circuit) {
+                
+                let mat = new THREE.MeshPhong2Material({
+                    color: 0xFFFF00,
+                    side: THREE.DoubleSide //not ideal but needed for now
+                })
+                mat.injections = injections
                 super(geo, mat)
 
                 this.start = e123.clone() //assumed to be normalized
@@ -80,23 +81,33 @@ function initCircuitsMeshes() {
                 //note you are sending in a logarithm!!
 
                 this.onBeforeRender = () => {
-                    
-                    // this.material.dq[5] = 1.
-                    // this.material.dq[1] = 1.
-                    // this.material.dq[0] = 0.
+
                     this.material.extraVec3.x = this.material.dq.exp(dq0).pointTrajectoryArcLength(start) / radius
 
-                    let ptAxisDirFromStart = this.material.dq.meet(e2,fl0).normalize().sub(this.start, fl1)
-
-                    if(ptAxisDirFromStart.isZero()) //start is in same place as axis
+                    if (this.material.dq.isZero()) {
                         this.visible = false
-                    else {
-                        this.visible = true
-                        ptAxisDirFromStart.normalize()
+                        return
                     }
-                    
-                    this.start.addScaled(ptAxisDirFromStart,  radius, fl0).pointToGibbsVec(this.material.extraVec1)
+
+                    let ptAxisDirFromStart = this.material.dq.meet(e2, fl0).normalize().sub(this.start, fl1)
+
+                    if (ptAxisDirFromStart.isZero()) {
+                        this.visible = false
+                        return
+                    }
+
+                    this.visible = true
+                    ptAxisDirFromStart.normalize()
+
+                    // ptAxisDirFromStart.log()
+                    this.start.addScaled(ptAxisDirFromStart, radius, fl0).pointToGibbsVec(this.material.extraVec1)
                     this.start.addScaled(ptAxisDirFromStart, -radius, fl0).pointToGibbsVec(this.material.extraVec2)
+
+                    // circuit.getOpBgCorner(v1, 0, 0., 0., 0.)
+                    // this.material.extraVec3.x = this.material.dq.exp(dq0).pointTrajectoryArcLength(fl0.pointFromGibbsVec(v1)) / radius
+
+                    // circuit.getOpBgCorner(this.material.extraVec1, 0, 0., 0.,  radius)
+                    // circuit.getOpBgCorner(this.material.extraVec2, 0, 0., 0., -radius)
                 }
             }
         }

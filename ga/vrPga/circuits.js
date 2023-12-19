@@ -68,15 +68,6 @@ function initCircuits() {
             circuitsGroup.add(this)
             circuits.push(this)
 
-            this.dottedLines = [
-                new DottedLine(), new DottedLine(), new DottedLine(),
-            ]
-            this.floorWires = [
-                new FloorWire(), new FloorWire(), new FloorWire(),
-            ]
-            this.floorWires.forEach( fw => {this.add(fw)})
-            this.dottedLines.forEach(dl => {this.add(dl)})
-
             this.opBg = new THREE.Mesh(triGeo, new THREE.MeshBasicMaterial({ color: 0xCCCCCC }))
             // this.opBg.position.x = -.8
             this.opBg.position.z = -1.
@@ -85,9 +76,24 @@ function initCircuits() {
                 this.opBg.rotation.y = camera.lookAtAngle
             }
 
+            this.dottedLines = [
+                new DottedLine(), new DottedLine(), new DottedLine(),
+            ]
+            this.floorWires = [
+                new FloorWire(this), new FloorWire(this), new FloorWire(this),
+            ]
+            this.floorWires.forEach( fw => {this.add(fw)})
+            this.dottedLines.forEach(dl => {this.add(dl)})
+
             // this.text = new THREE.Mesh(unchangingUnitSquareGeometry, opMats["mul"])
             // this.text.position.y -= .06
             // this.opGroup.add(this.text)
+        }
+
+        getOpBgCorner(target, index, additionX, additionY, additionZ) {
+            target.set(additionX || 0., additionY || 0., additionZ || 0.)
+            target.add(triVerts[index])
+            return this.opBg.localToWorld(target)
         }
     }
     for(let i = 0; i < 10; i++)
@@ -98,12 +104,14 @@ function initCircuits() {
     let onFloor = new Fl()
     let cameraSideDirection = new Fl()
     let circleDirection = new THREE.Vector3()
+    let centralAxis = new Dq()
     circuitsGroup.onBeforeRender = () => {
 
         // updateCircuitAppearancesNew()
 
         camera.frustum.top.meet(camera.frustum.bottom, dq0).meet(e0, cameraSideDirection)
-        cameraSideDirection.directionToGibbsVec(circleDirection).normalize()
+        cameraSideDirection.directionToGibbsVec(circleDirection).normalize().negate()
+        // cameraSideDirection.log()
 
         let lowestUnusedCircuit = 0
         snappables.forEach(s => {
@@ -128,34 +136,46 @@ function initCircuits() {
             c.dottedLines.forEach((dl,i) => {
 
                 let snappable = i === 0 ? s : s.affecters[i-1]
+                let fw = c.floorWires[i]
                 if(snappable === null) {
                     dl.visible = false
+                    fw.visible = false
                     return
                 }
+                else {
+                    dl.visible = true
+                    fw.visible = true
+                }
 
-                dl.visible = true
                 snappable.getArrowCenter(snappablePos)
                 dl.setHeight(snappablePos.pointToGibbsVec(v1).y)
                 snappablePos.projectOn(e2, onFloor)
                 onFloor.pointToGibbsVec(dl.position)
 
-                if (snappable !== s)
-                    return
+                // if (i !== 0)
+                //     return
 
-                let fw = c.floorWires[i]
-                let from = snappable === s ? c.opBg.localToWorld(v1.copy(triVerts[i])) : dl.position
-                let to   = snappable === s ? dl.position : c.opBg.localToWorld(v1.copy(triVerts[i]))
+                let ourCorner = c.opBg.localToWorld(v1.copy( triVerts[i] ))
+                let from = snappable === s ? ourCorner : dl.position
+                let to   = snappable === s ? dl.position : ourCorner
 
-                rotationThroughZrppAndPoint(
-                    v1.x, v1.z,
+                rotationAxisFromDirAndPoints(
+                    circleDirection.x, circleDirection.z,
                     from.x, from.z,
                     to.x, to.z,
-                    dq0 )
-                // console.log(v1, from, to )
-                dq0.logarithm(fw.material.dq)
-                fw.start.pointFromGibbsVec(from)
+                    centralAxis )
+                let startFl = fl0.pointFromGibbsVec(from)
+                let fromPlane = centralAxis.joinPt(startFl, fl1)
+                let toPlane   = centralAxis.joinPt(fl0.pointFromGibbsVec( to ), fl2)
+                toPlane.mulReverse(fromPlane, dq0)
+                dq0.normalize().logarithm(fw.material.dq).multiplyScalar(.5, fw.material.dq)
 
+                // centralAxis.meet(e2,fl3).pointToGibbsVec(debugSphere.position)
+
+                fw.start.pointFromGibbsVec(from).normalize()
+                
             })
+
             
             // dq0.logarithm(fw.dq)
 

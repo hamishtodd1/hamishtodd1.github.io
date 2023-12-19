@@ -43,13 +43,17 @@ function initEgaWithoutDeclarations() {
 
         getNormalization(target) {
 
-            let adHocNormSq = this.eNormSq();
+            let adHocNormSq = this.eNormSq()
             if (adHocNormSq === 0.)
                 adHocNormSq = this.getDual(newFl).eNormSq()
             if (adHocNormSq === 0.)
                 console.error("just tried to normalize: " + this.toString())
 
             let factor = 1. / Math.sqrt(adHocNormSq)
+            //er, worth asking about this hack
+            let isNegativePoint = this[7] < 0. && this[0] === 0. && this[1] === 0. && this[2] === 0. && this[3] === 0.
+            if (isNegativePoint)
+                factor = -factor
             return this.multiplyScalar(factor, target)
         }
 

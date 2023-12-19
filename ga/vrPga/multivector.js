@@ -367,7 +367,7 @@ function initMultivectorWithoutDeclarations() {
         }
 
         log(label, numDecimalPlaces) {
-            let str = this.toString(label, numDecimalPlaces)
+            let str = this.toString(numDecimalPlaces)
 
             if (label !== undefined)
                 str = label + ": " + str

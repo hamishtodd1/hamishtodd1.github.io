@@ -153,15 +153,15 @@ joinPt(b, target) {
     if (target === undefined)
         target = new Fl()
 
-	target[7] = - this[7] * b[7];
-    target[6] = - this[7] * b[6];
-    target[5] = - this[7] * b[5];
-    target[4] = - this[7] * b[4];
-    
-	target[3] = - this[3] * b[7] + this[5] * b[6] - this[6] * b[5];
-    target[2] = - this[2] * b[7] - this[4] * b[6] + this[6] * b[4];
-    target[1] = - this[1] * b[7] + this[4] * b[5] - this[5] * b[4];
     target[0] = + this[1] * b[6] + this[2] * b[5] + this[3] * b[4];
+    target[1] = - this[1] * b[7] + this[4] * b[5] - this[5] * b[4];
+    target[2] = - this[2] * b[7] - this[4] * b[6] + this[6] * b[4];
+	target[3] = - this[3] * b[7] + this[5] * b[6] - this[6] * b[5];
+    
+    target[4] = - this[7] * b[4];
+    target[5] = - this[7] * b[5];
+    target[6] = - this[7] * b[6];
+	target[7] = - this[7] * b[7];
 
     return target
 }

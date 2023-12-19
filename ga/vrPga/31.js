@@ -6,33 +6,25 @@ function init31() {
             super(16)
         }
 
-        lineToPlane(target) {
+        ppToDqLine(target) {
+
             target.zero()
-            target[1] = this[1]
-            target[3] = this[2]
-            target[0] = .5*(this[3] + this[4])
+            target[5] = -this[5]
+            target[1] = -.5 * (this[6] + this[7])
+            target[3] = -.5 * (this[8] + this[9])
+
             return target
         }
 
-        // rotorToDq(target) {
-        //     target.zero()
-
-        //     target[0] = this[0] //scalar
-        //     target[4] = this[5] //e12
-
-        //     target[1] = -.5 * (this[6] + this[7]) //e01
-        //     target[2] = -.5 * (this[8] + this[9]) //e02
-
-        //     return target
-        // }
-
         sandwich(a, target) {
+
             let intermediate = this.mul(a, cgaA)
             let thisReverse = this.getReverse(cgaB)
             return intermediate.mul(thisReverse, target)
         }
 
         tangentVector(xPos, yPos, xDir, yDir) {
+
             this.zero()
             this.addScaled(e1oCga, xDir/2., this)
             this.addScaled(e2oCga, yDir/2., this)
@@ -41,27 +33,15 @@ function init31() {
             return myTranslator.sandwich(this, this)
         }
 
-        zrcToGibbsVec(target) {
-            let flatPt = this.inner(ptAtInf, cgaD)
-            let div = 1. / (flatPt[5] * 2.)
-            let x = (flatPt[6]+flatPt[7]) * div
-            let y = (flatPt[8]+flatPt[9]) * div
-            return target.set(x,y,0.)
-        }
-
-        flatPt(x,y) {
-            let myTranslator = cgaE
-            myTranslator.translatorToXy(x, y)
-            return myTranslator.sandwich(e12Cga, this)
-        }
-
         zeroRadiusCircle(x,y) { //zero radius circle
+
             let myTranslator = cgaF
             myTranslator.translatorToXy(x,y)
             return myTranslator.sandwich(eoCga,this)
         }
 
         translatorToXy(x,y) {
+
             this.zero()
             this[0] = 1.
             //e0 = e3+e4
@@ -134,6 +114,10 @@ function init31() {
         }
 
         mul(b, target) {
+
+            if (target === undefined)
+                target = new Cga2d()
+
             target[0] = b[0] * this[0] + b[1] * this[1] + b[2] * this[2] + b[3] * this[3] - b[4] * this[4] - b[5] * this[5] - b[6] * this[6] + b[7] * this[7] - b[8] * this[8] + b[9] * this[9] + b[10] * this[10] - b[11] * this[11] + b[12] * this[12] + b[13] * this[13] + b[14] * this[14] - b[15] * this[15];
             target[1] = b[1] * this[0] + b[0] * this[1] - b[5] * this[2] - b[6] * this[3] + b[7] * this[4] + b[2] * this[5] + b[3] * this[6] - b[4] * this[7] - b[11] * this[8] + b[12] * this[9] + b[13] * this[10] - b[8] * this[11] + b[9] * this[12] + b[10] * this[13] - b[15] * this[14] + b[14] * this[15];
             target[2] = b[2] * this[0] + b[5] * this[1] + b[0] * this[2] - b[8] * this[3] + b[9] * this[4] - b[1] * this[5] + b[11] * this[6] - b[12] * this[7] + b[3] * this[8] - b[4] * this[9] + b[14] * this[10] + b[6] * this[11] - b[7] * this[12] + b[15] * this[13] + b[10] * this[14] - b[13] * this[15];
@@ -154,6 +138,10 @@ function init31() {
         }
 
         meet(b, target) {
+
+            if(target === undefined)
+                target = new Cga2d()
+
             target[0] = b[0] * this[0];
             target[1] = b[1] * this[0] + b[0] * this[1];
             target[2] = b[2] * this[0] + b[0] * this[2];
@@ -174,6 +162,10 @@ function init31() {
         }
 
         join(b, target) {
+
+            if (target === undefined)
+                target = new Cga2d()
+
             target[15] = 1 * (this[15] * b[15]);
             target[14] = -1 * (this[14] * -1 * b[15] + this[15] * b[14] * -1);
             target[13] = 1 * (this[13] * b[15] + this[15] * b[13]);
@@ -194,6 +186,10 @@ function init31() {
         }
 
         inner(b, target) {
+
+            if (target === undefined)
+                target = new Cga2d()
+
             target[0] = b[0] * this[0] + b[1] * this[1] + b[2] * this[2] + b[3] * this[3] - b[4] * this[4] - b[5] * this[5] - b[6] * this[6] + b[7] * this[7] - b[8] * this[8] + b[9] * this[9] + b[10] * this[10] - b[11] * this[11] + b[12] * this[12] + b[13] * this[13] + b[14] * this[14] - b[15] * this[15];
             target[1] = b[1] * this[0] + b[0] * this[1] - b[5] * this[2] - b[6] * this[3] + b[7] * this[4] + b[2] * this[5] + b[3] * this[6] - b[4] * this[7] - b[11] * this[8] + b[12] * this[9] + b[13] * this[10] - b[8] * this[11] + b[9] * this[12] + b[10] * this[13] - b[15] * this[14] + b[14] * this[15];
             target[2] = b[2] * this[0] + b[5] * this[1] + b[0] * this[2] - b[8] * this[3] + b[9] * this[4] - b[1] * this[5] + b[11] * this[6] - b[12] * this[7] + b[3] * this[8] - b[4] * this[9] + b[14] * this[10] + b[6] * this[11] - b[7] * this[12] + b[15] * this[13] + b[10] * this[14] - b[13] * this[15];
@@ -214,7 +210,7 @@ function init31() {
         }
     }
     Cga2d.basisNames = [
-        ``, `1`, `2`, `+`, `-`, `12`, `1+`, `1-`, `2+`, `2-`, `+-`, `12+`, `12-`, `1+-`, `2+-`, `12+-`
+        ``, `1`, `2`, `p`, `m`, `12`, `1p`, `1m`, `2p`, `2m`, `pm`, `12p`, `12m`, `1pm`, `2pm`, `12pm`
     ]
 
     let eoCga = new Cga2d()
@@ -223,7 +219,7 @@ function init31() {
     let e0Cga = new Cga2d()
     e0Cga[3] = 1.
     e0Cga[4] = 1.
-    let ptAtInf = eoCga.getDual(new Cga2d())
+    let ptAtInf = e0Cga.getDual(new Cga2d())
 
     let e1Cga = new Cga2d(); e1Cga[1] = 1.
     let e2Cga = new Cga2d(); e2Cga[2] = 1.
@@ -231,6 +227,9 @@ function init31() {
     let e20Cga = e2Cga.meet(e0Cga, new Cga2d())
     let e1oCga = e1Cga.meet(eoCga, new Cga2d())
     let e2oCga = e2Cga.meet(eoCga, new Cga2d())
+
+    // log(e0Cga.meet(e1Cga))
+    // log(e0Cga.meet(e2Cga))
 
     let e12Cga = new Cga2d()
     e12Cga[5] = 1.
@@ -262,35 +261,39 @@ function init31() {
     let zrc3 = new Cga2d()
     let zrpp = new Cga2d()
 
-    let axisPp = new Cga2d()
     let plane1 = new Fl()
     let plane2 = new Fl()
-    function dqFromCircleAndZrcs(circle,p1,p2, target) {
-
-        // debugger
-        circle.inner(ptAtInf, axisPp)
-        axisPp.inner(p1, cga4).lineToPlane(plane1)
-        axisPp.inner(p2, cga5).lineToPlane(plane2)
-        // debugger
-
-        return plane1.mulReverse(plane2, target).normalize().sqrtSelf()
-    }
-
-    rotationThroughZrppAndPoint = (dx, dy, x1, y1, x2, y2, target) => {
+    // function dqFromCircleAndZrcs(circle,p1,p2, target) {
+        
+        //     // debugger
+        //     circle.inner(ptAtInf, retPp)
+        //     retPp.inner(p1, cga4).lineToPlane(plane1)
+        //     retPp.inner(p2, cga5).lineToPlane(plane2)
+        //     // debugger
+        
+        
+        //     return plane1.mulReverse(plane2, target).normalize().sqrtSelf()
+        // }
+        
+    let retPp = new Cga2d()
+    rotationAxisFromDirAndPoints = (dx, dy, x1, y1, x2, y2, target) => {
         
         zrc1.zeroRadiusCircle(x1, y1)
         zrc2.zeroRadiusCircle(x2, y2)
         zrpp.tangentVector(x1, y1, dx, dy)
+        // debugger
         let circle = zrpp.meet(zrc2, cga0).getDual(cga1)
 
-        return dqFromCircleAndZrcs(circle, zrc1, zrc2, target)
+        circle.inner(ptAtInf, retPp)
+        return retPp.ppToDqLine(target)
     }
     
     //test
-    // rotationThroughZrppAndPoint(
-    //     1.,0., 
-    //     0., 1., 
-    //     1., 0., dq0)
+    rotationAxisFromDirAndPoints(
+        1.,0., 
+        0., 1., 
+        1., 0., dq0)
+    dq0.log()
     
 
     // rotationThroughPoints = (x1, y1, x2, y2, x3, y3, target) => {
