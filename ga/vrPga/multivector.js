@@ -87,12 +87,12 @@ function initMultivectorWithoutDeclarations() {
                 return b.mulReverse(this, target)
             else {
                 let ratio = b.mulReverse(this, newFl)
-                return ratio.mul(thingy, target).sqrtSelf()
+                return ratio.mul(thingy, target).normalize().sqrtSelf()
             }
         }
 
         dqTo(b, target) {
-            return this.dqToSq(b, target).sqrtSelf()
+            return this.dqToSq(b, target).normalize().sqrtSelf()
         }
 
         sandwichDq(b, target) {

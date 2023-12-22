@@ -94,14 +94,6 @@ function initControl() {
 
         //     viz4.markupPos.point(.3 * (1. + Math.cos(frameCount * .01)), 1.6, 0.)
         // }
-
-        // let buggedViz = new DqViz()
-        // buggedViz.markupPos.set(0, 0, 0, 0, 0, 1.6, -0.4, 1.)
-        // buggedViz.dq.set(-0.9969173073768616, 0.1302703320980072, 0.02736310474574566, -0.025946244597434998, 0.07845909893512726, 0., 0., 0.002042013918980956)
-        // // buggedViz.dq[0] = 0.
-        // // buggedViz.dq[7] = 0.
-        // // debugger
-        // buggedViz.dq.normalize()
     }
 
     let showMarkupVizes = false

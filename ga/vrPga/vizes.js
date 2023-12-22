@@ -284,7 +284,7 @@ function initVizes() {
                     this.markupPos.pointToGibbsVec(this.cup.position)
 
                     let joinedPlane = bivPart.joinPt(this.markupPos, fl0)
-                    joinedPlane.mulReverse(e2, dq0).sqrtSelf().toQuaternion(this.cup.quaternion)
+                    joinedPlane.mulReverse(e2, dq0).normalize().sqrtSelf().toQuaternion(this.cup.quaternion)
                 }
                 
                 //arrow
@@ -298,7 +298,7 @@ function initVizes() {
                         this.markupPos.pointToGibbsVec(this.extraShaft.position)
 
                         let joinedPlane = bivPart.joinPt(e123, fl0)
-                        joinedPlane.mulReverse(e2, dq0).sqrtSelf().toQuaternion(this.extraShaft.quaternion)
+                        joinedPlane.mulReverse(e2, dq0).normalize().sqrtSelf().toQuaternion(this.extraShaft.quaternion)
 
                         //arrow should be offset to start in some faraway place
                         //and take you back to where nonNetherDq takes markupPos

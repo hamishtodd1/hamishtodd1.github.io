@@ -360,7 +360,7 @@ function initEgaWithoutDeclarations() {
             return target.sqrtSelf()
         }
 
-        //assumes normalization
+        //assumes normalization! Seriously!
         sqrtSelf() {
             //could do study stuff. But not even steven and martin thought beyond getting sqrt of unnormalized
 
