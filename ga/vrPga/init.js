@@ -89,6 +89,10 @@ async function init() {
 
     document.body.appendChild(VRButton.createButton(renderer))
 
+    
+
+    
+
     function render() {
         let clockDelta = clock.getDelta()
         frameDelta = clockDelta < .1 ? clockDelta : .1 //clamped because debugger pauses create weirdness

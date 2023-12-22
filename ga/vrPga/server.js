@@ -14,7 +14,7 @@ app.get("/", function(req, res) {
 const http = require("http").Server(app);
 const io = require("socket.io")(http);
 
-const port = process.env.PORT || 80
+const port = process.env.PORT || 8000
 http.listen(port, () => {
 	log("\nvrPga server is listening on port ", port);
 })
