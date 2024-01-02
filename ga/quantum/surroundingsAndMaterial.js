@@ -50,7 +50,7 @@ async function initSurroundingsAndMaterial() {
 	// renderer.toneMappingExposure = 0.75
 
 	await new Promise(resolve => {
-		new RGBELoader().load('data/pedestrian_overpass_1k.hdr', function (texture) {
+        new RGBELoader().load('hamishtodd1.github.io/ga/quantum/data/pedestrian_overpass_1k.hdr', function (texture) {
 
 			texture.mapping = THREE.EquirectangularReflectionMapping;
 
