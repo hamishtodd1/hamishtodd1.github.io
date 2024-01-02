@@ -14,12 +14,9 @@
     Might be better if you only see the start and end of the arrow
     Or maybe you should get them moving a bit more to go to nicer-to-look-at positions
 
-    Call the plane contianing a translation axis and the camera point the "nice-plane"
+    Call the plane containing a translation axis and the camera point the "nice-plane"
         For any pair of non-parallel translations
             you can always compose both the arrows while keeping them in their nice-plane
-
-    Hey, even your rotoreflections and transflections need arrows
-    They are also gaugeable
 
     The idea is you're going to REMEMBER how the things got made
         If you're looking at the wires for a thing, could press a button to see how those things got made
@@ -41,7 +38,8 @@
     Could have things vibrate depending on their norm, because they "want to move"?
 */
 
-function initVizes() {
+
+function initDqVizes() {
 
     opIsSingleArgument = (opIndex) => {
         let op = operators[opIndex]
@@ -238,6 +236,7 @@ function initVizes() {
                     return
 
                 this.dq.selectGrade(2, bivPart)
+                this.dq.invariantDecomposition(rotationPart, translationPart)
                 
                 if (bivPart.isZero()) {
                     this.rotAxisMesh.visible = this.trnAxisMesh.visible = this.arrow.visible = this.cup.visible = false
@@ -259,12 +258,14 @@ function initVizes() {
                 this.arrow.visible = this.cup.visible = true
                 this.scalarSign.visible = false
 
+                //cup
+                this.markupPos.pointToGibbsVec(this.cup.position)
+
                 nonNetherDq.copy(this.dq)  
-                let isNether = nonNetherDq[0] < 0. && Math.abs(bivPart.eNormSq()) < .0001
+                let isNether = nonNetherDq[0] < 0. && Math.abs(bivPart.eNormSq()) < eps
                 if (isNether)
                     nonNetherDq.multiplyScalar(-1., nonNetherDq)
-                this.extraShaft.visible = false
-
+                
                 //bounding box and determination of arrow arclength
                 {
                     this.boundingBox.makeEmpty()
@@ -279,22 +280,39 @@ function initVizes() {
                     updateBoxHelper(this.boxHelper, this.boundingBox)
                 }
 
-                //cup
+                //axes
                 {
-                    this.markupPos.pointToGibbsVec(this.cup.position)
+                    if (rotationPart.approxEquals(oneDq))
+                        this.rotAxisMesh.visible = false
+                    else {
+                        this.rotAxisMesh.visible = true
 
-                    let joinedPlane = bivPart.joinPt(this.markupPos, fl0)
-                    joinedPlane.mulReverse(e2, dq0).normalize().sqrtSelf().toQuaternion(this.cup.quaternion)
+                        rotationPart.selectGrade(2, dq0)
+                        e31.dqTo(dq0, this.rotAxisMesh.dq)
+                    }
+
+                    if (translationPart.approxEquals(oneDq))
+                        this.trnAxisMesh.visible = false
+                    else {
+                        this.trnAxisMesh.visible = true
+
+                        translationPart.selectGrade(2, dq0)
+                        dq0.joinPt(camera.mvs.pos, fl0)
+                        let fakeLineAtInfinity = fl0.meet(camera.frustum.far, dq1)
+                        e31.dqTo(fakeLineAtInfinity, this.trnAxisMesh.dq)
+                    }
                 }
                 
                 //arrow
                 {
+                    this.extraShaft.visible = isNether
+
                     if(!isNether) {
-                        arrowMat.dq.copy(this.dq)
+                        translationPart.mul(rotationPart, arrowMat.dq)
+                        // arrowMat.dq.copy(this.dq)
                         nonNetherArrowStart.copy(this.markupPos)
-                    } 
+                    }
                     else {
-                        this.extraShaft.visible = true
                         this.markupPos.pointToGibbsVec(this.extraShaft.position)
 
                         let joinedPlane = bivPart.joinPt(e123, fl0)
@@ -302,14 +320,16 @@ function initVizes() {
 
                         //arrow should be offset to start in some faraway place
                         //and take you back to where nonNetherDq takes markupPos
-                        let offseterDq = dq1;
-                        offseterDq.copy(bivPart)
-                        let dqDist = bivPart.getDual(dq3).eNorm() / -this.dq[0]
-                        offseterDq.multiplyScalar(-100. / dqDist, offseterDq)
+                        let offseterDq = dq1
+                        offseterDq.copy( bivPart )
+                        let dqDist = bivPart.getDual( dq3 ).eNorm() / -this.dq[0]
+                        offseterDq.multiplyScalar( -100. / dqDist, offseterDq)
                         offseterDq[0] = 1.
                         
-                        offseterDq.sandwichFl(this.markupPos, nonNetherArrowStart)
-                        nonNetherDq.mulReverse(offseterDq, arrowMat.dq )
+                        offseterDq.sandwichFl( this.markupPos, nonNetherArrowStart )
+                        //mrh
+                        nonNetherDq.mulReverse( offseterDq, arrowMat.dq )
+                        arrowMat.dq[4] = 0.; arrowMat.dq[5] = 0.; arrowMat.dq[6] = 0.; arrowMat.dq[7] = 0.;
                     }
 
                     nonNetherArrowStart.pointToGibbsVec(arrowMat.extraVec1)
@@ -334,29 +354,6 @@ function initVizes() {
                         outDqAtStartLog[3]).multiplyScalar(arrowRadius)
                     // if(isNether)
                     //     log("outer", arrowMat.extraVec2)
-                }
-
-                this.dq.invariantDecomposition( rotationPart, translationPart )
-                {
-                    if (rotationPart.approxEquals(oneDq))
-                        this.rotAxisMesh.visible = false
-                    else {
-                        this.rotAxisMesh.visible = true
-
-                        rotationPart.selectGrade(2, dq0)
-                        e31.dqTo(dq0, this.rotAxisMesh.dq)
-                    }
-
-                    if (translationPart.approxEquals(oneDq))
-                        this.trnAxisMesh.visible = false
-                    else {
-                        this.trnAxisMesh.visible = true
-
-                        translationPart[0] = 0.
-                        translationPart.joinPt(camera.mvs.pos, fl0)
-                        let fakeLineAtInfinity = fl0.meet(camera.frustum.far, dq0)
-                        e31.dqTo(fakeLineAtInfinity, this.trnAxisMesh.dq)
-                    }
                 }
             }
         }

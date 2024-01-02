@@ -99,7 +99,6 @@ function initCircuits() {
     for(let i = 0; i < 10; i++)
         new Circuit()
 
-    let centerOfAllThree = new Fl()
     let snappablePos = new Fl()
     let onFloor = new Fl()
     let cameraSideDirection = new Fl()

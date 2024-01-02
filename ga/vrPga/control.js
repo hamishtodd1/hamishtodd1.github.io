@@ -59,22 +59,22 @@ function initControl() {
         // var sclptable = new Sclptable()
         // sclptable.brushStroke(fl0.point(0., 1.6, 0., 1.))
 
-        let viz1 = new DqViz(0xFF0000)
-        snappables.push(viz1)
-        viz1.dq.copy(Translator(.8, 0., 0.))
-        viz1.markupPos.point(-1.4, 1.6, 0.)
+        // let viz1 = new DqViz(0xFF0000)
+        // snappables.push(viz1)
+        // viz1.dq.copy(Translator(.8, 0., 0.))
+        // viz1.markupPos.point(-1.4, 1.6, 0.)
 
-        let viz2 = new DqViz(0xFF00FF)
-        snappables.push(viz2)
-        viz2.dq.copy(Translator(0., .6, 0.))
-        viz2.markupPos.point( 0., 1.6, 0.)
+        // let viz2 = new DqViz(0xFF00FF)
+        // snappables.push(viz2)
+        // viz2.dq.copy(Translator(0., .6, 0.))
+        // viz2.markupPos.point( 0., 1.6, 0.)
 
-        let viz3 = new DqViz()
-        snappables.push(viz3)
-        viz3.markupPos.point(1.4, 1.6, 0.)
-        viz3.affecters[0] = viz2
-        viz3.affecters[1] = viz1
-        viz3.affecters[2] = 1
+        // let viz3 = new DqViz()
+        // snappables.push(viz3)
+        // viz3.markupPos.point(1.4, 1.6, 0.)
+        // viz3.affecters[0] = viz2
+        // viz3.affecters[1] = viz1
+        // viz3.affecters[2] = 1
 
         // let viz4 = new DqViz()
         // snappables.push(viz4)
@@ -151,10 +151,10 @@ function initControl() {
             sclptableBeingSculpted.brushStroke()
     }
 
-    document.addEventListener("pointerdown", event => {
+    onHandButtonDown = (isLeftButton, isRightButton, isPaintingHand) => {
 
-        let isLeftButton = event.button === 0
-        let isRightButton = event.button === 2
+        if(inVr)
+            debugSphere.position.set(0.,1.,0.)
 
         if (isRightButton) { //Grabbing is generic across both. Also you can grab two things eventually?
             //actually this was meant to be about lasers
@@ -175,7 +175,7 @@ function initControl() {
         }
         else if(isLeftButton) {
             //this is about creation, depends on hand
-            if (simulatingPaintingHand) {
+            if (isPaintingHand) {
                 
                 if ( highlightedSclptable !== null )
                     sclptableBeingSculpted = highlightedSclptable
@@ -190,7 +190,7 @@ function initControl() {
                 getHandDq(handDqOnGrab)
             }
         }
-    })
+    }
 
     handleDqModificationAndUpdateFromCircuits = () => {
         if (heldDqViz !== null) {
@@ -234,20 +234,16 @@ function initControl() {
         })
     }
 
-    document.addEventListener("pointerup", event => {
-
-        let isLeftButton = event.button === 0
-        let isRightButton = event.button === 2
-
-        if (simulatingPaintingHand && isLeftButton)
+    onHandButtonUp = (isLeftButton, isRightButton, isPaintingHand) => {
+        if (isPaintingHand && isLeftButton)
             sclptableBeingSculpted = null
-        else if ( heldDqViz !== null && (isRightButton||isLeftButton)) { //remember middle button exists
+        else if (heldDqViz !== null && (isRightButton || isLeftButton)) { //remember middle button exists
 
             if (heldDqViz.sclptable) {
                 heldDqViz.dq
                     .getReverse(dq0)
                     .sandwich(
-                        heldDqViz.dq.sandwich(heldDqViz.sclptable.com,fl0),
+                        heldDqViz.dq.sandwich(heldDqViz.sclptable.com, fl0),
                         heldDqViz.markupPos)
             }
 
@@ -256,7 +252,7 @@ function initControl() {
             dispViz.visible = false
             oldViz.visible = false
         }
-    })
+    }
 
     //////////////////////
     // Helper functions //

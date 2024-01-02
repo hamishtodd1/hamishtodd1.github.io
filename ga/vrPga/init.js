@@ -4,6 +4,7 @@
         More operations and snapping should be accurate (possibly extra controls)
         Deleting sculptables
         Maybe want a way for a sclptable to be affected by other buttons during the show?
+            Have a button that does multiplcation by 0 or 1
         Make a properly rigged puppet! A tentacle or something
             And if you want more than that, eg planes/pts or copying, decide AFTER you've tried that!
         Recording your hand motion somehow?
@@ -11,7 +12,6 @@
         Audience view
             no markup visible
             MAYBE pupeteer view should be the same angle, maybe not, make it optional for now
-        Get rid of "current hand position"; it stinks of the origin
     Jon demo:
         Levels
         Chevrons
@@ -25,6 +25,7 @@
         Some levels!!!!!!
         Are you using the measurer for anything? If so, some numbers...
     Beyond:
+        Get rid of "current hand position"; it stinks of the origin
         Arrows should settle to being cut by the axes from your pov?
         Roblox addon for importing the animal you made
             Don't market it. This is the start, a way to get investment for further things
@@ -66,11 +67,14 @@ async function init() {
     initButtons()
     
     initSclptables()
-    initVizes()
+    initDqVizes()
+    // initFlVizes()
     initSnapping()
     initControl()
 
     initCircuits()
+
+    // initRecording()
 
     window.addEventListener('resize', () => {
 
@@ -87,11 +91,7 @@ async function init() {
     renderer.xr.enabled = true
     container.appendChild(renderer.domElement)
 
-    document.body.appendChild(VRButton.createButton(renderer))
-
-    
-
-    
+    document.body.appendChild(VRButton.createButton(renderer))    
 
     function render() {
         let clockDelta = clock.getDelta()
@@ -100,10 +100,9 @@ async function init() {
 
         updateCameraMvs()
         updateHandMvs()
+        buttonWhileDowns()
 
         blankFunction()
-
-        buttonWhileDowns()
 
         handleSculpting()
         handleDqModificationAndUpdateFromCircuits()
@@ -111,6 +110,8 @@ async function init() {
         updateHighlighting()
         
         updatePalette()
+
+        updateRecording()
 
         obj3dsWithOnBeforeRenders.forEach(obj3d => obj3d.onBeforeRender())
 

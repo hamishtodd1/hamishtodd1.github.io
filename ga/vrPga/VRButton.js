@@ -43,7 +43,8 @@ class VRButton {
 					const sessionInit = { optionalFeatures: [ 'local-floor', 'bounded-floor', 'hand-tracking', 'layers' ] };
 					navigator.xr.requestSession( 'immersive-vr', sessionInit ).then( onSessionStarted );
 
-					setUpVR()
+					onEnterVrFirstTime()
+                    inVr = true
 				} else {
 					currentSession.end();
 				}

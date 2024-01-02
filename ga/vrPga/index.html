@@ -32,71 +32,35 @@
     <script src="OrbitControls.js"></script>
     <script src="OBJLoader.js"></script>
     <script src="threejsVariables.js"></script>
+    <script src="buttons.js"></script>
+    <script src="camera.js"></script>
+    <script src="text.js"></script>
+    <script src="surroundings.js"></script>
     
     <script src="variables.js"></script>
     
     <script src="sculpt.js"></script>
     
-    <script src="buttons.js"></script>
     <script src="measurer.js"></script>
     
     <script src="circuitsMeshes.js"></script>
     <script src="circuits.js"></script>
     
-    <script src="vizes.js"></script>
+    <script src="dqVizes.js"></script>
+    <script src="flVizes.js"></script>
     <script src="snapping.js"></script>
     <script src="control.js"></script>
     
     <script src="hands.js"></script>
-    <script src="camera.js"></script>
     
-    <script src="text.js"></script>
-    <script src="surroundings.js"></script>
+    <script src="recording.js"></script>
     
     <script src="init.js"></script>
 
     <script type="module">
 
         import { XRControllerModelFactory } from '/xrController/XRControllerModelFactory.js';
-        
-        function setUpVr() {
-            // controllers
-
-            let controller1 = renderer.xr.getController(0);
-            scene.add(controller1);
-
-            let controller2 = renderer.xr.getController(1);
-            scene.add(controller2);
-
-            const controllerModelFactory = new XRControllerModelFactory();
-
-            // Hand 1
-            let controllerGrip1 = renderer.xr.getControllerGrip(0);
-            controllerGrip1.add(controllerModelFactory.createControllerModel(controllerGrip1));
-            scene.add(controllerGrip1);
-
-            let hand1 = renderer.xr.getHand(0);
-
-            scene.add(hand1);
-
-            // Hand 2
-            let controllerGrip2 = renderer.xr.getControllerGrip(1);
-            controllerGrip2.add(controllerModelFactory.createControllerModel(controllerGrip2));
-            scene.add(controllerGrip2);
-
-            let hand2 = renderer.xr.getHand(1);
-            scene.add(hand2);
-
-            const laserPointerGeo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 0, - 1)]);
-            const line = new THREE.Line(laserPointerGeo);
-            line.name = 'line';
-            line.scale.z = 5;
-
-            controller1.add(line.clone());
-            controller2.add(line.clone());
-        }
-
-        setUpVr()
+        window.XRControllerModelFactory = XRControllerModelFactory
 
         init()
             

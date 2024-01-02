@@ -233,6 +233,7 @@ class XRControllerModelFactory {
 					profile,
 					assetPath
 				);
+                log(assetPath)
 
 				const cachedAsset = this._assetCache[ controllerModel.motionController.assetUrl ];
 				if ( cachedAsset ) {
@@ -251,7 +252,7 @@ class XRControllerModelFactory {
 
 					this.gltfLoader.setPath( '' );
 					this.gltfLoader.load( controllerModel.motionController.assetUrl, ( asset ) => {
-
+                        
 						this._assetCache[ controllerModel.motionController.assetUrl ] = asset;
 
 						scene = asset.scene.clone();

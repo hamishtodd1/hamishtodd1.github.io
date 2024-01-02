@@ -138,6 +138,15 @@ function initEgaWithoutDeclarations() {
             this[0] = 1.
         }
 
+        slerp(end, t, target) {
+            
+            if (target === undefined)
+                target = new Dq()
+
+            let endOverStart = end.mulReverse(this, newDq)
+            return endOverStart.pow(t, newDq).mul(this, target)
+        }
+
         align(startPoints,endPoints) {
             
             let P = newDq;
@@ -192,14 +201,15 @@ function initEgaWithoutDeclarations() {
 
             let normalized = this.getNormalization(newDq)
 
-            if(normalized[7] === 0.) {
-                if (normalized[4] === 0. && normalized[5] === 0. && normalized[6] === 0.) {
+            if (Math.abs(normalized[7]) < eps) {
+                if (Math.abs(normalized[4]) < eps && Math.abs(normalized[5]) < eps && Math.abs(normalized[6]) < eps) {
                     //pure translation
-                    trnsTarget.copy(normalized)
+                    trnsTarget.zero()
+                    trnsTarget[0] = normalized[0]; trnsTarget[1] = normalized[1]; trnsTarget[2] = normalized[2]; trnsTarget[3] = normalized[3];
                     rotnTarget.copy(oneDq)
                 }
                 else {
-                    rotnTarget.copy(normalized)
+                    rotnTarget.copy(normalized); rotnTarget[7] = 0.
                     trnsTarget.copy(oneDq)
                 }
             }
@@ -413,6 +423,12 @@ function initEgaWithoutDeclarations() {
             this[5] = -q.y
             this[4] = -q.z
             this[0] = q.w
+            return this
+        }
+
+        fromMat4(m) {
+            m.decompose(v1,q1,v2)
+            this.fromPosQuat(v1,q1)
             return this
         }
 

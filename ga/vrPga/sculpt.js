@@ -148,7 +148,7 @@ function initSclptables()
         let sizes = [1., 2., 4.]
         let currentSize = 1
         let palette = new THREE.Group()
-        selectorRayCone.add(palette)
+        hand2.add(palette)
         let visibilityCountdown = -1.
         function hidePalette() {
             visibilityCountdown = -1.
