@@ -45,6 +45,16 @@ async function init() {
     initVoice()
 
     initBrushStroke()
+
+    let bgImage = new THREE.Mesh(unchangingUnitSquareGeometry, new THREE.MeshBasicMaterial())
+    bgImage.scale.multiplyScalar(2.4)
+    bgImage.position.y += .17
+    textureLoader.load(`data/table.png`, texture => {
+        bgImage.scale.x = bgImage.scale.y * 1072./742.
+        bgImage.material.map = texture
+        bgImage.material.needsUpdate = true
+        scene.add(bgImage)
+    })
     
     {
         scene.add(new THREE.HemisphereLight(0x808080, 0x606060))

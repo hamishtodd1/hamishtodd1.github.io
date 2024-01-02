@@ -14,7 +14,7 @@ function initBrushStroke()
     scene.add(buttonGroup)
 
     let col = new THREE.Color()
-    let buttonWidth = .18
+    let buttonWidth = .1
     let hueDivisions = 9
     let greyDivisions = 3
     let numButtons = hueDivisions + greyDivisions
@@ -31,8 +31,8 @@ function initBrushStroke()
         btn.scale.setScalar(buttonWidth)
         buttons.push(btn)
         btn.position.set(
+            -1.1,
             (i - numButtons / 2. + .5) * buttonWidth * 1.1,
-            -.5,
             0.)
         buttonGroup.add(btn)
 
@@ -87,6 +87,7 @@ function initBrushStroke()
     
     let cameraPositionOld = camera.position.clone()
     adjustControlsToCamera = () => {
+
         buttonGroup.scale.multiplyScalar(camera.position.z / cameraPositionOld.z)
         
         buttonGroup.position.x += camera.position.x - cameraPositionOld.x
