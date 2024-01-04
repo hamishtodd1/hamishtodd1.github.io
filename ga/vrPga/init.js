@@ -67,8 +67,10 @@ async function init() {
     initButtons()
     
     initSclptables()
+    
     initDqVizes()
-    // initFlVizes()
+    initFlVizes()
+
     initSnapping()
     initControl()
 

@@ -157,7 +157,7 @@ function initDqVizes() {
     }
     
     let rotAxisRadius = .02
-    let trnAxisRadius = .32 //there's something weird about it disappearing
+    let trnAxisRadius = .12
     let rotAxisGeo = new THREE.CylinderGeometry(rotAxisRadius, rotAxisRadius, camera.far * 10., 5, 1, true)
     let trnAxisGeo = new THREE.CylinderGeometry(trnAxisRadius, trnAxisRadius, camera.far * 10., 5, 1, true)
     let rotationPart = new Dq()
@@ -186,7 +186,7 @@ function initDqVizes() {
 
             this.sclptable = null
 
-            this.trnAxisMesh = new DqMesh(trnAxisGeo, axisMat)
+            this.trnAxisMesh = new THREE.Mesh(trnAxisGeo, axisMat)
             this.add(this.trnAxisMesh)
 
             this.boxHelper = new THREE.BoxHelper()
@@ -297,9 +297,13 @@ function initDqVizes() {
                         this.trnAxisMesh.visible = true
 
                         translationPart.selectGrade(2, dq0)
-                        dq0.joinPt(camera.mvs.pos, fl0)
-                        let fakeLineAtInfinity = fl0.meet(camera.frustum.far, dq1)
-                        e31.dqTo(fakeLineAtInfinity, this.trnAxisMesh.dq)
+                        let fakeLineAtInfinity = dq0.fakeThingAtInfinity(dq1)
+                        // e31.dqTo(fakeLineAtInfinity, this.trnAxisMesh.dq)
+                        camera.mvs.pos.projectOn(fakeLineAtInfinity, fl0).pointToGibbsVec(this.trnAxisMesh.position)
+                        let fakeAtOrigin = fakeLineAtInfinity.projectOn(e123, dq0)
+                        e31.dqTo(fakeAtOrigin, dq2).toQuaternion(this.trnAxisMesh.quaternion)
+                        
+
                     }
                 }
                 
@@ -327,7 +331,6 @@ function initDqVizes() {
                         offseterDq[0] = 1.
                         
                         offseterDq.sandwichFl( this.markupPos, nonNetherArrowStart )
-                        //mrh
                         nonNetherDq.mulReverse( offseterDq, arrowMat.dq )
                         arrowMat.dq[4] = 0.; arrowMat.dq[5] = 0.; arrowMat.dq[6] = 0.; arrowMat.dq[7] = 0.;
                     }

@@ -1,3 +1,10 @@
+/*
+    TERRIBLE DISTRACTION UNTIL YOU HAVE A REASON TO NEED IT
+        The arrow is the hard part
+        Needs to go through the plane
+        But how to indicate it's a reflection?
+ */
+
 
 function initFlVizes() {
 
@@ -43,15 +50,23 @@ function initFlVizes() {
 
             obj3dsWithOnBeforeRenders.push(this)
             this.onBeforeRender = () => {
-                let hasPlane = this.fl[0] !== 0. || this.fl[1] !== 0. || this.fl[2] !== 0. || this.fl[3] !== 0.
-                let hasPoint = this.fl[4] !== 0. || this.fl[5] !== 0. || this.fl[6] !== 0. || this.fl[7] !== 0.
+                let hasPlane = Math.abs(this.fl[0]) > eps || Math.abs(this.fl[1]) > eps || Math.abs(this.fl[2]) > eps || Math.abs(this.fl[3]) > eps
+                let hasPoint = Math.abs(this.fl[4]) > eps || Math.abs(this.fl[5]) > eps || Math.abs(this.fl[6]) > eps || Math.abs(this.fl[7]) > eps
 
                 this.point.visible = hasPoint
                 if( hasPoint) {
-                    this.fl.pointToGibbsVec(this.point.position)
-                    //actually if it's an ideal point, need to a bit more
+                    let isIdeal = this.fl[7] === 0.
+                    if (!isIdeal) {
+                        this.fl.pointToGibbsVec(this.point.position)
+                        this.point.scale.setScalar(1.)
+                    }
+                    else {
+                        this.fl.fakeThingAtInfinity(fl0)
+                        fl0.pointToGibbsVec(this.point.position)
+                        this.point.scale.setScalar(10.)
+                    }
 
-                    this.markupPos.copy(this.fl)
+                    this.markupPos.pointFromGibbsVec(this.point.position)
                 }
 
                 this.plane.visible = hasPlane
@@ -74,8 +89,17 @@ function initFlVizes() {
             }
         }
     }
+    window.FlViz = FlViz
 
     // let myFlViz = new FlViz()
-    // myFlViz.fl.copy(e123)
+    // myFlViz.fl.copy(e3)
+
+    // myFlViz.fl.copy(e012)
+    // // myFlViz.fl.multiplyScalar(-1., myFlViz.fl)
+
+    // blankFunction = () => {
+    //     myFlViz.fl[7] = sq(Math.cos(frameCount * .02))
+    //     myFlViz.fl[4] = -sq(Math.sin(frameCount * .02))
+    // }
 
 }

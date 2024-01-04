@@ -22,8 +22,6 @@ function initCircuitsMeshes() {
                 precedes: `	#include <project_vertex>`,
                 str: `
 
-                // You have a start point, and a dq, and 
-
                 r = transformed.x < 0. ? -1. : 1.;
                 vec4 start = vec4( transformed.x < 0. ? extraVec1 : extraVec2,1.);
                 
@@ -33,10 +31,6 @@ function initCircuitsMeshes() {
                 float[8] along; dqExp( alongLog, along );
                 vec4 alonged = sandwichDqPoint( along, start );
                 transformed = alonged.xyz / alonged.w;
-                
-                // transformed.xyz += ;
-
-                // vNormal = vec3(0.,1.,0.);
             `,
                 //` transformed.y += 0.; vNormal.x += 0.;\n`
             },
@@ -55,7 +49,7 @@ function initCircuitsMeshes() {
                 str: `
                 float numChevronsAlong = (alongness) * extraVec3.x + abs(r);
                 bool isYellow = mod( numChevronsAlong, 2. ) < 1.;
-                gl_FragColor.rgb *= isYellow ? 0. : 1.;
+                gl_FragColor.rgb = isYellow ? vec3(1.,1.,0.) : vec3(0.,0.,0.);
             \n`
             },
         ]
@@ -100,7 +94,7 @@ function initCircuitsMeshes() {
                     ptAxisDirFromStart.normalize()
 
                     // ptAxisDirFromStart.log()
-                    this.start.addScaled(ptAxisDirFromStart, radius, fl0).pointToGibbsVec(this.material.extraVec1)
+                    this.start.addScaled(ptAxisDirFromStart,  radius, fl0).pointToGibbsVec(this.material.extraVec1)
                     this.start.addScaled(ptAxisDirFromStart, -radius, fl0).pointToGibbsVec(this.material.extraVec2)
 
                     // circuit.getOpBgCorner(v1, 0, 0., 0., 0.)

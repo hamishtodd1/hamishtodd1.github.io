@@ -2,17 +2,51 @@ function initMultivectorWithoutDeclarations() {
     
     class Multivector extends Float32Array {
 
+        gradeDiff(that) {
+            let thisGrade = this.grade()
+            let thatGrade = that.grade()
+            if (thisGrade === -1 || thisGrade === -2 || thatGrade === -1 || thatGrade === -2)
+                console.error("grade error at " + getWhereThisWasCalledFrom())
+            return Math.abs(thisGrade - thatGrade)
+        }
+
+        angleTo(that) {
+
+            let g = this.gradeDiff(that)
+
+            let mIsDq = this.constructor === that.constructor
+            let m = that.mulReverse(this, mIsDq ? newDq : newFl)
+            let selected = mIsDq ? newDq : newFl
+
+            let numerator   =                  Math.sqrt(m.selectGrade(g + 2, selected).eNormSq())
+            let denominator = g === 0 ? m[0] : Math.sqrt(m.selectGrade(    g, selected).eNormSq())
+
+            return Math.atan2(numerator,denominator)
+
+            // let h = numerator === 0. ? g : g + 2
+            // let dualed = mIsDq ? newDq : newFl
+            // numerator   = h+2 === 4 ? m[7] : Math.sqrt(m.selectGrade(h + 2, selected).getDual(dualed).eNormSq())
+            // denominator = g   === 0 ? m[0] : Math.sqrt(m.selectGrade(    h, selected).eNormSq())
+
+            // return denominator === 0. ? Infinity * Math.sign(numerator) : numerator / denominator
+        }
+
+        //only thing this leaves out is plane-plane, plane-line, and line-line, which are the check-y ones
+        distanceToPt(pt) {
+            return Math.sqrt(this.joinPt(pt, this.constructor === Dq ? newFl : newDq).eNormSq())
+        }
+
+        fakeThingAtInfinity(target) {
+            let joined = this.joinPt(camera.mvs.pos, this.constructor === Dq ? newFl : newDq)
+            return joined.meet(camera.frustum.far, target)
+        }
+
         directionTo(b, target) {
 
             if (target === undefined)
                 target = new this.constructor()
 
             return b.addScaled(this, -b[7] / this[7], target).normalize()
-        }
-
-        //only thing this leaves out is plane-plane, plane-line, and line-line, which are the check-y ones
-        distanceToPt(pt) {
-            return Math.sqrt(this.joinPt(pt, this.constructor === Dq ? newFl : newDq).eNormSq())
         }
 
         eNorm() {
@@ -206,11 +240,11 @@ function initMultivectorWithoutDeclarations() {
         grade() {
             let grade = -1 //0 is grade -1!
             for (let i = 0; i < 8; ++i) {
-                if (this[i] !== 0.) {
+                if (Math.abs(this[i]) > eps) {
                     let extraGrade = this.constructor.indexGrades[i]
                     if (grade === -1)
                         grade = extraGrade
-                    else if (grade !== extraGrade) //it's some kind of combination. Hopefully a rotor
+                    else if (grade !== extraGrade) //combination
                         grade = -2
                 }
             }
@@ -252,7 +286,7 @@ function initMultivectorWithoutDeclarations() {
 
         multiplyScalar(s, target) {
             if (target === undefined) {
-                console.error("no target at " + getWhereThisWasCalledFrom(1))
+                console.error("no target, multiplyScalar will make a new object" + getWhereThisWasCalledFrom(1))
                 target = new this.constructor()
             }
 

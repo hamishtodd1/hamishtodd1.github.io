@@ -91,7 +91,7 @@ function initEgaWithoutDeclarations() {
                 target = new THREE.Vector3()
 
             if (this[7] === 0.)
-                console.error("ideal point")
+                console.error("ideal point at ", getWhereThisWasCalledFrom(0))
             else {
                 target.z = this[4] / this[7]
                 target.y = this[5] / this[7]
@@ -278,7 +278,11 @@ function initEgaWithoutDeclarations() {
             if (l === 0.)
                 return target.set(1., this[1], this[2], this[3], 0, 0, 0, 0)
 
-            let m = (this[1] * this[6] + this[2] * this[5] + this[3] * this[4]), a = Math.sqrt(l), c = Math.cos(a), s = Math.sin(a) / a, t = m / l * (c - s);
+            let m = (this[1] * this[6] + this[2] * this[5] + this[3] * this[4])
+            let a = Math.sqrt(l)
+            let c = Math.cos(a)
+            let s = Math.sin(a) / a
+            let t = m / l * (c - s)
 
             return target.set( c,
                 s * this[1] + t * this[6],
@@ -489,6 +493,19 @@ function initEgaWithoutDeclarations() {
         `021`, `013`, `032`, `123`,
     ]
 
+    fl0 = new Fl()
+    fl1 = new Fl()
+    fl2 = new Fl()
+    fl3 = new Fl()
+    fl4 = new Fl()
+    fl5 = new Fl()
+    fl6 = new Fl()
+
+    dq0 = new Dq()
+    dq1 = new Dq()
+    dq2 = new Dq()
+    dq3 = new Dq()
+
     {
         oneDq = new Dq().fromFloatAndIndex(1., 0)
         
@@ -513,18 +530,5 @@ function initEgaWithoutDeclarations() {
 
         e0123 = e0.mulFl(e123)
     }
-
-    fl0 = new Fl()
-    fl1 = new Fl()
-    fl2 = new Fl()
-    fl3 = new Fl()
-    fl4 = new Fl()
-    fl5 = new Fl()
-    fl6 = new Fl()
-
-    dq0 = new Dq()
-    dq1 = new Dq()
-    dq2 = new Dq()
-    dq3 = new Dq()
     
 /*END*/}
