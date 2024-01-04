@@ -117,6 +117,12 @@ function initEgaWithoutDeclarations() {
             return target
         }
 
+        directionFromGibbsVec(v) {
+
+            this.point(v.x, v.y, v.z, 0.)
+            return this
+        }
+
         plane(e0Coef, e1Coef, e2Coef, e3Coef) {
             this.zero()
             this[0] = e0Coef

@@ -104,7 +104,6 @@ function initCircuits() {
     let cameraSideDirection = new Fl()
     let circleDirection = new THREE.Vector3()
     let centralAxis = new Dq()
-    let debugPlanes = [new FlViz(), new FlViz()]
     circuitsGroup.onBeforeRender = () => {
 
         // updateCircuitAppearancesNew()
@@ -112,6 +111,12 @@ function initCircuits() {
         camera.frustum.top.meet(camera.frustum.bottom, dq0).meet(e0, cameraSideDirection)
         cameraSideDirection.directionToGibbsVec(circleDirection).normalize().negate()
         // cameraSideDirection.log()
+
+        function ensurePlaneFacesInDirection(plane, dir) {
+
+            if (dir.inner(plane) < 0.)
+                plane.multiplyScalar(-1., startPlane)
+        }
 
         let lowestUnusedCircuit = 0
         snappables.forEach(s => {
@@ -154,13 +159,11 @@ function initCircuits() {
                 snappablePos.projectOn(e2, onFloor)
                 onFloor.pointToGibbsVec(dl.position)
 
-                // if (i === 2)
-                //     debugger
-                    // return
-
                 let ourCorner = c.opBg.localToWorld(v1.copy( triVerts[i] ))
                 let start = isOut ? ourCorner : dl.position
                 let end   = isOut ? dl.position : ourCorner
+                let startPt = fl0.pointFromGibbsVec(start)
+                let endPt = fl3.pointFromGibbsVec(end)
 
                 rotationAxisFromDirAndPoints(
                     circleDirection.x, circleDirection.z,
@@ -168,26 +171,20 @@ function initCircuits() {
                     dl.position.x, dl.position.z,
                     centralAxis )
 
-                if(!isOut)
-                    centralAxis.multiplyScalar(-1., centralAxis)
-                
-                let startPt = fl0.pointFromGibbsVec(start)
-                let endPt   = fl3.pointFromGibbsVec(end)
                 let startPlane = centralAxis.joinPt(startPt, fl1)
-                let endPlane   = centralAxis.joinPt(endPt, fl2)
+                let endPlane = centralAxis.joinPt(endPt, fl2)
+
+                // let dirDual = fl5.pointFromGibbsVec(circleDirection).getDual(fl6)
+                // ensurePlaneFacesInDirection(isOut ? startPlane:endPlane, dirDual)
+                
+                let rotationMoreThan180 = isOut ? 
+                    (startPlane.joinPt(endPt, fl4))[0] < 0. :
+                    (endPlane.joinPt(startPt, fl4))[0] > 0.
 
                 endPlane.mulReverse(startPlane, dq0).sqrtSelf()
-                
-                let isMoreThan180 = (startPlane.joinPt(endPt, fl4))[0] < 0.
-                if (isMoreThan180)
-                    dq0.multiplyScalar(-1.,dq0)
-                
-                dq0.normalize().logarithm(fw.material.dq)//.multiplyScalar(.5, fw.material.dq)
-                // dq0.log("thing itself")
-                // fw.material.dq.log("logarithm")
-                // log(fw.material.dq)
-
-                // centralAxis.meet(e2,fl3).pointToGibbsVec(debugSphere.position)
+                if (rotationMoreThan180)
+                    dq0.multiplyScalar(-1.,dq0)                
+                dq0.normalize().logarithm(fw.material.dq)
 
                 fw.start.pointFromGibbsVec(start).normalize()
                 
