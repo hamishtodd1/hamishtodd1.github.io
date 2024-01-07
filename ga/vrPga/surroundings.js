@@ -27,7 +27,7 @@ function initSurroundings() {
 
     const light = new THREE.DirectionalLight(0xffffff)
     light.position.set(-.5, 2., 2.)
-    light.lookAt(0.,1.6,0.)
+    light.lookAt(0.,1.2,0.)
     light.castShadow = true
     light.shadow.camera.top = 2
     light.shadow.camera.bottom = - 2

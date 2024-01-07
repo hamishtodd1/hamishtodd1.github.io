@@ -8,7 +8,8 @@
 
 function initSclptables()
 {
-    const pointSize = .08
+    const VOXEL_WIDTH = .003
+    const pointSize = VOXEL_WIDTH * 2.6 //to fill in the gaps
     const maxVoxels = 30000 //eyeballed
     const numWide = 3 // this isn't affected by currentSize yet
 

@@ -36,7 +36,8 @@ function initFlVizes() {
             scene.add(this)
 
             this.fl = new Fl()
-            this.markupPos = new Fl().point(0.,1.6,0.,1.)
+            this.fl.zero()
+            this.markupPos = new Fl().point(0.,1.2,0.,1.)
 
             this.plane = new THREE.Group()
             scene.add(this.plane)
@@ -50,7 +51,8 @@ function initFlVizes() {
 
             obj3dsWithOnBeforeRenders.push(this)
             this.onBeforeRender = () => {
-                let hasPlane = Math.abs(this.fl[0]) > eps || Math.abs(this.fl[1]) > eps || Math.abs(this.fl[2]) > eps || Math.abs(this.fl[3]) > eps
+                
+                let hasPlane = /*Math.abs(this.fl[0]) > eps || */Math.abs(this.fl[1]) > eps || Math.abs(this.fl[2]) > eps || Math.abs(this.fl[3]) > eps
                 let hasPoint = Math.abs(this.fl[4]) > eps || Math.abs(this.fl[5]) > eps || Math.abs(this.fl[6]) > eps || Math.abs(this.fl[7]) > eps
 
                 this.point.visible = hasPoint
@@ -71,6 +73,7 @@ function initFlVizes() {
 
                 this.plane.visible = hasPlane
                 if (hasPlane ) {
+                    
                     this.markupPos.pointToGibbsVec(this.plane.position)
                     fl1.pointFromGibbsVec(this.plane.position)
                     let e3OnPos = e3.projectOn(this.markupPos,fl0)
@@ -91,6 +94,14 @@ function initFlVizes() {
     }
     window.FlViz = FlViz
 
+    debugFls = [
+        new FlViz(), new FlViz()
+    ]
+    debugFls.forEach(dfl => {
+        dfl.fl.zero()
+        dfl.markupPos.pointFromGibbsVec(outOfSightVec3)
+    })
+
     // let myFlViz = new FlViz()
     // myFlViz.fl.copy(e3)
 
@@ -101,5 +112,6 @@ function initFlVizes() {
     //     myFlViz.fl[7] = sq(Math.cos(frameCount * .02))
     //     myFlViz.fl[4] = -sq(Math.sin(frameCount * .02))
     // }
+    
 
 }

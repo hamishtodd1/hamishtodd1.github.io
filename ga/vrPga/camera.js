@@ -1,13 +1,31 @@
 function initCamera() {
 
-    // camera.position.set(-.25, 1.6, 3.7)
-    camera.position.set( 0., 1.6, 3.7)
+    let artistDeskAngle = 40. * (TAU / 360.) //cursory googling says artists seem to have 30-55 degrees
+    let comfortableLookAngle = TAU/4. - artistDeskAngle //downwards from looking directly forward
+    let comfortabledistance = .3 //from personal measurement, between 15cm and 40cm
+    
+    let lookDownRotationAxis = new Dq()
+    e23.addScaled(e03,-1.2,lookDownRotationAxis)
+    lookDownRotationAxis.multiplyScalar(0.5*comfortableLookAngle, lookDownRotationAxis)
+    let lookDownRotation = lookDownRotationAxis.exp(new Dq())
+    
+    let posUnrotated = new Fl()
+    comfortablePos = ( x, target, extraDist = 0. ) => {
+        posUnrotated.point(x, 1.2, -(comfortabledistance + extraDist), 1.)
+        return lookDownRotation.sandwich( posUnrotated, target )
+    }
+    // comfortablePos(0., debugFls[0].fl, 0.)
+
     orbitControls = new OrbitControls(camera, container)
-    orbitControls.target.set(0, 1.6, 0)
+    comfortablePos(0., fl0, 0.).pointToGibbsVec(orbitControls.target)
     orbitControls.update()
     orbitControls.enableZoom = false //change whenever you like!
+    camera.quaternion.setFromAxisAngle(xUnit, -comfortableLookAngle)
 
-    camera.lookAtAngle = 0.
+    //we can't be in the exact place the head is since that's on the e3 plane. This is one step back
+    camera.position.set(0., 1.2, 0. ) //10cm back because mouse plane is e3
+    v1.subVectors(orbitControls.target, camera.position)
+    camera.position.sub(v1)
 
     camera.frustum = {
         left: new Fl(),
@@ -44,8 +62,6 @@ function initCamera() {
         camera.mvs.pos.pointFromGibbsVec(   camera.position )
         camera.mvs.quat.fromQuaternion( camera.quaternion )
         camera.mvs.dq.fromPosQuat(   camera.position, camera.quaternion )
-
-        camera.lookAtAngle = Math.atan2(camera.position.x, camera.position.z)
 
         for (let planeName in camera.frustum) {
             camera.mvs.dq.sandwich(frustumUntransformed[planeName], camera.frustum[planeName])

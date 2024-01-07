@@ -1,12 +1,12 @@
-async function initHands() {
+function initHands() {
 
     handPosition = new Fl().copy(e123) //less fundamental
     handPositionOld = new Fl().copy(e123)
 
     let standinHandGeo = new THREE.BoxGeometry(.3,.3,.3)
     hand1 = new DqMesh(standinHandGeo, new THREE.MeshPhongMaterial({ color: 0x00FF00 }))
-    scene.add(hand1)
     hand2 = new DqMesh(standinHandGeo, new THREE.MeshPhongMaterial({ color: 0x0000FF }))
+    scene.add(hand1)
     scene.add(hand2)
 
     //Mouse stuff
@@ -25,7 +25,7 @@ async function initHands() {
         let mouseWheelTransformOld = new Dq().copy(oneDq)
 
         let workingPlane = new Fl()
-        let center = new Fl().point(0., 1.6, 0., 1.)
+        let center = new Fl().point(0., 1.2, 0., 1.)
         let rayToMouse = new Dq().copy(e12)
         updateHandMvs = () => {
 
@@ -131,55 +131,55 @@ async function initHands() {
         line.name = 'line'
         line.scale.z = 5
 
-        //yes, you need these, and you add objects to them. The transforms for the "grips" are weird.
-        let controller1 = renderer.xr.getController(0)
-        let controller2 = renderer.xr.getController(1)
-        controller1.add(line.clone())
-        controller2.add(line.clone())
+        //yes, you need these, and you add objects to them
+        let vrController1 = renderer.xr.getController(0)
+        let vrController2 = renderer.xr.getController(1)
+        vrController1.add(line.clone())
+        vrController2.add(line.clone())
 
+        //"grips" are needed for the appearance, but their transforms are weird, do not use them
         const controllerModelFactory = new XRControllerModelFactory()
         let controllerGrip1 = renderer.xr.getControllerGrip(0)
         let controllerGrip2 = renderer.xr.getControllerGrip(1)
         controllerGrip1.add(controllerModelFactory.createControllerModel(controllerGrip1))
         controllerGrip2.add(controllerModelFactory.createControllerModel(controllerGrip2))
 
-        // let mrh = controllerModelFactory.createControllerModel()
-        // mrh.position.y = 1.
-        // scene.add(mrh)
-
         //Responds a bit weirdly
-        controller1.addEventListener('selectstart',  () => { onHandButtonDown ( true, false, true  ) } )
-        controller1.addEventListener('selectend',    () => { onHandButtonUp   ( true, false, true  ) } )
-        controller2.addEventListener('selectstart',  () => { onHandButtonDown ( true, false, false ) } )
-        controller2.addEventListener('selectend',    () => { onHandButtonUp   ( true, false, false ) } )
-        controller1.addEventListener('squeezestart', () => { onHandButtonDown ( false, true, true  ) } )
-        controller1.addEventListener('squeezeend',   () => { onHandButtonUp   ( false, true, true  ) } )
-        controller2.addEventListener('squeezestart', () => { onHandButtonDown ( false, true, false ) } )
-        controller2.addEventListener('squeezeend',   () => { onHandButtonUp   ( false, true, false ) } )
+        vrController1.addEventListener('selectstart',  () => { onHandButtonDown ( true, false, true  ) } )
+        vrController1.addEventListener('selectend',    () => { onHandButtonUp   ( true, false, true  ) } )
+        vrController2.addEventListener('selectstart',  () => { onHandButtonDown ( true, false, false ) } )
+        vrController2.addEventListener('selectend',    () => { onHandButtonUp   ( true, false, false ) } )
+        vrController1.addEventListener('squeezestart', () => { onHandButtonDown ( false, true, true  ) } )
+        vrController1.addEventListener('squeezeend',   () => { onHandButtonUp   ( false, true, true  ) } )
+        vrController2.addEventListener('squeezestart', () => { onHandButtonDown ( false, true, false ) } )
+        vrController2.addEventListener('squeezeend',   () => { onHandButtonUp   ( false, true, false ) } )
 
         onEnterVrFirstTime = () => {
 
-            removeMouseEventListeners()
-
             let controller1MatrixWorldOld = new THREE.Matrix4()
 
+            scene.remove(hand1)
+            scene.remove(hand2)
+            hand1 = vrController1
+            hand2 = vrController2
+
             getHandDq = (dq, old = false) => {
-                dq.fromMat4(old ? controller1MatrixWorldOld : controller1.matrixWorld)
+                dq.fromMat4(old ? controller1MatrixWorldOld : vrController1.matrixWorld)
                 return dq
             }
 
             updateHandMvs = () => {
 
                 handPositionOld.copy(handPosition)
-                controller1MatrixWorldOld.copy(controller1.matrixWorld)
+                controller1MatrixWorldOld.copy(vrController1.matrixWorld)
 
                 getHandDq(dq0, false)
                 dq0.sandwich(e123, handPosition)
 
             }
 
-            scene.add(controller1)
-            scene.add(controller2)
+            scene.add(vrController1)
+            scene.add(vrController2)
             scene.add(controllerGrip1)
             scene.add(controllerGrip2)
         }
@@ -188,7 +188,7 @@ async function initHands() {
     objLoader.load(`/data/standinController.obj`, (obj) => {
         
         let geo = obj.children[0].geometry
-        geo.scale(.1, .1, .1)
+        geo.scale(.024, .024, .024)
         geo.rotateX(-TAU / 8. * 3.)
         geo.rotateY(TAU / 2.)
 

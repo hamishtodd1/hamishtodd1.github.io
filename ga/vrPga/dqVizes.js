@@ -129,7 +129,9 @@ function initDqVizes() {
             //` transformed.y += 0.; vNormal.x += 0.;\n`
         },
     ]
-    let arrowRadius = .04
+    const arrowRadius = .012
+    const headArcLength = arrowRadius * 5.
+    const headRadiusFactor = 2.1
     
     {
         let radialSegments = 14
@@ -166,6 +168,7 @@ function initDqVizes() {
     let bivPart = new Dq()
     let nonNetherDq = new Dq()
     let nonNetherArrowStart = new Fl()
+    let finalHeadRadiusFactor = headRadiusFactor / headArcLength
     class DqViz extends THREE.Group {
         
         constructor(col = dqCol, transparent = false) {
@@ -236,7 +239,6 @@ function initDqVizes() {
                     return
 
                 this.dq.selectGrade(2, bivPart)
-                this.dq.invariantDecomposition(rotationPart, translationPart)
                 
                 if (bivPart.isZero()) {
                     this.rotAxisMesh.visible = this.trnAxisMesh.visible = this.arrow.visible = this.cup.visible = false
@@ -281,6 +283,7 @@ function initDqVizes() {
                 }
 
                 //axes
+                this.dq.invariantDecomposition(rotationPart, translationPart)
                 {
                     if (rotationPart.approxEquals(oneDq))
                         this.rotAxisMesh.visible = false
@@ -339,9 +342,8 @@ function initDqVizes() {
                     
                     //if you're non-nether, you have an extraShaft, but that isn't "arrow" for these purposes
                     let arrowArcLength = arrowMat.dq.pointTrajectoryArcLength(nonNetherArrowStart, 16)
-                    let headArcLength = .25
                     let headStart = (1. - headArcLength / arrowArcLength)
-                    let headOutnessAtArrowBase = arrowArcLength * 10. //number we use to control head's radius
+                    let headOutnessAtArrowBase = arrowArcLength * finalHeadRadiusFactor
                     arrowMat.extraVec3.set(headOutnessAtArrowBase, headStart, 0.)
                     if(headArcLength > arrowArcLength) //really if you're at this stage, you should move markupPos
                         this.cup.scale.setScalar(1./(1.-headStart))
@@ -465,4 +467,12 @@ function initDqVizes() {
 
         return ret
     }
+
+    debugDqs = [
+        new DqViz(), new DqViz()
+    ]
+    debugDqs.forEach(ddq => {
+        ddq.dq.zero()
+        ddq.markupPos.pointFromGibbsVec(outOfSightVec3)
+    })
 }

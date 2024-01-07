@@ -10,11 +10,11 @@ var frameDelta = 0.
 var frameCount = 0
 const log = console.log
 
+const debugUpdates = []
+
 const obj3dsWithOnBeforeRenders = []
 
 const socket = io()
-
-const VOXEL_WIDTH = .03
 
 let simulatingPaintingHand = false //true
 

@@ -223,7 +223,7 @@ class OrbitControls extends THREE.EventDispatcher {
 
 
 				spherical.radius *= scale;
-				spherical.radius = clamp(spherical.radius,.5,30.)
+				spherical.radius = clamp(spherical.radius,.3,30.)
 
 				// restrict radius to be between desired limits
 				spherical.radius = Math.max( scope.minDistance, Math.min( scope.maxDistance, spherical.radius ) );

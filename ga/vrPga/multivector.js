@@ -33,7 +33,10 @@ function initMultivectorWithoutDeclarations() {
 
         //only thing this leaves out is plane-plane, plane-line, and line-line, which are the check-y ones
         distanceToPt(pt) {
-            return Math.sqrt(this.joinPt(pt, this.constructor === Dq ? newFl : newDq).eNormSq())
+            let thisNormalized = this.getNormalization(this.constructor === Fl ? newFl : newDq)
+            let ptNormalized   =   pt.getNormalization( newFl )
+            let theJoin = thisNormalized.joinPt(ptNormalized, this.constructor === Dq ? newFl : newDq)
+            return Math.sqrt(theJoin.eNormSq())
         }
 
         fakeThingAtInfinity(target) {

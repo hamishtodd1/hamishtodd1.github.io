@@ -2,7 +2,7 @@ function initMeasurer() {
     let measurer = new THREE.Group()
     scene.add(measurer)
     measurer.scale.setScalar(.2)
-    measurer.position.y = 1.6
+    measurer.position.y = 1.2
     let bg = new THREE.Mesh(unchangingUnitSquareGeometry, new THREE.MeshBasicMaterial({ color: 0x000000 }))
     bg.scale.set(7.4,2.,1.)
     bg.position.z = -.01

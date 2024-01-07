@@ -256,53 +256,90 @@ function init31() {
     let cga5 = new Cga2d()
     let cga6 = new Cga2d()
 
-    let zrc1 = new Cga2d()
-    let zrc2 = new Cga2d()
-    let zrc3 = new Cga2d()
+    let zrcA = new Cga2d()
+    let zrcB = new Cga2d()
+    let zrcC = new Cga2d()
     let zrpp = new Cga2d()
 
-    let plane1 = new Fl()
-    let plane2 = new Fl()
-    // function dqFromCircleAndZrcs(circle,p1,p2, target) {
-        
-        //     // debugger
-        //     circle.inner(ptAtInf, retPp)
-        //     retPp.inner(p1, cga4).lineToPlane(plane1)
-        //     retPp.inner(p2, cga5).lineToPlane(plane2)
-        //     // debugger
-        
-        
-        //     return plane1.mulReverse(plane2, target).normalize().sqrtSelf()
-        // }
-        
-    let retPp = new Cga2d()
-    rotationAxisFromDirAndPoints = (dx, dy, x1, y1, x2, y2, target) => {
-        
-        zrc1.zeroRadiusCircle(x1, y1)
-        zrc2.zeroRadiusCircle(x2, y2)
-        zrpp.tangentVector(x1, y1, dx, dy)
-        // debugger
-        let circle = zrpp.meet(zrc2, cga0).getDual(cga1)
-
+    function circleToDqLine(circle,target) {
         circle.inner(ptAtInf, retPp)
         return retPp.ppToDqLine(target)
     }
+        
+    let retPp = new Cga2d()
+    rotationAxisFromDirAndPoints = (d,a,b, target) => {
+        
+        zrcA.zeroRadiusCircle( a.x, a.z )
+        zrcB.zeroRadiusCircle( b.x, b.z )
+        zrpp.tangentVector( a.x, a.z, d.x, d.z )
+
+        let circle = zrpp.meet(zrcB, cga0).getDual(cga1)
+        return circleToDqLine(circle, target)
+    }
     
     //test
-    rotationAxisFromDirAndPoints(
-        1.,0., 
-        0., 1., 
-        1., 0., dq0)
-    dq0.log()
+    // rotationAxisFromDirAndPoints(
+    //     1.,0., 
+    //     0., 1., 
+    //     1., 0., dq0)
+    // dq0.log()
     
 
-    // rotationThroughPoints = (x1, y1, x2, y2, x3, y3, target) => {
-    //     zrc1.zeroRadiusCircle(x1,y1)
-    //     zrc2.zeroRadiusCircle(x2,y2)
-    //     zrc3.zeroRadiusCircle(x3,y3)
-    //     let circle = zrc1.meet(zrc2, cga0).meet(zrc3, cga1).dual(cga2)
+    rotationAxisFromPoints = (a,b,c, target) => {
 
-    //     //why 1 and 2? No reason right now
-    //     return dqFromCircleAndZrcPoints(circle, zrc1, zrc2, target)
-    // }
+        zrcA.zeroRadiusCircle( a.x, a.z )
+        zrcB.zeroRadiusCircle( b.x, b.z )
+        zrcC.zeroRadiusCircle( c.x, c.z )
+
+        let circle = zrcA.meet(zrcB, cga0).meet(zrcC, cga1).getDual(cga2)
+        return circleToDqLine(circle, target)
+    }
+
+    let centralAxis = new Dq()
+    let inputsPos = new Fl()
+    let outputPos = new Fl()
+    getDesiredCenter = (c) => {
+
+        let dls = c.dottedLines
+        outputPos.pointFromGibbsVec(dls[0].position)
+        fl0.pointFromGibbsVec(dls[1].position).add(fl0.pointFromGibbsVec(dls[2].position), inputsPos)
+        inputsPos.multiplyScalar(.5,inputsPos)
+
+        let isLargishCircle = inputsPos.distanceToPt(outputPos) > .0001
+        // log(isLargishCircle)
+
+        rotationAxisFromPoints( dls[0].position,dls[1].position,dls[2].position, centralAxis )
+        let circleCenter = centralAxis.meet(e2, fl0)
+        if (circleCenter[7] !== 0.) {
+            circleCenter.pointToGibbsVec(c.opBg.position)
+        }
+        else {
+            circleCenter.directionToGibbsVec(c.opBg.position)
+            c.opBg.position.negate().normalize()
+        }
+    }
+
+    testCircuits = () => {
+
+        let viz1 = new DqViz(0xFF0000)
+        snappables.push(viz1)
+        viz1.dq.copy(Translator(.3, 0., 0.))
+        comfortablePos(-.5, viz1.markupPos)
+
+        let viz2 = new DqViz(0xFF00FF)
+        snappables.push(viz2)
+        viz2.dq.copy(Translator(0., .2, 0.))
+        comfortablePos(0., viz2.markupPos)
+
+        let viz3 = new DqViz()
+        snappables.push(viz3)
+        comfortablePos(.5, viz3.markupPos)
+        viz3.affecters[0] = viz2
+        viz3.affecters[1] = viz1
+        viz3.affecters[2] = 1
+
+        debugUpdates.push( () => {
+            // viz2.markupPos.point(0., 1.2, Math.sin(frameCount * .004))
+        })
+    }
 }

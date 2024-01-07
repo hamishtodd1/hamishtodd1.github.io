@@ -1,25 +1,25 @@
 /*
     TODO for "show" demo:
-        Circuits better
+        Audience view
+            Need to send, across the wire:
+                sculpting updates
+                
+            no markup visible
+            MAYBE pupeteer view should be the same angle, maybe not, make it optional for now
         More operations and snapping should be accurate (possibly extra controls)
         Deleting sculptables
         Maybe want a way for a sclptable to be affected by other buttons during the show?
-            Have a button that does multiplcation by 0 or 1
+            Have a button that does multiplcation by 0 or 1. And maybe a point that's always present which goes up and down when you do that
         Make a properly rigged puppet! A tentacle or something
             And if you want more than that, eg planes/pts or copying, decide AFTER you've tried that!
-        Recording your hand motion somehow?
-            Probably it is automatically turned into a loop, it is about "idle" animations
-        Audience view
-            no markup visible
-            MAYBE pupeteer view should be the same angle, maybe not, make it optional for now
+        Circuits better
     Jon demo:
         Levels
         Chevrons
         "Undo". Should probably rewind "time"
         Eyeballs, maybe faces, on vizes!
         Wanna have gauging animations
-        Not just dqs
-            Grade selection is a "snap" sound
+        Grade selection is a "snap" sound
         Little lizard creatures that rate your animations, with different preferences
             Make an animation with the smallest number of bones, so it's doing a complex thing
         Some levels!!!!!!
@@ -53,24 +53,22 @@
             Well, sort of. There's switches, and speaking. Both technically are movement. But, movement is irrelevant
  */
 
-function blankFunction(){}
-
 async function init() {
 
     initDqMeshes()
     init31()
 
+    initDqVizes()
+    initFlVizes()
+
     initCamera()
     initSurroundings()
 
-    await initHands()
+    initHands()
     initButtons()
     
     initSclptables()
     
-    initDqVizes()
-    initFlVizes()
-
     initSnapping()
     initControl()
 
@@ -93,7 +91,7 @@ async function init() {
     renderer.xr.enabled = true
     container.appendChild(renderer.domElement)
 
-    document.body.appendChild(VRButton.createButton(renderer))    
+    initVrButton()
 
     function render() {
         let clockDelta = clock.getDelta()
@@ -104,7 +102,7 @@ async function init() {
         updateHandMvs()
         buttonWhileDowns()
 
-        blankFunction()
+        debugUpdates.forEach(du=>du())
 
         handleSculpting()
         handleDqModificationAndUpdateFromCircuits()

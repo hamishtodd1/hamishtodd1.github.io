@@ -57,31 +57,33 @@ function initControl() {
     //debug examples
     {
         // var sclptable = new Sclptable()
-        // sclptable.brushStroke(fl0.point(0., 1.6, 0., 1.))
+        // sclptable.brushStroke(fl0.point(0., 1.2, 0., 1.))
 
-        let viz1 = new DqViz(0xFF0000)
-        snappables.push(viz1)
-        viz1.dq.copy(Translator(.8, 0., 0.))
-        viz1.markupPos.point(-1.4, 1.6, 0.)
+        testCircuits()
 
-        let viz2 = new DqViz(0xFF00FF)
-        snappables.push(viz2)
-        viz2.dq.copy(Translator(0., .6, 0.))
-        viz2.markupPos.point( 0., 1.6, 0.)
+        // let viz1 = new DqViz(0xFF0000)
+        // snappables.push(viz1)
+        // viz1.dq.copy(Translator(.8, 0., 0.))
+        // viz1.markupPos.point(-1.4, 1.2, 0.)
 
-        let viz3 = new DqViz()
-        snappables.push(viz3)
-        viz3.markupPos.point(1.4, 1.6, 0.)
-        viz3.affecters[0] = viz2
-        viz3.affecters[1] = viz1
-        viz3.affecters[2] = 1
+        // let viz2 = new DqViz(0xFF00FF)
+        // snappables.push(viz2)
+        // viz2.dq.copy(Translator(0., .6, 0.))
+        // viz2.markupPos.point( 0., 1.2, 0.1)
+
+        // let viz3 = new DqViz()
+        // snappables.push(viz3)
+        // viz3.markupPos.point(1.4, 1.2, 0.)
+        // viz3.affecters[0] = viz2
+        // viz3.affecters[1] = viz1
+        // viz3.affecters[2] = 1
 
         // let viz4 = new DqViz()
         // snappables.push(viz4)
-        // viz4.markupPos.point(-.1, 1.6, 0.)
+        // viz4.markupPos.point(-.1, 1.2, 0.)
         // let axis = new Dq()
         // axis[4] = 1.
-        // axis[1] = 1.6
+        // axis[1] = 1.2
         // axis[2] = -.6
         // axis.multiplyScalar(TAU/2. - .01, axis).exp(viz4.dq)
         // blankFunction = () => {
@@ -92,7 +94,7 @@ function initControl() {
         //     // axis.multiplyScalar(Math.sin(.02 * frameCount), viz4.dq)
         //     // viz4.dq[0] = -1.
 
-        //     viz4.markupPos.point(.3 * (1. + Math.cos(frameCount * .01)), 1.6, 0.)
+        //     viz4.markupPos.point(.3 * (1. + Math.cos(frameCount * .01)), 1.2, 0.)
         // }
     }
 

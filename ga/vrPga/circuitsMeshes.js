@@ -172,7 +172,9 @@ function initCircuitsMeshes() {
                 
                 obj3dsWithOnBeforeRenders.push(this)
                 this.onBeforeRender = () => {
-                    this.rotation.y = camera.lookAtAngle
+                    v1.copy(camera.position)
+                    v1.y = 0.
+                    this.lookAt(v1)
                 }
             }
 

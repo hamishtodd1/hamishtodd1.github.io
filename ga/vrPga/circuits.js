@@ -112,12 +112,6 @@ function initCircuits() {
         cameraSideDirection.directionToGibbsVec(circleDirection).normalize().negate()
         // cameraSideDirection.log()
 
-        function ensurePlaneFacesInDirection(plane, dir) {
-
-            if (dir.inner(plane) < 0.)
-                plane.multiplyScalar(-1., startPlane)
-        }
-
         let lowestUnusedCircuit = 0
         snappables.forEach(s => {
 
@@ -138,7 +132,8 @@ function initCircuits() {
 
             // c.visible = true
 
-            c.dottedLines.forEach((dl,i) => {
+            let dls = c.dottedLines
+            dls.forEach((dl,i) => {
 
                 let isOut = i === 0
 
@@ -158,6 +153,17 @@ function initCircuits() {
                 dl.setHeight(snappablePos.pointToGibbsVec(v1).y)
                 snappablePos.projectOn(e2, onFloor)
                 onFloor.pointToGibbsVec(dl.position)
+            })
+
+            getDesiredCenter(c)
+            
+            dls.forEach((dl, i) => {
+
+                // if(i !== 1)
+                //     return
+                
+                let isOut = i === 0
+                let fw = c.floorWires[i]
 
                 let ourCorner = c.opBg.localToWorld(v1.copy( triVerts[i] ))
                 let start = isOut ? ourCorner : dl.position
@@ -166,50 +172,39 @@ function initCircuits() {
                 let endPt = fl3.pointFromGibbsVec(end)
 
                 rotationAxisFromDirAndPoints(
-                    circleDirection.x, circleDirection.z,
-                    ourCorner.x, ourCorner.z,
-                    dl.position.x, dl.position.z,
+                    circleDirection,
+                    ourCorner,
+                    dl.position,
                     centralAxis )
 
                 let startPlane = centralAxis.joinPt(startPt, fl1)
                 let endPlane = centralAxis.joinPt(endPt, fl2)
-
-                // let dirDual = fl5.pointFromGibbsVec(circleDirection).getDual(fl6)
-                // ensurePlaneFacesInDirection(isOut ? startPlane:endPlane, dirDual)
                 
                 let rotationMoreThan180 = isOut ? 
                     (startPlane.joinPt(endPt, fl4))[0] < 0. :
                     (endPlane.joinPt(startPt, fl4))[0] > 0.
 
+                // log(startPlane)
+
                 endPlane.mulReverse(startPlane, dq0).sqrtSelf()
-                if (rotationMoreThan180)
-                    dq0.multiplyScalar(-1.,dq0)                
+                // log(rotationMoreThan180)
+                // if (rotationMoreThan180)
+                //     dq0.multiplyScalar(-1.,dq0)                
                 dq0.normalize().logarithm(fw.material.dq)
+
+                // debugPlanes[0].fl.copy(startPlane)
+                // centralAxis.meet(e2, debugPlanes[0].markupPos)
+                // debugPlanes[1].fl.copy(endPlane)
+                // centralAxis.meet(e2, debugPlanes[1].markupPos)
+                // log(endPlane)
+                // debugDqs[0].dq.copy(centralAxis)
 
                 fw.start.pointFromGibbsVec(start).normalize()
                 
             })
 
-            
-            // dq0.logarithm(fw.dq)
-
-            s.affecters[1].getArrowCenter(fl0).projectOn(e2, fl2)
-            s.getArrowCenter(fl0).projectOn(e2, fl3)
-            // fl0.add(fl1, centerOfAllThree).normalize()
-            // centerOfAllThree.add(fl2, centerOfAllThree)
-
-            //Join the three in a circle. If the circle has too small a radius, need to push it out
-
-            // centerOfAllThree.pointToGibbsVec(c.opGroup.position)
-            // c.opGroup.position.y = camera.position.y
-            // c.opGroup.lookAt(camera.position)
-
-            // c.inWires[0].set(fl0, centerOfAllThree)
-            // c.inWires[1].set(fl1, centerOfAllThree)
-            // c.outWire.set(fl2, centerOfAllThree)
-
             ++lowestUnusedCircuit
-            if (lowestUnusedCircuit>=circuits.length)
+            if (lowestUnusedCircuit >= circuits.length)
                 new Circuit()
         })
 
