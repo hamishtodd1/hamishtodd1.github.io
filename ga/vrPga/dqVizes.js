@@ -169,6 +169,7 @@ function initDqVizes() {
     let nonNetherDq = new Dq()
     let nonNetherArrowStart = new Fl()
     let finalHeadRadiusFactor = headRadiusFactor / headArcLength
+    let cupBox = new THREE.Box3()
     class DqViz extends THREE.Group {
         
         constructor(col = dqCol, transparent = false) {
@@ -277,8 +278,9 @@ function initDqVizes() {
                         dq0.sandwichFl(this.markupPos, fl0).pointToGibbsVec(v1)
                         this.boundingBox.expandByPoint(v1)
                     }
-                    this.boundingBox.min.subScalar(arrowRadius)
-                    this.boundingBox.max.addScalar(arrowRadius)
+                    cupBox.min.copy(this.cup.position).subScalar(arrowRadius)
+                    cupBox.max.copy(this.cup.position).addScalar(arrowRadius)
+                    this.boundingBox.union(cupBox)
                     updateBoxHelper(this.boxHelper, this.boundingBox)
                 }
 
