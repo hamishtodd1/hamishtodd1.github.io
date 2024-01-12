@@ -1,6 +1,6 @@
 function initCircuitsMeshes() {
 
-    let radius = .05
+    let radius = .02
 
     {
         let injections = [

@@ -1,3 +1,18 @@
+function keyToAxes(eventKey, target) {
+    if (eventKey === "ArrowUp")
+        target.set(0., 1.)
+    else if (eventKey === "ArrowDown")
+        target.set(0., -1.)
+    else if (eventKey === "ArrowLeft")
+        target.set(1., 0.)
+    else if (eventKey === "ArrowRight")
+        target.set(-1., 0.)
+    else
+        return false
+
+    return true
+}
+
 function getWhereThisWasCalledFrom(depth) {
     let actualDepth = (depth || 0) + 3
     let splitIntoLines = Error().stack.split("\n")

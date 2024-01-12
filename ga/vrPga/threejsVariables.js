@@ -6,7 +6,10 @@ const renderer = new THREE.WebGLRenderer({ antialias: true })
 const scene = new THREE.Scene()
 
 //quest 2 is 96 degrees, we lop a bit off
-const camera = new THREE.PerspectiveCamera(92, window.innerWidth / window.innerHeight, 0.1, 100)
+function defaultCamera() {
+    return new THREE.PerspectiveCamera(92, window.innerWidth / window.innerHeight, 0.1, 100)
+}
+let camera = defaultCamera()
 let container = document.createElement('div')
 document.body.appendChild(container)
 

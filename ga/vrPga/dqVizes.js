@@ -184,6 +184,7 @@ function initDqVizes() {
                 opacity: transparent ? .4 : 1.
             })
             this.rotAxisMesh = new DqMesh(rotAxisGeo, axisMat)
+            this.rotAxisMesh.visible = false
             this.add(this.rotAxisMesh)
 
             this.circuitVisible = false
@@ -191,6 +192,7 @@ function initDqVizes() {
             this.sclptable = null
 
             this.trnAxisMesh = new THREE.Mesh(trnAxisGeo, axisMat)
+            this.trnAxisMesh.visible = false
             this.add(this.trnAxisMesh)
 
             this.boxHelper = new THREE.BoxHelper()
@@ -224,6 +226,7 @@ function initDqVizes() {
             arrowMat.injections = dqArrowMatInjections
 
             this.arrow = new THREE.Mesh(dqArrowGeo, arrowMat)
+            this.arrow.visible = false
             // this.arrow.castShadow = true //would be nice but it doesn't use the vertex shader
             this.markupPos = new Fl().copy(e123)
             this.arrow.matrixAutoUpdate = false
@@ -235,7 +238,6 @@ function initDqVizes() {
                 // if(frameCount === 400)
                 //     debugger
 
-                this.updateFromAffecters()
                 if (!this.visible)
                     return
 

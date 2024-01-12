@@ -12,6 +12,8 @@ const log = console.log
 
 const debugUpdates = []
 
+let spectatorMode = null
+
 const obj3dsWithOnBeforeRenders = []
 
 const socket = io()
@@ -22,8 +24,6 @@ const snappables = []
 const sclptables = []
 
 const eps = .0001 //not been tweaked for much yet so have at it
-
-const spectatorMode = false
 
 let inVr = false
 

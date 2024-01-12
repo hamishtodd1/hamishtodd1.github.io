@@ -25,13 +25,29 @@ http.listen(port, () => {
 
 const log = console.log
 
-io.on('connection', function (socket) {
+let sockets = []
+
+io.on('connection', socket => {
 	// console.log("User connected")
+
+    sockets.push(socket)
 
 	socket.emit("serverConnected")
 
-	socket.broadcast.on(
-		'genericUpdate',
-		msg => socket.broadcast.emit('genericUpdate', msg)
-	);
-});
+	socket.on("snappable", (msg) => {
+        sockets.forEach(s=>{
+            if(s === socket)
+                return
+
+            s.emit("snappable",msg)
+        })
+    })
+    socket.on("sclptable", (msg) => {
+        sockets.forEach(s => {
+            if (s === socket)
+                return
+
+            s.emit("sclptable", msg)
+        })
+    })
+})

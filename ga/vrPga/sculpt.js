@@ -9,10 +9,22 @@
 function initSclptables()
 {
     const VOXEL_WIDTH = .003
-    const pointSize = VOXEL_WIDTH * 2.6 //to fill in the gaps
     const maxVoxels = 30000 //eyeballed
     const numWide = 3 // this isn't affected by currentSize yet
 
+    let currentColor = 3
+
+    establishSculptablePointSize = () => {
+        if (coloredPointMats[0] === null) {
+            //point size different because it's not about size but about subtended angle or something
+            const pointSize = spectatorMode ? VOXEL_WIDTH * 9.5 : VOXEL_WIDTH * 2.6
+            cols.forEach((col, i) => {
+                coloredPointMats[i] = new THREE.PointsMaterial({ color: col, size: pointSize })
+            })
+        }
+    }
+
+    let coloredPointMats = []
     {
         let hueDivisions = 10
         let greyDivisions = 3
@@ -28,19 +40,41 @@ function initSclptables()
                 cols[i].setRGB(grey, grey, grey)
             }
         }
+
+        cols.forEach((col, i) => { 
+            coloredPointMats[i] = null
+        })
     }
 
-    let currentColor = Math.floor(Math.random() * numCols)
-     
-    let coloredPointMats = []
-    cols.forEach((col, i) => { 
-        coloredPointMats[i] = new THREE.PointsMaterial({ color: col, size: pointSize })
+    socket.on("sclptable", msg => {
+
+        turnOnSpectatorMode()
+
+        if (sclptables[msg.i] === undefined)
+            sclptables[msg.i] = new Sclptable()
+
+        // sclptables[msg.i].brushStroke(fl0.point(0., 1.2, 0., 1.))
+        
+        let cs = sclptables[msg.i].children[msg.color]
+        cs.vAttr.needsUpdate = true
+        cs.vAttr.updateRange.offset = 0
+        cs.vAttr.updateRange.count = 0
+        cs.geometry.drawRange.count = 0
+        cs.lowestUnusedCube = 0
+
+        //it's coming in as a literal object, not even an array. Really no good
+        let newCount = Object.keys(msg.arr).length / 3
+        for (let i = 0, il = newCount; i < il; ++i)
+            cs.fillCubePosition(v1.set(msg.arr[i * 3 + 0], msg.arr[i * 3 + 1], msg.arr[i * 3 + 2]))
     })
 
+    let posV = new THREE.Vector3()
     class Sclptable extends THREE.Group {
 
-        constructor() {
-            
+        constructor(index) {
+
+            establishSculptablePointSize()
+
             super()
             scene.add(this)
             this.matrixAutoUpdate = false
@@ -64,12 +98,34 @@ function initSclptables()
             this.com = new Fl() //NOT NORMALIZED AND NO REASON TO CHANGE THAT!
 
             obj3dsWithOnBeforeRenders.push(this)
-            sclptables.push(this)
+            if (index)
+                sclptables[index] = this
+            else
+                sclptables.push(this)
 
             this.onBeforeRender = () => {
                 this.dqViz.dq.toMat4(this.matrix)
                 this.boxHelper.matrix.copy(this.matrix)
             }
+        }
+
+        emitSelf() {
+
+            if( spectatorMode !== false ) {
+                makeSpectatorCamera(false)
+                spectatorMode = false
+            }
+
+            let vAttr = this.children[currentColor].vAttr
+
+            let arr = new Float32Array(vAttr.count * 3)
+            for(let i = 0; i < vAttr.count * 3; ++i)
+                arr[i] = vAttr.array[i]
+            socket.emit("sclptable", {
+                i: sclptables.indexOf(this),
+                color: currentColor, //don't change while painting I guess!
+                arr,
+            })
         }
 
         getWorldCom(target) {
@@ -81,14 +137,10 @@ function initSclptables()
         }
 
         brushStroke(pos) {
-            
+
             if(pos === undefined)
                 pos = handPosition
-
-            hidePalette()
-
-            pos.pointToGibbsVec(v1)
-            this.worldToLocal(v1)
+            this.worldToLocal(pos.pointToGibbsVec(posV))
 
             let cs = this.children[currentColor]
             cs.vAttr.updateRange.offset = cs.lowestUnusedCube * 3
@@ -113,23 +165,11 @@ function initSclptables()
                         // if(v2.lengthSq() > radiusSq)
                         //     continue
                         v2.multiplyScalar(VOXEL_WIDTH)
-                        v2.add(v1)
+                        v2.add(posV)
 
                         let fillable = cs.checkCubePosition(v2) //could check other ones
-                        if(fillable) {
-
+                        if(fillable)
                             cs.fillCubePosition(v2)
-
-                            fl0.pointFromGibbsVec(v2)
-                            this.com.add(fl0,this.com)
-                            
-                            this.boundingBox.min.x = Math.min(this.boundingBox.min.x, v2.x - 1.5*VOXEL_WIDTH)
-                            this.boundingBox.min.y = Math.min(this.boundingBox.min.y, v2.y - 1.5*VOXEL_WIDTH)
-                            this.boundingBox.min.z = Math.min(this.boundingBox.min.z, v2.z - 1.5*VOXEL_WIDTH)
-                            this.boundingBox.max.x = Math.max(this.boundingBox.max.x, v2.x + 1.5*VOXEL_WIDTH)
-                            this.boundingBox.max.y = Math.max(this.boundingBox.max.y, v2.y + 1.5*VOXEL_WIDTH)
-                            this.boundingBox.max.z = Math.max(this.boundingBox.max.z, v2.z + 1.5*VOXEL_WIDTH)
-                        }
                     }
                 }
             }
@@ -149,12 +189,12 @@ function initSclptables()
         let sizes = [1., 2., 4.]
         let currentSize = 1
         let palette = new THREE.Group()
-        hand2.add(palette)
+        scene.add(palette)
         let visibilityCountdown = -1.
-        function hidePalette() {
+        hidePalette = () => {
             visibilityCountdown = -1.
         }
-        let spacing = .2
+        let spacing = .024
         palette.position.z = .2
         let bg = new THREE.Mesh(new THREE.RingGeometry(spacing * .75, spacing * 3.5, numCols * 2), new THREE.MeshBasicMaterial({ color: 0xCCCCCC }))
         bg.position.z = -.001
@@ -176,26 +216,15 @@ function initSclptables()
                 swatch.position.y = (j - sizes.length    / 2. + .5) * spacing
             })
         })
-        function keyToAxes(eventKey, target) {
-            if (eventKey === "ArrowUp")
-                target.set(0., 1.)
-            else if (eventKey === "ArrowDown")
-                target.set(0., -1.)
-            else if (eventKey === "ArrowLeft")
-                target.set(1., 0.)
-            else if (eventKey === "ArrowRight")
-                target.set(-1., 0.)
-            else
-                return false
-
-            return true
-        }
-
+        
         updatePalette = () => {
             
             visibilityCountdown -= frameDelta
             if (visibilityCountdown < 0.)
                 palette.visible = false
+            
+            hand1.dq.sandwich(e123, fl0).pointToGibbsVec(palette.position)
+            palette.lookAt(camera.position)
 
             let selectorIntendedY = spacing * (currentSize - sizes.length / 2. + .5) + spacing * 2.
             selector.position.y += .1 * (selectorIntendedY - selector.position.y)
@@ -222,22 +251,16 @@ function initSclptables()
             })
         }
 
-        document.addEventListener('keydown', (event) => {
-            if(!simulatingPaintingHand)
-                return
-            
-            let didMove = keyToAxes(event.key, v1)
-            if (!didMove)
-                return
+        updatePaletteFromJoystickMovement = (joystickVec) => {
 
             palette.visible = true
             visibilityCountdown = 1.3
 
-            currentSize += v1.y
+            currentSize += joystickVec.y
             currentSize = Math.max(0, Math.min(sizes.length - 1, currentSize))
 
-            currentColor = (currentColor + numCols + v1.x) % numCols
-        })
+            currentColor = (currentColor + numCols + joystickVec.x) % numCols
+        }
     }
     
     let rounded = new Float32Array(3)
@@ -279,7 +302,6 @@ function initSclptables()
             return true
         }
 
-        //ASSUMES ROUNDING!
         fillCubePosition(p) {
 
             doRounding(p)
@@ -299,7 +321,15 @@ function initSclptables()
             let potentialNewDrawRange = this.lowestUnusedCube
             this.geometry.drawRange.count = Math.max(this.geometry.drawRange.count, potentialNewDrawRange)
 
-            return true
+            let s = this.parent
+            s.com.add(fl0.pointFromGibbsVec(v2), s.com)
+
+            s.boundingBox.min.x = Math.min( s.boundingBox.min.x, v2.x - 1.5 * VOXEL_WIDTH )
+            s.boundingBox.min.y = Math.min( s.boundingBox.min.y, v2.y - 1.5 * VOXEL_WIDTH )
+            s.boundingBox.min.z = Math.min( s.boundingBox.min.z, v2.z - 1.5 * VOXEL_WIDTH )
+            s.boundingBox.max.x = Math.max( s.boundingBox.max.x, v2.x + 1.5 * VOXEL_WIDTH )
+            s.boundingBox.max.y = Math.max( s.boundingBox.max.y, v2.y + 1.5 * VOXEL_WIDTH )
+            s.boundingBox.max.z = Math.max( s.boundingBox.max.z, v2.z + 1.5 * VOXEL_WIDTH )
         }
     }
 }

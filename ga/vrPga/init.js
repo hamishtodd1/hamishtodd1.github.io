@@ -1,10 +1,6 @@
 /*
     TODO for "show" demo:
         Audience view
-            Need to send, across the wire:
-                sculpting updates
-                
-            no markup visible
             MAYBE pupeteer view should be the same angle, maybe not, make it optional for now
         More operations and snapping should be accurate (possibly extra controls)
         Deleting sculptables
@@ -98,22 +94,31 @@ async function init() {
         frameDelta = clockDelta < .1 ? clockDelta : .1 //clamped because debugger pauses create weirdness
         ++frameCount
 
-        updateCameraMvs()
-        updateHandMvs()
-        buttonWhileDowns()
+        if (spectatorMode) {
+            handleDqMsgs()
+        }
+        else {
 
-        debugUpdates.forEach(du=>du())
+            updateCameraMvs()
+            updateHandMvs()
+            buttonWhileDowns()
+            updatePalette()
 
-        handleSculpting()
-        handleDqModificationAndUpdateFromCircuits()
-        
-        updateHighlighting()
-        
-        updatePalette()
+            handleSculpting()
+            handleDqModification()
+            
+            snappables.forEach(s => {
+                s.updateFromAffecters()
+            })
 
-        updateRecording()
+            updateHighlighting()
+            updateRecording()
+            //then broadcast
 
-        obj3dsWithOnBeforeRenders.forEach(obj3d => obj3d.onBeforeRender())
+            obj3dsWithOnBeforeRenders.forEach(obj3d => obj3d.onBeforeRender())
+        }
+
+        debugUpdates.forEach(du => du())
 
         renderer.render(scene, camera)
     }

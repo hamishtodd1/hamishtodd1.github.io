@@ -40,11 +40,13 @@ function initFlVizes() {
             this.markupPos = new Fl().point(0.,1.2,0.,1.)
 
             this.plane = new THREE.Group()
+            this.plane.visible = false
             scene.add(this.plane)
             this.plane.add(new THREE.Mesh(planeGeo, planeMatFront))
             this.plane.add(new THREE.Mesh(planeGeo, planeMatBack))
 
             this.point = new THREE.Mesh(pointGeo, pointMat)
+            this.point.visible = false
             scene.add(this.point)
 
             //arrow too maybe

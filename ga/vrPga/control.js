@@ -6,7 +6,7 @@
         Hovering a thing shows its affecters
         Sculpting can create new things or add to what's already there, depending on whether your paint is touching it
         You can hold two and it shows you different ones you could create from them
-        Change the way your hand movement changes heldDqViz
+        Change the way your hand movement changes heldViz
             You grab the thing, and its arrow moves such that its tip is where you just grabbed. It is frozen
             You move your hand, and that creates a further, separate arrow
             AND another arrow which is your current motion composed
@@ -59,7 +59,7 @@ function initControl() {
         // var sclptable = new Sclptable()
         // sclptable.brushStroke(fl0.point(0., 1.2, 0., 1.))
 
-        testCircuits()
+        // testCircuits()
 
         // let viz1 = new DqViz(0xFF0000)
         // snappables.push(viz1)
@@ -105,7 +105,12 @@ function initControl() {
     dispViz.visible = false
     let handDqOnGrab = new Dq()
 
-    let heldDqViz = null
+    let backedUpMsgs = []
+    socket.on( "snappable", msg => {
+        backedUpMsgs.push(msg)
+    })
+
+    let heldViz = null
     let sclptableBeingSculpted = null
     let highlightedTranslator = null
     let highlightedSclptable = null
@@ -116,7 +121,7 @@ function initControl() {
 
     updateHighlighting = () => {
         
-        // let dqVizWithCircuitShowing = highlightedTranslator || heldDqViz
+        // let dqVizWithCircuitShowing = highlightedTranslator || heldViz
         // if (dqVizWithCircuitShowing === null)
         //     hideCircuit()
         // else
@@ -149,8 +154,10 @@ function initControl() {
     }
 
     handleSculpting = () => {
-        if (sclptableBeingSculpted && simulatingPaintingHand)
+        if (sclptableBeingSculpted && simulatingPaintingHand) {
+            hidePalette()
             sclptableBeingSculpted.brushStroke()
+        }
     }
 
     onHandButtonDown = (isLeftButton, isRightButton, isPaintingHand) => {
@@ -164,16 +171,16 @@ function initControl() {
 
             let nearest = getNearestThingToHand()
 
-            heldDqViz = nearest.constructor === DqViz ? nearest : nearest.dqViz
+            heldViz = nearest.constructor === DqViz ? nearest : nearest.dqViz
             
-            oldViz.dq.copy(heldDqViz.dq)
-            oldViz.markupPos.copy(heldDqViz.markupPos)
+            oldViz.dq.copy(heldViz.dq)
+            oldViz.markupPos.copy(heldViz.markupPos)
             oldViz.dq.sandwich(oldViz.markupPos, dispViz.markupPos)
             dispViz.dq.copy(oneDq)
             getHandDq(handDqOnGrab)
 
-            if (heldDqViz.dq.isScalarMultipleOf(oneDq))
-                heldDqViz.markupPos.copy(handPosition)
+            if (heldViz.dq.isScalarMultipleOf(oneDq))
+                heldViz.markupPos.copy(handPosition)
         }
         else if(isLeftButton) {
             //this is about creation, depends on hand
@@ -185,32 +192,54 @@ function initControl() {
                     sclptableBeingSculpted = new Sclptable()
             }
             else {
-                heldDqViz = new DqViz()
-                snappables.push(heldDqViz)
-                heldDqViz.markupPos.copy(handPosition)
+                heldViz = new DqViz()
+                snappables.push(heldViz)
+                heldViz.markupPos.copy(handPosition)
 
                 getHandDq(handDqOnGrab)
             }
         }
     }
 
-    handleDqModificationAndUpdateFromCircuits = () => {
-        if (heldDqViz !== null) {
-            // highlightedTranslator = heldDqViz
+    handleDqMsgs = () => {
+        backedUpMsgs.forEach((msg) => {
+            if (snappables[msg.i] === undefined)
+                snappables[msg.i] = new DqViz()
+
+            for (let i = 0; i < 8; ++i) {
+                snappables[msg.i].dq[i] = msg.dq[i]
+                snappables[msg.i].markupPos[i] = msg.markupPos[i]
+            }
+        })
+        for (let i = 0; i < backedUpMsgs.length; ++i)
+            delete backedUpMsgs[i]
+        backedUpMsgs.length = 0
+    }
+
+    handleDqModification = () => {
+
+        if (heldViz !== null) {
+            // highlightedTranslator = heldViz
             highlightedTranslator = null
 
             let handDqCurrent = getHandDq(dq0)
             handDqCurrent.mulReverse(handDqOnGrab, dispViz.dq)
-            dispViz.dq.mul(oldViz.dq, heldDqViz.dq)
-            heldDqViz.dq.normalize()
-            // heldDqViz.dq.log()
+            dispViz.dq.mul(oldViz.dq, heldViz.dq)
+            heldViz.dq.normalize()
+            // heldViz.dq.log()
 
             if(showMarkupVizes) {
                 dispViz.visible = !dispViz.dq.equals(oneDq)
                 oldViz.visible = dispViz.visible
             }
+            
+            // snap(heldViz)
 
-            snap(heldDqViz)
+            socket.emit("snappable", { 
+                dq: heldViz.dq,
+                markupPos: heldViz.markupPos,
+                i: snappables.indexOf(heldViz) })
+
         }
         else {
 
@@ -230,26 +259,25 @@ function initControl() {
                 }
             }
         }
-
-        snappables.forEach(s => {
-            s.updateFromAffecters()
-        })
     }
 
     onHandButtonUp = (isLeftButton, isRightButton, isPaintingHand) => {
-        if (isPaintingHand && isLeftButton)
+        if (isPaintingHand && isLeftButton) {
+            if (sclptableBeingSculpted !== null)
+                sclptableBeingSculpted.emitSelf()
             sclptableBeingSculpted = null
-        else if (heldDqViz !== null && (isRightButton || isLeftButton)) { //remember middle button exists
+        }
+        else if (heldViz !== null && (isRightButton || isLeftButton)) { //remember middle button exists
 
-            if (heldDqViz.sclptable) {
-                heldDqViz.dq
+            if (heldViz.sclptable) {
+                heldViz.dq
                     .getReverse(dq0)
                     .sandwich(
-                        heldDqViz.dq.sandwich(heldDqViz.sclptable.com, fl0),
-                        heldDqViz.markupPos)
+                        heldViz.dq.sandwich(heldViz.sclptable.com, fl0),
+                        heldViz.markupPos)
             }
 
-            heldDqViz = null
+            heldViz = null
 
             dispViz.visible = false
             oldViz.visible = false

@@ -1,3 +1,4 @@
+
 function initSurroundings() {
 
     scene.background = new THREE.Color(0x8F8F8F)
@@ -35,4 +36,9 @@ function initSurroundings() {
     light.shadow.camera.left = - 2
     light.shadow.mapSize.set(4096, 4096)
     scene.add(light)
+
+    removeSurroundings = () => {
+        scene.remove(floor)
+        scene.background = null
+    }
 }

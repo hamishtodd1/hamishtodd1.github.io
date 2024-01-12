@@ -9,6 +9,8 @@ function initHands() {
     scene.add(hand1)
     scene.add(hand2)
 
+    let joystickMovement = new THREE.Vector2()
+
     //Mouse stuff
     {
         function mouseControlKeyEvents(event) {
@@ -18,6 +20,10 @@ function initHands() {
                 document.dispatchEvent(new Event(`mouseRewind`))
             if (event.key === "6" && event.ctrlKey)
                 document.dispatchEvent(new Event(`mouseFastForward`))
+
+            let wasJoystickMovement = keyToAxes(event.key, joystickMovement)
+            if (wasJoystickMovement && simulatingPaintingHand)
+                updatePaletteFromJoystickMovement(joystickMovement)
         }
         document.addEventListener(`keydown`, mouseControlKeyEvents)
 
@@ -121,6 +127,7 @@ function initHands() {
             document.removeEventListener('keydown', mouseControlKeyEvents)
             document.removeEventListener('pointerdown', onMouseButtonDown)
             document.removeEventListener('pointerup', onMouseButtonUp)
+            orbitControls.enabled = false
 
         }
     }
