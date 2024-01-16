@@ -31,7 +31,7 @@ function initBrushStroke()
         btn.scale.setScalar(buttonWidth)
         buttons.push(btn)
         btn.position.set(
-            -1.1,
+            -1.7,
             (i - numButtons / 2. + .5) * buttonWidth * 1.1,
             0.)
         buttonGroup.add(btn)
