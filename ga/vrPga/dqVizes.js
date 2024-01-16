@@ -209,7 +209,7 @@ function initDqVizes() {
             this.cup.visible = false
             this.add(this.cup)
 
-            this.scalarSign = changeableText()
+            this.scalarSign = new ChangeableText()
             this.scalarSign.scale.multiplyScalar(.4)
             this.scalarSign.visible = false
             this.add(this.scalarSign)
@@ -367,6 +367,22 @@ function initDqVizes() {
             }
         }
 
+        dispose() {
+
+            while(this.children.length > 0) {
+                let child = this.children[this.children.length - 1]
+                this.remove(child)
+            }
+
+            scene.remove(this)
+
+            this.arrow.material.dispose()
+            this.rotAxisMesh.material.dispose()
+            this.boxHelper.dispose()
+            
+            this.scalarSign.dispose()
+        }
+
         dependsOn(viz) {
             let ret = false
             if (this.affecters[0] === viz ||
@@ -424,52 +440,61 @@ function initDqVizes() {
     window.DqViz = DqViz
 
     let scalarBgMat = new THREE.MeshBasicMaterial({ color: 0xCCCCCC })
-    function changeableText() {
+    class ChangeableText extends THREE.Group {
 
-        let canvas = document.createElement("canvas")
-        let context = canvas.getContext("2d")
-        let material = new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(canvas), transparent: true })
+        constructor() {
 
-        let font = "Arial"
-        let padding = 43
-        let textSize = 85
-        canvas.height = textSize + padding
-        canvas.width = 200. //more an estimate of the required resolution
+            super()
+            
+            this.canvas = document.createElement("canvas")
+            this.material = new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(this.canvas), transparent: true })
 
-        let ret = new THREE.Group()
+            let font = "Arial"
+            let padding = 43
+            let textSize = 85
+            this.canvas.height = textSize + padding
+            this.canvas.width = 200. //more an estimate of the required resolution
 
-        let currentText = ""
-        ret.setText = function (text) {
-            if (currentText === text)
-                return
+            let currentText = ""
+            this.setText = function (text) {
+                if (currentText === text)
+                    return
 
-            context.font = "bold " + textSize + "px " + font
-            context.textAlign = "center"
-            context.textBaseline = "middle"
+                let context = this.canvas.getContext("2d")
 
-            context.clearRect(
-                0, 0,
-                canvas.width,
-                canvas.height)
-            context.fillStyle = "#000000"
-            context.fillText(text, canvas.width / 2., canvas.height / 2. + 8) //8 is eyeballed. These are numbers
+                context.font = "bold " + textSize + "px " + font
+                context.textAlign = "center"
+                context.textBaseline = "middle"
 
-            let textWidth = context.measureText(text).width + padding
-            bg.scale.x = bg.scale.y * textWidth / canvas.height
+                context.clearRect(
+                    0, 0,
+                    this.canvas.width,
+                    this.canvas.height)
+                context.fillStyle = "#000000"
+                context.fillText(text, this.canvas.width / 2., this.canvas.height / 2. + 8) //8 is eyeballed. These are numbers
 
-            material.map.needsUpdate = true
+                let textWidth = context.measureText(text).width + padding
+                bg.scale.x = bg.scale.y * textWidth / this.canvas.height
 
-            currentText = text
+                this.material.map.needsUpdate = true
+
+                currentText = text
+            }
+
+            let bg = new THREE.Mesh(unchangingUnitSquareGeometry, scalarBgMat)
+            bg.position.z = -.01
+            this.add(bg)
+            let sign = new THREE.Mesh(unchangingUnitSquareGeometry, this.material);
+            sign.scale.x = this.canvas.width / this.canvas.height
+            this.add(sign)
         }
 
-        let bg = new THREE.Mesh(unchangingUnitSquareGeometry, scalarBgMat)
-        bg.position.z = -.01
-        ret.add(bg)
-        let sign = new THREE.Mesh(unchangingUnitSquareGeometry, material);
-        sign.scale.x = canvas.width / canvas.height
-        ret.add(sign)
-
-        return ret
+        dispose() {
+            this.remove(this.children[0])
+            this.remove(this.children[0])
+            this.material.map.dispose()
+            this.material.dispose()
+        }
     }
 
     debugDqs = [

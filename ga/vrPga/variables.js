@@ -18,7 +18,7 @@ const obj3dsWithOnBeforeRenders = []
 
 const socket = io()
 
-let simulatingPaintingHand = false //true
+let simulatingPaintingHand = true//false //true
 
 const snappables = []
 const sclptables = []

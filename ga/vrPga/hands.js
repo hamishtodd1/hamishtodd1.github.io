@@ -3,11 +3,12 @@ function initHands() {
     handPosition = new Fl().copy(e123) //less fundamental
     handPositionOld = new Fl().copy(e123)
 
-    let standinHandGeo = new THREE.BoxGeometry(.3,.3,.3)
+    let standinHandGeo = new THREE.BoxGeometry(.075,.075,.075)
     hand1 = new DqMesh(standinHandGeo, new THREE.MeshPhongMaterial({ color: 0x00FF00 }))
     hand2 = new DqMesh(standinHandGeo, new THREE.MeshPhongMaterial({ color: 0x0000FF }))
     scene.add(hand1)
     scene.add(hand2)
+    e123.dqTo(comfortablePos(0., fl0, -.35), hand1.dq)
 
     let joystickMovement = new THREE.Vector2()
 
@@ -16,10 +17,10 @@ function initHands() {
         function mouseControlKeyEvents(event) {
             if (event.key === ` `)
                 simulatingPaintingHand = !simulatingPaintingHand
-            if (event.key === "5" && event.ctrlKey)
-                document.dispatchEvent(new Event(`mouseRewind`))
-            if (event.key === "6" && event.ctrlKey)
-                document.dispatchEvent(new Event(`mouseFastForward`))
+            if (event.key === "6" && event.ctrlKey) //mouse rewind
+                deleteSelected()
+            // if (event.key === "5" && event.ctrlKey) //mouse fast forward
+            //     document.dispatchEvent(new Event(`mouseFastForward`))
 
             let wasJoystickMovement = keyToAxes(event.key, joystickMovement)
             if (wasJoystickMovement && simulatingPaintingHand)

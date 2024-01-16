@@ -40,13 +40,6 @@
         Wheel is rotating
         You do have that one other button just behind the mouswheel
 
-    Got so many "infrastructure" requirements that buttons might be taken up by that crap:
-        Undo and redo
-        Delete
-        Select
-        Duplicate
-        Change color
-
     You probably want a laser, but not sure yet, and it raises many questions
 
     Your "go to next snap" button, if there IS no snap, could just try to do shit with whatever's visible
@@ -61,22 +54,22 @@ function initControl() {
 
         // testCircuits()
 
-        // let viz1 = new DqViz(0xFF0000)
-        // snappables.push(viz1)
-        // viz1.dq.copy(Translator(.8, 0., 0.))
-        // viz1.markupPos.point(-1.4, 1.2, 0.)
+        let viz1 = new DqViz(0xFF0000)
+        snappables.push(viz1)
+        viz1.dq.copy(Translator(.4, 0., 0.))
+        comfortablePos(-.6, viz1.markupPos,0.)
 
-        // let viz2 = new DqViz(0xFF00FF)
-        // snappables.push(viz2)
-        // viz2.dq.copy(Translator(0., .6, 0.))
-        // viz2.markupPos.point( 0., 1.2, 0.1)
+        let viz2 = new DqViz(0xFF00FF)
+        snappables.push(viz2)
+        viz2.dq.copy(Translator(0., .3, 0.))
+        comfortablePos( 0., viz2.markupPos, 0.1)
 
-        // let viz3 = new DqViz()
-        // snappables.push(viz3)
-        // viz3.markupPos.point(1.4, 1.2, 0.)
-        // viz3.affecters[0] = viz2
-        // viz3.affecters[1] = viz1
-        // viz3.affecters[2] = 1
+        let viz3 = new DqViz()
+        snappables.push(viz3)
+        comfortablePos( .6, viz3.markupPos, 0.)
+        viz3.affecters[0] = viz2
+        viz3.affecters[1] = viz1
+        viz3.affecters[2] = 1
 
         // let viz4 = new DqViz()
         // snappables.push(viz4)
@@ -98,6 +91,35 @@ function initControl() {
         // }
     }
 
+    {
+
+        let labelsOn1 = {
+            "grab": null, "paint": null,                           //buttons you hold
+            "delete": null, "change brush" : null, "undo"  : null, //not available while holding
+            "duplicate": null }                                    //only if you've grabbed something
+        let labelsOn2 = {
+            "grab": null, "versor": null,                          //buttons you hold
+            "delete": null, "change versor": null, "record": null, //not available while holding
+            "snap"     : null }                                    //only if you've grabbed something
+        //last two there are contingent on having just 
+        log(labelsOn2)
+        let both = [labelsOn1, labelsOn2]
+        both.forEach((labels, isHand1) => {
+            let hand = (isHand1 ? hand1 : hand2)
+            Object.keys(labels).forEach((labelName, i) => {
+                let label = text(labelName, false, "#000000")
+                label.scale.multiplyScalar(.015)
+                label.position.z = .01
+                label.position.y = .02 * (i-3)
+                hand.add(label)
+                labels[labelName] = label
+            })
+        })
+        // labelsOn1["grab"].position.x = -.02
+    }
+
+    // document.addEventListener(`mouseRewind`, () => { log("yo") })
+
     let showMarkupVizes = false
     let oldViz = new DqViz(0xFF0000, true)
     oldViz.visible = false
@@ -112,16 +134,34 @@ function initControl() {
 
     let heldViz = null
     let sclptableBeingSculpted = null
-    let highlightedTranslator = null
+    let highlightedViz = null
     let highlightedSclptable = null
 
     function interdependencyExists(a, b) {
         return a.dependsOn(b) || b.dependsOn(a)
     }
 
+    deleteSelected = () => {
+
+        if (highlightedSclptable !== null) {
+            let i = snappables.indexOf(highlightedSclptable)
+            if (i !== -1)
+                snappables.splice(i, 1)
+            highlightedSclptable.dispose()
+            highlightedSclptable = null
+        }
+        else if (highlightedViz !== null) {
+            let i = sclptables.indexOf(highlightedViz)
+            if (i !== -1)
+                sclptables.splice(i, 1)
+            highlightedViz.dispose()
+            highlightedViz = null
+        }
+    }
+
     updateHighlighting = () => {
         
-        // let dqVizWithCircuitShowing = highlightedTranslator || heldViz
+        // let dqVizWithCircuitShowing = highlightedViz || heldViz
         // if (dqVizWithCircuitShowing === null)
         //     hideCircuit()
         // else
@@ -131,9 +171,9 @@ function initControl() {
             sclptable.boxHelper.visible = sclptable === highlightedSclptable
             sclptable.dqViz.visible = 
                 sclptable.boxHelper.visible ? true :
-                highlightedTranslator === null ? false :
-                interdependencyExists(sclptable.dqViz, highlightedTranslator)
-            sclptable.dqViz.boxHelper.visible = sclptable.dqViz === highlightedTranslator  
+                highlightedViz === null ? false :
+                interdependencyExists(sclptable.dqViz, highlightedViz)
+            sclptable.dqViz.boxHelper.visible = sclptable.dqViz === highlightedViz  
         })
 
         snappables.forEach(snappable => {
@@ -141,15 +181,15 @@ function initControl() {
             if(snappable.sclptable)
                 return
 
-            snappable.boxHelper.visible = snappable === highlightedTranslator
+            snappable.boxHelper.visible = snappable === highlightedViz
         })
 
         snappables.forEach(snappable => {
             snappable.circuitVisible = 
-                highlightedTranslator === null ? 
+                highlightedViz === null ? 
                     false : 
-                    snappable === highlightedTranslator ||
-                    interdependencyExists(snappable, highlightedTranslator)
+                    snappable === highlightedViz ||
+                    interdependencyExists(snappable, highlightedViz)
         })
     }
 
@@ -219,8 +259,8 @@ function initControl() {
     handleDqModification = () => {
 
         if (heldViz !== null) {
-            // highlightedTranslator = heldViz
-            highlightedTranslator = null
+            // highlightedViz = heldViz
+            highlightedViz = null
 
             let handDqCurrent = getHandDq(dq0)
             handDqCurrent.mulReverse(handDqOnGrab, dispViz.dq)
@@ -244,18 +284,18 @@ function initControl() {
         else {
 
             if (sclptableBeingSculpted !== null)
-                highlightedTranslator = null
+                highlightedViz = null
             else {
                 let [nearestSnappable, nearestSnappableDist] = getNearestSnappableToPt(handPosition, false)
                 let [nearestSclptable, nearestSclptableDist] = getNearestSclptableToPt(handPosition)
 
                 if (nearestSnappableDist < nearestSclptableDist) {
-                    highlightedTranslator = nearestSnappable
+                    highlightedViz = nearestSnappable
                     highlightedSclptable = null
                 }
                 else {
                     highlightedSclptable = nearestSclptable
-                    highlightedTranslator = null
+                    highlightedViz = null
                 }
             }
         }

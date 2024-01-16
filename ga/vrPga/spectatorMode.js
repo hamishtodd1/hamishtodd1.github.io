@@ -1,3 +1,8 @@
+/*
+    Maybe should be closer to the pupeteer's view
+    Fog maybe? So that you can have them go away
+*/
+
 function turnOnSpectatorMode() {
 
     if (spectatorMode)
@@ -42,8 +47,6 @@ function makeSpectatorCamera(weAreSpectator) {
         scene.add(ret)
         scene.add(cameraHelper)
     }
-
-    //fog or something?
 
     return ret
 }

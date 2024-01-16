@@ -68,6 +68,8 @@ function initSclptables()
             cs.fillCubePosition(v1.set(msg.arr[i * 3 + 0], msg.arr[i * 3 + 1], msg.arr[i * 3 + 2]))
     })
 
+    
+
     let posV = new THREE.Vector3()
     class Sclptable extends THREE.Group {
 
@@ -109,11 +111,26 @@ function initSclptables()
             }
         }
 
+        dispose() {
+            
+            this.dqViz.dispose()
+            
+            scene.remove(this)
+            scene.remove(this.boxHelper)
+            this.boxHelper.dispose()
+            
+            while (this.children.length > 0) {
+                let child = this.children[this.children.length - 1]
+                this.remove(child)
+                child.geometry.dispose()
+            }
+        }
+
         emitSelf() {
 
             if( spectatorMode !== false ) {
-                makeSpectatorCamera(false)
                 spectatorMode = false
+                makeSpectatorCamera()
             }
 
             let vAttr = this.children[currentColor].vAttr

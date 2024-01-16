@@ -1,17 +1,17 @@
 /*
+    A relatively different approach is: one hand grabs a thing, other hand modifies
+        Grab sclptable and other hand adds stuff to it
+        Grab dq and you're holding the markupPos; other hand modifies what it does
+        Gotta be experimenting!
+
     TODO for "show" demo:
-        Audience view
-            MAYBE pupeteer view should be the same angle, maybe not, make it optional for now
         More operations and snapping should be accurate (possibly extra controls)
-        Deleting sculptables
-        Maybe want a way for a sclptable to be affected by other buttons during the show?
-            Have a button that does multiplcation by 0 or 1. And maybe a point that's always present which goes up and down when you do that
+        Sculptable- and Viz- deleting button
         Make a properly rigged puppet! A tentacle or something
             And if you want more than that, eg planes/pts or copying, decide AFTER you've tried that!
         Circuits better
     Jon demo:
         Levels
-        Chevrons
         "Undo". Should probably rewind "time"
         Eyeballs, maybe faces, on vizes!
         Wanna have gauging animations
@@ -21,6 +21,8 @@
         Some levels!!!!!!
         Are you using the measurer for anything? If so, some numbers...
     Beyond:
+        Maybe want a way for a sclptable to be affected by other buttons during the show?
+            Have a button that does multiplcation by 0 or 1. And maybe a point that's always present which goes up and down when you do that
         Get rid of "current hand position"; it stinks of the origin
         Arrows should settle to being cut by the axes from your pov?
         Roblox addon for importing the animal you made
@@ -39,7 +41,7 @@
             Your most-recently-created things are visible
             There's max 7 of them at a time
             Make a new thing visible (eg create a thing or grab a thing) and that thing becomes visible
-            But something else is now invisible
+            But something else is now invisible 
             You can "scroll back", making your new thing invisible and the thing that just disappeared visible
             Put this on futureofcoding slack
         
