@@ -3,22 +3,37 @@ function initButtonLabels() {
     let labelsOn2 = {
         "grab": null, "paint": null,                           //buttons you hold
         "delete": null, "change brush": null, "undo": null, //not available while holding
-        "duplicate": null
-    }                                    //only if you've grabbed something
+        "duplicate": null                                   //only if you've grabbed something
+    }
     let labelsOn1 = {
         "grab": null, "versor": null,                          //buttons you hold
         "delete": null, "change versor": null, "record": null, //not available while holding
-        "snap": null
-    }                                    //only if you've grabbed something
+        "snap": null                                           //only if you've grabbed something
+    }                                    
     //last two there are contingent on having just 
-    log(labelsOn2)
     let both = [labelsOn1, labelsOn2]
+    let groups = [new THREE.Group(), new THREE.Group()]
+    hand1.add( groups[0] )
+    hand2.add( groups[1] )
+    putButtonLabelsOnVrControllers = () => {
+        hand1.add(groups[0])
+        hand2.add(groups[1])
+        groups[0].rotation.x = -TAU / 4.
+        groups[1].rotation.x = -TAU / 4.
+
+        groups[0].position.set(0., -0.0025, 0.0475)
+        groups[1].position.set(0., -0.0025, 0.0475)
+    }
+
+    //delete, duplicate, snap, record, could all be for while-holding
+    //leaving only undo
+    
     both.forEach((labels, isHand1) => {
-        let hand = (isHand1 ? hand1 : hand2)
+        let group = (isHand1 ? groups[0] : groups[1])
         Object.keys(labels).forEach((labelName, i) => {
             let label = text(labelName, false, "#000000")
             label.scale.multiplyScalar(.015)
-            hand.add(label)
+            group.add(label)
             labels[labelName] = label
             label.position.z = .015
             label.position.y = -.02

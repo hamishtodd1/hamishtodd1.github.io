@@ -129,7 +129,7 @@ function initDqVizes() {
             //` transformed.y += 0.; vNormal.x += 0.;\n`
         },
     ]
-    const arrowRadius = .012
+    const arrowRadius = .006
     const headArcLength = arrowRadius * 5.
     const headRadiusFactor = 2.1
     

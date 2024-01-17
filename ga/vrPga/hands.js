@@ -12,7 +12,9 @@ function initHands() {
 
     let joystickMovement = new THREE.Vector2()
 
-    //Mouse stuff
+    ///////////
+    // Mouse //
+    ///////////
     {
         function mouseControlKeyEvents(event) {
             if (event.key === ` `)
@@ -133,6 +135,9 @@ function initHands() {
         }
     }
 
+    ////////////////////
+    // VR Controllers //
+    ////////////////////
     {
         const laserPointerGeo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 0, - 1)])
         const line = new THREE.Line(laserPointerGeo)
@@ -142,6 +147,8 @@ function initHands() {
         //yes, you need these, and you add objects to them
         let vrController1 = renderer.xr.getController(0)
         let vrController2 = renderer.xr.getController(1)
+        vrController1.dq = new Dq()
+        vrController2.dq = new Dq()
         vrController1.add(line.clone())
         vrController2.add(line.clone())
 
@@ -153,36 +160,41 @@ function initHands() {
         controllerGrip2.add(controllerModelFactory.createControllerModel(controllerGrip2))
 
         //Responds a bit weirdly
-        vrController1.addEventListener('selectstart',  () => { onHandButtonDown ( true, false, true  ) } )
-        vrController1.addEventListener('selectend',    () => { onHandButtonUp   ( true, false, true  ) } )
-        vrController2.addEventListener('selectstart',  () => { onHandButtonDown ( true, false, false ) } )
-        vrController2.addEventListener('selectend',    () => { onHandButtonUp   ( true, false, false ) } )
-        vrController1.addEventListener('squeezestart', () => { onHandButtonDown ( false, true, true  ) } )
-        vrController1.addEventListener('squeezeend',   () => { onHandButtonUp   ( false, true, true  ) } )
-        vrController2.addEventListener('squeezestart', () => { onHandButtonDown ( false, true, false ) } )
-        vrController2.addEventListener('squeezeend',   () => { onHandButtonUp   ( false, true, false ) } )
+        vrController2.addEventListener('selectstart',  () => { onHandButtonDown ( true, false, true  ) } ) //log(`0`) })
+        vrController2.addEventListener('selectend',    () => { onHandButtonUp   ( true, false, true  ) } ) //log(`1`) })
+        vrController1.addEventListener('selectstart',  () => { onHandButtonDown ( true, false, false ) } ) //log(`2`) })
+        vrController1.addEventListener('selectend',    () => { onHandButtonUp   ( true, false, false ) } ) //log(`3`) })
+        vrController2.addEventListener('squeezestart', () => { onHandButtonDown ( false, true, true  ) } ) //log(`4`) })
+        vrController2.addEventListener('squeezeend',   () => { onHandButtonUp   ( false, true, true  ) } ) //log(`5`) })
+        vrController1.addEventListener('squeezestart', () => { onHandButtonDown ( false, true, false ) } ) //log(`6`) })
+        vrController1.addEventListener('squeezeend',   () => { onHandButtonUp   ( false, true, false ) } ) //log(`7`) })
 
         onEnterVrFirstTime = () => {
-
-            let controller1MatrixWorldOld = new THREE.Matrix4()
 
             scene.remove(hand1)
             scene.remove(hand2)
             hand1 = vrController1
             hand2 = vrController2
 
+            putButtonLabelsOnVrControllers()
+
             getHandDq = (dq, old = false) => {
-                dq.fromMat4(old ? controller1MatrixWorldOld : vrController1.matrixWorld)
+                dq.copy(vrController2.dq)
                 return dq
             }
 
+            //next task is to 
+
             updateHandMvs = () => {
 
+                vrController1.dq.fromPosQuat(vrController1.position, vrController1.quaternion)
+                vrController2.dq.fromPosQuat(vrController2.position, vrController2.quaternion)
+
                 handPositionOld.copy(handPosition)
-                controller1MatrixWorldOld.copy(vrController1.matrixWorld)
 
                 getHandDq(dq0, false)
-                dq0.sandwich(e123, handPosition)
+                // dq0.sandwich(e123, handPosition)
+                handPosition.pointFromGibbsVec(vrController2.position)
 
             }
 

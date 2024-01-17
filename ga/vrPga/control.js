@@ -54,22 +54,22 @@ function initControl() {
 
         // testCircuits()
 
-        let viz1 = new DqViz(0xFF0000)
-        snappables.push(viz1)
-        viz1.dq.copy(Translator(.4, 0., 0.))
-        comfortablePos(-.6, viz1.markupPos,0.)
+        // let viz1 = new DqViz(0xFF0000)
+        // snappables.push(viz1)
+        // viz1.dq.copy(Translator(.2, 0., 0.))
+        // comfortablePos(-.3, viz1.markupPos,0.)
 
-        let viz2 = new DqViz(0xFF00FF)
-        snappables.push(viz2)
-        viz2.dq.copy(Translator(0., .3, 0.))
-        comfortablePos( 0., viz2.markupPos, 0.1)
+        // let viz2 = new DqViz(0xFF00FF)
+        // snappables.push(viz2)
+        // viz2.dq.copy(Translator(0., .15, 0.))
+        // comfortablePos( 0., viz2.markupPos, 0.1)
 
-        let viz3 = new DqViz()
-        snappables.push(viz3)
-        comfortablePos( .6, viz3.markupPos, 0.)
-        viz3.affecters[0] = viz2
-        viz3.affecters[1] = viz1
-        viz3.affecters[2] = 1
+        // let viz3 = new DqViz()
+        // snappables.push(viz3)
+        // comfortablePos( .3, viz3.markupPos, 0.)
+        // viz3.affecters[0] = viz2
+        // viz3.affecters[1] = viz1
+        // viz3.affecters[2] = 1
 
         // let viz4 = new DqViz()
         // snappables.push(viz4)
@@ -168,7 +168,7 @@ function initControl() {
     }
 
     handleSculpting = () => {
-        if (sclptableBeingModified && simulatingPaintingHand) {
+        if (sclptableBeingModified) {
             hidePalette()
             sclptableBeingModified.brushStroke()
         }
@@ -196,7 +196,7 @@ function initControl() {
         else if(isLeftButton) {
             //this is about creation, depends on hand
             if (isPaintingHand) {
-                
+
                 if ( highlightedSclptable !== null )
                     sclptableBeingModified = highlightedSclptable
                 else

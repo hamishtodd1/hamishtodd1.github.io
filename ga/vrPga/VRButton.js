@@ -10,6 +10,9 @@ function initVrButton() {
                 let currentSession = null;
 
                 async function onSessionStarted(session) {
+
+                    onEnterVrFirstTime()
+
                     session.addEventListener('end', onSessionEnded);
                     await renderer.xr.setSession(session);
                     button.textContent = 'EXIT VR';
@@ -46,8 +49,6 @@ function initVrButton() {
                         // be requested separately.)
                         const sessionInit = { optionalFeatures: ['local-floor', 'bounded-floor', 'hand-tracking', 'layers'] };
                         navigator.xr.requestSession('immersive-vr', sessionInit).then(onSessionStarted);
-
-                        onEnterVrFirstTime()
                     } else {
                         currentSession.end();
                     }

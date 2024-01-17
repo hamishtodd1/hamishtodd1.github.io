@@ -4,6 +4,12 @@
         Grab dq and you're holding the markupPos; other hand modifies what it does
         Gotta be experimenting!
 
+    New idea:
+        "Grab" button is versors
+
+    AND YOU NEED TO STANDARDIZE WHICH HAND IS WHICH!
+    "Simulating painting hand" belongs in mouse section of hands.js only
+
     TODO for "show" demo:
         More operations and snapping should be accurate (snap button?)
         Make a properly rigged puppet! A tentacle or something

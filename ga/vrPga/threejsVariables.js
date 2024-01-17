@@ -7,7 +7,7 @@ const scene = new THREE.Scene()
 
 //quest 2 is 96 degrees, we lop a bit off
 function defaultCamera() {
-    return new THREE.PerspectiveCamera(92, window.innerWidth / window.innerHeight, 0.1, 100)
+    return new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 100)
 }
 let camera = defaultCamera()
 let container = document.createElement('div')
