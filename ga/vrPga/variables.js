@@ -1,31 +1,20 @@
-function sq(a) {
-	return a * a
-}
+
 const TAU = Math.PI * 2.
-const HS3 = Math.sqrt(3.) / 2.
-const PHI = (1. + Math.sqrt(5.)) / 2.
-const smallerInLarger = {}
 
-var frameDelta = 0.
-var frameCount = 0
-const log = console.log
-
-const debugUpdates = []
-
+let vizBeingModified = null
+let sclptableBeingModified = null
 let spectatorMode = null
-
-const obj3dsWithOnBeforeRenders = []
-
-const socket = io()
-
-let simulatingPaintingHand = true//false //true
-
+let simulatingPaintingHand = false //true
 const snappables = []
 const sclptables = []
 
-const eps = .0001 //not been tweaked for much yet so have at it
-
-let inVr = false
+let frameDelta = 0.
+let frameCount = 0
+const log = console.log
+const debugUpdates = []
+const obj3dsWithOnBeforeRenders = []
+const socket = io()
+const eps = .0001 //not been tweaked for anything yet, so feel free to change
 
 let operators = [
 	`mul`, `mulReverse`, `add`, `sandwich`,

@@ -5,10 +5,8 @@
         Gotta be experimenting!
 
     TODO for "show" demo:
-        More operations and snapping should be accurate (possibly extra controls)
-        Sculptable- and Viz- deleting button
+        More operations and snapping should be accurate (snap button?)
         Make a properly rigged puppet! A tentacle or something
-            And if you want more than that, eg planes/pts or copying, decide AFTER you've tried that!
         Circuits better
     Jon demo:
         Levels
@@ -21,6 +19,7 @@
         Some levels!!!!!!
         Are you using the measurer for anything? If so, some numbers...
     Beyond:
+        Flesh colors
         Maybe want a way for a sclptable to be affected by other buttons during the show?
             Have a button that does multiplcation by 0 or 1. And maybe a point that's always present which goes up and down when you do that
         Get rid of "current hand position"; it stinks of the origin
@@ -108,6 +107,7 @@ async function init() {
 
             handleSculpting()
             handleDqModification()
+            updateButtonLabelVisibilities()
             
             snappables.forEach(s => {
                 s.updateFromAffecters()

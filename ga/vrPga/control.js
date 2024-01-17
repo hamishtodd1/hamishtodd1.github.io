@@ -6,7 +6,7 @@
         Hovering a thing shows its affecters
         Sculpting can create new things or add to what's already there, depending on whether your paint is touching it
         You can hold two and it shows you different ones you could create from them
-        Change the way your hand movement changes heldViz
+        Change the way your hand movement changes vizBeingModified
             You grab the thing, and its arrow moves such that its tip is where you just grabbed. It is frozen
             You move your hand, and that creates a further, separate arrow
             AND another arrow which is your current motion composed
@@ -91,32 +91,7 @@ function initControl() {
         // }
     }
 
-    {
-
-        let labelsOn1 = {
-            "grab": null, "paint": null,                           //buttons you hold
-            "delete": null, "change brush" : null, "undo"  : null, //not available while holding
-            "duplicate": null }                                    //only if you've grabbed something
-        let labelsOn2 = {
-            "grab": null, "versor": null,                          //buttons you hold
-            "delete": null, "change versor": null, "record": null, //not available while holding
-            "snap"     : null }                                    //only if you've grabbed something
-        //last two there are contingent on having just 
-        log(labelsOn2)
-        let both = [labelsOn1, labelsOn2]
-        both.forEach((labels, isHand1) => {
-            let hand = (isHand1 ? hand1 : hand2)
-            Object.keys(labels).forEach((labelName, i) => {
-                let label = text(labelName, false, "#000000")
-                label.scale.multiplyScalar(.015)
-                label.position.z = .01
-                label.position.y = .02 * (i-3)
-                hand.add(label)
-                labels[labelName] = label
-            })
-        })
-        // labelsOn1["grab"].position.x = -.02
-    }
+    initButtonLabels()
 
     // document.addEventListener(`mouseRewind`, () => { log("yo") })
 
@@ -132,8 +107,7 @@ function initControl() {
         backedUpMsgs.push(msg)
     })
 
-    let heldViz = null
-    let sclptableBeingSculpted = null
+    
     let highlightedViz = null
     let highlightedSclptable = null
 
@@ -161,7 +135,7 @@ function initControl() {
 
     updateHighlighting = () => {
         
-        // let dqVizWithCircuitShowing = highlightedViz || heldViz
+        // let dqVizWithCircuitShowing = highlightedViz || vizBeingModified
         // if (dqVizWithCircuitShowing === null)
         //     hideCircuit()
         // else
@@ -194,16 +168,13 @@ function initControl() {
     }
 
     handleSculpting = () => {
-        if (sclptableBeingSculpted && simulatingPaintingHand) {
+        if (sclptableBeingModified && simulatingPaintingHand) {
             hidePalette()
-            sclptableBeingSculpted.brushStroke()
+            sclptableBeingModified.brushStroke()
         }
     }
 
     onHandButtonDown = (isLeftButton, isRightButton, isPaintingHand) => {
-
-        if(inVr)
-            debugSphere.position.set(0.,1.,0.)
 
         if (isRightButton) { //Grabbing is generic across both. Also you can grab two things eventually?
             //actually this was meant to be about lasers
@@ -211,33 +182,35 @@ function initControl() {
 
             let nearest = getNearestThingToHand()
 
-            heldViz = nearest.constructor === DqViz ? nearest : nearest.dqViz
+            vizBeingModified = nearest.constructor === DqViz ? nearest : nearest.dqViz
             
-            oldViz.dq.copy(heldViz.dq)
-            oldViz.markupPos.copy(heldViz.markupPos)
+            oldViz.dq.copy(vizBeingModified.dq)
+            oldViz.markupPos.copy(vizBeingModified.markupPos)
             oldViz.dq.sandwich(oldViz.markupPos, dispViz.markupPos)
             dispViz.dq.copy(oneDq)
             getHandDq(handDqOnGrab)
 
-            if (heldViz.dq.isScalarMultipleOf(oneDq))
-                heldViz.markupPos.copy(handPosition)
+            if (vizBeingModified.dq.isScalarMultipleOf(oneDq))
+                vizBeingModified.markupPos.copy(handPosition)
         }
         else if(isLeftButton) {
             //this is about creation, depends on hand
             if (isPaintingHand) {
                 
                 if ( highlightedSclptable !== null )
-                    sclptableBeingSculpted = highlightedSclptable
+                    sclptableBeingModified = highlightedSclptable
                 else
-                    sclptableBeingSculpted = new Sclptable()
+                    sclptableBeingModified = new Sclptable()
             }
             else {
-                heldViz = new DqViz()
-                snappables.push(heldViz)
-                heldViz.markupPos.copy(handPosition)
+                vizBeingModified = new DqViz()
+                snappables.push(vizBeingModified)
+                vizBeingModified.markupPos.copy(handPosition)
 
                 getHandDq(handDqOnGrab)
             }
+
+            toggleButtonsVisibility(isPaintingHand)
         }
     }
 
@@ -258,32 +231,32 @@ function initControl() {
 
     handleDqModification = () => {
 
-        if (heldViz !== null) {
-            // highlightedViz = heldViz
+        if (vizBeingModified !== null) {
+            // highlightedViz = vizBeingModified
             highlightedViz = null
 
             let handDqCurrent = getHandDq(dq0)
             handDqCurrent.mulReverse(handDqOnGrab, dispViz.dq)
-            dispViz.dq.mul(oldViz.dq, heldViz.dq)
-            heldViz.dq.normalize()
-            // heldViz.dq.log()
+            dispViz.dq.mul(oldViz.dq, vizBeingModified.dq)
+            vizBeingModified.dq.normalize()
+            // vizBeingModified.dq.log()
 
             if(showMarkupVizes) {
                 dispViz.visible = !dispViz.dq.equals(oneDq)
                 oldViz.visible = dispViz.visible
             }
             
-            // snap(heldViz)
+            // snap(vizBeingModified)
 
             socket.emit("snappable", { 
-                dq: heldViz.dq,
-                markupPos: heldViz.markupPos,
-                i: snappables.indexOf(heldViz) })
+                dq: vizBeingModified.dq,
+                markupPos: vizBeingModified.markupPos,
+                i: snappables.indexOf(vizBeingModified) })
 
         }
         else {
 
-            if (sclptableBeingSculpted !== null)
+            if (sclptableBeingModified !== null)
                 highlightedViz = null
             else {
                 let [nearestSnappable, nearestSnappableDist] = getNearestSnappableToPt(handPosition, false)
@@ -302,22 +275,26 @@ function initControl() {
     }
 
     onHandButtonUp = (isLeftButton, isRightButton, isPaintingHand) => {
-        if (isPaintingHand && isLeftButton) {
-            if (sclptableBeingSculpted !== null)
-                sclptableBeingSculpted.emitSelf()
-            sclptableBeingSculpted = null
-        }
-        else if (heldViz !== null && (isRightButton || isLeftButton)) { //remember middle button exists
 
-            if (heldViz.sclptable) {
-                heldViz.dq
+        if(isLeftButton)
+            toggleButtonsVisibility(isPaintingHand)
+
+        if (isPaintingHand && isLeftButton) {
+            if (sclptableBeingModified !== null)
+                sclptableBeingModified.emitSelf()
+            sclptableBeingModified = null
+        }
+        else if (vizBeingModified !== null && (isRightButton || isLeftButton)) { //remember middle button exists
+
+            if (vizBeingModified.sclptable) {
+                vizBeingModified.dq
                     .getReverse(dq0)
                     .sandwich(
-                        heldViz.dq.sandwich(heldViz.sclptable.com, fl0),
-                        heldViz.markupPos)
+                        vizBeingModified.dq.sandwich(vizBeingModified.sclptable.com, fl0),
+                        vizBeingModified.markupPos)
             }
 
-            heldViz = null
+            vizBeingModified = null
 
             dispViz.visible = false
             oldViz.visible = false

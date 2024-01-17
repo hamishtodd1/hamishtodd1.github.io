@@ -1,3 +1,26 @@
+function sq(a) {
+    return a * a
+}
+
+function makeMovableWithKeyboard(thing) {
+    document.addEventListener(`keydown`, e => {
+        if (e.key === "ArrowUp")
+            thing.y += .0025
+        if (e.key === "ArrowDown")
+            thing.y -= .0025
+        if (e.key === "ArrowRight")
+            thing.x += .0025
+        if (e.key === "ArrowLeft")
+            thing.x -= .0025
+        if (e.key === "[")
+            thing.z += .0025
+        if (e.key === "]")
+            thing.z -= .0025
+
+        log(thing)
+    })
+}
+
 function keyToAxes(eventKey, target) {
     if (eventKey === "ArrowUp")
         target.set(0., 1.)

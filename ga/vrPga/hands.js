@@ -8,7 +8,7 @@ function initHands() {
     hand2 = new DqMesh(standinHandGeo, new THREE.MeshPhongMaterial({ color: 0x0000FF }))
     scene.add(hand1)
     scene.add(hand2)
-    e123.dqTo(comfortablePos(0., fl0, -.35), hand1.dq)
+    e123.dqTo(comfortablePos(0., fl0, -.42), hand1.dq)
 
     let joystickMovement = new THREE.Vector2()
 

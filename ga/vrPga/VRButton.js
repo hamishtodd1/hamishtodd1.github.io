@@ -48,7 +48,6 @@ function initVrButton() {
                         navigator.xr.requestSession('immersive-vr', sessionInit).then(onSessionStarted);
 
                         onEnterVrFirstTime()
-                        inVr = true
                     } else {
                         currentSession.end();
                     }
