@@ -55,24 +55,20 @@ function initControl() {
         // testCircuits()
 
         // let viz1 = new DqViz(0xFF0000)
-        // snappables.push(viz1)
         // viz1.dq.copy(Translator(.2, 0., 0.))
         // comfortablePos(-.3, viz1.markupPos,0.)
 
         // let viz2 = new DqViz(0xFF00FF)
-        // snappables.push(viz2)
         // viz2.dq.copy(Translator(0., .15, 0.))
         // comfortablePos( 0., viz2.markupPos, 0.1)
 
         // let viz3 = new DqViz()
-        // snappables.push(viz3)
         // comfortablePos( .3, viz3.markupPos, 0.)
         // viz3.affecters[0] = viz2
         // viz3.affecters[1] = viz1
         // viz3.affecters[2] = 1
 
         // let viz4 = new DqViz()
-        // snappables.push(viz4)
         // viz4.markupPos.point(-.1, 1.2, 0.)
         // let axis = new Dq()
         // axis[4] = 1.
@@ -96,205 +92,161 @@ function initControl() {
     // document.addEventListener(`mouseRewind`, () => { log("yo") })
 
     let showMarkupVizes = false
-    let oldViz = new DqViz(0xFF0000, true)
+    let oldViz  = new DqViz(0xFF0000, true, true)
     oldViz.visible = false
-    let dispViz = new DqViz(0xFF0000, true)
+    let dispViz = new DqViz(0xFF0000, true, true)
     dispViz.visible = false
-    let handDqOnGrab = new Dq()
+    let heldDqOnGrab = new Dq()
 
-    let backedUpMsgs = []
-    socket.on( "snappable", msg => {
-        backedUpMsgs.push(msg)
-    })
+    let highlightee = null
+    let vizBeingModified = null
+    let holdIsWithRight = false
+    let paintHandIsRight = -1
+    let grabbHandIsRight  = -1
+    let oddVersor = false
 
-    
-    let highlightedViz = null
-    let highlightedSclptable = null
+    let grabbee = null
+    let paintee = null
 
-    function interdependencyExists(a, b) {
-        return a.dependsOn(b) || b.dependsOn(a)
-    }
+    onHandButtonDown = (isTriggerButton, isSideButton, isRightHand) => {
 
-    deleteSelected = () => {
+        //make it so paintingButtonHeld is defined
 
-        if (highlightedSclptable !== null) {
-            let i = snappables.indexOf(highlightedSclptable)
-            if (i !== -1)
-                snappables.splice(i, 1)
-            highlightedSclptable.dispose()
-            highlightedSclptable = null
-        }
-        else if (highlightedViz !== null) {
-            let i = sclptables.indexOf(highlightedViz)
-            if (i !== -1)
-                sclptables.splice(i, 1)
-            highlightedViz.dispose()
-            highlightedViz = null
-        }
-    }
-
-    updateHighlighting = () => {
+        //trigger -> nothing -> paint
+        //trigger -> other side -> even versor
+        //side -> other trigger -> paint
+        //side -> other side -> odd versor (later)
+        //side -> nothing -> even versor
         
-        // let dqVizWithCircuitShowing = highlightedViz || vizBeingModified
-        // if (dqVizWithCircuitShowing === null)
-        //     hideCircuit()
-        // else
-        //     showCircuit(dqVizWithCircuitShowing)
+        if(paintee !== null && isTriggerButton )
+            return //huh, or maybe you could paint with both
+        if(isSideButton && grabbee === null && paintHandIsRight && isRightHand)
+            return
 
-        sclptables.forEach(sclptable => {
-            sclptable.boxHelper.visible = sclptable === highlightedSclptable
-            sclptable.dqViz.visible = 
-                sclptable.boxHelper.visible ? true :
-                highlightedViz === null ? false :
-                interdependencyExists(sclptable.dqViz, highlightedViz)
-            sclptable.dqViz.boxHelper.visible = sclptable.dqViz === highlightedViz  
-        })
+        if (isSideButton && grabbee === null) {
 
-        snappables.forEach(snappable => {
+            grabbHandIsRight = isRightHand
 
-            if(snappable.sclptable)
-                return
+            if (highlightee && !paintee)
+                grabbee = highlightee
+            else if( paintee )
+                grabbee = paintee
+            else {
+                grabbee = new DqViz()
+                grabbee.markupPos.copy(handPosition)
+            }
 
-            snappable.boxHelper.visible = snappable === highlightedViz
-        })
-
-        snappables.forEach(snappable => {
-            snappable.circuitVisible = 
-                highlightedViz === null ? 
-                    false : 
-                    snappable === highlightedViz ||
-                    interdependencyExists(snappable, highlightedViz)
-        })
-    }
-
-    handleSculpting = () => {
-        if (sclptableBeingModified) {
-            hidePalette()
-            sclptableBeingModified.brushStroke()
-        }
-    }
-
-    onHandButtonDown = (isLeftButton, isRightButton, isPaintingHand) => {
-
-        if (isRightButton) { //Grabbing is generic across both. Also you can grab two things eventually?
-            //actually this was meant to be about lasers
-            //maybe in mouse mode you should keep the controller in the bottom right and just be pointing it
-
-            let nearest = getNearestThingToHand()
-
-            vizBeingModified = nearest.constructor === DqViz ? nearest : nearest.dqViz
+            if (grabbee.dq.isScalarMultipleOf(oneDq))
+                grabbee.markupPos.copy(handPosition)
             
-            oldViz.dq.copy(vizBeingModified.dq)
-            oldViz.markupPos.copy(vizBeingModified.markupPos)
+            oldViz.dq.copy(grabbee.dq)
+            oldViz.markupPos.copy(grabbee.markupPos)
             oldViz.dq.sandwich(oldViz.markupPos, dispViz.markupPos)
             dispViz.dq.copy(oneDq)
-            getHandDq(handDqOnGrab)
-
-            if (vizBeingModified.dq.isScalarMultipleOf(oneDq))
-                vizBeingModified.markupPos.copy(handPosition)
+            getHandDq(heldDqOnGrab)
         }
-        else if(isLeftButton) {
-            //this is about creation, depends on hand
-            if (isPaintingHand) {
+        else if (isSideButton && grabbee !== null) {
 
-                if ( highlightedSclptable !== null )
-                    sclptableBeingModified = highlightedSclptable
-                else
-                    sclptableBeingModified = new Sclptable()
-            }
-            else {
-                vizBeingModified = new DqViz()
-                snappables.push(vizBeingModified)
-                vizBeingModified.markupPos.copy(handPosition)
+            oddVersor = true
 
-                getHandDq(handDqOnGrab)
-            }
-
-            toggleButtonsVisibility(isPaintingHand)
         }
+        else if(isTriggerButton) {
+
+            paintHandIsRight = isRightHand
+
+            let isHeldInOtherHand = grabbee && (
+                ( grabbHandIsRight && !isRightHand) ||
+                (!grabbHandIsRight &&  isRightHand) )
+            if (isHeldInOtherHand) {
+                vizPaintingOn = grabbee
+            }
+            else if(!grabbee) {
+                // figure out which one to paint on
+                paintee = highlightee
+                if(paintee === null) {
+                    paintee = new DqViz()
+                    paintee.sclptable = new Sclptable()
+                }
+            }
+
+        }
+
     }
 
-    handleDqMsgs = () => {
-        backedUpMsgs.forEach((msg) => {
-            if (snappables[msg.i] === undefined)
-                snappables[msg.i] = new DqViz()
+    modificationSculptingHighlighting = () => {
+        
+        setLabels(paintee !== null, grabbee !== null, paintHandIsRight, grabbHandIsRight)
 
-            for (let i = 0; i < 8; ++i) {
-                snappables[msg.i].dq[i] = msg.dq[i]
-                snappables[msg.i].markupPos[i] = msg.markupPos[i]
+        //highlighting
+        if (grabbee === null && paintee === null) {
+
+            let [nearestSnappable, nearestSnappableDist] = getNearestSnappableToPt(handPosition, false)
+            let [nearestSclptable, nearestSclptableDist] = getNearestSclptableToPt(handPosition)
+
+            if(Math.min(nearestSnappableDist, nearestSclptableDist) > .2) {
+                highlightee = null
+                return
             }
-        })
-        for (let i = 0; i < backedUpMsgs.length; ++i)
-            delete backedUpMsgs[i]
-        backedUpMsgs.length = 0
-    }
 
-    handleDqModification = () => {
-
-        if (vizBeingModified !== null) {
-            // highlightedViz = vizBeingModified
-            highlightedViz = null
-
-            let handDqCurrent = getHandDq(dq0)
-            handDqCurrent.mulReverse(handDqOnGrab, dispViz.dq)
-            dispViz.dq.mul(oldViz.dq, vizBeingModified.dq)
-            vizBeingModified.dq.normalize()
-            // vizBeingModified.dq.log()
-
-            if(showMarkupVizes) {
-                dispViz.visible = !dispViz.dq.equals(oneDq)
-                oldViz.visible = dispViz.visible
-            }
-            
-            // snap(vizBeingModified)
-
-            socket.emit("snappable", { 
-                dq: vizBeingModified.dq,
-                markupPos: vizBeingModified.markupPos,
-                i: snappables.indexOf(vizBeingModified) })
-
+            if (nearestSnappableDist < nearestSclptableDist)
+                highlightee = nearestSnappable
+            else if (nearestSclptable !== null)
+                highlightee = nearestSclptable.dqViz
         }
         else {
 
-            if (sclptableBeingModified !== null)
-                highlightedViz = null
-            else {
-                let [nearestSnappable, nearestSnappableDist] = getNearestSnappableToPt(handPosition, false)
-                let [nearestSclptable, nearestSclptableDist] = getNearestSclptableToPt(handPosition)
+            //grabbing
+            if (grabbee !== null) {
+                highlightee = grabbee
 
-                if (nearestSnappableDist < nearestSclptableDist) {
-                    highlightedViz = nearestSnappable
-                    highlightedSclptable = null
+                let handDqCurrent = getHandDq(dq0)
+                handDqCurrent.mulReverse(heldDqOnGrab, dispViz.dq)
+                dispViz.dq.mul(oldViz.dq, grabbee.dq)
+                grabbee.dq.normalize()
+                
+                snap(grabbee)
+
+                if (showMarkupVizes) {
+                    dispViz.visible = !dispViz.dq.equals(oneDq)
+                    oldViz.visible = dispViz.visible
                 }
-                else {
-                    highlightedSclptable = nearestSclptable
-                    highlightedViz = null
-                }
+
+                socket.emit("snappable", {
+                    dq: grabbee.dq,
+                    markupPos: grabbee.markupPos,
+                    i: snappables.indexOf(grabbee)
+                })
+            }
+
+            //painting
+            if(paintee !== null) {
+                highlightee = paintee
+                hidePalette()
+                paintee.sclptable.brushStroke()
             }
         }
+
     }
 
-    onHandButtonUp = (isLeftButton, isRightButton, isPaintingHand) => {
+    onHandButtonUp = (isTriggerButton, isSideButton, isRightHand) => {
 
-        if(isLeftButton)
-            toggleButtonsVisibility(isPaintingHand)
-
-        if (isPaintingHand && isLeftButton) {
-            if (sclptableBeingModified !== null)
-                sclptableBeingModified.emitSelf()
-            sclptableBeingModified = null
+        if (paintee !== null && isTriggerButton && ((isRightHand && paintHandIsRight) || (!isRightHand && !paintHandIsRight))) {
+            // toggleButtonsVisibility()
+            paintee.sclptable.emitSelf()
+            paintee = null
         }
-        else if (vizBeingModified !== null && (isRightButton || isLeftButton)) { //remember middle button exists
 
-            if (vizBeingModified.sclptable) {
-                vizBeingModified.dq
+        if (grabbee && isSideButton && ((isRightHand && holdIsWithRight) || (!isRightHand && !holdIsWithRight))) {
+
+            if (grabbee.sclptable) {
+                grabbee.dq
                     .getReverse(dq0)
                     .sandwich(
-                        vizBeingModified.dq.sandwich(vizBeingModified.sclptable.com, fl0),
-                        vizBeingModified.markupPos)
+                        grabbee.dq.sandwich(grabbee.sclptable.com, fl0),
+                        grabbee.markupPos)
             }
 
-            vizBeingModified = null
+            grabbee = null
 
             dispViz.visible = false
             oldViz.visible = false
@@ -305,12 +257,56 @@ function initControl() {
     // Helper functions //
     //////////////////////
 
+    function interdependencyExists(a, b) {
+        return a.dependsOn(b) || b.dependsOn(a)
+    }
+
+    deleteHeld = () => {
+
+        if (vizBeingModified !== null) {
+            vizBeingModified.dispose()
+            vizBeingModified = null
+        }
+    }
+
+    updateHighlighting = () => {
+
+        // let dqVizWithCircuitShowing = highlightee || vizBeingModified
+        // if (dqVizWithCircuitShowing === null)
+        //     hideCircuit()
+        // else
+        //     showCircuit(dqVizWithCircuitShowing)
+
+        if( vizBeingModified !== null)
+            highlightee = vizBeingModified
+
+        snappables.forEach( snappable => {
+
+            snappable.boxHelper.visible = snappable === highlightee
+
+            if (snappable.sclptable)
+                snappable.sclptable.boxHelper.visible = snappable.boxHelper.visible
+        })
+
+        snappables.forEach(snappable => {
+            snappable.circuitVisible =
+                highlightee === null ?
+                    false :
+                    snappable === highlightee ||
+                    interdependencyExists(snappable, highlightee)
+        })
+    }
+
     function getNearestSclptableToPt(pt) {
         
         let nearest = null
         let nearestDist = Infinity
 
-        sclptables.forEach(sclptable => {
+        snappables.forEach(snappable => {
+
+            let sclptable = snappable.sclptable
+            if (snappable.sclptable === null)
+                return
 
             if (sclptable.com[7] === 0.)
                 return
@@ -334,8 +330,7 @@ function initControl() {
         snappables.forEach(snappable => {
 
             if (!includeSculptables) {
-                let isAttachedToSclptable = sclptables.find( sc => sc.dqViz === snappable )
-                if (isAttachedToSclptable)
+                if (snappable.sclptable !== null)
                     return
             }
 
@@ -352,14 +347,14 @@ function initControl() {
         return [nearest, nearestDist]
     }
 
-    function getNearestThingToHand() {
+    function getNearestVizToHand() {
         let [nearestSnappable, nearestSnappableDist] = getNearestSnappableToPt(handPosition, true)
         let [nearestSclptable, nearestSclptableDist] = getNearestSclptableToPt(handPosition)
 
         if (nearestSnappableDist === Infinity && nearestSclptableDist === Infinity)
             return null
         else
-            return nearestSnappableDist < nearestSclptableDist ? nearestSnappable : nearestSclptable
+            return nearestSnappableDist < nearestSclptableDist ? nearestSnappable : nearestSclptable.dqViz
     }
 }
 

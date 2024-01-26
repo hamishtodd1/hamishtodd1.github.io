@@ -141,7 +141,10 @@ function initMultivectorWithoutDeclarations() {
         sandwichFl(b, target) {
             let intermediate = this.mulFl(b,  this.constructor === Fl ? newDq : newFl)
             let thisReverse = this.getReverse(this.constructor === Dq ? newDq : newFl)
-            return intermediate.mulDq(thisReverse, target)
+            intermediate.mulDq(thisReverse, target)
+            if (this.constructor === Dq )
+                target.multiplyScalar(-1., target)
+            return target
         }
 
         lerpSelf(b, alpha) {

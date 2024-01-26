@@ -2,11 +2,8 @@
 const TAU = Math.PI * 2.
 
 let vizBeingModified = null
-let sclptableBeingModified = null
 let spectatorMode = null
-let simulatingPaintingHand = false //true
 const snappables = []
-const sclptables = []
 
 let frameDelta = 0.
 let frameCount = 0

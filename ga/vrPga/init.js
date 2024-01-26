@@ -1,5 +1,5 @@
 /*
-    A relatively different approach is: one hand grabs a thing, other hand modifies
+    A relatively different approach is: one hand grabs a dq, other hand modifies
         Grab sclptable and other hand adds stuff to it
         Grab dq and you're holding the markupPos; other hand modifies what it does
         Gotta be experimenting!
@@ -7,17 +7,18 @@
     New idea:
         "Grab" button is versors
 
-    AND YOU NEED TO STANDARDIZE WHICH HAND IS WHICH!
-    "Simulating painting hand" belongs in mouse section of hands.js only
+
+    Actually, when you delete a sculptable, maybe it should only delete a part of it with one color
 
     TODO for "show" demo:
-        More operations and snapping should be accurate (snap button?)
         Make a properly rigged puppet! A tentacle or something
+            Bind pose inverses may be a problem :(((
+        More operations, and snapping should be accurate (snap button?)
         Circuits better
     Jon demo:
         Levels
-        "Undo". Should probably rewind "time"
-        Eyeballs, maybe faces, on vizes!
+        Undo
+        Eyeballs on vizes
         Wanna have gauging animations
         Grade selection is a "snap" sound
         Little lizard creatures that rate your animations, with different preferences
@@ -49,6 +50,11 @@
             But something else is now invisible 
             You can "scroll back", making your new thing invisible and the thing that just disappeared visible
             Put this on futureofcoding slack
+
+    Crazy zolly idea
+        You have an orthographic camera for the spectators
+        And things get transformed with some zolly on the snappeteer's side
+        So that you can have things appear very far away in a small space
         
     Philosophy
         If you have arrows you can put end-to-end, do you need gauges?
@@ -58,13 +64,16 @@
 
 async function init() {
 
+    let container = document.createElement('div')
+    document.body.appendChild(container)
+
     initDqMeshes()
     init31()
 
     initDqVizes()
     initFlVizes()
 
-    initCamera()
+    initCamera(container)
     initSurroundings()
 
     initHands()
@@ -73,6 +82,7 @@ async function init() {
     initSclptables()
     
     initSnapping()
+    initPotentialSpectatorReception()
     initControl()
 
     initCircuits()
@@ -111,9 +121,8 @@ async function init() {
             buttonWhileDowns()
             updatePalette()
 
-            handleSculpting()
-            handleDqModification()
-            updateButtonLabelVisibilities()
+            modificationSculptingHighlighting()
+            // updateButtonLabelVisibilities()
             
             snappables.forEach(s => {
                 s.updateFromAffecters()

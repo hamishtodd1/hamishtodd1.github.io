@@ -153,12 +153,11 @@ function initDqVizes() {
                 y = 1.001 + (y-shaftSegments-1)/headSegments
             attr.array[i * 3 + 1] = y
         }
-        log(attr.array.length)
         var extraShaftGeo = new THREE.CylinderGeometry(arrowRadius, arrowRadius, 2000., radialSegments, 1, true)
         extraShaftGeo.translate(0.,1000.,0.)
     }
     
-    let rotAxisRadius = .02
+    let rotAxisRadius = .006
     let trnAxisRadius = .12
     let rotAxisGeo = new THREE.CylinderGeometry(rotAxisRadius, rotAxisRadius, camera.far * 10., 5, 1, true)
     let trnAxisGeo = new THREE.CylinderGeometry(trnAxisRadius, trnAxisRadius, camera.far * 10., 5, 1, true)
@@ -172,11 +171,13 @@ function initDqVizes() {
     let cupBox = new THREE.Box3()
     class DqViz extends THREE.Group {
         
-        constructor(col = dqCol, transparent = false) {
+        constructor(col = dqCol, transparent = false, omitFromSnappables = false) {
 
             super()
             scene.add(this)
             this.dq = new Dq() //better to say mv really, disambiguate from dqMeshes
+            if(!omitFromSnappables)
+                snappables.push(this)
 
             let axisMat = new THREE.MeshPhongMaterial({
                 color: col,
@@ -369,6 +370,22 @@ function initDqVizes() {
 
         dispose() {
 
+            if( snappables.indexOf(this) !== -1) {
+
+                let i = snappables.indexOf(this)
+
+                if (spectatorMode === false)
+                    socket.emit(`disposeSnappable`, { i })
+
+                snappables.splice(i, 1)
+            }
+
+            if(this.sclptable !== null) {
+                let s = this.sclptable
+                this.sclptable = null
+                s.dispose()
+            }
+
             while(this.children.length > 0) {
                 let child = this.children[this.children.length - 1]
                 this.remove(child)
@@ -498,7 +515,7 @@ function initDqVizes() {
     }
 
     debugDqs = [
-        new DqViz(), new DqViz()
+        new DqViz(0xFF0000, false, true), new DqViz(0xFF0000, false, true)
     ]
     debugDqs.forEach(ddq => {
         ddq.dq.zero()

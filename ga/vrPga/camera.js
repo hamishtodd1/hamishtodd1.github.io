@@ -1,15 +1,15 @@
-function initCamera() {
+function initCamera(container) {
 
-    let artistDeskAngle = 40. * (TAU / 360.) //cursory googling says artists seem to have 30-55 degrees
-    let comfortableLookAngle = TAU/4. - artistDeskAngle //downwards from looking directly forward
-    let comfortabledistance = .3 //from personal measurement, between 15cm and 40cm
+    const artistDeskAngle = 40. * (TAU / 360.) //cursory googling says artists seem to have 30-55 degrees
+    const comfortableLookAngle = TAU/4. - artistDeskAngle //downwards from looking directly forward
+    const comfortabledistance = .3 //from personal measurement, between 15cm and 40cm
     
-    let lookDownRotationAxis = new Dq()
+    const lookDownRotationAxis = new Dq()
     e23.addScaled(e03,-1.2,lookDownRotationAxis)
     lookDownRotationAxis.multiplyScalar(0.5*comfortableLookAngle, lookDownRotationAxis)
-    let lookDownRotation = lookDownRotationAxis.exp(new Dq())
+    const lookDownRotation = lookDownRotationAxis.exp(new Dq())
     
-    let posUnrotated = new Fl()
+    const posUnrotated = new Fl()
     comfortablePos = ( x, target, extraDist = 0. ) => {
         posUnrotated.point(x, 1.2, -(comfortabledistance + extraDist), 1.)
         return lookDownRotation.sandwich( posUnrotated, target )
@@ -45,7 +45,7 @@ function initCamera() {
     let frameQuatHorizontal = new Dq().fromUnitAxisAndSeparation(e31, -fovHorizontal / 2. * (TAU / 360.) )
     let frameQuatVertical   = new Dq().fromUnitAxisAndSeparation(e23,    -camera.fov / 2. * (TAU / 360.) )
 
-    let frustumUntransformed = {}
+    const frustumUntransformed = {}
     for (let planeName in camera.frustum)
         frustumUntransformed[planeName] = new Fl()
 

@@ -4,11 +4,11 @@ function initHands() {
     handPositionOld = new Fl().copy(e123)
 
     let standinHandGeo = new THREE.BoxGeometry(.075,.075,.075)
-    hand1 = new DqMesh(standinHandGeo, new THREE.MeshPhongMaterial({ color: 0x00FF00 }))
-    hand2 = new DqMesh(standinHandGeo, new THREE.MeshPhongMaterial({ color: 0x0000FF }))
-    scene.add(hand1)
-    scene.add(hand2)
-    e123.dqTo(comfortablePos(0., fl0, -.42), hand1.dq)
+    handRight = new DqMesh(standinHandGeo, new THREE.MeshPhongMaterial({ color: 0x00FF00 }))
+    handLeft = new DqMesh(standinHandGeo, new THREE.MeshPhongMaterial({ color: 0x0000FF }))
+    scene.add(handRight)
+    scene.add(handLeft)
+    e123.dqTo(comfortablePos(0., fl0, -.42), handRight.dq)
 
     let joystickMovement = new THREE.Vector2()
 
@@ -16,17 +16,25 @@ function initHands() {
     // Mouse //
     ///////////
     {
+        let simulatingRightHand = false
+
         function mouseControlKeyEvents(event) {
-            if (event.key === ` `)
-                simulatingPaintingHand = !simulatingPaintingHand
+            if (event.key === ` `) {
+                
+                onHandButtonUp(true, false, simulatingRightHand)
+                onHandButtonUp(false, true, simulatingRightHand)
+
+                simulatingRightHand = !simulatingRightHand
+            }
+
             if (event.key === "6" && event.ctrlKey) //mouse rewind
-                deleteSelected()
+                deleteHeld()
             // if (event.key === "5" && event.ctrlKey) //mouse fast forward
             //     document.dispatchEvent(new Event(`mouseFastForward`))
 
-            let wasJoystickMovement = keyToAxes(event.key, joystickMovement)
-            if (wasJoystickMovement && simulatingPaintingHand)
-                updatePaletteFromJoystickMovement(joystickMovement)
+            let isJoystickMovement = keyToAxes(event.key, joystickMovement)
+            if (isJoystickMovement )
+                updatePaletteFromJoystickMovement( joystickMovement, simulatingRightHand ? handRight : handLeft )
         }
         document.addEventListener(`keydown`, mouseControlKeyEvents)
 
@@ -45,10 +53,10 @@ function initHands() {
             workingPlane.meet(rayToMouse, handPosition)
             handPosition.normalize()
 
-            if (simulatingPaintingHand)
-                getHandDq(hand1.dq, false)
+            if (simulatingRightHand)
+                getHandDq(handRight.dq, false)
             else
-                getHandDq(hand2.dq, false)
+                getHandDq(handLeft.dq, false)
 
         }
 
@@ -113,12 +121,12 @@ function initHands() {
         function onMouseButtonDown(event) {
             let isLeftButton = event.button === 0
             let isRightButton = event.button === 2
-            onHandButtonDown(isLeftButton, isRightButton, simulatingPaintingHand)
+            onHandButtonDown(isLeftButton, isRightButton, simulatingRightHand)
         }
         function onMouseButtonUp(event) {
             let isLeftButton = event.button === 0
             let isRightButton = event.button === 2
-            onHandButtonUp(isLeftButton, isRightButton, simulatingPaintingHand)
+            onHandButtonUp(isLeftButton, isRightButton, simulatingRightHand)
         }
         document.addEventListener("pointerdown", onMouseButtonDown )
         document.addEventListener("pointerup", onMouseButtonUp )
@@ -145,12 +153,12 @@ function initHands() {
         line.scale.z = 5
 
         //yes, you need these, and you add objects to them
-        let vrController1 = renderer.xr.getController(0)
-        let vrController2 = renderer.xr.getController(1)
-        vrController1.dq = new Dq()
-        vrController2.dq = new Dq()
-        vrController1.add(line.clone())
-        vrController2.add(line.clone())
+        let vrControllerRight = renderer.xr.getController(0)
+        let vrControllerLeft = renderer.xr.getController(1)
+        vrControllerRight.dq = new Dq()
+        vrControllerLeft.dq = new Dq()
+        vrControllerRight.add(line.clone())
+        vrControllerLeft.add(line.clone())
 
         //"grips" are needed for the appearance, but their transforms are weird, do not use them
         const controllerModelFactory = new XRControllerModelFactory()
@@ -160,46 +168,44 @@ function initHands() {
         controllerGrip2.add(controllerModelFactory.createControllerModel(controllerGrip2))
 
         //Responds a bit weirdly
-        vrController2.addEventListener('selectstart',  () => { onHandButtonDown ( true, false, true  ) } ) //log(`0`) })
-        vrController2.addEventListener('selectend',    () => { onHandButtonUp   ( true, false, true  ) } ) //log(`1`) })
-        vrController1.addEventListener('selectstart',  () => { onHandButtonDown ( true, false, false ) } ) //log(`2`) })
-        vrController1.addEventListener('selectend',    () => { onHandButtonUp   ( true, false, false ) } ) //log(`3`) })
-        vrController2.addEventListener('squeezestart', () => { onHandButtonDown ( false, true, true  ) } ) //log(`4`) })
-        vrController2.addEventListener('squeezeend',   () => { onHandButtonUp   ( false, true, true  ) } ) //log(`5`) })
-        vrController1.addEventListener('squeezestart', () => { onHandButtonDown ( false, true, false ) } ) //log(`6`) })
-        vrController1.addEventListener('squeezeend',   () => { onHandButtonUp   ( false, true, false ) } ) //log(`7`) })
+        vrControllerLeft .addEventListener('selectstart',  () => { onHandButtonDown ( true, false, false  ) } ) //log(`0`) })
+        vrControllerLeft .addEventListener('selectend',    () => { onHandButtonUp   ( true, false, false  ) } ) //log(`1`) })
+        vrControllerRight.addEventListener('selectstart',  () => { onHandButtonDown ( true, false, true   ) } ) //log(`2`) })
+        vrControllerRight.addEventListener('selectend',    () => { onHandButtonUp   ( true, false, true   ) } ) //log(`3`) })
+        vrControllerLeft .addEventListener('squeezestart', () => { onHandButtonDown ( false, true, false  ) } ) //log(`4`) })
+        vrControllerLeft .addEventListener('squeezeend',   () => { onHandButtonUp   ( false, true, false  ) } ) //log(`5`) })
+        vrControllerRight.addEventListener('squeezestart', () => { onHandButtonDown ( false, true, true   ) } ) //log(`6`) })
+        vrControllerRight.addEventListener('squeezeend',   () => { onHandButtonUp   ( false, true, true   ) } ) //log(`7`) })
 
         onEnterVrFirstTime = () => {
 
-            scene.remove(hand1)
-            scene.remove(hand2)
-            hand1 = vrController1
-            hand2 = vrController2
+            scene.remove(handRight)
+            scene.remove(handLeft)
+            handRight = vrControllerRight
+            handLeft = vrControllerLeft
 
             putButtonLabelsOnVrControllers()
 
             getHandDq = (dq, old = false) => {
-                dq.copy(vrController2.dq)
+                dq.copy(vrControllerLeft.dq)
                 return dq
             }
 
-            //next task is to 
-
             updateHandMvs = () => {
 
-                vrController1.dq.fromPosQuat(vrController1.position, vrController1.quaternion)
-                vrController2.dq.fromPosQuat(vrController2.position, vrController2.quaternion)
+                vrControllerRight.dq.fromPosQuat(vrControllerRight.position, vrControllerRight.quaternion)
+                vrControllerLeft.dq.fromPosQuat(vrControllerLeft.position, vrControllerLeft.quaternion)
 
                 handPositionOld.copy(handPosition)
 
                 getHandDq(dq0, false)
                 // dq0.sandwich(e123, handPosition)
-                handPosition.pointFromGibbsVec(vrController2.position)
+                handPosition.pointFromGibbsVec(vrControllerLeft.position)
 
             }
 
-            scene.add(vrController1)
-            scene.add(vrController2)
+            scene.add(vrControllerRight)
+            scene.add(vrControllerLeft)
             scene.add(controllerGrip1)
             scene.add(controllerGrip2)
         }
@@ -212,8 +218,8 @@ function initHands() {
         geo.rotateX(-TAU / 8. * 3.)
         geo.rotateY(TAU / 2.)
 
-        hand1.geometry = geo
-        hand2.geometry = geo
+        handRight.geometry = geo
+        handLeft.geometry = geo
         
     })
 }

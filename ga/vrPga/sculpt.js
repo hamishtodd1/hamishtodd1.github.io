@@ -14,6 +14,8 @@ function initSclptables()
 
     let currentColor = 3
 
+    let paletteHand = handRight
+
     establishSculptablePointSize = () => {
         if (coloredPointMats[0] === null) {
             //point size different because it's not about size but about subtended angle or something
@@ -46,34 +48,10 @@ function initSclptables()
         })
     }
 
-    socket.on("sclptable", msg => {
-
-        turnOnSpectatorMode()
-
-        if (sclptables[msg.i] === undefined)
-            sclptables[msg.i] = new Sclptable()
-
-        // sclptables[msg.i].brushStroke(fl0.point(0., 1.2, 0., 1.))
-        
-        let cs = sclptables[msg.i].children[msg.color]
-        cs.vAttr.needsUpdate = true
-        cs.vAttr.updateRange.offset = 0
-        cs.vAttr.updateRange.count = 0
-        cs.geometry.drawRange.count = 0
-        cs.lowestUnusedCube = 0
-
-        //it's coming in as a literal object, not even an array. Really no good
-        let newCount = Object.keys(msg.arr).length / 3
-        for (let i = 0, il = newCount; i < il; ++i)
-            cs.fillCubePosition(v1.set(msg.arr[i * 3 + 0], msg.arr[i * 3 + 1], msg.arr[i * 3 + 2]))
-    })
-
-    
-
     let posV = new THREE.Vector3()
     class Sclptable extends THREE.Group {
 
-        constructor(index) {
+        constructor() {
 
             establishSculptablePointSize()
 
@@ -94,16 +72,11 @@ function initSclptables()
 
             this.dqViz = new DqViz()
             this.dqViz.sclptable = this
-            snappables.push(this.dqViz)
             //well, it makes sense to have the thing be at the tip of an arrow
 
             this.com = new Fl() //NOT NORMALIZED AND NO REASON TO CHANGE THAT!
 
             obj3dsWithOnBeforeRenders.push(this)
-            if (index)
-                sclptables[index] = this
-            else
-                sclptables.push(this)
 
             this.onBeforeRender = () => {
                 this.dqViz.dq.toMat4(this.matrix)
@@ -139,7 +112,7 @@ function initSclptables()
             for(let i = 0; i < vAttr.count * 3; ++i)
                 arr[i] = vAttr.array[i]
             socket.emit("sclptable", {
-                i: sclptables.indexOf(this),
+                i: snappables.indexOf(this.dqViz),
                 color: currentColor, //don't change while painting I guess!
                 arr,
             })
@@ -240,7 +213,7 @@ function initSclptables()
             if (visibilityCountdown < 0.)
                 palette.visible = false
             
-            hand1.dq.sandwich(e123, fl0).pointToGibbsVec(palette.position)
+            paletteHand.dq.sandwich(e123, fl0).pointToGibbsVec( palette.position )
             palette.lookAt(camera.position)
 
             let selectorIntendedY = spacing * (currentSize - sizes.length / 2. + .5) + spacing * 2.
@@ -263,12 +236,13 @@ function initSclptables()
                         Math.cos(swatchNewAngle) * radius,
                         0.
                     )
-
                 })
             })
         }
 
-        updatePaletteFromJoystickMovement = (joystickVec) => {
+        updatePaletteFromJoystickMovement = (joystickVec, hand) => {
+
+            paletteHand = hand
 
             palette.visible = true
             visibilityCountdown = 1.3

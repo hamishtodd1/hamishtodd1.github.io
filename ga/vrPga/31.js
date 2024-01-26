@@ -322,17 +322,14 @@ function init31() {
     testCircuits = () => {
 
         let viz1 = new DqViz(0xFF0000)
-        snappables.push(viz1)
         viz1.dq.copy(Translator(.3, 0., 0.))
         comfortablePos(-.5, viz1.markupPos)
 
         let viz2 = new DqViz(0xFF00FF)
-        snappables.push(viz2)
         viz2.dq.copy(Translator(0., .2, 0.))
         comfortablePos(0., viz2.markupPos)
 
         let viz3 = new DqViz()
-        snappables.push(viz3)
         comfortablePos(.5, viz3.markupPos)
         viz3.affecters[0] = viz2
         viz3.affecters[1] = viz1

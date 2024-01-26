@@ -10,8 +10,6 @@ function defaultCamera() {
     return new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 100)
 }
 let camera = defaultCamera()
-let container = document.createElement('div')
-document.body.appendChild(container)
 
 const zeroVector = new THREE.Vector3(0., 0., 0.)
 const zeroMatrix = new THREE.Matrix4().set(0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.)
@@ -31,6 +29,7 @@ const m2 = new THREE.Matrix4()
 const q1 = new THREE.Quaternion()
 const q2 = new THREE.Quaternion()
 
+//indices look like a Z
 const unchangingUnitSquareGeometry = new THREE.PlaneGeometry(1., 1.)
 
 const outOfSightVec3 = new THREE.Vector3(999., 999., 999.)

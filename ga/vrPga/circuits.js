@@ -116,7 +116,7 @@ function initCircuits() {
         snappables.forEach(s => {
 
             //"circuitVisible" is the only interaction of the outside world with this stuff
-            if (!s.visible || !s.circuitVisible || s.affecters[0] === null )
+            if ( s === null || !s.visible || !s.circuitVisible || s.affecters[0] === null )
                 return
 
             let c = circuits[lowestUnusedCircuit]
