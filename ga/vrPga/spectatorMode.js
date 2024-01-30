@@ -18,8 +18,9 @@ function initPotentialSpectatorReception() {
         turnOnSpectatorMode()
 
         if (snappables[msg.i] === undefined) {
-            snappables[msg.i] = new Snappable()
-            snappables[msg.i].sclptable = new Sclptable()
+            snappables[msg.i] = new DqViz(0xFF0000,false,true)
+            snappables[msg.i].sclptable = new Sclptable(snappables[msg.i])
+            snappables[msg.i].visible = false
         }
 
         // sclptables[msg.i].brushStroke(fl0.point(0., 1.2, 0., 1.))
@@ -42,15 +43,20 @@ function initPotentialSpectatorReception() {
         backedUpMsgs.push(msg)
     })
     handleDqMsgs = () => {
+        
         backedUpMsgs.forEach((msg) => {
             if (snappables[msg.i] === undefined)
                 snappables[msg.i] = new DqViz(0xFF0000, false, true)
 
-            for (let i = 0; i < 8; ++i) {
-                snappables[msg.i].dq[i] = msg.dq[i]
-                snappables[msg.i].markupPos[i] = msg.markupPos[i]
+            for (let j = 0; j < 8; ++j) {
+                snappables[msg.i].dq[j] = msg.dqCoefficientsArray[j]
+                // log(snappables[msg.i].dq[j])
             }
+
+            // snappables[msg.i].sclptable.
+            
         })
+        
         for (let i = 0; i < backedUpMsgs.length; ++i)
             delete backedUpMsgs[i]
         backedUpMsgs.length = 0
@@ -87,10 +93,10 @@ function initPotentialSpectatorReception() {
             spectatorCamera = defaultCamera()
 
         spectatorCamera.fov = 12.
-        comfortablePos(0., fl0, 0.).pointToGibbsVec(spectatorCamera.position)
-        spectatorCamera.position.z -= 1.2
+        comfortableHandPos(fl0).pointToGibbsVec(spectatorCamera.position)
+        spectatorCamera.position.z -= 1.4
         spectatorCamera.near = .8
-        spectatorCamera.lookAt(comfortablePos(0., fl0, 0.).pointToGibbsVec(v1))
+        spectatorCamera.lookAt(comfortableHandPos(fl0).pointToGibbsVec(v1))
 
         spectatorCamera.updateMatrixWorld()
         spectatorCamera.updateProjectionMatrix() //and need to do frustum things too
@@ -109,13 +115,13 @@ function initPotentialSpectatorReception() {
                 let surfaces = [
                     new THREE.Mesh(
                         new THREE.PlaneGeometry(1., 1., 1, 1),
-                        new THREE.MeshPhongMaterial({ color: 0x333333, side: THREE.DoubleSide, }) ),
+                        new THREE.MeshPhongMaterial({ color: 0x333333, side: THREE.DoubleSide, transparent: true, opacity: .8 }) ),
                     new THREE.Mesh(
                         new THREE.PlaneGeometry(1., 1., 1, 1),
-                        new THREE.MeshPhongMaterial({ color: 0x555555, side: THREE.DoubleSide, }) ),
+                        new THREE.MeshPhongMaterial({ color: 0x555555, side: THREE.DoubleSide, transparent: true, opacity: .8 }) ),
                     new THREE.Mesh(
                         new THREE.PlaneGeometry(1., 1., 1, 1),
-                        new THREE.MeshPhongMaterial({ color: 0x555555, side: THREE.DoubleSide, }) ) ]
+                        new THREE.MeshPhongMaterial({ color: 0x555555, side: THREE.DoubleSide, transparent: true, opacity: .8 }) ) ]
 
                 cameraHelper.add(surfaces[0], surfaces[1], surfaces[2])
                 
@@ -126,7 +132,7 @@ function initPotentialSpectatorReception() {
                     let corner = v1.fromArray(cameraHelper.geometry.attributes.position.array, helperIndex * 3)
                     corner.toArray(arr, stageIndex * 3)
 
-                    v4.subVectors(pyramidTop, corner).multiplyScalar(-1.).add(corner)
+                    v4.subVectors(pyramidTop, corner).multiplyScalar(-1.3).add(corner)
                     v4.toArray(arr, (stageIndex + 2) * 3)
                 }
 

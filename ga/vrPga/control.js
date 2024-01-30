@@ -56,14 +56,14 @@ function initControl() {
 
         // let viz1 = new DqViz(0xFF0000)
         // viz1.dq.copy(Translator(.2, 0., 0.))
-        // comfortablePos(-.3, viz1.markupPos,0.)
+        // comfortableLookPos(-.3, viz1.markupPos,0.)
 
         // let viz2 = new DqViz(0xFF00FF)
         // viz2.dq.copy(Translator(0., .15, 0.))
-        // comfortablePos( 0., viz2.markupPos, 0.1)
+        // comfortableLookPos( 0., viz2.markupPos, 0.1)
 
         // let viz3 = new DqViz()
-        // comfortablePos( .3, viz3.markupPos, 0.)
+        // comfortableLookPos( .3, viz3.markupPos, 0.)
         // viz3.affecters[0] = viz2
         // viz3.affecters[1] = viz1
         // viz3.affecters[2] = 1
@@ -100,7 +100,6 @@ function initControl() {
 
     let highlightee = null
     let vizBeingModified = null
-    let holdIsWithRight = false
     let paintHandIsRight = -1
     let grabbHandIsRight  = -1
     let oddVersor = false
@@ -109,6 +108,8 @@ function initControl() {
     let paintee = null
 
     onHandButtonDown = (isTriggerButton, isSideButton, isRightHand) => {
+
+        log(isTriggerButton, isSideButton, isRightHand)
 
         //make it so paintingButtonHeld is defined
 
@@ -119,13 +120,13 @@ function initControl() {
         //side -> nothing -> even versor
         
         if(paintee !== null && isTriggerButton )
-            return //huh, or maybe you could paint with both
-        if(isSideButton && grabbee === null && paintHandIsRight && isRightHand)
-            return
+            return //huh, or maybe you could paint with both hands
 
         if (isSideButton && grabbee === null) {
 
-            grabbHandIsRight = isRightHand
+            grabbHandIsRight = isRightHand ? 1 : 0
+
+            log(grabbHandIsRight)
 
             if (highlightee && !paintee)
                 grabbee = highlightee
@@ -152,7 +153,7 @@ function initControl() {
         }
         else if(isTriggerButton) {
 
-            paintHandIsRight = isRightHand
+            paintHandIsRight = isRightHand ? 1 : 0
 
             let isHeldInOtherHand = grabbee && (
                 ( grabbHandIsRight && !isRightHand) ||
@@ -165,7 +166,7 @@ function initControl() {
                 paintee = highlightee
                 if(paintee === null) {
                     paintee = new DqViz()
-                    paintee.sclptable = new Sclptable()
+                    paintee.sclptable = new Sclptable(paintee)
                 }
             }
 
@@ -173,7 +174,7 @@ function initControl() {
 
     }
 
-    modificationSculptingHighlighting = () => {
+    movingPaintingHighlightingHandLabels = () => {
         
         setLabels(paintee !== null, grabbee !== null, paintHandIsRight, grabbHandIsRight)
 
@@ -212,8 +213,7 @@ function initControl() {
                 }
 
                 socket.emit("snappable", {
-                    dq: grabbee.dq,
-                    markupPos: grabbee.markupPos,
+                    dqCoefficientsArray: grabbee.dq,
                     i: snappables.indexOf(grabbee)
                 })
             }
@@ -222,7 +222,9 @@ function initControl() {
             if(paintee !== null) {
                 highlightee = paintee
                 hidePalette()
-                paintee.sclptable.brushStroke()
+
+                let paintHand = paintHandIsRight ? handRight : handLeft
+                paintee.sclptable.brushStroke(fl0.pointFromGibbsVec(paintHand.position))
             }
         }
 
@@ -230,13 +232,16 @@ function initControl() {
 
     onHandButtonUp = (isTriggerButton, isSideButton, isRightHand) => {
 
-        if (paintee !== null && isTriggerButton && ((isRightHand && paintHandIsRight) || (!isRightHand && !paintHandIsRight))) {
+        log(isTriggerButton, isSideButton, isRightHand)
+
+        if (paintee !== null && isTriggerButton && ((isRightHand && paintHandIsRight===1) || (!isRightHand && paintHandIsRight === 0))) {
             // toggleButtonsVisibility()
             paintee.sclptable.emitSelf()
             paintee = null
+            paintHandIsRight = -1
         }
 
-        if (grabbee && isSideButton && ((isRightHand && holdIsWithRight) || (!isRightHand && !holdIsWithRight))) {
+        if (grabbee && isSideButton && ((isRightHand && grabbHandIsRight) || (!isRightHand && !grabbHandIsRight))) {
 
             if (grabbee.sclptable) {
                 grabbee.dq
@@ -250,6 +255,7 @@ function initControl() {
 
             dispViz.visible = false
             oldViz.visible = false
+            grabbHandIsRight = -1
         }
     }
 

@@ -323,14 +323,14 @@ function init31() {
 
         let viz1 = new DqViz(0xFF0000)
         viz1.dq.copy(Translator(.3, 0., 0.))
-        comfortablePos(-.5, viz1.markupPos)
+        comfortableLookPos(-.5, viz1.markupPos)
 
         let viz2 = new DqViz(0xFF00FF)
         viz2.dq.copy(Translator(0., .2, 0.))
-        comfortablePos(0., viz2.markupPos)
+        comfortableLookPos(0., viz2.markupPos)
 
         let viz3 = new DqViz()
-        comfortablePos(.5, viz3.markupPos)
+        comfortableLookPos(.5, viz3.markupPos)
         viz3.affecters[0] = viz2
         viz3.affecters[1] = viz1
         viz3.affecters[2] = 1

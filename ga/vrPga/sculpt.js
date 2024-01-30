@@ -3,6 +3,8 @@
         Adjacency is an option: if your thing is connected to an existing thing, then yes, that's it
         But apparently bounding boxes go a long way
 
+    When you delete a sculptable, maybe it should only delete a part of it with one color
+
     could make a shell of cubes, and always be subtracting ones from the center
  */
 
@@ -51,7 +53,7 @@ function initSclptables()
     let posV = new THREE.Vector3()
     class Sclptable extends THREE.Group {
 
-        constructor() {
+        constructor(dqViz) {
 
             establishSculptablePointSize()
 
@@ -70,7 +72,7 @@ function initSclptables()
                 this.add(cs)
             })
 
-            this.dqViz = new DqViz()
+            this.dqViz = dqViz
             this.dqViz.sclptable = this
             //well, it makes sense to have the thing be at the tip of an arrow
 
@@ -80,6 +82,8 @@ function initSclptables()
 
             this.onBeforeRender = () => {
                 this.dqViz.dq.toMat4(this.matrix)
+                // this.dqViz.dq.log()
+                //apparently this is being changed on the spectator side, so what the FUCK is going on?
                 this.boxHelper.matrix.copy(this.matrix)
             }
         }

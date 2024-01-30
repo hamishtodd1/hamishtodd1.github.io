@@ -1,3 +1,9 @@
+/*
+    New mouse idea
+        Your controllers stay in place, corners of screen
+        moving mouse around changes where they are pointing
+ */
+
 function initHands() {
 
     handPosition = new Fl().copy(e123) //less fundamental
@@ -8,7 +14,7 @@ function initHands() {
     handLeft = new DqMesh(standinHandGeo, new THREE.MeshPhongMaterial({ color: 0x0000FF }))
     scene.add(handRight)
     scene.add(handLeft)
-    e123.dqTo(comfortablePos(0., fl0, -.42), handRight.dq)
+    e123.dqTo(comfortableLookPos(0., fl0, -.42), handRight.dq)
 
     let joystickMovement = new THREE.Vector2()
 
@@ -177,7 +183,7 @@ function initHands() {
         vrControllerRight.addEventListener('squeezestart', () => { onHandButtonDown ( false, true, true   ) } ) //log(`6`) })
         vrControllerRight.addEventListener('squeezeend',   () => { onHandButtonUp   ( false, true, true   ) } ) //log(`7`) })
 
-        onEnterVrFirstTime = () => {
+        onEnterVrFirstTime = (session) => {
 
             scene.remove(handRight)
             scene.remove(handLeft)
@@ -192,6 +198,14 @@ function initHands() {
             }
 
             updateHandMvs = () => {
+
+                // log(datas[0].axes)
+
+                for (const source of session.inputSources) {
+                    if (!source.gamepad)
+                        continue
+                    log(source.gamepad.axes)
+                }
 
                 vrControllerRight.dq.fromPosQuat(vrControllerRight.position, vrControllerRight.quaternion)
                 vrControllerLeft.dq.fromPosQuat(vrControllerLeft.position, vrControllerLeft.quaternion)

@@ -4,12 +4,6 @@
         Grab dq and you're holding the markupPos; other hand modifies what it does
         Gotta be experimenting!
 
-    New idea:
-        "Grab" button is versors
-
-
-    Actually, when you delete a sculptable, maybe it should only delete a part of it with one color
-
     TODO for "show" demo:
         Make a properly rigged puppet! A tentacle or something
             Bind pose inverses may be a problem :(((
@@ -121,7 +115,7 @@ async function init() {
             buttonWhileDowns()
             updatePalette()
 
-            modificationSculptingHighlighting()
+            movingPaintingHighlightingHandLabels()
             // updateButtonLabelVisibilities()
             
             snappables.forEach(s => {
@@ -132,8 +126,9 @@ async function init() {
             updateRecording()
             //then broadcast
 
-            obj3dsWithOnBeforeRenders.forEach(obj3d => obj3d.onBeforeRender())
         }
+        
+        obj3dsWithOnBeforeRenders.forEach(obj3d => obj3d.onBeforeRender())
 
         debugUpdates.forEach(du => du())
 

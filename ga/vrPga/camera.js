@@ -10,14 +10,18 @@ function initCamera(container) {
     const lookDownRotation = lookDownRotationAxis.exp(new Dq())
     
     const posUnrotated = new Fl()
-    comfortablePos = ( x, target, extraDist = 0. ) => {
+    comfortableLookPos = ( x, target, extraDist = 0. ) => {
         posUnrotated.point(x, 1.2, -(comfortabledistance + extraDist), 1.)
         return lookDownRotation.sandwich( posUnrotated, target )
     }
-    // comfortablePos(0., debugFls[0].fl, 0.)
+    const lookToHand = new Dq().translator(0.,-0.22,0.)
+    comfortableHandPos = (target) => {
+        let lookPos = comfortableLookPos(0., fl6, 0.)
+        return lookToHand.sandwich(lookPos, target)
+    }
 
     orbitControls = new OrbitControls(camera, container)
-    comfortablePos(0., fl0, 0.).pointToGibbsVec(orbitControls.target)
+    comfortableLookPos(0., fl0, 0.).pointToGibbsVec(orbitControls.target)
     orbitControls.update()
     orbitControls.enableZoom = false //change whenever you like!
     camera.quaternion.setFromAxisAngle(xUnit, -comfortableLookAngle)

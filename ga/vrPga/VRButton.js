@@ -11,12 +11,12 @@ function initVrButton() {
 
                 async function onSessionStarted(session) {
 
-                    onEnterVrFirstTime()
-
                     session.addEventListener('end', onSessionEnded);
                     await renderer.xr.setSession(session);
                     button.textContent = 'EXIT VR';
                     currentSession = session;
+                    
+                    onEnterVrFirstTime(session)
                 }
 
                 function onSessionEnded( /*event*/) {
