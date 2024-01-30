@@ -99,7 +99,6 @@ function initControl() {
     let heldDqOnGrab = new Dq()
 
     let highlightee = null
-    let vizBeingModified = null
     let paintHandIsRight = -1
     let grabbHandIsRight  = -1
     let oddVersor = false
@@ -108,8 +107,6 @@ function initControl() {
     let paintee = null
 
     onHandButtonDown = (isTriggerButton, isSideButton, isRightHand) => {
-
-        log(isTriggerButton, isSideButton, isRightHand)
 
         //make it so paintingButtonHeld is defined
 
@@ -252,6 +249,7 @@ function initControl() {
             }
 
             grabbee = null
+            oddVersor = false
 
             dispViz.visible = false
             oldViz.visible = false
@@ -269,9 +267,9 @@ function initControl() {
 
     deleteHeld = () => {
 
-        if (vizBeingModified !== null) {
-            vizBeingModified.dispose()
-            vizBeingModified = null
+        if (grabbee !== null) {
+            grabbee.dispose()
+            grabbee = null
         }
     }
 
@@ -283,8 +281,8 @@ function initControl() {
         // else
         //     showCircuit(dqVizWithCircuitShowing)
 
-        if( vizBeingModified !== null)
-            highlightee = vizBeingModified
+        if( grabbee !== null)
+            highlightee = grabbee
 
         snappables.forEach( snappable => {
 
