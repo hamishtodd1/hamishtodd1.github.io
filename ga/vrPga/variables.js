@@ -4,6 +4,7 @@ const TAU = Math.PI * 2.
 let vizBeingModified = null
 let spectatorMode = null
 const snappables = []
+let vrSession = null
 
 let frameDelta = 0.
 let frameCount = 0

@@ -6,23 +6,41 @@
 
 function initHands() {
 
-    handPosition = new Fl().copy(e123) //less fundamental
-    handPositionOld = new Fl().copy(e123)
-
     let standinHandGeo = new THREE.BoxGeometry(.075,.075,.075)
     handRight = new DqMesh(standinHandGeo, new THREE.MeshPhongMaterial({ color: 0x00FF00 }))
     handLeft = new DqMesh(standinHandGeo, new THREE.MeshPhongMaterial({ color: 0x0000FF }))
     scene.add(handRight)
     scene.add(handLeft)
-    e123.dqTo(comfortableLookPos(0., fl0, -.42), handRight.dq)
+    // e123.dqTo(comfortableLookPos(0., fl0, -.42), handRight.dq)
 
-    let joystickMovement = new THREE.Vector2()
+    const laserPointerGeo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 0, 1)])
+    const laserObject3D = new THREE.Line(laserPointerGeo)
+    handRight.add(laserObject3D.clone())
+    handRight.laserDq = new Dq().copy(e12)
+    handLeft.add(laserObject3D.clone())
+    handLeft.laserDq = new Dq().copy(e12)
 
     ///////////
     // Mouse //
     ///////////
     {
         let simulatingRightHand = false
+
+        let discreteStickNew = new THREE.Vector2()
+        let discreteStick = new THREE.Vector2()
+        getPalletteInput = () => {
+            if (!discreteStick.equals(discreteStickNew))
+                updatePaletteFromDiscreteStick(discreteStick, simulatingRightHand)
+        }
+
+        let lazyHandPosRight = new Fl()
+        comfortableHandPos(lazyHandPosRight)
+        lazyHandPosRight.copy(dq0.translator(0.55, -.03, 0.2).sandwich(lazyHandPosRight, fl0))
+        let lazyHandPosLeft = new Fl().copy(lazyHandPosRight)
+        lazyHandPosLeft[6] *= -1.
+        
+        e123.dqTo(lazyHandPosRight, handRight.dq)
+        e123.dqTo(lazyHandPosLeft, handLeft.dq)
 
         function mouseControlKeyEvents(event) {
             if (event.key === ` `) {
@@ -38,31 +56,44 @@ function initHands() {
             // if (event.key === "5" && event.ctrlKey) //mouse fast forward
             //     document.dispatchEvent(new Event(`mouseFastForward`))
 
-            let isJoystickMovement = keyToAxes(event.key, joystickMovement)
-            if (isJoystickMovement )
-                updatePaletteFromJoystickMovement( joystickMovement, simulatingRightHand ? handRight : handLeft )
+            keyToDiscreteStick(event.key, discreteStickNew)
         }
         document.addEventListener(`keydown`, mouseControlKeyEvents)
 
         let mouseWheelTransform = new Dq().copy(oneDq)
         let mouseWheelTransformOld = new Dq().copy(oneDq)
 
+        getIndicatedHandPosition = (isRight, target) => {
+            let hand = isRight ? handRight : handLeft
+            return workingPlane.meet(hand.laserDq, target)
+        }
+
+        let posIndicator = new THREE.Mesh(new THREE.SphereGeometry(.01), new THREE.MeshPhongMaterial({color:0xFF0000}))
+        scene.add(posIndicator)
+
         let workingPlane = new Fl()
-        let center = new Fl().point(0., 1.2, 0., 1.)
         let rayToMouse = new Dq().copy(e12)
         updateHandMvs = () => {
 
-            handPositionOld.copy(handPosition)
             mouseWheelTransformOld.copy(mouseWheelTransform)
 
-            camera.frustum.near.projectOn(center, workingPlane)
-            workingPlane.meet(rayToMouse, handPosition)
-            handPosition.normalize()
+            camera.frustum.near.projectOn(comfortableLookPos(0.,fl0,0.), workingPlane)
 
-            if (simulatingRightHand)
-                getHandDq(handRight.dq, false)
-            else
-                getHandDq(handLeft.dq, false)
+            let activeHand = simulatingRightHand ? handRight : handLeft
+            let lazyPos = simulatingRightHand ? lazyHandPosRight : lazyHandPosLeft
+
+            let placeToPointAt = workingPlane.meet(rayToMouse, fl0)
+            fl0.pointToGibbsVec(posIndicator.position)
+
+            lazyPos.joinPt(placeToPointAt, activeHand.laserDq)
+            let laserUnMoved = e12.projectOn(lazyPos, dq3).negate(dq3)
+            let pointAtRotation = activeHand.laserDq.mulReverse(laserUnMoved, dq2).sqrtSelf()
+
+            let toLazyPos = e123.dqTo(lazyPos, dq5)
+            pointAtRotation.mul(toLazyPos, dq1).mul(mouseWheelTransform,activeHand.dq)
+
+            discreteStick.copy(discreteStickNew)
+            discreteStickNew.set(0.,0.)
 
         }
 
@@ -114,15 +145,6 @@ function initHands() {
             document.addEventListener('pointermove', onMouseMove)
             document.addEventListener('wheel', onMouseWheel)
         }
-        
-        //Actually it is problematic for your philosophy to speak of a "handDq"
-        //There is no "current position of your hand", there is only a movement of your hand
-        getHandDq = (dq, old = false) => {
-            e123.ptToPt(old ? handPositionOld : handPosition, dq)
-            dq.append(old ? mouseWheelTransformOld : mouseWheelTransform)
-            //yes, append, because algebra
-            return dq
-        }
 
         function onMouseButtonDown(event) {
             let isLeftButton = event.button === 0
@@ -146,6 +168,8 @@ function initHands() {
             document.removeEventListener('pointerup', onMouseButtonUp)
             orbitControls.enabled = false
 
+            scene.remove(posIndicator)
+
         }
     }
 
@@ -153,18 +177,13 @@ function initHands() {
     // VR Controllers //
     ////////////////////
     {
-        const laserPointerGeo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 0, - 1)])
-        const line = new THREE.Line(laserPointerGeo)
-        line.name = 'line'
-        line.scale.z = 5
-
         //yes, you need these, and you add objects to them
         let vrControllerRight = renderer.xr.getController(0)
         let vrControllerLeft = renderer.xr.getController(1)
         vrControllerRight.dq = new Dq()
         vrControllerLeft.dq = new Dq()
-        vrControllerRight.add(line.clone())
-        vrControllerLeft.add(line.clone())
+        vrControllerRight.add(laserObject3D.clone())
+        vrControllerLeft.add(laserObject3D.clone())
 
         //"grips" are needed for the appearance, but their transforms are weird, do not use them
         const controllerModelFactory = new XRControllerModelFactory()
@@ -183,7 +202,23 @@ function initHands() {
         vrControllerRight.addEventListener('squeezestart', () => { onHandButtonDown ( false, true, true   ) } ) //log(`6`) })
         vrControllerRight.addEventListener('squeezeend',   () => { onHandButtonUp   ( false, true, true   ) } ) //log(`7`) })
 
+        let discreteSticks = [new THREE.Vector2(),new THREE.Vector2()]
+        let discreteSticksOld = [new THREE.Vector2(),new THREE.Vector2()]
+        
         onEnterVrFirstTime = (session) => {
+
+            getPalletteInput = () => {
+                let i = 0
+                for (const source of session.inputSources) {
+                    if (!source.gamepad)
+                        continue
+
+                    if (!discreteSticksOld[i].equals(discreteSticks[i]))
+                        updatePaletteFromDiscreteStick(discreteStick[i], i ? true : false)
+
+                    ++i
+                }
+            }
 
             scene.remove(handRight)
             scene.remove(handLeft)
@@ -192,29 +227,27 @@ function initHands() {
 
             putButtonLabelsOnVrControllers()
 
-            getHandDq = (dq, old = false) => {
-                dq.copy(vrControllerLeft.dq)
-                return dq
+            getIndicatedHandPosition = (isRight, target) => {
+                let hand = isRight ? handRight : handLeft
+                return target.pointFromGibbsVec(hand.position)
             }
 
             updateHandMvs = () => {
 
                 // log(datas[0].axes)
 
-                for (const source of session.inputSources) {
-                    if (!source.gamepad)
-                        continue
-                    log(source.gamepad.axes)
-                }
-
                 vrControllerRight.dq.fromPosQuat(vrControllerRight.position, vrControllerRight.quaternion)
                 vrControllerLeft.dq.fromPosQuat(vrControllerLeft.position, vrControllerLeft.quaternion)
 
-                handPositionOld.copy(handPosition)
+                let i = 0
+                for (const source of session.inputSources) {
+                    if (!source.gamepad)
+                        continue
 
-                getHandDq(dq0, false)
-                // dq0.sandwich(e123, handPosition)
-                handPosition.pointFromGibbsVec(vrControllerLeft.position)
+                    discreteSticksOld[i].copy(discreteSticks[i])
+                    vrControllerAxesToDiscreteStick(source.gamepad.axes, discreteSticks[i])
+                    ++i
+                }
 
             }
 

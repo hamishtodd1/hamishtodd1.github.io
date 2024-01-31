@@ -96,7 +96,7 @@ function initControl() {
     oldViz.visible = false
     let dispViz = new DqViz(0xFF0000, true, true)
     dispViz.visible = false
-    let heldDqOnGrab = new Dq()
+    let dqOnGrab = new Dq()
 
     let highlightee = null
     let paintHandIsRight = -1
@@ -123,25 +123,23 @@ function initControl() {
 
             grabbHandIsRight = isRightHand ? 1 : 0
 
-            log(grabbHandIsRight)
-
             if (highlightee && !paintee)
                 grabbee = highlightee
             else if( paintee )
                 grabbee = paintee
             else {
                 grabbee = new DqViz()
-                grabbee.markupPos.copy(handPosition)
+                getIndicatedHandPosition(grabbHandIsRight,grabbee.markupPos)
             }
 
             if (grabbee.dq.isScalarMultipleOf(oneDq))
-                grabbee.markupPos.copy(handPosition)
+                getIndicatedHandPosition(grabbHandIsRight,grabbee.markupPos)
             
             oldViz.dq.copy(grabbee.dq)
             oldViz.markupPos.copy(grabbee.markupPos)
             oldViz.dq.sandwich(oldViz.markupPos, dispViz.markupPos)
             dispViz.dq.copy(oneDq)
-            getHandDq(heldDqOnGrab)
+            dqOnGrab.copy(grabbHandIsRight ? handRight.dq : handLeft.dq)
         }
         else if (isSideButton && grabbee !== null) {
 
@@ -175,21 +173,33 @@ function initControl() {
         
         setLabels(paintee !== null, grabbee !== null, paintHandIsRight, grabbHandIsRight)
 
+        if (paintHandIsRight === -1)
+            getPalletteInput()
+
         //highlighting
         if (grabbee === null && paintee === null) {
 
-            let [nearestSnappable, nearestSnappableDist] = getNearestSnappableToPt(handPosition, false)
-            let [nearestSclptable, nearestSclptableDist] = getNearestSclptableToPt(handPosition)
+            let [nearestSclptableLeft,  nearestSclptableDistLeft ] = getNearestSclptableToPt(getIndicatedHandPosition(false, fl0))
+            let [nearestSnappableLeft,  nearestSnappableDistLeft ] = getNearestSnappableToPt(getIndicatedHandPosition(false, fl0))
+            let [nearestSclptableRight, nearestSclptableDistRight] = getNearestSclptableToPt(getIndicatedHandPosition(true, fl0))
+            let [nearestSnappableRight, nearestSnappableDistRight] = getNearestSnappableToPt(getIndicatedHandPosition(true, fl0))
+            let nearestSnappableDist = nearestSnappableDistRight < nearestSnappableDistLeft ? nearestSnappableDistRight : nearestSnappableDistLeft
+            let nearestSclptableDist = nearestSclptableDistRight < nearestSclptableDistLeft ? nearestSclptableDistRight : nearestSclptableDistLeft
+            let nearestSnappable = nearestSnappableDistRight < nearestSnappableDistLeft ? nearestSnappableRight : nearestSnappableLeft
+            let nearestSclptable = nearestSclptableDistRight < nearestSclptableDistLeft ? nearestSclptableRight : nearestSclptableLeft
 
-            if(Math.min(nearestSnappableDist, nearestSclptableDist) > .2) {
+            let maxDist = .2
+            if(nearestSclptableDistLeft > maxDist && nearestSclptableDistRight > maxDist && nearestSnappableDistLeft > maxDist && nearestSnappableDistRight > maxDist) {
                 highlightee = null
                 return
             }
+            else {
+                if (nearestSnappableDist < nearestSclptableDist)
+                    highlightee = nearestSnappable
+                else if (nearestSclptable !== null)
+                    highlightee = nearestSclptable.dqViz
+            }
 
-            if (nearestSnappableDist < nearestSclptableDist)
-                highlightee = nearestSnappable
-            else if (nearestSclptable !== null)
-                highlightee = nearestSclptable.dqViz
         }
         else {
 
@@ -197,8 +207,8 @@ function initControl() {
             if (grabbee !== null) {
                 highlightee = grabbee
 
-                let handDqCurrent = getHandDq(dq0)
-                handDqCurrent.mulReverse(heldDqOnGrab, dispViz.dq)
+                let handDqCurrent = grabbHandIsRight ? handRight.dq : handLeft.dq
+                handDqCurrent.mulReverse(dqOnGrab, dispViz.dq)
                 dispViz.dq.mul(oldViz.dq, grabbee.dq)
                 grabbee.dq.normalize()
                 
@@ -220,16 +230,13 @@ function initControl() {
                 highlightee = paintee
                 hidePalette()
 
-                let paintHand = paintHandIsRight ? handRight : handLeft
-                paintee.sclptable.brushStroke(fl0.pointFromGibbsVec(paintHand.position))
+                paintee.sclptable.brushStroke(getIndicatedHandPosition(paintHandIsRight,fl0))
             }
         }
 
     }
 
     onHandButtonUp = (isTriggerButton, isSideButton, isRightHand) => {
-
-        log(isTriggerButton, isSideButton, isRightHand)
 
         if (paintee !== null && isTriggerButton && ((isRightHand && paintHandIsRight===1) || (!isRightHand && paintHandIsRight === 0))) {
             // toggleButtonsVisibility()
@@ -301,6 +308,7 @@ function initControl() {
         })
     }
 
+    let normalizedCom = new Fl()
     function getNearestSclptableToPt(pt) {
         
         let nearest = null
@@ -315,7 +323,7 @@ function initControl() {
             if (sclptable.com[7] === 0.)
                 return
 
-            let normalizedCom = sclptable.getWorldCom(fl0).multiplyScalar(1. / fl0[7], fl0)
+            sclptable.getWorldCom(normalizedCom).multiplyScalar(1. / normalizedCom[7], normalizedCom)
 
             let dist = pt.distanceToPt(normalizedCom)
             if (dist < nearestDist) {
@@ -327,16 +335,14 @@ function initControl() {
         return [nearest, nearestDist]
     }
 
-    function getNearestSnappableToPt(pt, includeSculptables) {
+    function getNearestSnappableToPt(pt) {
 
         let nearest = null
         let nearestDist = Infinity
         snappables.forEach(snappable => {
 
-            if (!includeSculptables) {
-                if (snappable.sclptable !== null)
-                    return
-            }
+            if (snappable.sclptable !== null)
+                return
 
             snappable.getArrowTip(fl0)
             let dist = pt.distanceToPt(fl0)
@@ -350,23 +356,13 @@ function initControl() {
 
         return [nearest, nearestDist]
     }
-
-    function getNearestVizToHand() {
-        let [nearestSnappable, nearestSnappableDist] = getNearestSnappableToPt(handPosition, true)
-        let [nearestSclptable, nearestSclptableDist] = getNearestSclptableToPt(handPosition)
-
-        if (nearestSnappableDist === Infinity && nearestSclptableDist === Infinity)
-            return null
-        else
-            return nearestSnappableDist < nearestSclptableDist ? nearestSnappable : nearestSclptable.dqViz
-    }
 }
 
 //for SSC Joel:
 /*
     For every object having a "position" and a "rotation" is a bad idea
     I could justify this in terms of classical physics,
-        like the fact that while "torque about your center of mass" is a useful simplification for an undergrad,
+        while "torque about your center of mass" is a useful simplification for an undergrad,
         pure torque is very rare in the real world, so most angular momentum is NOT about an axis through the center of mass
         But it's more than that, it has made people dependent on the origin
  */

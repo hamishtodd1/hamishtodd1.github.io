@@ -21,7 +21,9 @@ function makeMovableWithKeyboard(thing) {
     })
 }
 
-function keyToAxes(eventKey, target) {
+function keyToDiscreteStick(eventKey, target) {
+
+    target.set(0., 0.)
     if (eventKey === "ArrowUp")
         target.set(0., 1.)
     else if (eventKey === "ArrowDown")
@@ -30,10 +32,22 @@ function keyToAxes(eventKey, target) {
         target.set(1., 0.)
     else if (eventKey === "ArrowRight")
         target.set(-1., 0.)
-    else
-        return false
 
-    return true
+    return target
+}
+
+function vrControllerAxesToDiscreteStick(axes, target) {
+
+    let dominant = Math.abs(axes[2]) > Math.abs(axes[3]) ? 2 : 3
+
+    if (Math.abs(axes[dominant]) < .1)
+        target.set(0.,0.)
+    else if(dominant === 2)
+        target.set(axes[2] > 0 ? 1. : -1., 0.)
+    else
+        target.set(0., axes[3] > 0 ? -1. : 1.)
+    
+    return target
 }
 
 function getWhereThisWasCalledFrom(depth) {

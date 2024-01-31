@@ -5,11 +5,15 @@
         Gotta be experimenting!
 
     TODO for "show" demo:
+        Can paint and grab with both hands independently
+        Stage probably is from your point of view
         Make a properly rigged puppet! A tentacle or something
             Bind pose inverses may be a problem :(((
         More operations, and snapping should be accurate (snap button?)
         Circuits better
+        Eraser of paint
     Jon demo:
+        Deletion
         Levels
         Undo
         Eyeballs on vizes
@@ -20,6 +24,7 @@
         Some levels!!!!!!
         Are you using the measurer for anything? If so, some numbers...
     Beyond:
+        Hidden surface removal for boxhelpers
         Flesh colors
         Maybe want a way for a sclptable to be affected by other buttons during the show?
             Have a button that does multiplcation by 0 or 1. And maybe a point that's always present which goes up and down when you do that
@@ -113,10 +118,9 @@ async function init() {
             updateCameraMvs()
             updateHandMvs()
             buttonWhileDowns()
-            updatePalette()
 
             movingPaintingHighlightingHandLabels()
-            // updateButtonLabelVisibilities()
+            updatePalette()
             
             snappables.forEach(s => {
                 s.updateFromAffecters()

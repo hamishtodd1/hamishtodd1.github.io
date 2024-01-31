@@ -16,7 +16,6 @@ function initSclptables()
 
     let currentColor = 3
 
-    let paletteHand = handRight
 
     establishSculptablePointSize = () => {
         if (coloredPointMats[0] === null) {
@@ -50,7 +49,7 @@ function initSclptables()
         })
     }
 
-    let posV = new THREE.Vector3()
+    let posGibbsVec = new THREE.Vector3()
     class Sclptable extends THREE.Group {
 
         constructor(dqViz) {
@@ -132,21 +131,13 @@ function initSclptables()
 
         brushStroke(pos) {
 
-            if(pos === undefined)
-                pos = handPosition
-            this.worldToLocal(pos.pointToGibbsVec(posV))
+            pos.pointToGibbsVec(posGibbsVec)
+            this.worldToLocal(posGibbsVec)
 
             let cs = this.children[currentColor]
             cs.vAttr.updateRange.offset = cs.lowestUnusedCube * 3
             cs.vAttr.updateRange.count = 0
             cs.vAttr.needsUpdate = true
-
-            // let distanceGone = handPosition.distanceToPt(handPositionOld)
-            // let numSteps = Math.max(1,Math.floor(distanceGone / VOXEL_WIDTH * .9))
-            // for (let i = 0; i < numSteps+1; ++i) {
-            //     let step = handPositionOld.lerp(handPosition, i / numSteps, fl0)
-            //     cs.fillCubePosition(step.pointToGibbsVec(v2))
-            // }
 
             //both of these are in voxels
             // let radiusSq = sq(numWide / 2.)
@@ -159,7 +150,7 @@ function initSclptables()
                         // if(v2.lengthSq() > radiusSq)
                         //     continue
                         v2.multiplyScalar(VOXEL_WIDTH)
-                        v2.add(posV)
+                        v2.add(posGibbsVec)
 
                         let fillable = cs.checkCubePosition(v2) //could check other ones
                         if(fillable)
@@ -180,6 +171,7 @@ function initSclptables()
 
     //Palette
     {
+        let onRightHand = true
         let sizes = [1., 2., 4.]
         let currentSize = 1
         let palette = new THREE.Group()
@@ -212,12 +204,13 @@ function initSclptables()
         })
         
         updatePalette = () => {
-            
+
             visibilityCountdown -= frameDelta
             if (visibilityCountdown < 0.)
                 palette.visible = false
-            
-            paletteHand.dq.sandwich(e123, fl0).pointToGibbsVec( palette.position )
+
+            let hand = onRightHand ? handRight : handLeft
+            hand.dq.sandwich(e123, fl0).pointToGibbsVec(palette.position)
             palette.lookAt(camera.position)
 
             let selectorIntendedY = spacing * (currentSize - sizes.length / 2. + .5) + spacing * 2.
@@ -244,9 +237,9 @@ function initSclptables()
             })
         }
 
-        updatePaletteFromJoystickMovement = (joystickVec, hand) => {
+        updatePaletteFromDiscreteStick = (joystickVec, isRightHand) => {
 
-            paletteHand = hand
+            onRightHand = isRightHand
 
             palette.visible = true
             visibilityCountdown = 1.3

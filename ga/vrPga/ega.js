@@ -90,8 +90,10 @@ function initEgaWithoutDeclarations() {
             if (target === undefined)
                 target = new THREE.Vector3()
 
-            if (this[7] === 0.)
+            if (this[7] === 0.) {
+                // debugger
                 console.error("ideal point at ", getWhereThisWasCalledFrom(0))
+            }
             else {
                 target.z = this[4] / this[7]
                 target.y = this[5] / this[7]
@@ -106,8 +108,10 @@ function initEgaWithoutDeclarations() {
             if (target === undefined)
                 target = new THREE.Vector3()
 
-            if (this[7] !== 0.)
+            if (this[7] !== 0.) {
+                // debugger
                 console.error("non-ideal point")
+            }
             else {
                 target.z = this[4]
                 target.y = this[5]
@@ -511,6 +515,8 @@ function initEgaWithoutDeclarations() {
     dq1 = new Dq()
     dq2 = new Dq()
     dq3 = new Dq()
+    dq4 = new Dq()
+    dq5 = new Dq()
 
     {
         oneDq = new Dq().fromFloatAndIndex(1., 0)
