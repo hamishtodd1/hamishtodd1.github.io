@@ -126,7 +126,6 @@ async function init() {
                 s.updateFromAffecters()
             })
 
-            updateHighlighting()
             updateRecording()
             //then broadcast
 

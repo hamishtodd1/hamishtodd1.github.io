@@ -6,6 +6,10 @@ let spectatorMode = null
 const snappables = []
 let vrSession = null
 
+const LEFT = 0
+const RIGHT = 1
+const hands = Array(2)
+
 let frameDelta = 0.
 let frameCount = 0
 const log = console.log

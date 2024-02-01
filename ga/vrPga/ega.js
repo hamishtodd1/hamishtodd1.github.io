@@ -6,6 +6,11 @@ function initEgaWithoutDeclarations() {
             super(8)
         }
 
+        pointNormalize() {
+            this.multiplyScalar(1. / this[7], this)
+            return this
+        }
+
         momentumLine( rateBivector, targetDq ) {
 
             let derivative = this.commutator(rateBivector, newFl)

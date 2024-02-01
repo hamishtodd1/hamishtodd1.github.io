@@ -11,6 +11,8 @@ function initHands() {
     handLeft = new DqMesh(standinHandGeo, new THREE.MeshPhongMaterial({ color: 0x0000FF }))
     scene.add(handRight)
     scene.add(handLeft)
+    hands[RIGHT] = handRight
+    hands[LEFT] = handLeft
     // e123.dqTo(comfortableLookPos(0., fl0, -.42), handRight.dq)
 
     const laserPointerGeo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 0, 1)])
@@ -24,7 +26,7 @@ function initHands() {
     // Mouse //
     ///////////
     {
-        let simulatingRightHand = false
+        let simulatingRightHand = 0
 
         let discreteStickNew = new THREE.Vector2()
         let discreteStick = new THREE.Vector2()
@@ -48,11 +50,11 @@ function initHands() {
                 onHandButtonUp(true, false, simulatingRightHand)
                 onHandButtonUp(false, true, simulatingRightHand)
 
-                simulatingRightHand = !simulatingRightHand
+                simulatingRightHand = 1-simulatingRightHand
             }
 
             if (event.key === "6" && event.ctrlKey) //mouse rewind
-                deleteHeld()
+                deleteHeld(simulatingRightHand)
             // if (event.key === "5" && event.ctrlKey) //mouse fast forward
             //     document.dispatchEvent(new Event(`mouseFastForward`))
 
@@ -193,14 +195,14 @@ function initHands() {
         controllerGrip2.add(controllerModelFactory.createControllerModel(controllerGrip2))
 
         //Responds a bit weirdly
-        vrControllerLeft .addEventListener('selectstart',  () => { onHandButtonDown ( true, false, false  ) } ) //log(`0`) })
-        vrControllerLeft .addEventListener('selectend',    () => { onHandButtonUp   ( true, false, false  ) } ) //log(`1`) })
-        vrControllerRight.addEventListener('selectstart',  () => { onHandButtonDown ( true, false, true   ) } ) //log(`2`) })
-        vrControllerRight.addEventListener('selectend',    () => { onHandButtonUp   ( true, false, true   ) } ) //log(`3`) })
-        vrControllerLeft .addEventListener('squeezestart', () => { onHandButtonDown ( false, true, false  ) } ) //log(`4`) })
-        vrControllerLeft .addEventListener('squeezeend',   () => { onHandButtonUp   ( false, true, false  ) } ) //log(`5`) })
-        vrControllerRight.addEventListener('squeezestart', () => { onHandButtonDown ( false, true, true   ) } ) //log(`6`) })
-        vrControllerRight.addEventListener('squeezeend',   () => { onHandButtonUp   ( false, true, true   ) } ) //log(`7`) })
+        vrControllerLeft .addEventListener('selectstart',  () => { onHandButtonDown ( true, false, 0  ) } ) //log(`0`) })
+        vrControllerLeft .addEventListener('selectend',    () => { onHandButtonUp   ( true, false, 0  ) } ) //log(`1`) })
+        vrControllerRight.addEventListener('selectstart',  () => { onHandButtonDown ( true, false, 1   ) } ) //log(`2`) })
+        vrControllerRight.addEventListener('selectend',    () => { onHandButtonUp   ( true, false, 1   ) } ) //log(`3`) })
+        vrControllerLeft .addEventListener('squeezestart', () => { onHandButtonDown ( false, true, 0  ) } ) //log(`4`) })
+        vrControllerLeft .addEventListener('squeezeend',   () => { onHandButtonUp   ( false, true, 0  ) } ) //log(`5`) })
+        vrControllerRight.addEventListener('squeezestart', () => { onHandButtonDown ( false, true, 1   ) } ) //log(`6`) })
+        vrControllerRight.addEventListener('squeezeend',   () => { onHandButtonUp   ( false, true, 1   ) } ) //log(`7`) })
 
         let discreteSticks = [new THREE.Vector2(),new THREE.Vector2()]
         let discreteSticksOld = [new THREE.Vector2(),new THREE.Vector2()]
@@ -224,6 +226,8 @@ function initHands() {
             scene.remove(handLeft)
             handRight = vrControllerRight
             handLeft = vrControllerLeft
+            hands[RIGHT] = handRight
+            hands[LEFT] = handLeft
 
             putButtonLabelsOnVrControllers()
 
