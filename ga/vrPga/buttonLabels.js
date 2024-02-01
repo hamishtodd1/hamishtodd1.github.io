@@ -54,10 +54,7 @@ function initButtonLabels() {
         for (let profileName in labelProfiles) {
             groups[profileName] = new THREE.Group()
 
-            if (isLeft)
-                handLeft.add(groups[profileName])
-            else
-                handRight.add(groups[profileName])
+            hands[isLeft].add(groups[profileName])
 
             for (let labelName in labelProfiles[profileName]) {
                 let label = text(labelName, false, "#000000")
@@ -101,10 +98,7 @@ function initButtonLabels() {
             for (let profileName in labelProfiles) {
                 let g = groups[profileName]
 
-                if (isLeft)
-                    handLeft.add(g)
-                else
-                    handRight.add(g)
+                hands[isLeft].add(g)
 
                 g.rotation.x = -TAU / 4.
                 g.position.set(0., -0.0025, 0.0475)

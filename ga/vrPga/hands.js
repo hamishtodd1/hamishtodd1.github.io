@@ -11,16 +11,20 @@ function initHands() {
     handLeft = new DqMesh(standinHandGeo, new THREE.MeshPhongMaterial({ color: 0x0000FF }))
     scene.add(handRight)
     scene.add(handLeft)
-    hands[RIGHT] = handRight
-    hands[LEFT] = handLeft
     // e123.dqTo(comfortableLookPos(0., fl0, -.42), handRight.dq)
 
-    const laserPointerGeo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 0, 1)])
-    const laserObject3D = new THREE.Line(laserPointerGeo)
-    handRight.add(laserObject3D.clone())
-    handRight.laserDq = new Dq().copy(e12)
-    handLeft.add(laserObject3D.clone())
-    handLeft.laserDq = new Dq().copy(e12)
+    const laserPointerGeo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, 0, 1), new THREE.Vector3(0, 0, -1)])
+    function bestowHandProperties() {
+        handRight.laserDq = new Dq().copy(e12)
+        handLeft.laserDq  = new Dq().copy(e12)
+        handRight.laserPlane = new Fl().copy(e3)
+        handLeft.laserPlane  = new Fl().copy(e3)
+        handRight.add( new THREE.Line(laserPointerGeo) )
+        handLeft.add(  new THREE.Line(laserPointerGeo) )
+        hands[RIGHT] = handRight
+        hands[LEFT]  = handLeft
+    }
+    bestowHandProperties()
 
     ///////////
     // Mouse //
@@ -65,9 +69,8 @@ function initHands() {
         let mouseWheelTransform = new Dq().copy(oneDq)
         let mouseWheelTransformOld = new Dq().copy(oneDq)
 
-        getIndicatedHandPosition = (isRight, target) => {
-            let hand = isRight ? handRight : handLeft
-            return workingPlane.meet(hand.laserDq, target)
+        getIndicatedHandPosition = (isLeft, target) => {
+            return workingPlane.meet(hands[isLeft].laserDq, target)
         }
 
         let posIndicator = new THREE.Mesh(new THREE.SphereGeometry(.01), new THREE.MeshPhongMaterial({color:0xFF0000}))
@@ -93,6 +96,8 @@ function initHands() {
 
             let toLazyPos = e123.dqTo(lazyPos, dq5)
             pointAtRotation.mul(toLazyPos, dq1).mul(mouseWheelTransform,activeHand.dq)
+
+            activeHand.dq.sandwich(e3, activeHand.laserPlane)
 
             discreteStick.copy(discreteStickNew)
             discreteStickNew.set(0.,0.)
@@ -180,34 +185,40 @@ function initHands() {
     ////////////////////
     {
         //yes, you need these, and you add objects to them
-        let vrControllerRight = renderer.xr.getController(0)
-        let vrControllerLeft = renderer.xr.getController(1)
-        vrControllerRight.dq = new Dq()
-        vrControllerLeft.dq = new Dq()
-        vrControllerRight.add(laserObject3D.clone())
-        vrControllerLeft.add(laserObject3D.clone())
+        let vrRight = renderer.xr.getController(LEFT)
+        let vrLeft = renderer.xr.getController(RIGHT)
+        vrRight.dq = new Dq()
+        vrLeft.dq = new Dq()
 
         //"grips" are needed for the appearance, but their transforms are weird, do not use them
         const controllerModelFactory = new XRControllerModelFactory()
-        let controllerGrip1 = renderer.xr.getControllerGrip(0)
-        let controllerGrip2 = renderer.xr.getControllerGrip(1)
-        controllerGrip1.add(controllerModelFactory.createControllerModel(controllerGrip1))
-        controllerGrip2.add(controllerModelFactory.createControllerModel(controllerGrip2))
+        let gripLeft  = renderer.xr.getControllerGrip(LEFT)
+        let gripRight = renderer.xr.getControllerGrip(RIGHT)
+        gripLeft.add(controllerModelFactory.createControllerModel(gripLeft))
+        gripRight.add(controllerModelFactory.createControllerModel(gripRight))
 
         //Responds a bit weirdly
-        vrControllerLeft .addEventListener('selectstart',  () => { onHandButtonDown ( true, false, 0  ) } ) //log(`0`) })
-        vrControllerLeft .addEventListener('selectend',    () => { onHandButtonUp   ( true, false, 0  ) } ) //log(`1`) })
-        vrControllerRight.addEventListener('selectstart',  () => { onHandButtonDown ( true, false, 1   ) } ) //log(`2`) })
-        vrControllerRight.addEventListener('selectend',    () => { onHandButtonUp   ( true, false, 1   ) } ) //log(`3`) })
-        vrControllerLeft .addEventListener('squeezestart', () => { onHandButtonDown ( false, true, 0  ) } ) //log(`4`) })
-        vrControllerLeft .addEventListener('squeezeend',   () => { onHandButtonUp   ( false, true, 0  ) } ) //log(`5`) })
-        vrControllerRight.addEventListener('squeezestart', () => { onHandButtonDown ( false, true, 1   ) } ) //log(`6`) })
-        vrControllerRight.addEventListener('squeezeend',   () => { onHandButtonUp   ( false, true, 1   ) } ) //log(`7`) })
+        vrLeft .addEventListener('selectstart',  () => { onHandButtonDown ( true, false, LEFT  ) } ) //log(`0`) })
+        vrLeft .addEventListener('selectend',    () => { onHandButtonUp   ( true, false, LEFT  ) } ) //log(`1`) })
+        vrRight.addEventListener('selectstart',  () => { onHandButtonDown ( true, false, RIGHT   ) } ) //log(`2`) })
+        vrRight.addEventListener('selectend',    () => { onHandButtonUp   ( true, false, RIGHT   ) } ) //log(`3`) })
+        vrLeft .addEventListener('squeezestart', () => { onHandButtonDown ( false, true, LEFT  ) } ) //log(`4`) })
+        vrLeft .addEventListener('squeezeend',   () => { onHandButtonUp   ( false, true, LEFT  ) } ) //log(`5`) })
+        vrRight.addEventListener('squeezestart', () => { onHandButtonDown ( false, true, RIGHT   ) } ) //log(`6`) })
+        vrRight.addEventListener('squeezeend',   () => { onHandButtonUp   ( false, true, RIGHT   ) } ) //log(`7`) })
 
-        let discreteSticks = [new THREE.Vector2(),new THREE.Vector2()]
+        let discreteSticks    = [new THREE.Vector2(),new THREE.Vector2()]
         let discreteSticksOld = [new THREE.Vector2(),new THREE.Vector2()]
         
         onEnterVrFirstTime = (session) => {
+
+            scene.remove(handRight)
+            scene.remove(handLeft)
+            handRight = vrRight
+            handLeft  = vrLeft
+            bestowHandProperties()
+
+            putButtonLabelsOnVrControllers()
 
             getPalletteInput = () => {
                 let i = 0
@@ -222,26 +233,21 @@ function initHands() {
                 }
             }
 
-            scene.remove(handRight)
-            scene.remove(handLeft)
-            handRight = vrControllerRight
-            handLeft = vrControllerLeft
-            hands[RIGHT] = handRight
-            hands[LEFT] = handLeft
-
-            putButtonLabelsOnVrControllers()
-
-            getIndicatedHandPosition = (isRight, target) => {
-                let hand = isRight ? handRight : handLeft
-                return target.pointFromGibbsVec(hand.position)
+            getIndicatedHandPosition = (isLeft, target) => {
+                return target.pointFromGibbsVec(hands[isLeft].position)
             }
 
             updateHandMvs = () => {
 
                 // log(datas[0].axes)
 
-                vrControllerRight.dq.fromPosQuat(vrControllerRight.position, vrControllerRight.quaternion)
-                vrControllerLeft.dq.fromPosQuat(vrControllerLeft.position, vrControllerLeft.quaternion)
+                vrRight.dq.fromPosQuat(vrRight.position, vrRight.quaternion)
+                vrLeft.dq.fromPosQuat(vrLeft.position, vrLeft.quaternion)
+
+                vrRight.dq.sandwich(e12, vrRight.laserDq)
+                vrLeft.dq.sandwich( e12, vrLeft.laserDq )
+                vrRight.dq.sandwich(e3, vrRight.laserPlane)
+                vrLeft.dq.sandwich( e3, vrLeft.laserPlane )
 
                 let i = 0
                 for (const source of session.inputSources) {
@@ -255,10 +261,10 @@ function initHands() {
 
             }
 
-            scene.add(vrControllerRight)
-            scene.add(vrControllerLeft)
-            scene.add(controllerGrip1)
-            scene.add(controllerGrip2)
+            scene.add(vrRight)
+            scene.add(vrLeft)
+            scene.add(gripLeft)
+            scene.add(gripRight)
         }
     }
 
@@ -266,7 +272,7 @@ function initHands() {
         
         let geo = obj.children[0].geometry
         geo.scale(.024, .024, .024)
-        geo.rotateX(-TAU / 8. * 3.)
+        // geo.rotateX(-TAU / 8. * 3.)
         geo.rotateY(TAU / 2.)
 
         handRight.geometry = geo

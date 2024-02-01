@@ -6,8 +6,8 @@ let spectatorMode = null
 const snappables = []
 let vrSession = null
 
-const LEFT = 0
-const RIGHT = 1
+const RIGHT = 0
+const LEFT = 1
 const hands = Array(2)
 
 let frameDelta = 0.

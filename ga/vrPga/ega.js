@@ -468,7 +468,7 @@ function initEgaWithoutDeclarations() {
         fromPosQuat(p, q) {
             let qPart = newDq.fromQuaternion(q)
             let pPart = newDq.translator(p.x, p.y, p.z)
-            return qPart.mul(pPart, this)
+            return pPart.mul(qPart, this)
         }
 
         /*dqVerbose*/

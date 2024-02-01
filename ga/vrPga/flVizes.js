@@ -22,8 +22,8 @@ function initFlVizes() {
     let pointMat = new THREE.MeshPhongMaterial({
         color: 0x00FFFF,
     })
-    let planeGeo = new THREE.CircleGeometry(1., 32)
-    let pointGeo = new THREE.SphereGeometry(.04)
+    let planeGeo = new THREE.CircleGeometry(.2, 32)
+    let pointGeo = new THREE.SphereGeometry(.004)
 
     //need studs
     //dotted line axis maybe
@@ -97,6 +97,7 @@ function initFlVizes() {
     window.FlViz = FlViz
 
     debugFls = [
+        new FlViz(), new FlViz(),
         new FlViz(), new FlViz()
     ]
     debugFls.forEach(dfl => {

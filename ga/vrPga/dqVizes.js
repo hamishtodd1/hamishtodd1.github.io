@@ -514,10 +514,10 @@ function initDqVizes() {
         }
     }
 
-    debugDqs = [
+    debugDqVizes = [
         new DqViz(0xFF0000, false, true), new DqViz(0xFF0000, false, true)
     ]
-    debugDqs.forEach(ddq => {
+    debugDqVizes.forEach(ddq => {
         ddq.dq.zero()
         ddq.markupPos.pointFromGibbsVec(outOfSightVec3)
     })

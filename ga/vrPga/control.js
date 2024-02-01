@@ -54,19 +54,19 @@ function initControl() {
 
         // testCircuits()
 
-        // let viz1 = new DqViz(0xFF0000)
-        // viz1.dq.copy(Translator(.2, 0., 0.))
-        // comfortableLookPos(-.3, viz1.markupPos,0.)
+        let viz1 = new DqViz(0xFF0000)
+        viz1.dq.copy(Translator(.2, 0., 0.))
+        comfortableLookPos(-.3, viz1.markupPos,0.)
 
-        // let viz2 = new DqViz(0xFF00FF)
-        // viz2.dq.copy(Translator(0., .15, 0.))
-        // comfortableLookPos( 0., viz2.markupPos, 0.1)
+        let viz2 = new DqViz(0xFF00FF)
+        viz2.dq.copy(Translator(0., .15, 0.))
+        comfortableLookPos( 0., viz2.markupPos, 0.1)
 
-        // let viz3 = new DqViz()
-        // comfortableLookPos( .3, viz3.markupPos, 0.)
-        // viz3.affecters[0] = viz2
-        // viz3.affecters[1] = viz1
-        // viz3.affecters[2] = 1
+        let viz3 = new DqViz()
+        comfortableLookPos( .3, viz3.markupPos, 0.)
+        viz3.affecters[0] = viz2
+        viz3.affecters[1] = viz1
+        viz3.affecters[2] = 1
 
         // let viz4 = new DqViz()
         // viz4.markupPos.point(-.1, 1.2, 0.)
@@ -96,7 +96,8 @@ function initControl() {
     oldVizes[0].visible = false; oldVizes[1].visible = false;
     let dispVizes = [new DqViz(0xFF0000, true, true), new DqViz(0xFF0000, true, true)]
     dispVizes[0].visible = false; dispVizes[1].visible = false;
-    let dqOnGrabs = [new Dq(), new Dq()]
+    let handDqOnGrabs = [new Dq(), new Dq()]
+    let snappableDqOnGrabs = [new Dq(), new Dq()]
 
     let paintees = [null,null]
     let highlightees = [null,null]
@@ -123,7 +124,9 @@ function initControl() {
 
             grabbees[focusHand] = paintees[otherHand] || highlightees[focusHand]
 
-            if (grabbees[RIGHT] !== null && grabbees[RIGHT] === grabbees[LEFT])
+            log(focusHand, grabbees )
+
+            if (grabbees[RIGHT] !== null && grabbees[LEFT] !== null && grabbees[RIGHT] === grabbees[LEFT])
                 oddVersor = true
             else {
                 if( grabbees[focusHand] === null )
@@ -132,9 +135,10 @@ function initControl() {
                 if (grabbees[focusHand].dq.isScalarMultipleOf(oneDq))
                     getIndicatedHandPosition(focusHand, grabbees[focusHand].markupPos)
 
-                dqOnGrabs[focusHand].copy(hands[focusHand].dq)
+                handDqOnGrabs[focusHand].copy(hands[focusHand].dq)
+                snappableDqOnGrabs[focusHand].copy(grabbees[focusHand].dq)
 
-                oldVizes[focusHand].dq.copy(grabbees[focusHand].dq)
+                oldVizes[focusHand].dq.copy(snappableDqOnGrabs[focusHand])
                 oldVizes[focusHand].markupPos.copy(grabbees[focusHand].markupPos)
                 oldVizes[focusHand].dq.sandwich(oldVizes[focusHand].markupPos, dispVizes[focusHand].markupPos)
                 dispVizes[focusHand].dq.copy(oneDq)
@@ -151,70 +155,70 @@ function initControl() {
     }
 
     movingPaintingHighlightingHandLabels = () => {
-        
+
+        // log(grabbees, highlightees)
+
         // setLabels(paintee !== null, grabbee !== null, paintHandIsRight, grabbHandIsRight)
 
         if (paintees[0] === null && paintees[1] === null)
             getPalletteInput()
 
         for(let hand = 0; hand < 2; ++hand) {
-            //highlighting
-            if (grabbees[hand] === null && paintees[hand] === null) {
-    
-                let [nearest, nearestDistSq] = getNearest(hands[hand].laserDq) //getNearest(getIndicatedHandPosition(hand, fl0))
 
-                if ( nearestDistSq > .04)
+            /////////////////////
+            // MOVING GRABBEES //
+            /////////////////////
+            if (grabbees[hand] !== null) {
+                highlightees[hand] = grabbees[hand]
+
+                // hands[hand].dq.mulReverse(handDqOnGrabs[hand], dispVizes[hand].dq)
+                // dispVizes[hand].dq.mul(oldVizes[hand].dq, grabbees[hand].dq)
+                let movementSinceGrab = hands[hand].dq.mulReverse(handDqOnGrabs[hand], dq0)
+                movementSinceGrab.mul(snappableDqOnGrabs[hand], grabbees[hand].dq )
+                grabbees[hand].dq.normalize()
+                dispVizes[hand].dq.copy(movementSinceGrab)
+                
+                snap(grabbees[hand])
+
+                if (showMarkupVizes) {
+                    dispVizes[hand].visible = !dispVizes[hand].dq.equals(oneDq)
+                    oldVizes[hand].visible = dispVizes[hand].visible
+                }
+
+                socket.emit("snappable", {
+                    dqCoefficientsArray: grabbees[hand].dq,
+                    i: snappables.indexOf(grabbees[hand])
+                })
+            }
+
+            //////////////
+            // PAINTING //
+            //////////////
+            if(paintees[hand] !== null) {
+                highlightees[hand] = paintees[hand]
+                hidePalette()
+
+                paintees[hand].sclptable.brushStroke(getIndicatedHandPosition(hand,fl0))
+            }
+
+            //////////////////
+            // HIGHLIGHTING //
+            //////////////////
+            if (grabbees[hand] === null && paintees[hand] === null) {
+
+                let [nearest, nearestDistSq] = getNearest(hand) //getNearest(getIndicatedHandPosition(hand, fl0))
+
+                if (nearestDistSq > .04)
                     highlightees[hand] = null
                 else
                     highlightees[hand] = nearest
-    
-            }
-            else {
-    
-                //grabbing
-                if (grabbees[hand] !== null) {
-                    highlightees[hand] = grabbees[hand]
-    
-                    hands[hand].dq.mulReverse(dqOnGrabs[hand], dispVizes[hand].dq)
-                    dispVizes[hand].dq.mul(oldVizes[hand].dq, grabbees[hand].dq)
-                    grabbees[hand].dq.normalize()
-                    
-                    snap(grabbees[hand])
-    
-                    if (showMarkupVizes) {
-                        dispVizes[hand].visible = !dispVizes[hand].dq.equals(oneDq)
-                        oldVizes[hand].visible = dispVizes[hand].visible
-                    }
-    
-                    socket.emit("snappable", {
-                        dqCoefficientsArray: grabbees[hand].dq,
-                        i: snappables.indexOf(grabbees[hand])
-                    })
-                }
-    
-                //painting
-                if(paintees[hand] !== null) {
-                    highlightees[hand] = paintees[hand]
-                    hidePalette()
-    
-                    paintees[hand].sclptable.brushStroke(getIndicatedHandPosition(hand,fl0))
-                }
+
             }
         }
 
-        // let dqVizWithCircuitShowing = highlightee || vizBeingModified
-        // if (dqVizWithCircuitShowing === null)
-        //     hideCircuit()
-        // else
-        //     showCircuit(dqVizWithCircuitShowing)
-
-        //////////////////
-        // Highlighting //
-        //////////////////
-        for (let i = 0; i < 2; ++i) {
-            if (grabbees[i] !== null)
-                highlightees[i] = grabbees[i]
-        }
+        //////////////////////////////
+        // REACTING TO HIGHLIGHTING //
+        //////////////////////////////
 
         snappables.forEach(snappable => {
 
@@ -230,6 +234,12 @@ function initControl() {
                 interdependencyExists(snappable, highlightees[0]) ||
                 interdependencyExists(snappable, highlightees[1])
         })
+
+        // let dqVizWithCircuitShowing = highlightee || vizBeingModified
+        // if (dqVizWithCircuitShowing === null)
+        //     hideCircuit()
+        // else
+        //     showCircuit(dqVizWithCircuitShowing)
     }
     
     onHandButtonUp = (isTriggerButton, isSideButton, focusHand) => {
@@ -277,29 +287,40 @@ function initControl() {
         }
     }
 
-    let normalizedCom = new Fl()
-    let arrowTip = new Fl()
+    let testPoint = new Fl()
     let joinPlane = new Fl()
-    function getNearest(mv) {
+    function getNearest(hand) {
 
-        mv.normalize()
+        // debugFls[0].fl.copy(vrRight.laserPlane)
+        // debugFls[0].markupPos.pointFromGibbsVec(vrRight.position)
+        // debugFls[1].fl.copy(vrLeft.laserPlane)
+        // debugFls[1].markupPos.pointFromGibbsVec(vrLeft.position)
 
         let nearest = null
         let nearestDistSq = Infinity
         snappables.forEach(snappable => {
 
-            let distSq = mv.joinPt(snappable.getArrowTip(arrowTip).pointNormalize(), joinPlane).eNormSq()
+            let distSq = Infinity
+            
+            testPoint.pointFromGibbsVec(snappable.boundingBox.getCenter(v1)).pointNormalize()
+            if (true)//hands[hand].laserPlane.joinPt(testPoint)[0] > 0.)
+                distSq = hands[hand].laserDq.joinPt(testPoint, joinPlane).eNormSq()
+
+            // debugFls[2].fl.copy(testPoint)
 
             if (snappable.sclptable !== null) {
                 
                 if (snappable.sclptable.com[7] === 0.)
                     return
 
-                snappable.sclptable.getWorldCom(normalizedCom).pointNormalize()
+                snappable.sclptable.getWorldCom(testPoint).pointNormalize()
+                debugFls[3].fl.copy(testPoint)
 
-                let sclptableDistSq = mv.joinPt(normalizedCom, joinPlane).eNormSq()
-                if (sclptableDistSq < distSq)
-                    distSq = sclptableDistSq
+                if (true){//hands[hand].laserPlane.joinPt(testPoint)[0] > 0.) {
+                    let sclptableDistSq = hands[hand].laserDq.joinPt(testPoint, joinPlane).eNormSq()
+                    if (sclptableDistSq < distSq)
+                        distSq = sclptableDistSq
+                }
             }
 
             if (distSq < nearestDistSq) {

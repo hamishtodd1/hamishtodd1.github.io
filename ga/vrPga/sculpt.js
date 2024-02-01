@@ -171,7 +171,7 @@ function initSclptables()
 
     //Palette
     {
-        let onRightHand = true
+        let handIndex = RIGHT
         let sizes = [1., 2., 4.]
         let currentSize = 1
         let palette = new THREE.Group()
@@ -209,7 +209,7 @@ function initSclptables()
             if (visibilityCountdown < 0.)
                 palette.visible = false
 
-            let hand = onRightHand ? handRight : handLeft
+            let hand = hands[handIndex]
             hand.dq.sandwich(e123, fl0).pointToGibbsVec(palette.position)
             palette.lookAt(camera.position)
 
@@ -237,9 +237,9 @@ function initSclptables()
             })
         }
 
-        updatePaletteFromDiscreteStick = (joystickVec, isRightHand) => {
+        updatePaletteFromDiscreteStick = (joystickVec, newHandIndex) => {
 
-            onRightHand = isRightHand
+            handIndex = newHandIndex
 
             palette.visible = true
             visibilityCountdown = 1.3
