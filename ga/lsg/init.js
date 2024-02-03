@@ -32,8 +32,11 @@ async function init() {
     initButtons()
 
     init42()
-    init22()
+    initPluckerVizes()
     // initMrh()
+    
+    initBasises()
+    initDebugDisplay()
 
     window.addEventListener('resize', () => {
 

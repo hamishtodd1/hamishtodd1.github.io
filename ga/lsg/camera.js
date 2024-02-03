@@ -3,7 +3,7 @@ function initCamera() {
     // camera.position.set(-.25, 1.6, 3.7)
     camera.position.set( 0., 1.6, 3.7)
     orbitControls = new OrbitControls(camera, container)
-    orbitControls.target.set(0, 1.6, 0)
+    orbitControls.target.set(0, 0., 0)
     orbitControls.update()
     orbitControls.enableZoom = false //change whenever you like!
 

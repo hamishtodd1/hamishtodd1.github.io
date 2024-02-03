@@ -20,21 +20,6 @@ function init42() {
         e1t0() { return -this[29] }
         e2t0() { return this[29] }
 
-        lowestNonZeroSigned() {
-            let lowest = this.lowestNonZero()
-            return lowest * Math.sign(this[lowest])
-        }
-
-        coordFromSignedIndex(signedIndex) {
-            return this[Math.abs(signedIndex)] * Math.sign(signedIndex)
-        }
-
-        meetUnavecs(b,target) {
-            target.zero()
-            target[ 7] = b[ 2] * this[ 1] - b[ 1] * this[ 2]; target[ 8] = b[ 3] * this[ 1] - b[ 1] * this[ 3]; target[ 9] = b[ 4] * this[ 1] - b[ 1] * this[ 4]; target[10] = b[ 5] * this[ 1] - b[ 1] * this[ 5]; target[11] = b[ 6] * this[ 1] - b[ 1] * this[ 6]; target[12] = b[ 3] * this[ 2] - b[ 2] * this[ 3]; target[13] = b[ 4] * this[ 2] - b[ 2] * this[ 4]; target[14] = b[ 5] * this[ 2] - b[ 2] * this[ 5]; target[15] = b[ 6] * this[ 2] - b[ 2] * this[ 6]; target[16] = b[ 4] * this[ 3] - b[ 3] * this[ 4]; target[17] = b[ 5] * this[ 3] - b[ 3] * this[ 5]; target[18] = b[ 6] * this[ 3] - b[ 3] * this[ 6]; target[19] = b[ 5] * this[ 4] - b[ 4] * this[ 5]; target[20] = b[ 6] * this[ 4] - b[ 4] * this[ 6]; target[21] = b[ 6] * this[ 5] - b[ 5] * this[ 6]
-            return target
-        }
-
         // exp() {
         //     //maybe split them up? (2,2) bivector + Cl(2) bivector, or (1,2) bivector + (3,0,0) bivector. Mmm, cross terms
         // }
@@ -45,11 +30,11 @@ function init42() {
 
         sandwich(b,target) {
 
-            return this.mul(b, mrh1).mulReverse( this, target )
+            return this.mul(b, tw1Local).mulReverse( this, target )
         }
 
         mulReverse(b, target) {
-            let bReverse = b.getReverse(mrh0)
+            let bReverse = b.getReverse(tw0Local)
             this.mul(bReverse, target)
             return target
         }
@@ -103,6 +88,8 @@ function init42() {
         6
     ]
 
+    , "e1", "e2", "e3", "e4", "e5", "e6", "e123", "e124", "e125", "e126", "e134", "e135", "e136", "e145", "e146", "e156", "e234", "e235", "e236", "e245", "e246", "e256", "e345", "e346", "e356", "e645",
+
     Tw.basisNames = [
         ``,
         `1`,`2`,`3`,`p`,`m`,`t`,
@@ -113,27 +100,10 @@ function init42() {
         `123tpm`
     ]
 
-    class Unavec42 extends Multivector {
-        constructor() {
-            super(6)
-        }
-
-        toMv(target) {
-            target.zero()
-            for(let i = 1; i < 7; ++i)
-                target[i] = this[i-1]
-            return target
-        }
-
-    }
-    Unavec42.indexGrades = [1,1,1,1,1,1]
-
-    
-
-    let mrh0 = new Tw()
-    let mrh1 = new Tw()
-    let mrh2 = new Tw()
-    let mrh3 = new Tw()
+    let tw0Local = new Tw()
+    let tw1Local = new Tw()
+    let tw2Local = new Tw()
+    let tw3Local = new Tw()
 
     _e1 = new Tw().fromFloatAndIndex(1., 1)
     _e2 = new Tw().fromFloatAndIndex(1., 2)
@@ -143,18 +113,21 @@ function init42() {
     _et = new Tw().fromFloatAndIndex(1., 6) //yeah, bit weird, but it is what it is
     _e0 = _ep.add(_em,new Tw())
 
-    _e1t = _e1.mul(_et, new Tw()) //boost preserving the origin
-    _e10 = _e1.mul(_e0, new Tw()) //translation in space
-    _e20 = _e2.mul(_e0, new Tw()) //translation in space
-    _e12 = _e1.mul(_e2, new Tw()) //rotation
-    _et0 = _et.mul(_e0, new Tw()) //translation in time
-    _epm = _ep.mul(_em, new Tw()) //scaling preserving the origin
-    _e1p = _e1.mul(_ep, new Tw())
-    _e1m = _e1.mul(_em, new Tw())
-    _etp = _et.mul(_ep, new Tw())
-    _etm = _et.mul(_em, new Tw())
-    _e1t = _e1.mul(_et, new Tw())
-    _e2t = _e2.mul(_et, new Tw())
+    _e1t = _e1.meet(_et, new Tw()) //boost preserving the origin
+    _e10 = _e1.meet(_e0, new Tw()) //translation in space
+    _e20 = _e2.meet(_e0, new Tw()) //translation in space
+    _e30 = _e3.meet(_e0, new Tw()) //translation in space
+    _e12 = _e1.meet(_e2, new Tw()) //rotation
+    _e23 = _e2.meet(_e3, new Tw()) //rotation
+    _e31 = _e3.meet(_e1, new Tw()) //rotation
+    _et0 = _et.meet(_e0, new Tw()) //translation in time
+    _epm = _ep.meet(_em, new Tw()) //scaling preserving the origin
+    _e1p = _e1.meet(_ep, new Tw())
+    _e1m = _e1.meet(_em, new Tw())
+    _etp = _et.meet(_ep, new Tw())
+    _etm = _et.meet(_em, new Tw())
+    _e1t = _e1.meet(_et, new Tw())
+    _e2t = _e2.meet(_et, new Tw())
 
     oneTw = new Tw().fromFloatAndIndex(1., 0)
 
@@ -168,4 +141,26 @@ function init42() {
     tw7 = new Tw()
     tw8 = new Tw()
     tw9 = new Tw()
+
+    function setBasisNames(Constructor) {
+        Constructor.basisNames = Array(Constructor.indexGrades.length)
+        let example = new Constructor()
+        for (let i = 0, il = example.length; i < il; ++i) {
+
+            example.zero()
+            example[i] = 1.
+            example.cast(tw0)
+
+            Constructor.basisNames[i] = Tw.basisNames[tw0.lowestNonzero()]
+        }
+        delete example
+
+    }
+    setBasisNames(Unavec)
+    setBasisNames(Bivec)
+    setBasisNames(Trivec)
+    setBasisNames(Quadvec)
+    setBasisNames(Pentavec)
+    setBasisNames(Hexavec)
+    setBasisNames(Bireflection)
 }

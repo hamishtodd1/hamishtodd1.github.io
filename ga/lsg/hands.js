@@ -6,8 +6,10 @@ async function initHands() {
     let standinHandGeo = new THREE.BoxGeometry(.3,.3,.3)
     hand1 = new DqMesh(standinHandGeo, new THREE.MeshPhongMaterial({ color: 0x00FF00 }))
     scene.add(hand1)
+    hand1.dq.translator(1.,0.,0.)
     hand2 = new DqMesh(standinHandGeo, new THREE.MeshPhongMaterial({ color: 0x0000FF }))
     scene.add(hand2)
+    hand2.dq.translator(-1., 0., 0.)
 
     //Mouse stuff
     {

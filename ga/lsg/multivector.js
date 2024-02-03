@@ -1,110 +1,70 @@
-function initMultivectorWithoutDeclarations() {
-    
-    class Multivector extends Float32Array {
+function initGeneralVectors() {
 
-        directionTo(b, target) {
+    function mySign(val) {
+        let ret = Math.sign(val)
+        if (Object.is(val, -0))
+            ret = -1
+        else if (Object.is(val, 0))
+            ret = 1
+        return ret
+    }
 
-            if (target === undefined)
-                target = new this.constructor()
+    class GeneralVector extends Float32Array {
 
-            return b.addScaled(this, -b[7] / this[7], target).normalize()
+        lowestNonzeroSigned() {
+            let i = this.lowestNonzero()
+            let val = this.getAtSignedIndex(i)
+            let sign = val === 0 ? 1 : val === -0 ? -1 : val
+            return sign * i
         }
 
-        //only thing this leaves out is plane-plane, plane-line, and line-line, which are the check-y ones
-        distanceToPt(pt) {
-            return Math.sqrt(this.joinPt(pt, this.constructor === Dq ? newFl : newDq).eNormSq())
+        getAtSignedIndex(signedIndex) {
+            return mySign(signedIndex) * this[Math.abs(signedIndex)]
         }
 
-        eNorm() {
-            return Math.sqrt(this.eNormSq())
-        }
-
-        //pretty confusing: append causes a transformation to be done BEFORE the current transformation
-        append(b) {
-            let temp = this.mul(b, newDq)
-            this.copy(temp)
-            return this
-        }
-        prepend(b) {
-            let temp = b.mul(this, newDq)
-            this.copy(temp)
+        setAtSignedIndex(signedIndex, coord) {
+            this[Math.abs(signedIndex)] = mySign(signedIndex) * coord
             return this
         }
 
-        //there might be a more literal name for this. Maybe "offset by"
-        mulReverse(b, target) {
-            let bReverse = b.getReverse(b.constructor === Fl ? newFl : newDq)
-            return this.mul(bReverse, target)
-        }
+        cast(target) {
 
-        projectOn(toBeProjectedOn, target) {
-            if (target === undefined)
-                target = new this.constructor()
+            let egaInvolved = this.constructor === Fl ||   this.constructor === Dq
+                            target.constructor === Fl || target.constructor === Dq
+            if (egaInvolved) {
+                console.error("do something different because e0")    
+            }
 
-            let numerator = this.inner(toBeProjectedOn, this.constructor === toBeProjectedOn.constructor ? newDq : newFl)
-            numerator.mulReverse(toBeProjectedOn, target)
+            let thisIndexGrades = this.constructor.indexGrades
+            let targetIndexGrades = target.constructor.indexGrades
+            target.zero()
+
+            let lastGrade = -1
+            let iInTarget = -1
+            for(let i = 0, il = this.length; i < il; ++i) {
+                
+                let grade = thisIndexGrades[i]
+                if(grade !== lastGrade) {
+                    lastGrade = grade
+
+                    let j = 0, jl = targetIndexGrades.length
+                    for (j; j < jl; ++j) {
+                        if (targetIndexGrades[j] === grade) {
+                            iInTarget = j
+                            break
+                        }
+                    }
+                    if(j === jl)
+                        iInTarget = -1
+                }
+
+                if(iInTarget !== -1) {
+                    target[iInTarget] = this[i]
+                    ++iInTarget
+                }
+            }
 
             return target
-        }
-
-        isScalarMultipleOf(b) {
-            if(this.constructor !== b.constructor)
-                return false
-
-            let ratio = this.divide(b,newDq)
-            if(ratio[0] === 0.)
-                return false
-            ratio[0] /= ratio[0]
-            return ratio.approxEquals(oneDq)
-            // return (ratio[0] !== 0. && 
-            //     ratio[1] === 0. && ratio[2] === 0. && ratio[3] === 0. && ratio[4] === 0. && ratio[5] === 0. && ratio[6] === 0. && ratio[7] === 0.)
-        }
-
-        divide(b, target) {
-            return this.mul(b.rigorousInverse(newDq), target)
-        }
-
-        rigorousInverse(target) {
-            if (target === undefined)
-                target = new this.constructor()
-
-            let thisReverse = this.getReverse(this.constructor === Dq ? newDq : newFl)
-
-            let thisThisReverse = this.mul(thisReverse, newDq) //potentially study
-            let thisThisReverseInverse = newDq;
-            thisThisReverseInverse[0] = 1. / thisThisReverse[0]
-            thisThisReverseInverse[7] = -thisThisReverse[7] / (thisThisReverse[0] * thisThisReverse[0])
-
-            return thisReverse.mulDq(thisThisReverseInverse, target)
-        }
-
-        dqToSq(b, target) {
-
-            if (target === undefined)
-                target = new Dq()
-
-            if (b.constructor === this.constructor)
-                return b.mulReverse(this, target)
-            else {
-                let ratio = b.mulReverse(this, newFl)
-                return ratio.mul(thingy, target).normalize().sqrtSelf()
-            }
-        }
-
-        dqTo(b, target) {
-            return this.dqToSq(b, target).normalize().sqrtSelf()
-        }
-
-        sandwichDq(b, target) {
-            let intermediate = this.mulDq(b,  this.constructor === Dq ? newDq : newFl)
-            let thisReverse = this.getReverse(this.constructor === Dq ? newDq : newFl)
-            return intermediate.mulDq(thisReverse, target)
-        }
-
-        sandwichFl(b, target) {
-            let intermediate = this.mulFl(b,  this.constructor === Fl ? newDq : newFl)
-            let thisReverse = this.getReverse(this.constructor === Dq ? newDq : newFl)
-            return intermediate.mulDq(thisReverse, target)
         }
 
         lerpSelf(b, alpha) {
@@ -125,54 +85,6 @@ function initMultivectorWithoutDeclarations() {
 
             for (let i = 0, il = this.length; i < il; ++i)
                 target[i] = this[i] + alpha * (toLerpTo[i] - this[i])
-
-            return target
-        }
-
-        sandwich(b, target) {
-            if (target === undefined)
-                target = new b.constructor()
-
-            if (b instanceof Dq)
-                this.sandwichDq(b, target)
-            else
-                this.sandwichFl(b, target)
-
-            return target
-        }
-
-        mul(b, target) {
-            if (target === undefined)
-                target = new (this.constructor === b.constructor ? Dq : Fl)()
-
-            if (b instanceof Dq)
-                this.mulDq(b, target)
-            else
-                this.mulFl(b, target)
-
-            return target
-        }
-
-        meet(b, target) {
-            if (target === undefined)
-                target = new (this.constructor === b.constructor ? Dq : Fl)()
-
-            if (b instanceof Dq)
-                this.meetDq(b, target)
-            else
-                this.meetFl(b, target)
-
-            return target
-        }
-
-        inner(b, target) {
-            if (target === undefined)
-                target = new (this.constructor === b.constructor ? Dq : Fl)()
-
-            if (b instanceof Dq)
-                this.innerDq(b, target)
-            else
-                this.innerFl(b, target)
 
             return target
         }
@@ -417,6 +329,165 @@ function initMultivectorWithoutDeclarations() {
                 str += `0.`
 
             return str
+        }
+    }
+    window.GeneralVector = GeneralVector
+}
+
+function initMultivectorWithoutDeclarations() {
+    
+    class Multivector extends GeneralVector {
+
+        //pretty confusing: append causes a transformation to be done BEFORE the current transformation
+        append(b) {
+            let temp = this.mul(b, newDq)
+            this.copy(temp)
+            return this
+        }
+        prepend(b) {
+            let temp = b.mul(this, newDq)
+            this.copy(temp)
+            return this
+        }
+
+        directionTo(b, target) {
+
+            if (target === undefined)
+                target = new this.constructor()
+
+            return b.addScaled(this, -b[7] / this[7], target).normalize()
+        }
+
+        //only thing this leaves out is plane-plane, plane-line, and line-line, which are the check-y ones
+        distanceToPt(pt) {
+            return Math.sqrt(this.joinPt(pt, this.constructor === Dq ? newFl : newDq).eNormSq())
+        }
+
+        eNorm() {
+            return Math.sqrt(this.eNormSq())
+        }
+        //there might be a more literal name for this. Maybe "offset by"
+        mulReverse(b, target) {
+            let bReverse = b.getReverse(b.constructor === Fl ? newFl : newDq)
+            return this.mul(bReverse, target)
+        }
+
+        projectOn(toBeProjectedOn, target) {
+            if (target === undefined)
+                target = new this.constructor()
+
+            let numerator = this.inner(toBeProjectedOn, this.constructor === toBeProjectedOn.constructor ? newDq : newFl)
+            numerator.mulReverse(toBeProjectedOn, target)
+
+            return target
+        }
+
+        isScalarMultipleOf(b) {
+            if (this.constructor !== b.constructor)
+                return false
+
+            let ratio = this.divide(b, newDq)
+            if (ratio[0] === 0.)
+                return false
+            ratio[0] /= ratio[0]
+            return ratio.approxEquals(oneDq)
+            // return (ratio[0] !== 0. && 
+            //     ratio[1] === 0. && ratio[2] === 0. && ratio[3] === 0. && ratio[4] === 0. && ratio[5] === 0. && ratio[6] === 0. && ratio[7] === 0.)
+        }
+
+        divide(b, target) {
+            return this.mul(b.rigorousInverse(newDq), target)
+        }
+
+        rigorousInverse(target) {
+            if (target === undefined)
+                target = new this.constructor()
+
+            let thisReverse = this.getReverse(this.constructor === Dq ? newDq : newFl)
+
+            let thisThisReverse = this.mul(thisReverse, newDq) //potentially study
+            let thisThisReverseInverse = newDq;
+            thisThisReverseInverse[0] = 1. / thisThisReverse[0]
+            thisThisReverseInverse[7] = -thisThisReverse[7] / (thisThisReverse[0] * thisThisReverse[0])
+
+            return thisReverse.mulDq(thisThisReverseInverse, target)
+        }
+
+        dqToSq(b, target) {
+
+            if (target === undefined)
+                target = new Dq()
+
+            if (b.constructor === this.constructor)
+                return b.mulReverse(this, target)
+            else {
+                let ratio = b.mulReverse(this, newFl)
+                return ratio.mul(thingy, target).normalize().sqrtSelf()
+            }
+        }
+
+        dqTo(b, target) {
+            return this.dqToSq(b, target).normalize().sqrtSelf()
+        }
+
+        sandwichDq(b, target) {
+            let intermediate = this.mulDq(b, this.constructor === Dq ? newDq : newFl)
+            let thisReverse = this.getReverse(this.constructor === Dq ? newDq : newFl)
+            return intermediate.mulDq(thisReverse, target)
+        }
+
+        sandwichFl(b, target) {
+            let intermediate = this.mulFl(b, this.constructor === Fl ? newDq : newFl)
+            let thisReverse = this.getReverse(this.constructor === Dq ? newDq : newFl)
+            return intermediate.mulDq(thisReverse, target)
+        }
+
+        sandwich(b, target) {
+            if (target === undefined)
+                target = new b.constructor()
+
+            if (b instanceof Dq)
+                this.sandwichDq(b, target)
+            else
+                this.sandwichFl(b, target)
+
+            return target
+        }
+
+        mul(b, target) {
+            if (target === undefined)
+                target = new (this.constructor === b.constructor ? Dq : Fl)()
+
+            if (b instanceof Dq)
+                this.mulDq(b, target)
+            else
+                this.mulFl(b, target)
+
+            return target
+        }
+
+        meet(b, target) {
+            if (target === undefined)
+                target = new (this.constructor === b.constructor ? Dq : Fl)()
+
+            if (b instanceof Dq)
+                this.meetDq(b, target)
+            else
+                this.meetFl(b, target)
+
+            return target
+        }
+
+        inner(b, target) {
+            if (target === undefined)
+                target = new (this.constructor === b.constructor ? Dq : Fl)()
+
+            if (b instanceof Dq)
+                this.innerDq(b, target)
+            else
+                this.innerFl(b, target)
+
+            return target
         }
     }
     window.Multivector = Multivector
