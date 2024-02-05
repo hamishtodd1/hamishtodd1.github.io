@@ -40,27 +40,29 @@ function initGeneralVectors() {
             target.zero()
 
             let lastGrade = -1
-            let iInTarget = -1
-            for(let i = 0, il = this.length; i < il; ++i) {
+            let iInThis = -1
+            for(let i = 0, il = target.length; i < il; ++i) {
                 
-                let grade = thisIndexGrades[i]
+                let grade = targetIndexGrades[i]
                 if(grade !== lastGrade) {
                     lastGrade = grade
 
-                    let j = 0, jl = targetIndexGrades.length
+                    let j = 0, jl = thisIndexGrades.length
                     for (j; j < jl; ++j) {
-                        if (targetIndexGrades[j] === grade) {
-                            iInTarget = j
+                        if (thisIndexGrades[j] === grade) {
+                            iInThis = j
                             break
                         }
                     }
                     if(j === jl)
-                        iInTarget = -1
+                        iInThis = -1
                 }
 
-                if(iInTarget !== -1) {
-                    target[iInTarget] = this[i]
-                    ++iInTarget
+                if(iInThis === -1) 
+                    target[i] = 0.
+                else {
+                    target[i] = this[iInThis]
+                    ++iInThis
                 }
             }
 
@@ -319,9 +321,16 @@ function initGeneralVectors() {
                         numString = this[i].toFixed(numDecimalPlaces)
 
                     let basisName = this.constructor.basisNames[i]
-                    str += numString + (basisName === `` ? `` : `e`) + basisName
 
-                    //would be nice to have e0 in cga printing
+                    let e0Replacers = this.constructor.e0Replacers
+                    if (e0Replacers !== undefined &&
+                        e0Replacers[i] !== null &&
+                        this[e0Replacers[i][0]] === this[e0Replacers[i][1]]) {
+                        basisName = e0Replacers[i][2]
+                        ++i
+                    }
+
+                    str += numString + (basisName === `` ? `` : `e`) + basisName
                 }
             }
 

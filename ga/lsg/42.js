@@ -75,6 +75,41 @@ function init42() {
                 target = new Tw()
             return inner42(this,b,target)
         }
+
+        toString(numDecimalPlaces) {
+            if (numDecimalPlaces === undefined)
+                numDecimalPlaces = 1
+
+            let str = ""
+            for (let i = 0, il = this.length; i < il; ++i) {
+
+                if (Math.abs(this[i]) > 0.05 || isNaN(this[i])) {
+
+                    if (str !== "")
+                        str += " + "
+
+                    let numString = this[i].toString()
+                    if (numString.length > numDecimalPlaces)
+                        numString = this[i].toFixed(numDecimalPlaces)
+
+                    let basisName = this.constructor.basisNames[i]
+                    let e0Replacers = this.constructor.e0Replacers
+                    if( e0Replacers !== undefined && 
+                        e0Replacers[i] !== null && 
+                        this[e0Replacers[i][0]] === this[e0Replacers[i][1]] ) {
+                        basisName = e0Replacers[i][2]
+                        ++i
+                    }
+                    
+                    str += numString + (basisName === `` ? `` : `e`) + basisName
+                }
+            }
+
+            if (str === ``)
+                str += `0.`
+
+            return str
+        }
     }
     window.Tw = Tw
 
@@ -88,17 +123,27 @@ function init42() {
         6
     ]
 
-    , "e1", "e2", "e3", "e4", "e5", "e6", "e123", "e124", "e125", "e126", "e134", "e135", "e136", "e145", "e146", "e156", "e234", "e235", "e236", "e245", "e246", "e256", "e345", "e346", "e356", "e645",
-
     Tw.basisNames = [
         ``,
         `1`,`2`,`3`,`p`,`m`,`t`,
         `12`,`13`,`1p`,`1m`,`1t`,`23`,`2p`,`2m`,`2t`,`3p`,`3m`,`3t`,`pm`,`pt`,`mt`,
-        `123`,`12p`,`12m`,`12t`,`13p`,`13m`,`13t`,`1pm`,`1pt`,`1mt`,`23p`,`23m`,`23t`,`2pm`,`2pt`,`2mt`,`3pm`,`3pt`,`3mt`,`tpm`,
-        `123p`,`123m`,`123t`,`12pm`,`12pt`,`12mt`,`13pm`,`13pt`,`13mt`,`1tpm`,`23pm`,`23pt`,`23mt`,`2tpm`,`3tpm`,
-        `123pm`,`123pt`,`123mt`,`12tpm`,`13tpm`,`23tpm`,
-        `123tpm`
+        `123`,`12p`,`12m`,`12t`,`13p`,`13m`,`13t`,`1pm`,`1pt`,`1mt`,`23p`,`23m`,`23t`,`2pm`,`2pt`,`2mt`,`3pm`,`3pt`,`3mt`,`pmt`,
+        `123p`,`123m`,`123t`,`12pm`,`12pt`,`12mt`,`13pm`,`13pt`,`13mt`,`1pmt`,`23pm`,`23pt`,`23mt`,`2pmt`,`3pmt`,
+        `123pm`,`123pt`,`123mt`,`12pmt`,`13pmt`,`23pmt`,
+        `123pmt`
     ]
+
+    Tw.e0Replacers = Array(Tw.basisNames.length)
+    Tw.e0Replacers.fill(null)
+    function getIndices(prefix, tAppended) {
+        let pIndex = Tw.basisNames.indexOf(prefix + `p` + (tAppended ? `t` : ``))
+        let mIndex = Tw.basisNames.indexOf(prefix + `m` + (tAppended ? `t` : ``))
+        let index = pIndex < mIndex ? pIndex : mIndex
+        Tw.e0Replacers[index] = [ pIndex, mIndex, prefix + `0` + (tAppended ? `t` : ``)]
+    }
+    let someIndices = [``, `1`, `2`, `3`, `12`, `13`, `23`, `123`]
+    someIndices.forEach(prefix => getIndices(prefix, false))
+    someIndices.forEach(prefix => getIndices(prefix, true))
 
     let tw0Local = new Tw()
     let tw1Local = new Tw()
@@ -119,7 +164,8 @@ function init42() {
     _e30 = _e3.meet(_e0, new Tw()) //translation in space
     _e12 = _e1.meet(_e2, new Tw()) //rotation
     _e23 = _e2.meet(_e3, new Tw()) //rotation
-    _e31 = _e3.meet(_e1, new Tw()) //rotation
+    _e31 = _e3.meet(_e1, new Tw()) //rotation, NOTE THAT e13 is stored not e31
+    _e13 = _e1.meet(_e3, new Tw())
     _et0 = _et.meet(_e0, new Tw()) //translation in time
     _epm = _ep.meet(_em, new Tw()) //scaling preserving the origin
     _e1p = _e1.meet(_ep, new Tw())
@@ -128,6 +174,12 @@ function init42() {
     _etm = _et.meet(_em, new Tw())
     _e1t = _e1.meet(_et, new Tw())
     _e2t = _e2.meet(_et, new Tw())
+
+    _e123 = _e12.meet(_e3, new Tw())
+    _e012 = _e0.meet(_e12, new Tw())
+    _e023 = _e0.meet(_e23, new Tw())
+    _e013 = _e0.meet(_e13, new Tw())
+    _e031 = _e0.meet(_e31, new Tw())
 
     oneTw = new Tw().fromFloatAndIndex(1., 0)
 
@@ -141,6 +193,14 @@ function init42() {
     tw7 = new Tw()
     tw8 = new Tw()
     tw9 = new Tw()
+
+    uv0 = new Unavec()
+    uv1 = new Unavec()
+    uv2 = new Unavec()
+    uv3 = new Unavec()
+    uv4 = new Unavec()
+    uv5 = new Unavec()
+    uv6 = new Unavec()
 
     function setBasisNames(Constructor) {
         Constructor.basisNames = Array(Constructor.indexGrades.length)
@@ -162,5 +222,4 @@ function init42() {
     setBasisNames(Quadvec)
     setBasisNames(Pentavec)
     setBasisNames(Hexavec)
-    setBasisNames(Bireflection)
 }

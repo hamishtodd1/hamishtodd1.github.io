@@ -5,6 +5,24 @@ class Unavec extends GeneralVector {
         super(6)
     }
 
+    e0Multiple() {
+        return this[3] !== 0. && this[3] === this[4] && this[0] === 0. && this[1] === 0. && this[2] === 0. && this[5] === 0.
+    }
+
+    meetE0(target) {
+        target.zero()
+        target[ 2] = this[0]
+        target[ 3] = this[0]
+        target[ 6] = this[1]
+        target[ 7] = this[1]
+        target[ 9] = this[2]
+        target[10] = this[2]
+        target[12] = this[3] - this[4]
+        target[13] = -this[5]
+        target[14] = -this[5]
+        return target
+    }
+
     meet(b, target) {
         if (b.constructor === Unavec && target.constructor === Bivec) {
             target[ 0] = this[ 0] * b[ 1] - this[ 1] * b[ 0];
@@ -205,6 +223,14 @@ class Bivec extends GeneralVector {
             target[13] = -this[ 0] * b[ 4] - this[10] * b[14] - this[ 1] * b[ 7] - this[ 3] * b[ 9] - this[ 5] * b[11] - this[ 7] * b[13];
             target[14] = -this[ 0] * b[ 5] - this[ 1] * b[ 8] - this[ 2] * b[ 9] - this[ 5] * b[12] - this[ 6] * b[13] - this[ 9] * b[14];
         }
+        else if (b.constructor === Unavec && target.constructor === Unavec) {
+            target[0] = this[0] * b[1] + this[1] * b[2] + this[2] * b[3] - this[3] * b[4] - this[4] * b[5];
+            target[1] = this[5] * b[2] + this[6] * b[3] - this[0] * b[0] - this[7] * b[4] - this[8] * b[5];
+            target[2] = this[9] * b[3] - this[10] * b[4] - this[11] * b[5] - this[1] * b[0] - this[5] * b[1];
+            target[3] = -this[12] * b[4] - this[13] * b[5] - this[2] * b[0] - this[6] * b[1] - this[9] * b[2];
+            target[4] = -this[10] * b[2] - this[12] * b[3] - this[14] * b[5] - this[3] * b[0] - this[7] * b[1];
+            target[5] = this[14] * b[4] - this[11] * b[2] - this[13] * b[3] - this[4] * b[0] - this[8] * b[1];
+        }
         else
             console.error("not implemented")
 
@@ -300,82 +326,6 @@ class Hexavec extends GeneralVector {
 }
 Hexavec.indexGrades = [
     6
-]
-
-class Bireflection extends GeneralVector {
-
-    constructor() {
-        super(16)
-    }
-
-    getReverse(target) {
-        target[ 0] = this[ 0]; target[ 1] = -this[ 1]; target[ 2] = -this[ 2]; target[ 3] = -this[ 3]; target[ 4] = -this[ 4]; target[ 5] = -this[ 5]; target[ 6] = -this[ 6]; target[ 7] = -this[ 7]; target[ 8] = -this[ 8]; target[ 9] = -this[ 9]; target[10] = -this[10]; target[11] = -this[11]; target[12] = -this[12]; target[13] = -this[13]; target[14] = -this[14]; target[15] = -this[15];
-    }
-
-    //hmm, since you're only doing these equatorial things, might be able to optimize this. It's like three "parallel" reflections
-    mul(b, target) {
-
-        if( b.constructor !== Unavec || target.constructor !== Trireflection )
-            console.error("not implemented")
-
-        target[0] = this[0] * b[0] + this[1] * b[1] + this[2] * b[2] + this[3] * b[3] - this[4] * b[4] - this[5] * b[5];
-        target[1] = this[0] * b[1] + this[6] * b[2] + this[7] * b[3] - this[1] * b[0] - this[8] * b[4] - this[9] * b[5];
-        target[2] = this[0] * b[2] + this[10] * b[3] - this[11] * b[4] - this[12] * b[5] - this[2] * b[0] - this[6] * b[1];
-        target[3] = this[0] * b[3] - this[10] * b[2] - this[13] * b[4] - this[14] * b[5] - this[3] * b[0] - this[7] * b[1];
-        target[4] = this[0] * b[4] - this[11] * b[2] - this[13] * b[3] - this[15] * b[5] - this[4] * b[0] - this[8] * b[1];
-        target[5] = this[0] * b[5] + this[15] * b[4] - this[12] * b[2] - this[14] * b[3] - this[5] * b[0] - this[9] * b[1];
-        target[6] = this[1] * b[2] + this[6] * b[0] - this[2] * b[1];
-        target[7] = this[1] * b[3] + this[7] * b[0] - this[3] * b[1];
-        target[8] = this[1] * b[4] + this[8] * b[0] - this[4] * b[1];
-        target[9] = this[1] * b[5] + this[9] * b[0] - this[5] * b[1];
-        target[10] = this[10] * b[0] + this[2] * b[3] - this[3] * b[2];
-        target[11] = this[11] * b[0] + this[2] * b[4] - this[4] * b[2];
-        target[12] = this[12] * b[0] + this[2] * b[5] - this[5] * b[2];
-        target[13] = this[13] * b[0] + this[3] * b[4] - this[4] * b[3];
-        target[14] = this[14] * b[0] + this[3] * b[5] - this[5] * b[3];
-        target[15] = this[15] * b[0] + this[4] * b[5] - this[5] * b[4];
-        target[16] = this[10] * b[1] + this[6] * b[3] - this[7] * b[2];
-        target[17] = this[11] * b[1] + this[6] * b[4] - this[8] * b[2];
-        target[18] = this[12] * b[1] + this[6] * b[5] - this[9] * b[2];
-        target[19] = this[13] * b[1] + this[7] * b[4] - this[8] * b[3];
-        target[20] = this[14] * b[1] + this[7] * b[5] - this[9] * b[3];
-        target[21] = this[15] * b[1] + this[8] * b[5] - this[9] * b[4];
-        target[22] = this[10] * b[4] + this[13] * b[2] - this[11] * b[3];
-        target[23] = this[10] * b[5] + this[14] * b[2] - this[12] * b[3];
-        target[24] = this[11] * b[5] + this[15] * b[2] - this[12] * b[4];
-        target[25] = this[13] * b[5] + this[15] * b[3] - this[14] * b[4];
-        return target;
-    }
-
-}
-Bireflection.indexGrades = [
-    0,
-    2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-]
-
-class Trireflection extends GeneralVector {
-
-    constructor() {
-        super(26)
-    }
-
-    mul(b,target) {
-        if (b.constructor !== Bireflection || target.constructor !== Unavec )
-            console.error("not implemented")
-
-        target[0] = this[0] * b[0] + this[11] * b[11] + this[12] * b[12] + this[13] * b[13] + this[14] * b[14] + this[4] * b[4] + this[5] * b[5] + this[8] * b[8] + this[9] * b[9] - this[10] * b[10] - this[15] * b[15] - this[1] * b[1] - this[2] * b[2] - this[3] * b[3] - this[6] * b[6] - this[7] * b[7];
-        target[1] = this[0] * b[1] + this[17] * b[11] + this[18] * b[12] + this[19] * b[13] + this[1] * b[0] + this[20] * b[14] + this[4] * b[8] + this[5] * b[9] + this[6] * b[2] + this[7] * b[3] - this[16] * b[10] - this[21] * b[15] - this[2] * b[6] - this[3] * b[7] - this[8] * b[4] - this[9] * b[5];
-        target[2] = this[0] * b[2] + this[10] * b[3] + this[16] * b[7] + this[1] * b[6] + this[22] * b[13] + this[23] * b[14] + this[2] * b[0] + this[4] * b[11] + this[5] * b[12] - this[11] * b[4] - this[12] * b[5] - this[17] * b[8] - this[18] * b[9] - this[24] * b[15] - this[3] * b[10] - this[6] * b[1];
-        target[3] = this[0] * b[3] + this[1] * b[7] + this[2] * b[10] + this[3] * b[0] + this[4] * b[13] + this[5] * b[14] - this[10] * b[2] - this[13] * b[4] - this[14] * b[5] - this[16] * b[6] - this[19] * b[8] - this[20] * b[9] - this[22] * b[11] - this[23] * b[12] - this[7] * b[1];
-        target[4] = this[0] * b[4] + this[1] * b[8] + this[2] * b[11] + this[3] * b[13] + this[4] * b[0] + this[5] * b[15] - this[11] * b[2] - this[13] * b[3] - this[15] * b[5] - this[17] * b[6] - this[19] * b[7] - this[21] * b[9] - this[22] * b[10] - this[24] * b[12] - this[8] * b[1];
-        target[5] = this[0] * b[5] + this[15] * b[4] + this[1] * b[9] + this[21] * b[8] + this[24] * b[11] + this[2] * b[12] + this[3] * b[14] + this[5] * b[0] - this[12] * b[2] - this[14] * b[3] - this[18] * b[6] - this[20] * b[7] - this[23] * b[10] - this[4] * b[15] - this[9] * b[1];
-        return target;
-    }
-
-}
-Trireflection.indexGrades = [
-    1,1,1,1,1,
-    3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,
 ]
 
 function reverse42(a, target) {
