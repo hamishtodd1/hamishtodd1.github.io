@@ -60,7 +60,7 @@ function initCircuitsMeshes() {
 
         class FloorWire extends THREE.Mesh {
 
-            constructor(circuit) {
+            constructor() {
                 
                 let mat = new THREE.MeshPhong2Material({
                     color: 0xFFFF00,
@@ -120,7 +120,7 @@ function initCircuitsMeshes() {
         const dashWidthHalf = dashHeight * .25
         const numDots = 300
         const dashVerts = 6
-        dashedGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(dashVerts * 3 * numDots), 3))
+        dashedGeo.setAttribute('position', new THREE.BufferAttribute( new Float32Array(dashVerts * 3 * numDots), 3) )
         const dgp = dashedGeo.attributes.position.array
         for (let i = 0; i < numDots; ++i) {
             let y = i * dashHeight * 2.

@@ -3,7 +3,6 @@
         could prioritize based on the bb volume
 
     TODO
-        Hovering a thing shows its affecters
         Sculpting can create new things or add to what's already there, depending on whether your paint is touching it
         You can hold two and it shows you different ones you could create from them
         Change the way your hand movement changes vizBeingModified
@@ -54,13 +53,13 @@ function initControl() {
 
         // testCircuits()
 
-        let viz1 = new DqViz(0xFF0000)
+        let viz1 = new DqViz()
         viz1.dq.copy(Translator(.2, 0., 0.))
         comfortableLookPos(-.3, viz1.markupPos,0.)
 
-        let viz2 = new DqViz(0xFF00FF)
+        let viz2 = new DqViz()
         viz2.dq.copy(Translator(0., .15, 0.))
-        comfortableLookPos( 0., viz2.markupPos, 0.1)
+        comfortableLookPos( 0., viz2.markupPos, 0.)
 
         let viz3 = new DqViz()
         comfortableLookPos( .3, viz3.markupPos, 0.)
@@ -87,6 +86,10 @@ function initControl() {
         // }
     }
 
+    let highlightedColor = new THREE.Color(0xFFFFFF)
+    let highlighteeIsAffecteeCol = new THREE.Color(0xFF0000)
+    let highlighteeIsAffectorCol = new THREE.Color(0x00FF00)
+
     initButtonLabels()
 
     // document.addEventListener(`mouseRewind`, () => { log("yo") })
@@ -98,11 +101,20 @@ function initControl() {
     dispVizes[0].visible = false; dispVizes[1].visible = false;
     let handDqOnGrabs = [new Dq(), new Dq()]
     let snappableDqOnGrabs = [new Dq(), new Dq()]
+    // let smootheningRecords = [new Dq(), new Dq()]
 
     let paintees = [null,null]
     let highlightees = [null,null]
     let grabbees = [null,null]
     let oddVersor = false
+
+    deleteHeld = (focusHand) => {
+
+        if (grabbees[focusHand] !== null) {
+            grabbees[focusHand].dispose()
+            grabbees[focusHand] = null
+        }
+    }
 
     onHandButtonDown = (isTriggerButton, isSideButton, focusHand) => {
 
@@ -115,16 +127,15 @@ function initControl() {
         //side -> nothing -> even versor
 
         let otherHand = 1-focusHand
-        
-        if ((grabbees[focusHand] !== null && isTriggerButton) ||
-            (paintees[focusHand] !== null && isSideButton))
-            return
             
         if ( isSideButton ) {
 
+            if (paintees[focusHand] !== null)
+                return  // later: it controls a boolean related to that thing
+
             grabbees[focusHand] = paintees[otherHand] || highlightees[focusHand]
 
-            log(focusHand, grabbees )
+            // log(focusHand, grabbees )
 
             if (grabbees[RIGHT] !== null && grabbees[LEFT] !== null && grabbees[RIGHT] === grabbees[LEFT])
                 oddVersor = true
@@ -146,17 +157,21 @@ function initControl() {
         }
         else if(isTriggerButton) {
 
-            paintees[focusHand] = grabbees[otherHand] || paintees[otherHand] || highlightees[focusHand]
-            if (paintees[focusHand] === null) {
-                paintees[focusHand] = new DqViz()
-                paintees[focusHand].sclptable = new Sclptable(paintees[focusHand])
+            if( grabbees[focusHand] !== null )
+                deleteHeld(focusHand)
+            else {
+                paintees[focusHand] = grabbees[otherHand] || paintees[otherHand] || highlightees[focusHand]
+
+                if (paintees[focusHand] === null)
+                    paintees[focusHand] = new DqViz()
+
+                if(paintees[focusHand].sclptable === null)
+                    paintees[focusHand].sclptable = new Sclptable(paintees[focusHand])
             }
         }
     }
 
     movingPaintingHighlightingHandLabels = () => {
-
-        // log(grabbees, highlightees)
 
         // setLabels(paintee !== null, grabbee !== null, paintHandIsRight, grabbHandIsRight)
 
@@ -173,7 +188,11 @@ function initControl() {
 
                 // hands[hand].dq.mulReverse(handDqOnGrabs[hand], dispVizes[hand].dq)
                 // dispVizes[hand].dq.mul(oldVizes[hand].dq, grabbees[hand].dq)
+
+                // smootheningRecords[hand].add(hands[hand].dq, dq0).normalize()
+
                 let movementSinceGrab = hands[hand].dq.mulReverse(handDqOnGrabs[hand], dq0)
+                // some mild snapping here miiiight be nice?
                 movementSinceGrab.mul(snappableDqOnGrabs[hand], grabbees[hand].dq )
                 grabbees[hand].dq.normalize()
                 dispVizes[hand].dq.copy(movementSinceGrab)
@@ -221,25 +240,38 @@ function initControl() {
         //////////////////////////////
 
         snappables.forEach(snappable => {
-
-            snappable.boxHelper.visible = highlightees.indexOf(snappable) !== -1
-
-            if (snappable.sclptable)
-                snappable.sclptable.boxHelper.visible = snappable.boxHelper.visible
+            snappable.boxHelper.visible = false
+            if(snappable.sclptable)
+                snappable.sclptable.boxHelper.visible = false
         })
 
         snappables.forEach(snappable => {
-            snappable.circuitVisible =
-                highlightees.indexOf(snappable) !== -1 ||
-                interdependencyExists(snappable, highlightees[0]) ||
-                interdependencyExists(snappable, highlightees[1])
-        })
+            snappable.boxHelper.visible = false
+            snappable.circuitVisible = false //fuck that for now
 
-        // let dqVizWithCircuitShowing = highlightee || vizBeingModified
-        // if (dqVizWithCircuitShowing === null)
-        //     hideCircuit()
-        // else
-        //     showCircuit(dqVizWithCircuitShowing)
+            highlightees.forEach(highlightee => {
+                if(highlightee === null)
+                    return
+
+                if (highlightee === snappable) {
+                    snappable.boxHelper.visible = true
+                    snappable.boxHelper.material.color.copy(highlightedColor)
+                }
+                else if (highlightee.dependsOn(snappable) ) {
+                    snappable.boxHelper.visible = true
+                    snappable.boxHelper.material.color.copy(highlighteeIsAffectorCol)
+                }
+                else if( snappable.dependsOn(highlightee) ) {
+                    snappable.boxHelper.visible = true
+                    snappable.boxHelper.material.color.copy(highlighteeIsAffecteeCol)
+                }
+            })
+
+            if (snappable.sclptable) {
+                snappable.sclptable.boxHelper.visible = snappable.boxHelper.visible
+                snappable.sclptable.boxHelper.material.color.copy( snappable.boxHelper.material.color )
+            }
+        })
     }
     
     onHandButtonUp = (isTriggerButton, isSideButton, focusHand) => {
@@ -277,14 +309,6 @@ function initControl() {
 
     function interdependencyExists(a, b) {
         return a.dependsOn(b) || b.dependsOn(a)
-    }
-
-    deleteHeld = (focusHand) => {
-
-        if (grabbees[focusHand] !== null) {
-            grabbees[focusHand].dispose()
-            grabbees[focusHand] = null
-        }
     }
 
     let testPoint = new Fl()

@@ -30,13 +30,13 @@ function initHands() {
     // Mouse //
     ///////////
     {
-        let simulatingRightHand = 0
+        let focusHand = 0
 
         let discreteStickNew = new THREE.Vector2()
         let discreteStick = new THREE.Vector2()
         getPalletteInput = () => {
             if (!discreteStick.equals(discreteStickNew))
-                updatePaletteFromDiscreteStick(discreteStick, simulatingRightHand)
+                updatePaletteFromDiscreteStick(discreteStick, focusHand)
         }
 
         let lazyHandPosRight = new Fl()
@@ -51,14 +51,15 @@ function initHands() {
         function mouseControlKeyEvents(event) {
             if (event.key === ` `) {
                 
-                onHandButtonUp(true, false, simulatingRightHand)
-                onHandButtonUp(false, true, simulatingRightHand)
+                onHandButtonUp(true, false, focusHand)
+                onHandButtonUp(false, true, focusHand)
 
-                simulatingRightHand = 1-simulatingRightHand
+                focusHand = 1-focusHand
             }
 
-            if (event.key === "6" && event.ctrlKey) //mouse rewind
-                deleteHeld(simulatingRightHand)
+            //mouse rewind IF THIS ISN'T WORKING CHECK SCRIPT, MAY NEED TO CHANGE WINDOW NAME
+            if (event.key === "6" && event.ctrlKey)
+                deleteHeld(focusHand)
             // if (event.key === "5" && event.ctrlKey) //mouse fast forward
             //     document.dispatchEvent(new Event(`mouseFastForward`))
 
@@ -84,20 +85,20 @@ function initHands() {
 
             camera.frustum.near.projectOn(comfortableLookPos(0.,fl0,0.), workingPlane)
 
-            let activeHand = simulatingRightHand ? handRight : handLeft
-            let lazyPos = simulatingRightHand ? lazyHandPosRight : lazyHandPosLeft
+            let hand = hands[focusHand]
+            let lazyPos = focusHand ? lazyHandPosLeft : lazyHandPosRight
 
             let placeToPointAt = workingPlane.meet(rayToMouse, fl0)
             fl0.pointToGibbsVec(posIndicator.position)
 
-            lazyPos.joinPt(placeToPointAt, activeHand.laserDq)
+            lazyPos.joinPt(placeToPointAt, hand.laserDq)
             let laserUnMoved = e12.projectOn(lazyPos, dq3).negate(dq3)
-            let pointAtRotation = activeHand.laserDq.mulReverse(laserUnMoved, dq2).sqrtSelf()
+            let pointAtRotation = hand.laserDq.mulReverse(laserUnMoved, dq2).sqrtSelf()
 
             let toLazyPos = e123.dqTo(lazyPos, dq5)
-            pointAtRotation.mul(toLazyPos, dq1).mul(mouseWheelTransform,activeHand.dq)
+            pointAtRotation.mul(toLazyPos, dq1).mul(mouseWheelTransform,hand.dq)
 
-            activeHand.dq.sandwich(e3, activeHand.laserPlane)
+            hand.dq.sandwich(e3, hand.laserPlane)
 
             discreteStick.copy(discreteStickNew)
             discreteStickNew.set(0.,0.)
@@ -156,17 +157,18 @@ function initHands() {
         function onMouseButtonDown(event) {
             let isLeftButton = event.button === 0
             let isRightButton = event.button === 2
-            onHandButtonDown(isLeftButton, isRightButton, simulatingRightHand)
+            onHandButtonDown(isLeftButton, isRightButton, focusHand)
         }
         function onMouseButtonUp(event) {
             let isLeftButton = event.button === 0
             let isRightButton = event.button === 2
-            onHandButtonUp(isLeftButton, isRightButton, simulatingRightHand)
+            onHandButtonUp(isLeftButton, isRightButton, focusHand)
         }
         document.addEventListener("pointerdown", onMouseButtonDown )
         document.addEventListener("pointerup", onMouseButtonUp )
 
         removeMouseEventListeners = () => {
+            console.error("y")
 
             document.removeEventListener('pointermove', onMouseMove)
             document.removeEventListener('wheel', onMouseWheel)
@@ -241,6 +243,9 @@ function initHands() {
 
                 // log(datas[0].axes)
 
+                //there's something sad going on here, which is that we appear to be losing double cover info
+                //one way to avoid this might be to store the old one,
+                //then compare the diff to the new with the diff to the new*-1
                 vrRight.dq.fromPosQuat(vrRight.position, vrRight.quaternion)
                 vrLeft.dq.fromPosQuat(vrLeft.position, vrLeft.quaternion)
 
@@ -256,6 +261,12 @@ function initHands() {
 
                     discreteSticksOld[i].copy(discreteSticks[i])
                     vrControllerAxesToDiscreteStick(source.gamepad.axes, discreteSticks[i])
+                    // source.gamepad.buttons.forEach((button, j) => {
+                    //     if(button.pressed)
+                    //         log(j, button)
+                    // })
+                    // if(source.gamepad.buttons[0].pressed)
+                    //     deleteHeld(i)
                     ++i
                 }
 

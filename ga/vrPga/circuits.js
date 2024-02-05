@@ -119,6 +119,7 @@ function initCircuits() {
             if ( s === null || !s.visible || !s.circuitVisible || s.affecters[0] === null )
                 return
 
+
             let c = circuits[lowestUnusedCircuit]
 
             if (opIsSingleArgument(s.affecters[2]))
@@ -126,13 +127,11 @@ function initCircuits() {
 
             c.visible = true
 
-
             // c.text.material = opMats[operators[s.affecters[2]]]
             // c.text.scale.x = c.text.scale.y * (c.text.material.map.image.width / c.text.material.map.image.height)
 
-            // c.visible = true
-
             let dls = c.dottedLines
+
             dls.forEach((dl,i) => {
 
                 let isOut = i === 0
@@ -155,53 +154,9 @@ function initCircuits() {
                 onFloor.pointToGibbsVec(dl.position)
             })
 
-            getDesiredCenter(c)
-            
-            dls.forEach((dl, i) => {
-
-                // if(i !== 1)
-                //     return
-                
-                let isOut = i === 0
-                let fw = c.floorWires[i]
-
-                let ourCorner = c.opBg.localToWorld(v1.copy( triVerts[i] ))
-                let start = isOut ? ourCorner : dl.position
-                let end   = isOut ? dl.position : ourCorner
-                let startPt = fl0.pointFromGibbsVec(start)
-                let endPt = fl3.pointFromGibbsVec(end)
-
-                rotationAxisFromDirAndPoints(
-                    circleDirection,
-                    ourCorner,
-                    dl.position,
-                    centralAxis )
-
-                let startPlane = centralAxis.joinPt(startPt, fl1)
-                let endPlane = centralAxis.joinPt(endPt, fl2)
-                
-                let rotationMoreThan180 = isOut ? 
-                    (startPlane.joinPt(endPt, fl4))[0] < 0. :
-                    (endPlane.joinPt(startPt, fl4))[0] > 0.
-
-                // log(startPlane)
-
-                endPlane.mulReverse(startPlane, dq0).sqrtSelf()
-                // log(rotationMoreThan180)
-                // if (rotationMoreThan180)
-                //     dq0.multiplyScalar(-1.,dq0)                
-                dq0.normalize().logarithm(fw.material.dq)
-
-                // debugPlanes[0].fl.copy(startPlane)
-                // centralAxis.meet(e2, debugPlanes[0].markupPos)
-                // debugPlanes[1].fl.copy(endPlane)
-                // centralAxis.meet(e2, debugPlanes[1].markupPos)
-                // log(endPlane)
-                // debugDqs[0].dq.copy(centralAxis)
-
-                fw.start.pointFromGibbsVec(start).normalize()
-                
-            })
+            c.opBg.position.addVectors(v1.addVectors(dls[0].position, dls[1].position), dls[0].position).multiplyScalar(1. / 3.)
+            // c.opBg.position.set(0.,0.,0.)
+            debugSphere.position.copy(c.opBg.position)
 
             ++lowestUnusedCircuit
             if (lowestUnusedCircuit >= circuits.length)

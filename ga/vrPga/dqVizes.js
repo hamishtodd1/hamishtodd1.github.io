@@ -157,9 +157,11 @@ function initDqVizes() {
         extraShaftGeo.translate(0.,1000.,0.)
     }
     
-    let rotAxisRadius = .006
+    let colFactor = 0.
+    let colFactorIncrease = 1./sq(Math.sqrt(5.) / 2. + .5)
+    let rotAxisRadius = .0025
     let trnAxisRadius = .12
-    let rotAxisGeo = new THREE.CylinderGeometry(rotAxisRadius, rotAxisRadius, camera.far * 10., 5, 1, true)
+    let rotAxisGeo = new THREE.CylinderGeometry(rotAxisRadius, rotAxisRadius, 1., 5, 1, false)
     let trnAxisGeo = new THREE.CylinderGeometry(trnAxisRadius, trnAxisRadius, camera.far * 10., 5, 1, true)
     let rotationPart = new Dq()
     let translationPart = new Dq()
@@ -171,7 +173,7 @@ function initDqVizes() {
     let cupBox = new THREE.Box3()
     class DqViz extends THREE.Group {
         
-        constructor(col = dqCol, transparent = false, omitFromSnappables = false) {
+        constructor(col, transparent = false, omitFromSnappables = false) {
 
             super()
             scene.add(this)
@@ -179,12 +181,19 @@ function initDqVizes() {
             if(!omitFromSnappables)
                 snappables.push(this)
 
+            if(col === undefined) {
+                col = new THREE.Color()
+                let i = (colFactor * 3.) % 3
+                col.lerpColors(discreteViridis[Math.floor(i)].color, discreteViridis[Math.ceil(i)].color, i % 1.)
+                // log(col)
+                colFactor += colFactorIncrease
+            }
             let axisMat = new THREE.MeshPhongMaterial({
                 color: col,
-                transparent: transparent,
-                opacity: transparent ? .4 : 1.
+                transparent: true,
+                opacity: .65
             })
-            this.rotAxisMesh = new DqMesh(rotAxisGeo, axisMat)
+            this.rotAxisMesh = new THREE.Mesh(rotAxisGeo, axisMat)
             this.rotAxisMesh.visible = false
             this.add(this.rotAxisMesh)
 
@@ -206,7 +215,7 @@ function initDqVizes() {
             this.extraShaft.visible = false
             this.add(this.extraShaft)
 
-            this.cup = new THREE.Mesh(cupGeo, axisMat)
+            this.cup = new THREE.Mesh(cupGeo, new THREE.MeshPhongMaterial({ color: col }))
             this.cup.visible = false
             this.add(this.cup)
 
@@ -295,8 +304,10 @@ function initDqVizes() {
                     else {
                         this.rotAxisMesh.visible = true
 
-                        rotationPart.selectGrade(2, dq0)
-                        e31.dqTo(dq0, this.rotAxisMesh.dq)
+                        rotationPart.selectGrade(2, dq1)
+                        e31.dqTo( dq1.projectOn(e123, dq0), this.rotAxisMesh.dq ).toQuaternion(this.rotAxisMesh.quaternion)
+                        nonNetherDq.sqrt(dq0).sandwich(this.markupPos,fl0).projectOn(dq1, fl1).pointToGibbsVec(this.rotAxisMesh.position)
+                        this.rotAxisMesh.scale.y = this.boundingBox.getSize(v0).length()
                     }
 
                     if (translationPart.approxEquals(oneDq))

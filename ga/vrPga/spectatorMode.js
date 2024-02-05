@@ -94,7 +94,7 @@ function initPotentialSpectatorReception() {
 
         spectatorCamera.fov = 12.
         comfortableHandPos(fl0).pointToGibbsVec(spectatorCamera.position)
-        spectatorCamera.position.z -= 1.4
+        spectatorCamera.position.z -= 2.4
         spectatorCamera.near = .8
         spectatorCamera.lookAt(comfortableHandPos(fl0).pointToGibbsVec(v1))
 

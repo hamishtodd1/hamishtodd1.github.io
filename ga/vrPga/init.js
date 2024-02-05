@@ -4,16 +4,18 @@
         Grab dq and you're holding the markupPos; other hand modifies what it does
         Gotta be experimenting!
 
-    TODO for "show" demo:
-        Make the silly old Ram!
+    TODO for FoC demo:
+        Make the silly old Ram
+            Trigger button controls boolean, for mouth
+            Hold it by the head
+            Body follows
+            Legs pump when moved, eg the instantaneous movement is known
         More operations, and snapping should be accurate (snap button?)
-        Circuits better
-            Could return to spreadsheets
-            No, just need non CIRCULAR things dummy
         Eraser of paint
-        Passthrough. Maybe with a translucent cube surrounding you to make it less distracting
     Jon demo:
-        Deletion
+        Passthrough. Maybe with a translucent cube surrounding you to make it less distracting
+        Gauges =/ because that's what it's about
+        Limit on how tight an arrow can wind
         Levels
         Undo
         Eyeballs on vizes
@@ -23,6 +25,10 @@
             Make an animation with the smallest number of bones, so it's doing a complex thing
         Some levels!!!!!!
         Are you using the measurer for anything? If so, some numbers...
+        Show the "code"
+            OR JESUS SINCE THEY ARE ONE OPERATION EACH DOES IT REALLY MATTER
+            Spreadsheets help you keep track of them
+            No, just need non CIRCULAR things dummy
     Beyond:
         Experiment with stage from your POV (but probably keep as is because facing audience is good)
         Hidden surface removal for boxhelpers
