@@ -2,6 +2,14 @@ function initMultivectorWithoutDeclarations() {
     
     class Multivector extends Float32Array {
 
+        l1NormTo(that) {
+            if(this.constructor !== that.constructor)
+                return Infinity
+
+            let subtraction = this.sub(that, this.constructor === Dq ? newDq:newFl)
+            return Math.abs(subtraction[0]) + Math.abs(subtraction[1]) + Math.abs(subtraction[2]) + Math.abs(subtraction[3]) + Math.abs(subtraction[4]) + Math.abs(subtraction[5]) + Math.abs(subtraction[6]) + Math.abs(subtraction[7])
+        }
+
         gradeDiff(that) {
             let thisGrade = this.grade()
             let thatGrade = that.grade()
@@ -16,8 +24,8 @@ function initMultivectorWithoutDeclarations() {
 
             let mIsDq = this.constructor === that.constructor
             let m = that.mulReverse(this, mIsDq ? newDq : newFl)
+            
             let selected = mIsDq ? newDq : newFl
-
             let numerator   =                  Math.sqrt(m.selectGrade(g + 2, selected).eNormSq())
             let denominator = g === 0 ? m[0] : Math.sqrt(m.selectGrade(    g, selected).eNormSq())
 
@@ -223,6 +231,16 @@ function initMultivectorWithoutDeclarations() {
                 if (this[i] !== 0.)
                     ret = false
             return ret
+        }
+
+        includesGrade(g) {
+            
+            for(let i = 0; i < 8; ++i) {
+                if(this.constructor.indexGrades[i] === g && Math.abs(this[i]) > eps)
+                    return true
+            }
+
+            return false
         }
 
         selectGrade(desiredGrade, target) {

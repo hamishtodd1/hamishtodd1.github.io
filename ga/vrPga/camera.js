@@ -10,18 +10,18 @@ function initCamera(container) {
     const lookDownRotation = lookDownRotationAxis.exp(new Dq())
     
     const posUnrotated = new Fl()
-    comfortableLookPos = ( x, target, extraDist = 0. ) => {
+    comfortableLookPos = ( target, x = 0., extraDist = 0. ) => {
         posUnrotated.point(x, 1.2, -(comfortabledistance + extraDist), 1.)
         return lookDownRotation.sandwich( posUnrotated, target )
     }
     const lookToHand = new Dq().translator(0.,-0.22,0.)
-    comfortableHandPos = (target) => {
-        let lookPos = comfortableLookPos(0., fl6, 0.)
+    comfortableHandPos = (target, x = 0.) => {
+        let lookPos = comfortableLookPos(fl6, x, 0.)
         return lookToHand.sandwich(lookPos, target)
     }
 
     orbitControls = new OrbitControls(camera, container)
-    comfortableLookPos(0., fl0, 0.).pointToGibbsVec(orbitControls.target)
+    comfortableLookPos(fl0).pointToGibbsVec(orbitControls.target)
     orbitControls.update()
     orbitControls.enableZoom = false //change whenever you like!
     camera.quaternion.setFromAxisAngle(xUnit, -comfortableLookAngle)
@@ -53,7 +53,7 @@ function initCamera(container) {
     for (let planeName in camera.frustum)
         frustumUntransformed[planeName] = new Fl()
 
-    frustumUntransformed.far.plane(camera.far * .8, 0., 0., 1.) //eyeballed. Which is not great.
+    frustumUntransformed.far.plane(camera.far * .45, 0., 0., 1.) //eyeballed. Which is not great.
     frustumUntransformed.near.plane(camera.near * -1.03, 0., 0., 1.)
     frameQuatHorizontal.sandwich( e1, frustumUntransformed.left )
     frameQuatVertical.sandwich(   e2, frustumUntransformed.bottom )

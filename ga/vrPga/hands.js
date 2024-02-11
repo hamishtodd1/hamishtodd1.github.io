@@ -11,7 +11,7 @@ function initHands() {
     handLeft = new DqMesh(standinHandGeo, new THREE.MeshPhongMaterial({ color: 0x0000FF }))
     scene.add(handRight)
     scene.add(handLeft)
-    // e123.dqTo(comfortableLookPos(0., fl0, -.42), handRight.dq)
+    // e123.dqTo(comfortableLookPos(fl0, 0., -.42), handRight.dq)
 
     const laserPointerGeo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, 0, 1), new THREE.Vector3(0, 0, -1)])
     function bestowHandProperties() {
@@ -51,8 +51,8 @@ function initHands() {
         function mouseControlKeyEvents(event) {
             if (event.key === ` `) {
                 
-                onHandButtonUp(true, false, focusHand)
-                onHandButtonUp(false, true, focusHand)
+                // onHandButtonUp(true, false, focusHand)
+                // onHandButtonUp(false, true, focusHand)
 
                 focusHand = 1-focusHand
             }
@@ -74,7 +74,7 @@ function initHands() {
             return workingPlane.meet(hands[isLeft].laserDq, target)
         }
 
-        let posIndicator = new THREE.Mesh(new THREE.SphereGeometry(.01), new THREE.MeshPhongMaterial({color:0xFF0000}))
+        let posIndicator = new THREE.Mesh(new THREE.SphereGeometry(.01), new THREE.MeshPhongMaterial({color:0x00FF00}))
         scene.add(posIndicator)
 
         let workingPlane = new Fl()
@@ -83,7 +83,7 @@ function initHands() {
 
             mouseWheelTransformOld.copy(mouseWheelTransform)
 
-            camera.frustum.near.projectOn(comfortableLookPos(0.,fl0,0.), workingPlane)
+            camera.frustum.near.projectOn(comfortableLookPos(fl0), workingPlane)
 
             let hand = hands[focusHand]
             let lazyPos = focusHand ? lazyHandPosLeft : lazyHandPosRight

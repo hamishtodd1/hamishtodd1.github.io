@@ -25,6 +25,11 @@
 
 function initCircuits() {
 
+    opIsSingleArgument = (opIndex) => {
+        let op = operators[opIndex]
+        return dq0[op].length === 1
+    }
+
     var circuitsGroup = new THREE.Group()
     obj3dsWithOnBeforeRenders.push(circuitsGroup)
     if (!spectatorMode)

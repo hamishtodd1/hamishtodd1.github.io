@@ -1,10 +1,9 @@
 /*
-    It's probably quite fun just to look at dq arrow compositions
-    Like the vector picture but a bit more fun because you can curve
-
     TODO:
         A null bivector, hey man, that's still valid - it's a translation to infinity
         So, Just the beginning of the arrow, going off into the sky
+
+    Possibly should have points at infinity where the axes meet the sky
 
     The box should be at the center of the circle that all three points fall on
         Unless two of the floor points are within a certain distance of each other
@@ -40,26 +39,6 @@
 
 
 function initDqVizes() {
-
-    opIsSingleArgument = (opIndex) => {
-        let op = operators[opIndex]
-        return dq0[op].length === 1
-    }
-
-    function operate(affecters, target) {
-
-        let op = operators[affecters[2]]
-        let affecter0 = affecters[0]
-        let affecter1 = affecters[1]
-
-        // debugger
-        if (affecter0.dq[op].length === 1)
-            affecter0.dq[op](target)
-        else
-            affecter0.dq[op](affecter1.dq, target)
-
-        target.normalize()
-    }
 
     let dqCol = 0x00FFFF
     /*
@@ -160,7 +139,7 @@ function initDqVizes() {
     let colFactor = 0.
     let colFactorIncrease = 1./sq(Math.sqrt(5.) / 2. + .5)
     let rotAxisRadius = .0025
-    let trnAxisRadius = .12
+    let trnAxisRadius = .06
     let rotAxisGeo = new THREE.CylinderGeometry(rotAxisRadius, rotAxisRadius, 1., 5, 1, false)
     let trnAxisGeo = new THREE.CylinderGeometry(trnAxisRadius, trnAxisRadius, camera.far * 10., 5, 1, true)
     let rotationPart = new Dq()
@@ -177,9 +156,15 @@ function initDqVizes() {
 
             super()
             scene.add(this)
+            
+            this.boundingBox = new THREE.Box3()
+            this.boxHelper = new THREE.BoxHelper()
+
+            if (!omitFromSnappables)
+                giveSnappableProperties(this)
+        
             this.dq = new Dq() //better to say mv really, disambiguate from dqMeshes
-            if(!omitFromSnappables)
-                snappables.push(this)
+            this.mv = this.dq
 
             if(col === undefined) {
                 col = new THREE.Color()
@@ -199,17 +184,9 @@ function initDqVizes() {
 
             this.circuitVisible = false
 
-            this.sclptable = null
-
             this.trnAxisMesh = new THREE.Mesh(trnAxisGeo, axisMat)
             this.trnAxisMesh.visible = false
             this.add(this.trnAxisMesh)
-
-            this.boxHelper = new THREE.BoxHelper()
-            this.boundingBox = new THREE.Box3()
-            this.boxHelper.visible = false
-            this.boxHelper.matrixAutoUpdate = false
-            this.add(this.boxHelper)
 
             this.extraShaft = new THREE.Mesh(extraShaftGeo, axisMat)
             this.extraShaft.visible = false
@@ -223,10 +200,6 @@ function initDqVizes() {
             this.scalarSign.scale.multiplyScalar(.4)
             this.scalarSign.visible = false
             this.add(this.scalarSign)
-
-            this.affecters = [
-                null, null, -1
-            ]
 
             let arrowMat = new THREE.MeshPhong2Material({
                 color: col,
@@ -307,7 +280,7 @@ function initDqVizes() {
                         rotationPart.selectGrade(2, dq1)
                         e31.dqTo( dq1.projectOn(e123, dq0), this.rotAxisMesh.dq ).toQuaternion(this.rotAxisMesh.quaternion)
                         nonNetherDq.sqrt(dq0).sandwich(this.markupPos,fl0).projectOn(dq1, fl1).pointToGibbsVec(this.rotAxisMesh.position)
-                        this.rotAxisMesh.scale.y = this.boundingBox.getSize(v0).length()
+                        this.rotAxisMesh.scale.y = this.boundingBox.getSize(v0).length() * 1.8
                     }
 
                     if (translationPart.approxEquals(oneDq))
@@ -321,7 +294,6 @@ function initDqVizes() {
                         camera.mvs.pos.projectOn(fakeLineAtInfinity, fl0).pointToGibbsVec(this.trnAxisMesh.position)
                         let fakeAtOrigin = fakeLineAtInfinity.projectOn(e123, dq0)
                         e31.dqTo(fakeAtOrigin, dq2).toQuaternion(this.trnAxisMesh.quaternion)
-                        
 
                     }
                 }
@@ -379,57 +351,38 @@ function initDqVizes() {
             }
         }
 
+        regularizeMarkupPos() {
+
+            let bivPart = this.dq.selectGrade(2, dq0)
+
+            //could have something about it going to being closer to your line of sight
+
+            if ( Math.abs(bivPart.eNormSq()) < eps )
+                return
+
+            //want to pull it in a good direction
+            let markupPosOnRotAxis = this.markupPos.projectOn( bivPart, fl0 )
+            let out = markupPosOnRotAxis.dqTo(this.markupPos, dq1).normalizeTranslation()
+            let dist = out.translationDistance()
+            let newDist = clamp(dist, .015, .06)
+            out[1] *= newDist / dist
+            out[2] *= newDist / dist
+            out[3] *= newDist / dist
+
+            log(dist, newDist)
+
+            out.sandwich( markupPosOnRotAxis, this.markupPos )
+        }
+
         dispose() {
 
-            if( snappables.indexOf(this) !== -1) {
-
-                let i = snappables.indexOf(this)
-
-                if (spectatorMode === false)
-                    socket.emit(`disposeSnappable`, { i })
-
-                snappables.splice(i, 1)
-            }
-
-            if(this.sclptable !== null) {
-                let s = this.sclptable
-                this.sclptable = null
-                s.dispose()
-            }
-
-            while(this.children.length > 0) {
-                let child = this.children[this.children.length - 1]
-                this.remove(child)
-            }
-
-            scene.remove(this)
+            disposeMostOfSnappable(this)
 
             this.arrow.material.dispose()
             this.rotAxisMesh.material.dispose()
             this.boxHelper.dispose()
             
             this.scalarSign.dispose()
-        }
-
-        dependsOn(viz) {
-            let ret = false
-            if (this.affecters[0] === viz ||
-                this.affecters[1] === viz)
-                ret = true
-
-            if (ret === false && this.affecters[0] !== null)
-                ret = this.affecters[0].dependsOn(viz)
-            if (ret === false && this.affecters[1] !== null)
-                ret = this.affecters[1].dependsOn(viz)
-
-            return ret
-        }
-
-        updateFromAffecters() {
-            if (this.affecters[0] !== null) {
-                operate(this.affecters, this.dq)
-                this.dq.normalize()
-            }
         }
 
         setColor(newColor) {

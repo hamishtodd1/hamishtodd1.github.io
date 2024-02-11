@@ -48,7 +48,7 @@ function initVrButton() {
                         // ('local' is always available for immersive sessions and doesn't need to
                         // be requested separately.)
                         const sessionInit = { optionalFeatures: ['local-floor', 'bounded-floor', 'hand-tracking', 'layers'] };
-                        navigator.xr.requestSession('immersive-vr', sessionInit).then(onSessionStarted);
+                        navigator.xr.requestSession(passThroughMode ? 'immersive-ar' : 'immersive-vr', sessionInit).then(onSessionStarted);
                     } else {
                         currentSession.end();
                     }
@@ -95,7 +95,7 @@ function initVrButton() {
                 button.style.display = 'none';
                 stylizeElement(button);
 
-                navigator.xr.isSessionSupported('immersive-vr').then(function (supported) {
+                navigator.xr.isSessionSupported(passThroughMode ? 'immersive-ar' : 'immersive-vr').then(function (supported) {
                     supported ? showEnterVR() : showWebXRNotFound();
                     if (supported && VRButton.xrSessionIsGranted) {
                         button.click();

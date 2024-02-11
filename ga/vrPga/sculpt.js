@@ -203,7 +203,7 @@ function initSclptables()
             })
         })
         
-        updatePalette = () => {
+        updatePaletteAnimation = () => {
 
             visibilityCountdown -= frameDelta
             if (visibilityCountdown < 0.)

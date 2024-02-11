@@ -101,6 +101,8 @@ function initPotentialSpectatorReception() {
         spectatorCamera.updateMatrixWorld()
         spectatorCamera.updateProjectionMatrix() //and need to do frustum things too
 
+        addStage(spectatorCamera, weAreSpectator)
+
         if (!weAreSpectator) {
 
             let cameraHelper = new THREE.CameraHelper(spectatorCamera)
@@ -109,7 +111,6 @@ function initPotentialSpectatorReception() {
 
             cameraHelper.update()
             cameraHelper.updateMatrixWorld()
-
             
             {
                 let surfaces = [
@@ -163,4 +164,56 @@ function initPotentialSpectatorReception() {
 
         return spectatorCamera
     }
+
+    function addStage( cameraToAddTo, haveMiddle ) {
+
+        let stage = new THREE.Group()
+        if (cameraToAddTo.parent !== scene)
+            scene.add(cameraToAddTo)
+        cameraToAddTo.add(stage)
+        
+        stage.position.z = -1.1 * cameraToAddTo.near
+        stage.scale.multiplyScalar(1. / 6.5)
+
+        let imageAspect = 620. / 384.
+        // let middleAspect = 253. / 384.
+
+        if (haveMiddle) {
+            textureLoader.load('data/stageBack.png', (texture) => {
+                const mat = new THREE.MeshBasicMaterial({
+                    transparent: true,
+                    map: texture,
+                    side: THREE.DoubleSide
+                })
+                const middle = new THREE.Mesh(new THREE.PlaneGeometry(1., 1.), mat)
+                middle.scale.x = cameraToAddTo.aspect * 1.23 //eyeballed
+                stage.add(middle)
+            })
+        }
+        textureLoader.load('data/curtainRight.png', (texture) => {
+            const mat = new THREE.MeshBasicMaterial({
+                transparent: true,
+                map: texture,
+                side: THREE.DoubleSide
+            })
+            const curtain = new THREE.Mesh(new THREE.PlaneGeometry(1., 1.), mat)
+            curtain.scale.x = imageAspect
+            curtain.position.x = cameraToAddTo.aspect / 2. - curtain.scale.x / 2.
+            curtain.position.z = -.001
+            stage.add(curtain)
+        })
+        textureLoader.load('data/curtainLeft.png', (texture) => {
+            const mat = new THREE.MeshBasicMaterial({
+                transparent: true,
+                map: texture,
+                side: THREE.DoubleSide
+            })
+            const curtain = new THREE.Mesh(new THREE.PlaneGeometry(1., 1.), mat)
+            curtain.scale.x = imageAspect
+            curtain.position.x = -(cameraToAddTo.aspect / 2. - curtain.scale.x / 2.)
+            curtain.position.z = .001
+            stage.add(curtain)
+        })
+    }
+    // addStage(camera, true)
 }

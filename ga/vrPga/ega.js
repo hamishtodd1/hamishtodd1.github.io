@@ -6,7 +6,7 @@ function initEgaWithoutDeclarations() {
             super(8)
         }
 
-        pointNormalize() {
+        normalizePoint() {
             this.multiplyScalar(1. / this[7], this)
             return this
         }
@@ -46,12 +46,16 @@ function initEgaWithoutDeclarations() {
             return this[1] * this[1] + this[2] * this[2] + this[3] * this[3] + this[7] * this[7]
         }
 
+        iNormSq() {
+            return this.getDual(newFl).eNormSq()
+        }
+
         getNormalization(target) {
 
             let adHocNormSq = this.eNormSq()
-            if (adHocNormSq === 0.)
-                adHocNormSq = this.getDual(newFl).eNormSq()
-            if (adHocNormSq === 0.)
+            if (adHocNormSq === 0. )
+                adHocNormSq = this.iNormSq()
+            if (adHocNormSq === 0. )
                 console.error("just tried to normalize: " + this.toString())
 
             let factor = 1. / Math.sqrt(adHocNormSq)
@@ -151,6 +155,16 @@ function initEgaWithoutDeclarations() {
         constructor() {
             super(8)
             this[0] = 1.
+        }
+
+        normalizeTranslation() {
+            this[1] /= this[0]; this[2] /= this[0]; this[3] /= this[0]
+            this[0] = 1.
+            return this
+        }
+
+        translationDistance() {
+            return Math.sqrt(this[1] * this[1] + this[2] * this[2] + this[3] * this[3]) / this[0]
         }
 
         slerp(end, t, target) {

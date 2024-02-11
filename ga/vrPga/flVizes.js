@@ -20,22 +20,33 @@ function initFlVizes() {
         opacity: .4
     })
     let pointMat = new THREE.MeshPhongMaterial({
-        color: 0x00FFFF,
+        color: 0xFF0000,
     })
     let planeGeo = new THREE.CircleGeometry(.2, 32)
+    planeGeo.computeBoundingBox()
     let pointGeo = new THREE.SphereGeometry(.004)
+    pointGeo.computeBoundingBox()
+
+    let boundingBox = new THREE.Box3()
 
     //need studs
     //dotted line axis maybe
     
     class FlViz extends THREE.Group {
 
-        constructor() {
+        constructor(omitFromSnappables = false) {
             
             super()
             scene.add(this)
 
+            this.boundingBox = new THREE.Box3()
+            this.boxHelper = new THREE.BoxHelper()
+
+            if (!omitFromSnappables)
+                giveSnappableProperties(this)
+
             this.fl = new Fl()
+            this.mv = this.fl
             this.fl.zero()
             this.markupPos = new Fl().point(0.,1.2,0.,1.)
 
@@ -49,32 +60,53 @@ function initFlVizes() {
             this.point.visible = false
             scene.add(this.point)
 
+            this.idealPoints = Array(new THREE.Mesh(pointGeo, pointMat), new THREE.Mesh(pointGeo, pointMat))
+            this.idealPoints.forEach((pt,i) => {
+                pt.visible = false
+                scene.add(pt)
+                pt.scale.setScalar(37.5)
+            })
+
             //arrow too maybe
 
             obj3dsWithOnBeforeRenders.push(this)
             this.onBeforeRender = () => {
+
+                this.boundingBox.makeEmpty()
+
+                this.point.visible = false
+                this.plane.visible = false
+                this.idealPoints.forEach(pt => pt.visible = false)
                 
                 let hasPlane = /*Math.abs(this.fl[0]) > eps || */Math.abs(this.fl[1]) > eps || Math.abs(this.fl[2]) > eps || Math.abs(this.fl[3]) > eps
-                let hasPoint = Math.abs(this.fl[4]) > eps || Math.abs(this.fl[5]) > eps || Math.abs(this.fl[6]) > eps || Math.abs(this.fl[7]) > eps
+                let hasPoint = this.fl.includesGrade(3)
 
-                this.point.visible = hasPoint
                 if( hasPoint) {
                     let isIdeal = this.fl[7] === 0.
                     if (!isIdeal) {
+                        this.point.visible = true
                         this.fl.pointToGibbsVec(this.point.position)
-                        this.point.scale.setScalar(1.)
+                        let camDistSq = this.point.position.distanceToSquared(camera.position)
+                        this.point.scale.setScalar(Math.sqrt(Math.sqrt(camDistSq)) )
                     }
                     else {
                         this.fl.fakeThingAtInfinity(fl0)
-                        fl0.pointToGibbsVec(this.point.position)
-                        this.point.scale.setScalar(10.)
+                        fl0.pointToGibbsVec(this.idealPoints[0].position)
+                        this.idealPoints[1].position.copy(this.idealPoints[0].position)
+                        this.idealPoints[0].visible = true
+                        this.idealPoints[1].visible = true
                     }
 
                     this.markupPos.pointFromGibbsVec(this.point.position)
+
+                    boundingBox.copy(pointGeo.boundingBox)
+                    this.point.updateMatrixWorld()
+                    boundingBox.applyMatrix4(this.point.matrixWorld)
+                    this.boundingBox.union(boundingBox)
                 }
 
-                this.plane.visible = hasPlane
                 if (hasPlane ) {
+                    this.plane.visible = true
                     
                     this.markupPos.pointToGibbsVec(this.plane.position)
                     fl1.pointFromGibbsVec(this.plane.position)
@@ -83,6 +115,11 @@ function initFlVizes() {
 
                     //TODO studs, rounded back, sharp front
                     //randomly distributed, maybe moving super slowly
+
+                    boundingBox.copy(planeGeo.boundingBox)
+                    this.plane.updateMatrixWorld()
+                    boundingBox.applyMatrix4(this.plane.matrixWorld)
+                    this.boundingBox.union(boundingBox)
                 }
 
                 if (hasPlane && hasPoint) {
@@ -91,14 +128,21 @@ function initFlVizes() {
                     //arrows gaugeable
                     //also the 3-reflection I guess, 3 planes
                 }
+
+                updateBoxHelper(this.boxHelper, this.boundingBox)
             }
+        }
+
+        dispose() {
+
+            disposeMostOfSnappable(this)
         }
     }
     window.FlViz = FlViz
 
     debugFls = [
-        new FlViz(), new FlViz(),
-        new FlViz(), new FlViz()
+        new FlViz(true), new FlViz(true),
+        new FlViz(true), new FlViz(true)
     ]
     debugFls.forEach(dfl => {
         dfl.fl.zero()

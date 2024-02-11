@@ -5,17 +5,23 @@
         Gotta be experimenting!
 
     TODO for FoC demo:
-        Make the silly old Ram
-            Trigger button controls boolean, for mouth
-            Hold it by the head
-            Body follows
-            Legs pump when moved, eg the instantaneous movement is known
-        More operations, and snapping should be accurate (snap button?)
-        Eraser of paint
+        Just an eye that rotates in place
+            Join eye position with initial eyeFocusPoint (at infinity), get line
+            Join eye position with focusPoint, get line
+            Do dqTo
+        // Make a head with a rotating eye
+        //     Make an eye somewhere in space, and a head somwhere else. headDq, eyeDq, unmovedEyeToUnmovedEyeSocketDq
+        //     Make a line from where the eye socket
+        //     eyeDq = headDq * headToEyeSocketDq * ()
+        // Make the silly old Ram
+        //     Trigger button controls boolean, for mouth
+        //     Hold it by the head
+        //     Body follows
+        //     Legs pump when moved, eg the instantaneous movement is known
+        Paint eraser "color"
     Jon demo:
         Passthrough. Maybe with a translucent cube surrounding you to make it less distracting
         Gauges =/ because that's what it's about
-        Limit on how tight an arrow can wind
         Levels
         Undo
         Eyeballs on vizes
@@ -107,7 +113,7 @@ async function init() {
     renderer.setSize(window.innerWidth, window.innerHeight) 
     renderer.outputEncoding = THREE.sRGBEncoding
     renderer.shadowMap.enabled = true
-    renderer.xr.enabled = true
+    renderer.xr.enabled = true //regardless of whether you're connected or not
     container.appendChild(renderer.domElement)
 
     initVrButton()
@@ -127,15 +133,14 @@ async function init() {
             buttonWhileDowns()
 
             movingPaintingHighlightingHandLabels()
-            updatePalette()
+            updatePaletteAnimation()
             
             snappables.forEach(s => {
-                s.updateFromAffecters()
+                updateFromAffecters(s)
             })
 
             updateRecording()
             //then broadcast
-
         }
         
         obj3dsWithOnBeforeRenders.forEach(obj3d => obj3d.onBeforeRender())

@@ -2,7 +2,7 @@ const zUnit = new THREE.Vector3(0, 0, 1)
 const yUnit = new THREE.Vector3(0, 1, 0)
 const xUnit = new THREE.Vector3(1, 0, 0)
 
-const renderer = new THREE.WebGLRenderer({ antialias: true })
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true })
 const scene = new THREE.Scene()
 
 //quest 2 is 96 degrees, we lop a bit off

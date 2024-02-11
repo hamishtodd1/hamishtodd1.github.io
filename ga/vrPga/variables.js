@@ -1,10 +1,10 @@
-
 const TAU = Math.PI * 2.
 
 let vizBeingModified = null
 let spectatorMode = null
 const snappables = []
 let vrSession = null
+let passThroughMode = false
 
 const RIGHT = 0
 const LEFT = 1
@@ -19,10 +19,12 @@ const socket = io()
 const eps = .0001 //not been tweaked for anything yet, so feel free to change
 
 let operators = [
-	`mul`, `mulReverse`, `add`, `sandwich`,
+    // `mul`, `mulReverse`, `add`, `sandwich`,
+    `dqTo`,
+    `joinPt`
     //copy to! Very important, this is how you make many things move at once
 	//`sqrt`,//`logarithm`
-	//later: wedge, join, projection, sandwich
+    //`velocity`, eg A velocity B = A's commutator with the rate bivector of B
 	//distances, angles
 	//direction-headed-in, eg derivitive, eg commutator
 	//commutator will be very fun. Remember to take it with the logs of things
