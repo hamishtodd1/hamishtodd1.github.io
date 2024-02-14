@@ -4,7 +4,13 @@
         Grab dq and you're holding the markupPos; other hand modifies what it does
         Gotta be experimenting!
 
+    Snap button:
+        You keep your hands held in place
+        You press the button
+        It cycles through the potential snaps
+
     TODO for FoC demo:
+        COLOR CHANGING
         Just an eye that rotates in place
             Join eye position with initial eyeFocusPoint (at infinity), get line
             Join eye position with focusPoint, get line
@@ -20,22 +26,19 @@
         //     Legs pump when moved, eg the instantaneous movement is known
         Paint eraser "color"
     Jon demo:
-        Passthrough. Maybe with a translucent cube surrounding you to make it less distracting
-        Gauges =/ because that's what it's about
-        Levels
-        Undo
+        Levels. Just 4 or so
+        Gauges =/ because that's what it's about. Some kind of animation triggers
+        Spreadsheets
+        Infinity is at 10m or whatever
         Eyeballs on vizes
-        Wanna have gauging animations
-        Grade selection is a "snap" sound
+        SFX
+            Grade selection is a "snap"
         Little lizard creatures that rate your animations, with different preferences
             Make an animation with the smallest number of bones, so it's doing a complex thing
-        Some levels!!!!!!
-        Are you using the measurer for anything? If so, some numbers...
-        Show the "code"
-            OR JESUS SINCE THEY ARE ONE OPERATION EACH DOES IT REALLY MATTER
-            Spreadsheets help you keep track of them
-            No, just need non CIRCULAR things dummy
+        Undo
     Beyond:
+        Are you using the measurer for anything? If so, some numbers...
+        If passthrough, maybe have a warning saying to do it in the middle of a field
         Experiment with stage from your POV (but probably keep as is because facing audience is good)
         Hidden surface removal for boxhelpers
         Flesh colors
@@ -81,7 +84,8 @@ async function init() {
 
     initDqMeshes()
     init31()
-
+    
+    initArrows()
     initDqVizes()
     initFlVizes()
 

@@ -132,7 +132,7 @@ function initMultivectorWithoutDeclarations() {
                 return b.mulReverse(this, target)
             else {
                 let ratio = b.mulReverse(this, newFl)
-                return ratio.mul(thingy, target).normalize().sqrtSelf()
+                return ratio.mul(ratio, target).normalize().sqrtSelf()
             }
         }
 

@@ -1,4 +1,11 @@
 /*
+    For transflection: When holding, have all 3
+        It's so unlikely you actually want a transflection that we can get rid of all 3 mirrors
+        So markupPos is the place where TWO of the plane positions are
+
+    Studs might be nice?
+    dotted line axis maybe
+
     TERRIBLE DISTRACTION UNTIL YOU HAVE A REASON TO NEED IT
         The arrow is the hard part
         Needs to go through the plane
@@ -29,8 +36,25 @@ function initFlVizes() {
 
     let boundingBox = new THREE.Box3()
 
-    //need studs
-    //dotted line axis maybe
+    let extraPlanes = [
+        new THREE.Group().add(
+            new THREE.Mesh(planeGeo, planeMatFront),
+            new THREE.Mesh(planeGeo, planeMatBack)),
+        new THREE.Group().add(
+            new THREE.Mesh(planeGeo, planeMatFront),
+            new THREE.Mesh(planeGeo, planeMatBack)),
+    ]
+    extraPlanes.forEach(plane => {
+        plane.visible = false
+        scene.add(plane)
+    })
+
+    function planeFlToMesh(planeMesh, planeFl, markupPos) {
+        markupPos.pointToGibbsVec(planeMesh.position)
+        let e3OnPos = e3.projectOn(markupPos, fl0)
+        planeFl.selectGrade(1, planePart)
+        planePart.mulReverse(e3OnPos, dq0).sqrtSelf().toQuaternion(planeMesh.quaternion)
+    }
     
     class FlViz extends THREE.Group {
 
@@ -42,6 +66,8 @@ function initFlVizes() {
             this.boundingBox = new THREE.Box3()
             this.boxHelper = new THREE.BoxHelper()
 
+            this.hasExtraPlanes = false
+
             if (!omitFromSnappables)
                 giveSnappableProperties(this)
 
@@ -50,11 +76,14 @@ function initFlVizes() {
             this.fl.zero()
             this.markupPos = new Fl().point(0.,1.2,0.,1.)
 
+            this.arrow
+
             this.plane = new THREE.Group()
             this.plane.visible = false
             scene.add(this.plane)
-            this.plane.add(new THREE.Mesh(planeGeo, planeMatFront))
-            this.plane.add(new THREE.Mesh(planeGeo, planeMatBack))
+            this.plane.add(
+                new THREE.Mesh(planeGeo, planeMatFront), 
+                new THREE.Mesh(planeGeo, planeMatBack))
 
             this.point = new THREE.Mesh(pointGeo, pointMat)
             this.point.visible = false
@@ -97,7 +126,8 @@ function initFlVizes() {
                         this.idealPoints[1].visible = true
                     }
 
-                    this.markupPos.pointFromGibbsVec(this.point.position)
+                    //no, don't do this, because point could be very far away
+                    // this.markupPos.pointFromGibbsVec(this.point.position)
 
                     boundingBox.copy(pointGeo.boundingBox)
                     this.point.updateMatrixWorld()
@@ -108,10 +138,7 @@ function initFlVizes() {
                 if (hasPlane ) {
                     this.plane.visible = true
                     
-                    this.markupPos.pointToGibbsVec(this.plane.position)
-                    fl1.pointFromGibbsVec(this.plane.position)
-                    let e3OnPos = e3.projectOn(this.markupPos,fl0)
-                    this.fl.mulReverse(e3OnPos,dq0).sqrtSelf().toQuaternion(this.plane.quaternion)
+                    planeFlToMesh(this.plane, this.fl, this.markupPos)
 
                     //TODO studs, rounded back, sharp front
                     //randomly distributed, maybe moving super slowly

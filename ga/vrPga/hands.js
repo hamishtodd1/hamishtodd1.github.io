@@ -13,18 +13,21 @@ function initHands() {
     scene.add(handLeft)
     // e123.dqTo(comfortableLookPos(fl0, 0., -.42), handRight.dq)
 
-    const laserPointerGeo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, 0, 1), new THREE.Vector3(0, 0, -1)])
+    const laserPointerGeo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 0, -1)])
     function bestowHandProperties() {
         handRight.laserDq = new Dq().copy(e12)
         handLeft.laserDq  = new Dq().copy(e12)
-        handRight.laserPlane = new Fl().copy(e3)
-        handLeft.laserPlane  = new Fl().copy(e3)
-        handRight.add( new THREE.Line(laserPointerGeo) )
-        handLeft.add(  new THREE.Line(laserPointerGeo) )
+        handRight.laser = new THREE.Line( laserPointerGeo )
+        handRight.add( handRight.laser )
+        handLeft.laser = new THREE.Line( laserPointerGeo )
+        handLeft.add(handLeft.laser)
         hands[RIGHT] = handRight
         hands[LEFT]  = handLeft
     }
     bestowHandProperties()
+    //because apparently VR controllers go the opposite way than you might expect
+    handLeft.laser.rotation.x = TAU / 2.
+    handRight.laser.rotation.x = TAU / 2.
 
     ///////////
     // Mouse //
@@ -58,8 +61,8 @@ function initHands() {
             }
 
             //mouse rewind IF THIS ISN'T WORKING CHECK SCRIPT, MAY NEED TO CHANGE WINDOW NAME
-            if (event.key === "6" && event.ctrlKey)
-                deleteHeld(focusHand)
+            // if (event.key === "6" && event.ctrlKey)
+            //     doSomething() //deleteHeld(focusHand)
             // if (event.key === "5" && event.ctrlKey) //mouse fast forward
             //     document.dispatchEvent(new Event(`mouseFastForward`))
 
@@ -150,7 +153,7 @@ function initHands() {
 
             }
 
-            document.addEventListener('pointermove', onMouseMove)
+            document.addEventListener('mousemove', onMouseMove)
             document.addEventListener('wheel', onMouseWheel)
         }
 
@@ -164,17 +167,17 @@ function initHands() {
             let isRightButton = event.button === 2
             onHandButtonUp(isLeftButton, isRightButton, focusHand)
         }
-        document.addEventListener("pointerdown", onMouseButtonDown )
-        document.addEventListener("pointerup", onMouseButtonUp )
+        document.addEventListener("mousedown", onMouseButtonDown )
+        document.addEventListener("mouseup", onMouseButtonUp )
 
         removeMouseEventListeners = () => {
-            console.error("y")
+            console.log(`Removing mouse event listeners`)
 
-            document.removeEventListener('pointermove', onMouseMove)
+            document.removeEventListener('mousemove', onMouseMove)
             document.removeEventListener('wheel', onMouseWheel)
             document.removeEventListener('keydown', mouseControlKeyEvents)
-            document.removeEventListener('pointerdown', onMouseButtonDown)
-            document.removeEventListener('pointerup', onMouseButtonUp)
+            document.removeEventListener('mousedown', onMouseButtonDown)
+            document.removeEventListener('mouseup', onMouseButtonUp)
             orbitControls.enabled = false
 
             scene.remove(posIndicator)
@@ -229,7 +232,7 @@ function initHands() {
                         continue
 
                     if (!discreteSticksOld[i].equals(discreteSticks[i]))
-                        updatePaletteFromDiscreteStick(discreteStick[i], i ? true : false)
+                        updatePaletteFromDiscreteStick(discreteSticks[i], session.inputSources[i].handedness === `left` ? LEFT : RIGHT)
 
                     ++i
                 }
@@ -261,12 +264,16 @@ function initHands() {
 
                     discreteSticksOld[i].copy(discreteSticks[i])
                     vrControllerAxesToDiscreteStick(source.gamepad.axes, discreteSticks[i])
+
+                    //THIS LETS YOU SEE WHICH BUTTONS ARE WHICH
+                    //A and B are 4 and 5
                     // source.gamepad.buttons.forEach((button, j) => {
                     //     if(button.pressed)
-                    //         log(j, button)
+                    //         log(j, source.handedness, button)
                     // })
                     // if(source.gamepad.buttons[0].pressed)
                     //     deleteHeld(i)
+
                     ++i
                 }
 
@@ -284,7 +291,7 @@ function initHands() {
         let geo = obj.children[0].geometry
         geo.scale(.024, .024, .024)
         // geo.rotateX(-TAU / 8. * 3.)
-        geo.rotateY(TAU / 2.)
+        geo.rotateZ(TAU / 2.)
 
         handRight.geometry = geo
         handLeft.geometry = geo

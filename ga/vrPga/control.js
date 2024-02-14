@@ -53,22 +53,25 @@ function initControl() {
 
         // testCircuits()
 
-        let flViz0 = new FlViz()
-        comfortableLookPos(flViz0.fl)
-        let flViz1 = new FlViz()
-        comfortableLookPos(flViz1.fl, .5)
+        {
+            // let flViz0 = new FlViz()
+            // comfortableLookPos(flViz0.fl)
+            // let flViz1 = new FlViz()
+            // comfortableLookPos(flViz1.fl, .5)
 
-        let dqViz1 = new DqViz()
-        e23.projectOn(flViz0.fl.addScaled(e012, .01, fl0), dqViz1.dq)
-        // debugger
-        snap(dqViz1)
-        debugUpdates.push(()=>{
-            if(frameCount === 2)
-                dqViz1.regularizeMarkupPos()
-        })
+            // let dqViz5 = new DqViz()
+            // e23.projectOn(flViz0.fl.addScaled(e012, .01, fl0), dqViz5.dq)
+            // // debugger
+            // snap(dqViz5)
+            // debugUpdates.push(()=>{
+            //     if(frameCount === 2)
+            //         dqViz5.regularizeMarkupPos()
+            // })
+        }
 
         // let dqViz1 = new DqViz()
         // dqViz1.dq.copy(Translator(.2, 0., 0.))
+        // dqViz1.dq[0] *= -1.
         // comfortableHandPos(dqViz1.markupPos, -.3)
 
         // let dqViz2 = new DqViz()
@@ -102,14 +105,20 @@ function initControl() {
 
     let highlightedColor = new THREE.Color(0xFFFFFF)
     let grabbedColor = new THREE.Color(0x00FF00)
+    let highlightedAndGrabbedCol = new THREE.Color(0xFF00FF)
     let highlighteeIsAffecteeCol = new THREE.Color(0xFF0000)
     let highlighteeIsAffectorCol = new THREE.Color(0x00FFFF)
+
+    let rightFl = new Fl()
+    let planePart = new Fl()
+    let pointPart = new Fl()
 
     initButtonLabels()
 
     // document.addEventListener(`mouseRewind`, () => { log("yo") })
 
     let showMarkupVizes = true
+
     let oldDqVizes = [new DqViz( 0xFF0000, true, true ), new DqViz( 0xFF0000, true, true )]
     oldDqVizes[0].visible = false; oldDqVizes[1].visible = false;
     let dispDqVizes = [new DqViz(0xFF0000, true, true), new DqViz(0xFF0000, true, true)]
@@ -120,16 +129,11 @@ function initControl() {
 
     let paintees = [null,null]
     let highlightees = [null,null]
-    let grabbees = [null,null]
-    let grabbeeOdd = null
+    let evenGrabbees = [null,null]
+    
+    let oddGrabbee = null
+    let handsHoldingOdd = [false, false]
 
-    deleteHeld = (focusHand) => {
-
-        if (grabbees[focusHand] !== null) {
-            grabbees[focusHand].dispose()
-            grabbees[focusHand] = null
-        }
-    }
 
     onHandButtonDown = (isTriggerButton, isSideButton, focusHand) => {
 
@@ -138,75 +142,95 @@ function initControl() {
         //trigger -> nothing -> paint
         //trigger -> other side -> even versor
         //side -> other trigger -> paint
-        //side -> other side -> odd versor (later)
-        //side -> nothing -> even versor
+        //side -> other side -> odd versor
+        //side -> even versor
 
         let otherHand = 1-focusHand
             
         if ( isSideButton ) {
 
+            if(oddGrabbee)
+                return
+
             if (paintees[focusHand] !== null) {
-                // later: it controls a boolean related to that thing
+                // later: it controls a float, press-amount-dependent
                 //but do a face with eyes first
                 return 
             }
             else {
                 
-                //if we do want to make arrows with two hands sometimes
-                let oddVersorDesired = 
-                    grabbees[otherHand] !== null && grabbees[otherHand] === highlightees[focusHand] &&
-                    grabbees[otherHand].sclptable === null
-                // let oddVersorDesired =
-                //     grabbees[otherHand] !== null && grabbees[otherHand].sclptable === null
+                evenGrabbees[focusHand] = paintees[otherHand] || highlightees[focusHand]
 
-                // log(grabbees[otherHand])
+                let isOddVersor = 
+                    (evenGrabbees[otherHand] !== null && evenGrabbees[otherHand] === evenGrabbees[focusHand] ) ||
+                    (evenGrabbees[focusHand] !== null && evenGrabbees[focusHand].constructor === FlViz) ||
+                    oddGrabbee !== null
+                if (isOddVersor) {
+
+                    handsHoldingOdd[focusHand] = true
+                    
+                    if (evenGrabbees[focusHand] !== null ) {
+                        //switch it to being an fl
+                        let newViz = new FlViz()
+                        newViz.sclptable = evenGrabbees[focusHand].sclptable
     
-                if (oddVersorDesired) {
-                    grabbeeOdd = new FlViz()
-                    if(grabbees[otherHand].sclptable !== null)
-                        grabbees[otherHand].dispose()
-                    grabbees[LEFT ] = null
-                    grabbees[RIGHT] = null
-                    paintees[LEFT ] = null
+                        let oldDqViz = evenGrabbees[focusHand]
+                        evenGrabbees[focusHand] = null
+                        oldDqViz.sclptable = null
+                        oldDqViz.dispose()
+
+                        oddGrabbee = newViz
+                    }
+
+                    evenGrabbees[LEFT] = null
+                    evenGrabbees[RIGHT] = null
+                    paintees[LEFT] = null
                     paintees[RIGHT] = null
+
+                    dispDqVizes[focusHand].visible = false
+                    oldDqVizes[focusHand].visible = false
                 }
                 else {
 
-                    grabbees[focusHand] = paintees[otherHand] || highlightees[focusHand]
+                    if( evenGrabbees[focusHand] === null )
+                        evenGrabbees[focusHand] = new DqViz()
 
-                    if( grabbees[focusHand] === null )
-                        grabbees[focusHand] = new DqViz()
+                    if(evenGrabbees[focusHand].dq === undefined)
+                        debugger
     
-                    if (grabbees[focusHand].mv.constructor === Dq ) {
-                        if (grabbees[focusHand].dq.isScalarMultipleOf(oneDq))
-                            getIndicatedHandPosition(focusHand, grabbees[focusHand].markupPos)
-        
-                        handDqOnGrabs[focusHand].copy(hands[focusHand].dq)
-                        snappableDqOnGrabs[focusHand].copy(grabbees[focusHand].dq)
-        
-                        oldDqVizes[focusHand].dq.copy(snappableDqOnGrabs[focusHand])
-                        oldDqVizes[focusHand].markupPos.copy(grabbees[focusHand].markupPos)
-                        oldDqVizes[focusHand].dq.sandwich(oldDqVizes[focusHand].markupPos, dispDqVizes[focusHand].markupPos)
-                        dispDqVizes[focusHand].dq.copy(oneDq)
-                    }
+                    if (evenGrabbees[focusHand].dq.isScalarMultipleOf(oneDq))
+                        getIndicatedHandPosition(focusHand, evenGrabbees[focusHand].markupPos)
+    
+                    handDqOnGrabs[focusHand].copy(hands[focusHand].dq)
+                    snappableDqOnGrabs[focusHand].copy(evenGrabbees[focusHand].dq)
+    
+                    oldDqVizes[focusHand].dq.copy(snappableDqOnGrabs[focusHand])
+                    oldDqVizes[focusHand].markupPos.copy(evenGrabbees[focusHand].markupPos)
+                    oldDqVizes[focusHand].dq.sandwich(oldDqVizes[focusHand].markupPos, dispDqVizes[focusHand].markupPos)
+                    dispDqVizes[focusHand].dq.copy(oneDq)
                 }
             }
         }
         else if(isTriggerButton) {
 
-            if( grabbees[focusHand] !== null )
-                deleteHeld(focusHand)
+            if( evenGrabbees[focusHand] !== null ) {
+                evenGrabbees[focusHand].dispose()
+                evenGrabbees[focusHand] = null
+            }
+            else if (oddGrabbee !== null) {
+                oddGrabbee.dispose()
+                oddGrabbee = null
+                handsHoldingOdd[0] = false
+                handsHoldingOdd[1] = false
+            }
             else {
 
-                if(grabbeeOdd !== null)
-                    return
-
-                paintees[focusHand] = grabbees[otherHand] || paintees[otherHand] || highlightees[focusHand]
+                paintees[focusHand] = evenGrabbees[otherHand] || paintees[otherHand] || highlightees[focusHand]
 
                 if (paintees[focusHand] === null)
                     paintees[focusHand] = new DqViz()
 
-                if(paintees[focusHand].sclptable === null)
+                if( paintees[focusHand].sclptable === null)
                     paintees[focusHand].sclptable = new Sclptable(paintees[focusHand])
             }
         }
@@ -214,61 +238,75 @@ function initControl() {
 
     movingPaintingHighlightingHandLabels = () => {
 
-        debugFls[0].fl.point(0., 0., 1., 0.)
-
         // setLabels(paintee !== null, grabbee !== null, paintHandIsRight, grabbHandIsRight)
 
         if (paintees[0] === null && paintees[1] === null)
             getPalletteInput()
 
-        if (grabbeeOdd !== null) {
+        if (oddGrabbee !== null) {
 
             //the right hand is the left hand preceded (that is, algebraically followed...) by a reflection in e1
 
-            let pointBetweenHands = fl3.pointFromGibbsVec(v1.addVectors(hands[0].position, hands[1].position).multiplyScalar(.5))
+            // let pointBetweenHands = fl3.pointFromGibbsVec(v1.addVectors(hands[0].position, hands[1].position).multiplyScalar(.5))
 
-            let rightFl = new Fl()
             hands[LEFT].dq.mul(e1, rightFl)
-            rightFl.mulReverse(hands[RIGHT].dq, grabbeeOdd.fl)
+            rightFl.mulReverse(hands[RIGHT].dq, oddGrabbee.fl)
             
-            grabbeeOdd.fl.normalize()
-            let plane = grabbeeOdd.fl.selectGrade(1, fl0)
-            let point = grabbeeOdd.fl.selectGrade(3, fl1)
-            let pointAtInf = fl2.copy(point)
+            oddGrabbee.fl.normalize()
+            oddGrabbee.fl.selectGrade(1, planePart)
+            oddGrabbee.fl.selectGrade(3, pointPart)
+            let pointAtInf = fl2.copy(pointPart)
             pointAtInf[7] = 0.
 
-            let eNormSqPlane = plane.eNormSq()
-            let eNormSqPoint = point.eNormSq()
+            let eNormSqPlane = planePart.eNormSq()
+            let eNormSqPoint = pointPart.eNormSq()
             let iNormSqPointAtInf = pointAtInf.iNormSq()
 
-            //we want points at infinity quite often
-            //THIS IS SHIT MAKE IT BETTER
-
-            let distanceTaken = rightFl.sandwich(pointBetweenHands, fl4).distanceToPt(pointBetweenHands)
-
-            let angleIsShallow = Math.abs(eNormSqPlane) > Math.abs(eNormSqPoint)
-            // log(angleIsShallow, Math.abs(iNormSqPointAtInf) * 30., Math.abs(eNormSqPlane) )
+            oddGrabbee.markupPos.copy(pointPart)
             
-            // if (distanceTaken > .2 ) {
-            //     //might be concerned about whether or not this is in front of the camera
-            //     pointAtInf.multiplyScalar(1. / Math.sqrt(iNormSqPointAtInf), grabbeeOdd.fl)
+            //one of the extra planes is where one of your hands is
+            //other is halfway between
+            // let pl = extraPlanes[LEFT]
+            // let planeFl = handPosition.joinPt(pointPart, dq0).inner(planePart, fl0)
+            // pl.position.copy(hands[LEFT].position)
+
+            // let firstPos = hands[LEFT].position
+
+            // planeFlToMesh(extraPlanes[hand], planeFl, oddGrabbee.markupPos)
+            // planeFlToMesh(extraPlanes[hand], planeFl, oddGrabbee.markupPos)
+
+
+
+
+
+
+
+
+            //we want points at infinity quite often
+
+            // let distanceTaken = rightFl.sandwich(pointBetweenHands, fl4).distanceToPt(pointBetweenHands)
+
+            // let angleIsShallow = Math.abs(eNormSqPlane) > Math.abs(eNormSqPoint)
+            // // log(angleIsShallow, Math.abs(iNormSqPointAtInf) * 30., Math.abs(eNormSqPlane) )
+            
+            // // if (distanceTaken > .2 ) {
+            // //     //might be concerned about whether or not this is in front of the camera
+            // //     pointAtInf.multiplyScalar(1. / Math.sqrt(iNormSqPointAtInf), oddGrabbee.fl)
+            // // }
+            // // else 
+            // {
+
+            //     if (angleIsShallow) {
+            //         planePart.multiplyScalar(1. / Math.sqrt(eNormSqPlane), oddGrabbee.fl)
+            //         oddGrabbee.markupPos.copy(pointBetweenHands)
+            //     }
+            //     else {
+            //         pointPart.multiplyScalar(1. / Math.sqrt(eNormSqPlane), oddGrabbee.fl)
+            //     }
             // }
-            // else 
-            {
-
-                if (angleIsShallow) {
-                    plane.multiplyScalar(1. / Math.sqrt(eNormSqPlane), grabbeeOdd.fl)
-                    grabbeeOdd.markupPos.copy(pointBetweenHands)
-                }
-                else {
-                    point.multiplyScalar(1. / Math.sqrt(eNormSqPlane), grabbeeOdd.fl)
-                }
-            }
-
-            grabbeeOdd.fl.log()
 
             //look at their quats alone
-            //plane part is the bisector of their positions
+            //planePart part is the bisector of their positions
             //compose the right hand's dq with the reflection to get an fl called rightBireflection
         }
 
@@ -277,37 +315,37 @@ function initControl() {
             /////////////////////
             // MOVING GRABBEES //
             /////////////////////
-            if ( grabbeeOdd === null && grabbees[hand] !== null) {
-                highlightees[hand] = grabbees[hand]
+            if ( oddGrabbee === null && evenGrabbees[hand] !== null) {
+                highlightees[hand] = evenGrabbees[hand]
 
                 // hands[hand].dq.mulReverse(handDqOnGrabs[hand], dispDqVizes[hand].dq)
-                // dispDqVizes[hand].dq.mul(oldDqVizes[hand].dq, grabbees[hand].dq)
+                // dispDqVizes[hand].dq.mul(oldDqVizes[hand].dq, evenGrabbees[hand].dq)
 
                 // smootheningRecords[hand].add(hands[hand].dq, dq0).normalize()
 
                 let movementSinceGrab = hands[hand].dq.mulReverse(handDqOnGrabs[hand], dq0)
                 // some mild snapping here miiiight be nice?
-                movementSinceGrab.mul(snappableDqOnGrabs[hand], grabbees[hand].dq )
-                grabbees[hand].dq.normalize()
+                movementSinceGrab.mul(snappableDqOnGrabs[hand], evenGrabbees[hand].dq )
+                evenGrabbees[hand].dq.normalize()
                 dispDqVizes[hand].dq.copy(movementSinceGrab)
                 
-                snap(grabbees[hand])
+                snap(evenGrabbees[hand])
 
                 if (showMarkupVizes) {
-                    dispDqVizes[hand].visible = !dispDqVizes[hand].dq.equals(oneDq)
+                    dispDqVizes[hand].visible = !oldDqVizes[hand].dq.equals(oneDq)
                     oldDqVizes[hand].visible = dispDqVizes[hand].visible
                 }
 
                 socket.emit("snappable", {
-                    dqCoefficientsArray: grabbees[hand].dq,
-                    i: snappables.indexOf(grabbees[hand])
+                    dqCoefficientsArray: evenGrabbees[hand].dq,
+                    i: snappables.indexOf(evenGrabbees[hand])
                 })
             }
 
             //////////////
             // PAINTING //
             //////////////
-            if (grabbeeOdd === null && paintees[hand] !== null) {
+            if (oddGrabbee === null && paintees[hand] !== null) {
                 highlightees[hand] = paintees[hand]
                 hidePalette()
 
@@ -317,7 +355,7 @@ function initControl() {
             //////////////////
             // HIGHLIGHTING //
             //////////////////
-            if (grabbees[hand] === null && paintees[hand] === null) {
+            if (evenGrabbees[hand] === null && paintees[hand] === null && oddGrabbee === null) {
 
                 let [nearest, nearestDistSq] = getNearest(hand) //getNearest(getIndicatedHandPosition(hand, fl0))
 
@@ -345,13 +383,14 @@ function initControl() {
             snappable.boxHelper.visible = false
             snappable.circuitVisible = false //fuck that for now
 
-            highlightees.forEach(highlightee => {
+            highlightees.forEach((highlightee,hand) => {
                 if(highlightee === null)
                     return
 
                 if (highlightee === snappable) {
                     snappable.boxHelper.visible = true
-                    snappable.boxHelper.material.color.copy(highlightedColor)
+                    let col = evenGrabbees[1-hand] === highlightee ? highlightedAndGrabbedCol : highlightedColor
+                    snappable.boxHelper.material.color.copy(col)
                 }
                 else if (aDependsOnB(highlightee,snappable) ) {
                     snappable.boxHelper.visible = true
@@ -362,13 +401,14 @@ function initControl() {
                     snappable.boxHelper.material.color.copy(highlighteeIsAffecteeCol)
                 }
             })
-            grabbees.forEach(grabbee => {
+            evenGrabbees.forEach((grabbee,hand) => {
                 if (grabbee === null)
                     return
 
                 if (grabbee === snappable) {
                     snappable.boxHelper.visible = true
-                    snappable.boxHelper.material.color.copy(grabbedColor)
+                    let col = highlightees[1-hand] === grabbee ? highlightedAndGrabbedCol : grabbedColor
+                    snappable.boxHelper.material.color.copy(col)
                 }
                 else if (aDependsOnB(grabbee,snappable)) {
                     snappable.boxHelper.visible = true
@@ -395,24 +435,29 @@ function initControl() {
             paintees[focusHand] = null
         }
 
-        if (grabbees[focusHand] && isSideButton ) {
+        if (evenGrabbees[focusHand] && isSideButton ) {
 
-            if (grabbees[focusHand].sclptable) {
-                grabbees[focusHand].dq
+            if (evenGrabbees[focusHand].sclptable) {
+                evenGrabbees[focusHand].dq
                     .getReverse(dq0)
                     .sandwich(
-                        grabbees[focusHand].dq.sandwich(grabbees[focusHand].sclptable.com, fl0),
-                        grabbees[focusHand].markupPos)
+                        evenGrabbees[focusHand].dq.sandwich(evenGrabbees[focusHand].sclptable.com, fl0),
+                        evenGrabbees[focusHand].markupPos)
             }
 
-            grabbees[focusHand] = null
+            evenGrabbees[focusHand] = null
 
             dispDqVizes[focusHand].visible = false
             oldDqVizes[focusHand].visible = false
         }
 
-        if (grabbeeOdd !== null && isSideButton)
-            grabbeeOdd = null
+        if (oddGrabbee !== null && isSideButton) {
+            handsHoldingOdd[focusHand] = false
+            if (!handsHoldingOdd[0] && !handsHoldingOdd[1]) {
+                oddGrabbee = null
+
+            }
+        }
     }
 
     //////////////////////
