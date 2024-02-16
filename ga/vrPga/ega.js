@@ -536,9 +536,14 @@ function initEgaWithoutDeclarations() {
     dq3 = new Dq()
     dq4 = new Dq()
     dq5 = new Dq()
+    dq6 = new Dq()
+    dq7 = new Dq()
+    dq8 = new Dq()
+    dq9 = new Dq()
 
     {
         oneDq = new Dq().fromFloatAndIndex(1., 0)
+        zeroDq = new Dq().zero()
         
         e0 = new Fl().fromFloatAndIndex(1., 0)
         e1 = new Fl().fromFloatAndIndex(1., 1)

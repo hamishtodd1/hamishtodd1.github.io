@@ -58,18 +58,18 @@ function initArrows() {
         },
     ]
 
-    const arrowRadius = .006
     const headArcLength = arrowRadius * 5.
     const headRadiusFactor = 2.1
 
     {
         let radialSegments = 14
         var cupGeo = new THREE.SphereGeometry(arrowRadius, radialSegments)
+
         let headSegments = 8
         let shaftSegments = 37
-        let heightSegments = headSegments + shaftSegments + 1
+        let heightSegments = shaftSegments + headSegments + 1
         var dqArrowGeo = new THREE.ConeGeometry(
-            1., //irrelevant
+            1., //irrelevant radius
             heightSegments, //we are about to modify y's
             radialSegments, heightSegments, true) //first half is shaft, second is head
         let attr = dqArrowGeo.attributes.position
@@ -82,29 +82,35 @@ function initArrows() {
                 y = 1.001 + (y - shaftSegments - 1) / headSegments
             attr.array[i * 3 + 1] = y
         }
+
+        var headlessGeo = new THREE.CylinderGeometry(
+            1., 1.,
+            1.,
+            radialSegments, shaftSegments, false)
+        headlessGeo.translate(0.,0.5,0.)
+        // dqArrowGeo = headlessGeo
+        
         var extraShaftGeo = new THREE.CylinderGeometry(arrowRadius, arrowRadius, 2000., radialSegments, 1, true)
         extraShaftGeo.translate(0., 1000., 0.)
     } 
     
-    let randomPt = new Fl().point(0.2448657087518873, 0.07640275431752674, 0.360207610338215, 1.)
     let nonNetherArrowStart = new Fl()
     let finalHeadRadiusFactor = headRadiusFactor / headArcLength
 
-    let cupBox = new THREE.Box3()
     let nonNetherDq = new Dq()
 
     class Arrow extends THREE.Mesh {
         
-        constructor(col, transparent, axisMat) {
+        constructor( color, transparent, axisMat, headless) {
 
             let mat = new THREE.MeshPhong2Material({
-                color: col,
-                transparent: transparent,
+                color,
+                transparent,
                 opacity: transparent ? .4 : 1.
             })
             mat.injections = arrowMatInjections
 
-            super(dqArrowGeo, mat)
+            super(headless ? headlessGeo : dqArrowGeo, mat )
             this.matrixAutoUpdate = false
 
             this.extraShaft = new THREE.Mesh(extraShaftGeo, axisMat)
@@ -116,85 +122,91 @@ function initArrows() {
         }
 
         update(
-            dq,
+            possiblyNetherDq,
             rotationPart,
             translationPart,
             bivPart,
-            markupPos,
+            startPoint,
 
-            pointHalfWayAlongArrow,
-            boundingBox ) {
-
+            boundingBox,
+            pointHalfWayAlongArrow ) 
             {
-                nonNetherDq.copy(dq)
+
+            startPoint.pointToGibbsVec(this.cup.position)
+
+            //extend bounding box
+            {
+                //if you're non-nether, you have an extraShaft, but that isn't "arrow" for these purposes
+                nonNetherDq.copy(possiblyNetherDq)
                 var isNether = nonNetherDq[0] < 0. && Math.abs(bivPart.eNormSq()) < eps
                 if (isNether)
                     nonNetherDq.multiplyScalar(-1., nonNetherDq)
 
                 //bounding box and determination of arrow arclength
-                boundingBox.makeEmpty()
                 let numSamples = 8
                 for (let i = 0; i < numSamples; ++i) {
                     nonNetherDq.pow(i / (numSamples - 1), dq0)
-                    dq0.sandwichFl(markupPos, fl0).pointToGibbsVec(v1)
+                    dq0.sandwichFl(startPoint, fl0).pointToGibbsVec(v1)
                     boundingBox.expandByPoint(v1)
                 }
-                cupBox.min.copy(this.cup.position).subScalar(arrowRadius)
-                cupBox.max.copy(this.cup.position).addScalar(arrowRadius)
-                boundingBox.union(cupBox)
+                box0.min.copy(this.cup.position).subScalar(arrowRadius)
+                box0.max.copy(this.cup.position).addScalar(arrowRadius)
+                boundingBox.union(box0)
             }
 
-            markupPos.pointToGibbsVec(this.cup.position)
-
-            this.extraShaft.visible = isNether
-
+            //you MIGHT want nether transflections one day, keep this stuff here
             if (!isNether) {
+                this.extraShaft.visible = false
+
                 translationPart.mul(rotationPart, this.material.dq)
-                // this.material.dq.copy(dq)
-                nonNetherArrowStart.copy(markupPos)
+                nonNetherArrowStart.copy(startPoint)
             }
             else {
-                markupPos.pointToGibbsVec(this.extraShaft.position)
+                this.extraShaft.visible = false
+
+                startPoint.pointToGibbsVec(this.extraShaft.position)
 
                 let joinedPlane = bivPart.joinPt(e123, fl0)
                 joinedPlane.mulReverse(e2, dq0).normalize().sqrtSelf().toQuaternion(this.extraShaft.quaternion)
 
                 //arrow should be offset to start in some faraway place
-                //and take you back to where nonNetherDq takes markupPos
+                //and take you back to where nonNetherDq takes startPoint
                 let offseterDq = dq1
                 offseterDq.copy(bivPart)
-                let dqDist = bivPart.getDual(dq3).eNorm() / -dq[0]
+                let dqDist = bivPart.getDual(dq3).eNorm() / -possiblyNetherDq[0]
                 offseterDq.multiplyScalar(-100. / dqDist, offseterDq)
                 offseterDq[0] = 1.
 
-                offseterDq.sandwichFl(markupPos, nonNetherArrowStart)
+                offseterDq.sandwichFl(startPoint, nonNetherArrowStart)
                 nonNetherDq.mulReverse(offseterDq, this.material.dq)
                 this.material.dq[4] = 0.; this.material.dq[5] = 0.; this.material.dq[6] = 0.; this.material.dq[7] = 0.;
             }
 
             nonNetherArrowStart.pointToGibbsVec(this.material.extraVec1)
 
-            //if you're non-nether, you have an extraShaft, but that isn't "arrow" for these purposes
-            let arrowArcLength = this.material.dq.pointTrajectoryArcLength(nonNetherArrowStart, 16)
-            let headStart = (1. - headArcLength / arrowArcLength)
-            let headOutnessAtArrowBase = arrowArcLength * finalHeadRadiusFactor
-            this.material.extraVec3.set(headOutnessAtArrowBase, headStart, 0.)
-            if (headArcLength > arrowArcLength) //really if you're at this stage, you should move markupPos
-                this.cup.scale.setScalar(1. / (1. - headStart))
-            else
-                this.cup.scale.setScalar(1.)
+            //Head radius and arrow base stuff
+            {
+                let arrowArcLength = this.material.dq.pointTrajectoryArcLength(nonNetherArrowStart, 16)
+                let headStart = (1. - headArcLength / arrowArcLength)
+                let headOutnessAtArrowBase = arrowArcLength * finalHeadRadiusFactor
+                this.material.extraVec3.set(headOutnessAtArrowBase, headStart, 0.)
+                if (headArcLength > arrowArcLength) //really if you're at this stage, you should move startPoint
+                    this.cup.scale.setScalar(1. / (1. - headStart))
+                else
+                    this.cup.scale.setScalar(1.)
+                
+                //out vector at base
+                let spineLineAtNominalStart = nonNetherArrowStart.momentumLineFromRotor(this.material.dq, dq0)
+                let randomPlaneContainingLine = spineLineAtNominalStart.joinPt(randomPt, fl1)
+                let outDqAtStartLog = randomPlaneContainingLine.meet(e0, dq0).normalize()
+                this.material.extraVec2.set(
+                    outDqAtStartLog[1],
+                    outDqAtStartLog[2],
+                    outDqAtStartLog[3]).multiplyScalar(arrowRadius)
+            }
 
-            let spineLineAtNominalStart = nonNetherArrowStart.momentumLineFromRotor(this.material.dq, dq0)
-            let randomPlaneContainingLine = spineLineAtNominalStart.joinPt(randomPt, fl1)
-            let outDqAtStartLog = randomPlaneContainingLine.meet(e0, dq0).normalize()
-            this.material.extraVec2.set(
-                outDqAtStartLog[1],
-                outDqAtStartLog[2],
-                outDqAtStartLog[3]).multiplyScalar(arrowRadius)
-            // if(isNether)
-            //     log("outer", this.material.extraVec2)
-
-            nonNetherDq.sqrt(dq0).sandwich(markupPos, pointHalfWayAlongArrow)
+            if (pointHalfWayAlongArrow)
+                nonNetherDq.sqrt(dq0).sandwich(startPoint, pointHalfWayAlongArrow)
         }
     }
     window.Arrow = Arrow

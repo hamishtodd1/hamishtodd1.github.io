@@ -10,7 +10,6 @@
         It cycles through the potential snaps
 
     TODO for FoC demo:
-        COLOR CHANGING
         Just an eye that rotates in place
             Join eye position with initial eyeFocusPoint (at infinity), get line
             Join eye position with focusPoint, get line
@@ -26,17 +25,22 @@
         //     Legs pump when moved, eg the instantaneous movement is known
         Paint eraser "color"
     Jon demo:
+        arrow starts move slowly to correct position instead of teleporting
         Levels. Just 4 or so
-        Gauges =/ because that's what it's about. Some kind of animation triggers
+        Gauges. Some kind of animation system for this triggered by creating mvs.
         Spreadsheets
         Infinity is at 10m or whatever
         Eyeballs on vizes
         SFX
             Grade selection is a "snap"
-        Little lizard creatures that rate your animations, with different preferences
-            Make an animation with the smallest number of bones, so it's doing a complex thing
+        Judges that rate your animations
+            One changes their opinion with every level
+            One always likes less code.
+            One likes dynamism or something, just "seeing more stuff happen"
         Undo
     Beyond:
+        ACTUALLY, there is such a thing as a "nether screw". It has no logarithm or sqrt but it's a thing
+        How come hand can't do anything more than 180deg arrow?
         Are you using the measurer for anything? If so, some numbers...
         If passthrough, maybe have a warning saying to do it in the middle of a field
         Experiment with stage from your POV (but probably keep as is because facing audience is good)
@@ -65,6 +69,9 @@
             But something else is now invisible 
             You can "scroll back", making your new thing invisible and the thing that just disappeared visible
             Put this on futureofcoding slack
+    MR lectures
+        For sure spreadsheet. Can just have a single column, so variable names are A, B, C, etc
+        Probably make them pretty small, and pretty close to the camera
 
     Crazy zolly idea
         You have an orthographic camera for the spectators
@@ -75,6 +82,22 @@
         If you have arrows you can put end-to-end, do you need gauges?
         IRL, you can ONLY change things by moving something
             Well, sort of. There's switches, and speaking. Both technically are movement. But, movement is irrelevant
+
+    Code for "nether screw"
+    let transform = new Dq()
+    let initialPos = new Fl().point(0., 0., -0.5, 1.)
+    camera.position.z += 1.
+    debugUpdates.push(()=>{
+        let factor = frameCount * .004
+        let transBiv = oneDq.multiplyScalar(-1.,dq4).addScaled( e02, -factor, transform )
+        let rotBiv = e13.multiplyScalar(frameCount*.0033, dq5).exp(dq6)
+        transBiv.mul(rotBiv,transform)
+        // dq1.mul(e13, transform)
+        // biv.zero()
+        transform.sandwich( initialPos, fl0 ).pointToGibbsVec(debugSphere.position)
+
+        camera.position.z = 1.2
+    })
  */
 
 async function init() {

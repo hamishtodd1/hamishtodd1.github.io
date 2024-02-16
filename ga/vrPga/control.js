@@ -53,6 +53,18 @@ function initControl() {
 
         // testCircuits()
 
+        let flViz0 = new FlViz()
+        debugUpdates.push(()=>{
+            comfortableLookPos(flViz0.markupPos)
+            e02.multiplyScalar(.1, dq0).exp(dq1)
+            e1.addScaled(e0, .1, fl0)
+            fl0.mul(dq1, flViz0.fl)
+
+            // flViz0.regularizeMarkupPos()
+            comfortableLookPos(flViz0.markupPos)
+            
+        })
+
         {
             // let flViz0 = new FlViz()
             // comfortableLookPos(flViz0.fl)

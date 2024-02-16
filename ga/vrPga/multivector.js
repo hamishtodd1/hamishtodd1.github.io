@@ -149,8 +149,8 @@ function initMultivectorWithoutDeclarations() {
         sandwichFl(b, target) {
             let intermediate = this.mulFl(b,  this.constructor === Fl ? newDq : newFl)
             let thisReverse = this.getReverse(this.constructor === Dq ? newDq : newFl)
-            intermediate.mulDq(thisReverse, target)
-            if (this.constructor === Dq )
+            intermediate.mul(thisReverse, target)
+            if (this.constructor === Fl )
                 target.multiplyScalar(-1., target)
             return target
         }

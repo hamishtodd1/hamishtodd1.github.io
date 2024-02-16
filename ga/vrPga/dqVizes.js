@@ -111,8 +111,12 @@ function initDqVizes() {
             this.markupPosAttractor = new Fl().copy(e123)
             this.add(this.arrow)
 
+            this.arrowBar = new THREE.Mesh(new THREE.CylinderGeometry(),axisMat)
+
             obj3dsWithOnBeforeRenders.push(this)
             this.onBeforeRender = () => {
+
+                this.boundingBox.makeEmpty()
 
                 // if(frameCount === 400)
                 //     debugger
@@ -151,10 +155,10 @@ function initDqVizes() {
                     rotationPart,
                     translationPart,
                     bivPart,
-                    
                     this.markupPos,
-                    pointHalfWayAlongArrow,
-                    this.boundingBox)
+                    
+                    this.boundingBox,
+                    pointHalfWayAlongArrow)
                 updateBoxHelper(this.boxHelper, this.boundingBox)
 
                 //axes
@@ -168,6 +172,7 @@ function initDqVizes() {
                         e31.dqTo( rotationAxis.projectOn(e123, dq0), this.rotAxisMesh.dq ).toQuaternion(this.rotAxisMesh.quaternion)
                         pointHalfWayAlongArrow.projectOn(rotationAxis, fl1).pointToGibbsVec(this.rotAxisMesh.position)
                         this.rotAxisMesh.scale.y = this.boundingBox.getSize(v0).length() * 1.8
+                        //funny: pointHalfWayAlongArrow is point pair at infinity for netherDqs
                     }
 
                     if (translationPart.approxEquals(oneDq))

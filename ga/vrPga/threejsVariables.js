@@ -19,6 +19,8 @@ let objLoader = new THREE.OBJLoader()
 
 const clock = new THREE.Clock(true)
 
+let box0 = new THREE.Box3()
+
 const v0 = new THREE.Vector3()
 const v1 = new THREE.Vector3()
 const v2 = new THREE.Vector3()
@@ -45,7 +47,7 @@ const spandrelGeo = new THREE.ShapeGeometry(
 		.lineTo(1., 0.)
 		.lineTo(0., 0.)).translate(0., -.5, 0.)
 
-var debugSphere = new THREE.Mesh(new THREE.SphereGeometry(.0431),new THREE.MeshBasicMaterial({color:0xCCCCCC}))
+var debugSphere = new THREE.Mesh(new THREE.SphereGeometry(.0431),new THREE.MeshBasicMaterial({color:0x333333}))
 scene.add(debugSphere)
 debugSphere.position.copy(outOfSightVec3)
 
