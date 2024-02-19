@@ -37,7 +37,8 @@ function initFlVizes() {
     })
     let diskGeo = new THREE.CircleGeometry(.2, 32)
     diskGeo.computeBoundingBox()
-    let pointGeo = new THREE.SphereGeometry(.004)
+    let pointRadius = .004
+    let pointGeo = new THREE.SphereGeometry(pointRadius)
     pointGeo.computeBoundingBox()
 
     let planePos = new Fl()
@@ -150,6 +151,7 @@ function initFlVizes() {
                         box0.copy(pointGeo.boundingBox)
                         this.pointMesh.updateMatrixWorld()
                         box0.applyMatrix4(this.pointMesh.matrixWorld)
+                        box0.expandByScalar(pointRadius * 1.5)
                         this.boundingBox.union(box0)
                     }
                     else {

@@ -66,19 +66,17 @@ function initControl() {
         // })
 
         // {
-        //     // let flViz0 = new FlViz()
-        //     // comfortableLookPos(flViz0.fl)
-        //     // let flViz1 = new FlViz()
-        //     // comfortableLookPos(flViz1.fl, .5)
+        //     var flViz0 = new FlViz()
+        //     comfortableLookPos(flViz0.fl)
+        //     var flViz1 = new FlViz()
+        //     comfortableLookPos(flViz1.fl, .5)
 
-        //     // let dqViz5 = new DqViz()
-        //     // e23.projectOn(flViz0.fl.addScaled(e012, .01, fl0), dqViz5.dq)
-        //     // // debugger
-        //     // snap(dqViz5)
-        //     // debugUpdates.push(()=>{
-        //     //     if(frameCount === 2)
-        //     //         dqViz5.regularizeMarkupPos()
-        //     // })
+        //     var dqViz5 = new DqViz()
+        //     e23.projectOn(flViz0.fl.addScaled(e012, .01, fl0), dqViz5.dq)
+        //     snap(dqViz5)
+
+        //     debugUpdates.push(()=>{
+        //     })
         // }
 
         // let dqViz1 = new DqViz()
@@ -172,14 +170,15 @@ function initControl() {
             }
             else {
                 
-                evenGrabbees[focusHand] = paintees[otherHand] || highlightees[focusHand]
+                let grabbee = paintees[otherHand] || highlightees[focusHand]
 
                 let isOddVersor = 
-                    (evenGrabbees[otherHand] !== null && evenGrabbees[otherHand] === evenGrabbees[focusHand] ) ||
-                    (evenGrabbees[focusHand] !== null && evenGrabbees[focusHand].constructor === FlViz) ||
+                    (evenGrabbees[otherHand] !== null && evenGrabbees[otherHand] === grabbee ) ||
+                    (grabbee !== null && grabbee.constructor === FlViz) ||
                     oddGrabbee !== null
                 if (isOddVersor) {
 
+                    oddGrabbee = grabbee
                     handsHoldingOdd[focusHand] = true
                     
                     if (evenGrabbees[focusHand] !== null ) {
@@ -204,6 +203,8 @@ function initControl() {
                     oldDqVizes[focusHand].visible = false
                 }
                 else {
+
+                    evenGrabbees[focusHand] = grabbee
 
                     if( evenGrabbees[focusHand] === null )
                         evenGrabbees[focusHand] = new DqViz()
@@ -247,9 +248,14 @@ function initControl() {
                     paintees[focusHand].sclptable = new Sclptable(paintees[focusHand])
             }
         }
+
+        log(oddGrabbee)
     }
 
     movingPaintingHighlightingHandLabels = () => {
+
+        // if(oddGrabbee)
+        //     log(oddGrabbee.fl)
 
         // setLabels(paintee !== null, grabbee !== null, paintHandIsRight, grabbHandIsRight)
 
@@ -266,48 +272,14 @@ function initControl() {
             //...the transform that would get the place where the right hand is to that
             rightFl.mulReverse(hands[RIGHT].dq, oddGrabbee.fl)
             
-            oddGrabbee.fl.normalize()
-            oddGrabbee.fl.selectGrade(1, planePart)
-            oddGrabbee.fl.selectGrade(3, pointPart)
-            let pointAtInf = fl2.copy(pointPart)
-            pointAtInf[7] = 0.
-
-            oddGrabbee.fl.mul(planePart, evenVersion)
-            let evenVersionAxis = dq0
-            evenVersion.selectGrade(2, evenVersionAxis)
-            evenVersion.normalize()
-            // evenVersion.log()
-
-            let handsDistToAxis = evenVersionAxis.distanceToPt(pointBetweenHands)
-            let distTaken = pointBetweenHands.distanceToPt( evenVersion.sandwich(pointBetweenHands, fl1) )
-
-            let eNormSqAxis = Math.sqrt(Math.abs(evenVersionAxis.eNormSq()))
-            let angle = 4. * Math.abs(Math.atan2(eNormSqAxis, evenVersion[0]))
-            //4 because double cover, or WHATEVER
-            // log(eNormSqAxis, evenVersion[0])
-            // log(angle)
-
-            let PLANE = 0
-            let POINT = 1
-            let ROTOREFLECTION = 2
-            let TRANSFLECTION = 3
-            
-            let thingThisIs = TRANSFLECTION
-            if(angle > Math.PI * .9)
-                thingThisIs = POINT
-            else if(angle > Math.PI * .2)
-                thingThisIs = ROTOREFLECTION
-            else if(distTaken < .13)
-                thingThisIs = PLANE
-
-            let eNormPlane = Math.sqrt( planePart.eNormSq() )
-            let eNormPoint = Math.sqrt( pointPart.eNormSq() )
-            let iNormPointAtInf = Math.sqrt( pointAtInf.iNormSq() )
+            let thingThisIs = oddGrabbee.fl.getTypeAndParts( planePart, pointPart )
 
             if (thingThisIs === TRANSFLECTION) {
 
+                let distTaken = pointBetweenHands.distanceToPt(evenVersion.sandwich(pointBetweenHands, fl4))
+
                 let newPointAtInf = pointBetweenHands.joinPt(pointPart, dq0).meet(e0, fl0)
-                let scalar = .5 * distTaken / eNormPlane / Math.sqrt(fl0.iNormSq())
+                let scalar = .5 * distTaken / Math.sqrt(planePart.eNormSq() / fl0.iNormSq())
                 planePart.addScaled(newPointAtInf, scalar, oddGrabbee.fl)
                 
             }
@@ -385,7 +357,7 @@ function initControl() {
                 evenGrabbees[hand].dq.normalize()
                 dispDqVizes[hand].dq.copy(movementSinceGrab)
                 
-                snap(evenGrabbees[hand])
+                let didSnap = snap(evenGrabbees[hand])
 
                 if (showMarkupVizes) {
                     dispDqVizes[hand].visible = !oldDqVizes[hand].dq.equals(oneDq)
@@ -508,10 +480,18 @@ function initControl() {
         }
 
         if (oddGrabbee !== null && isSideButton) {
+            
             handsHoldingOdd[focusHand] = false
             if (!handsHoldingOdd[0] && !handsHoldingOdd[1]) {
-                oddGrabbee = null
 
+                let thingThisIs = oddGrabbee.fl.getTypeAndParts(planePart, pointPart)
+                if (thingThisIs === POINT || thingThisIs === TRANSFLECTION)
+                    oddGrabbee.fl.zeroPlanePart()
+                else
+                    oddGrabbee.fl.zeroPointPart()
+
+
+                oddGrabbee = null
             }
         }
     }

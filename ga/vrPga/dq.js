@@ -158,10 +158,11 @@ joinPt(b, target) {
     target[2] = - this[2] * b[7] - this[4] * b[6] + this[6] * b[4];
 	target[3] = - this[3] * b[7] + this[5] * b[6] - this[6] * b[5];
     
-    target[4] = - this[7] * b[4];
-    target[5] = - this[7] * b[5];
-    target[6] = - this[7] * b[6];
-	target[7] = - this[7] * b[7];
+    //join a 180 screw with a point and get... a rotoreflection?
+    target[4] = 0.; // - this[7] * b[4];
+    target[5] = 0.; // - this[7] * b[5];
+    target[6] = 0.; // - this[7] * b[6];
+	target[7] = 0.; // - this[7] * b[7];
 
     return target
 }

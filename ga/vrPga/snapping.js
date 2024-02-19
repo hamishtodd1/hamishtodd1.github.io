@@ -67,10 +67,17 @@ function initSnapping() {
 
                 case `joinPt`:
                     let g = potentialSnap.grade()
-                    let gradeGPart = toBeSnapped.mv.selectGrade( g, toBeSnapped.mv.constructor === Dq ? dq4 : fl4 )
-                    if(gradeGPart.isZero())
+                    let gradeGPart = toBeSnapped.mv.selectGrade(g, toBeSnapped.mv.constructor === Dq ? dq4 : fl4)
+                    if (gradeGPart.isZero())
                         return false
-                    l1Norm = potentialSnap.l1NormTo(toBeSnapped.mv)
+                    //gotta make it NOT a screw axis
+                    if(g===2)
+                        gradeGPart.normalize()
+
+                    l1Norm = potentialSnap.l1NormTo(gradeGPart)
+
+                    let handicap = 5. // whatever it needs to make it feel right for tolerance = 1
+                    l1Norm /= handicap
 
                     break
                 
@@ -148,8 +155,8 @@ function initSnapping() {
             }
         }
         
-        let yesToSnap = Math.abs(l1NormLowest) < tolerance
-        if (!yesToSnap) {
+        let acceptableSnapFound = Math.abs(l1NormLowest) < tolerance
+        if (!acceptableSnapFound) {
             toBeSnapped.affecters[0] = null
             toBeSnapped.affecters[1] = null
             toBeSnapped.affecters[2] = -1
@@ -167,6 +174,6 @@ function initSnapping() {
             
         }
 
-        return yesToSnap
+        return acceptableSnapFound
     }    
 }

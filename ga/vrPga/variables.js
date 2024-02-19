@@ -19,6 +19,13 @@ const socket = io()
 const eps = .0001 //not been tweaked for anything yet, so feel free to change
 const arrowRadius = .006
 
+let ZERO_BLADE = -1
+let PLANE = 1
+let LINE = 2
+let POINT = 3
+let ROTOREFLECTION = 5
+let TRANSFLECTION = 6
+
 const randomPt = new Fl().point(0.2448657087518873, 0.07640275431752674, 0.360207610338215, 1.)
 
 const operators = [
