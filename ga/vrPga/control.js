@@ -53,33 +53,33 @@ function initControl() {
 
         // testCircuits()
 
-        let flViz0 = new FlViz()
-        debugUpdates.push(()=>{
-            comfortableLookPos(flViz0.markupPos)
-            e02.multiplyScalar(.1, dq0).exp(dq1)
-            e1.addScaled(e0, .1, fl0)
-            fl0.mul(dq1, flViz0.fl)
+        // let flViz0 = new FlViz()
+        // debugUpdates.push(()=>{
+        //     // e02.multiplyScalar(.1, dq0).exp(dq1)
+        //     comfortableLookPos(fl0).joinPt(e023, dq0).exp(dq1)
+        //     e1.addScaled(e0, .1, fl0)
+        //     fl0.mul(dq1, flViz0.fl)
 
-            // flViz0.regularizeMarkupPos()
-            comfortableLookPos(flViz0.markupPos)
+        //     // comfortableLookPos(flViz0.markupPos)
+        //     flViz0.regularizeMarkupPos()
             
-        })
+        // })
 
-        {
-            // let flViz0 = new FlViz()
-            // comfortableLookPos(flViz0.fl)
-            // let flViz1 = new FlViz()
-            // comfortableLookPos(flViz1.fl, .5)
+        // {
+        //     // let flViz0 = new FlViz()
+        //     // comfortableLookPos(flViz0.fl)
+        //     // let flViz1 = new FlViz()
+        //     // comfortableLookPos(flViz1.fl, .5)
 
-            // let dqViz5 = new DqViz()
-            // e23.projectOn(flViz0.fl.addScaled(e012, .01, fl0), dqViz5.dq)
-            // // debugger
-            // snap(dqViz5)
-            // debugUpdates.push(()=>{
-            //     if(frameCount === 2)
-            //         dqViz5.regularizeMarkupPos()
-            // })
-        }
+        //     // let dqViz5 = new DqViz()
+        //     // e23.projectOn(flViz0.fl.addScaled(e012, .01, fl0), dqViz5.dq)
+        //     // // debugger
+        //     // snap(dqViz5)
+        //     // debugUpdates.push(()=>{
+        //     //     if(frameCount === 2)
+        //     //         dqViz5.regularizeMarkupPos()
+        //     // })
+        // }
 
         // let dqViz1 = new DqViz()
         // dqViz1.dq.copy(Translator(.2, 0., 0.))
@@ -144,6 +144,7 @@ function initControl() {
     let evenGrabbees = [null,null]
     
     let oddGrabbee = null
+    let evenVersion = new Dq()
     let handsHoldingOdd = [false, false]
 
 
@@ -257,11 +258,12 @@ function initControl() {
 
         if (oddGrabbee !== null) {
 
+            let pointBetweenHands = fl3.pointFromGibbsVec(v1.addVectors(hands[0].position, hands[1].position).multiplyScalar(.5))
+            
             //the right hand is the left hand preceded (that is, algebraically followed...) by a reflection in e1
-
-            // let pointBetweenHands = fl3.pointFromGibbsVec(v1.addVectors(hands[0].position, hands[1].position).multiplyScalar(.5))
-
+            //so this is the transform that would reflect the right hand then get it to where left hand is
             hands[LEFT].dq.mul(e1, rightFl)
+            //...the transform that would get the place where the right hand is to that
             rightFl.mulReverse(hands[RIGHT].dq, oddGrabbee.fl)
             
             oddGrabbee.fl.normalize()
@@ -270,42 +272,69 @@ function initControl() {
             let pointAtInf = fl2.copy(pointPart)
             pointAtInf[7] = 0.
 
-            let eNormSqPlane = planePart.eNormSq()
-            let eNormSqPoint = pointPart.eNormSq()
-            let iNormSqPointAtInf = pointAtInf.iNormSq()
+            oddGrabbee.fl.mul(planePart, evenVersion)
+            let evenVersionAxis = dq0
+            evenVersion.selectGrade(2, evenVersionAxis)
+            evenVersion.normalize()
+            // evenVersion.log()
 
-            oddGrabbee.markupPos.copy(pointPart)
+            let handsDistToAxis = evenVersionAxis.distanceToPt(pointBetweenHands)
+            let distTaken = pointBetweenHands.distanceToPt( evenVersion.sandwich(pointBetweenHands, fl1) )
+
+            let eNormSqAxis = Math.sqrt(Math.abs(evenVersionAxis.eNormSq()))
+            let angle = 4. * Math.abs(Math.atan2(eNormSqAxis, evenVersion[0]))
+            //4 because double cover, or WHATEVER
+            // log(eNormSqAxis, evenVersion[0])
+            // log(angle)
+
+            let PLANE = 0
+            let POINT = 1
+            let ROTOREFLECTION = 2
+            let TRANSFLECTION = 3
             
-            //one of the extra planes is where one of your hands is
-            //other is halfway between
-            // let pl = extraPlanes[LEFT]
-            // let planeFl = handPosition.joinPt(pointPart, dq0).inner(planePart, fl0)
-            // pl.position.copy(hands[LEFT].position)
+            let thingThisIs = TRANSFLECTION
+            if(angle > Math.PI * .9)
+                thingThisIs = POINT
+            else if(angle > Math.PI * .2)
+                thingThisIs = ROTOREFLECTION
+            else if(distTaken < .13)
+                thingThisIs = PLANE
 
-            // let firstPos = hands[LEFT].position
+            let eNormPlane = Math.sqrt( planePart.eNormSq() )
+            let eNormPoint = Math.sqrt( pointPart.eNormSq() )
+            let iNormPointAtInf = Math.sqrt( pointAtInf.iNormSq() )
 
-            // planeFlToMesh(extraPlanes[hand], planeFl, oddGrabbee.markupPos)
-            // planeFlToMesh(extraPlanes[hand], planeFl, oddGrabbee.markupPos)
+            if (thingThisIs === TRANSFLECTION) {
 
+                let newPointAtInf = pointBetweenHands.joinPt(pointPart, dq0).meet(e0, fl0)
+                let scalar = .5 * distTaken / eNormPlane / Math.sqrt(fl0.iNormSq())
+                planePart.addScaled(newPointAtInf, scalar, oddGrabbee.fl)
+                
+            }
+            else if (thingThisIs === PLANE ) {
+                oddGrabbee.fl.zeroPointPart()
+                oddGrabbee.markupPos.copy(pointBetweenHands)
+            }
+            else if (thingThisIs === POINT )
+                oddGrabbee.fl.zeroPlanePart()
 
-
-
-
-
-
-
+            hands[RIGHT].dq.sandwich(e123, oddGrabbee.markupPos)
+            oddGrabbee.regularizeMarkupPos()
+            
+            
             //we want points at infinity quite often
 
-            // let distanceTaken = rightFl.sandwich(pointBetweenHands, fl4).distanceToPt(pointBetweenHands)
+            // let distTaken = rightFl.sandwich(pointBetweenHands, fl4).distanceToPt(pointBetweenHands)
 
-            // let angleIsShallow = Math.abs(eNormSqPlane) > Math.abs(eNormSqPoint)
-            // // log(angleIsShallow, Math.abs(iNormSqPointAtInf) * 30., Math.abs(eNormSqPlane) )
+            // // let angleIsShallow = Math.abs(eNormSqPlane) > Math.abs(eNormSqPoint)
+            // // // log(angleIsShallow, Math.abs(iNormSqPointAtInf) * 30., Math.abs(eNormSqPlane) )
             
-            // // if (distanceTaken > .2 ) {
-            // //     //might be concerned about whether or not this is in front of the camera
-            // //     pointAtInf.multiplyScalar(1. / Math.sqrt(iNormSqPointAtInf), oddGrabbee.fl)
-            // // }
-            // // else 
+            // if (distTaken > .2 ) {
+            //     //might be concerned about whether or not this is in front of the camera
+            //     // pointAtInf.multiplyScalar(1. / Math.sqrt(iNormSqPointAtInf), oddGrabbee.fl)
+            //     oddGrabbee.fl[7] = 0.
+            // }
+            // else 
             // {
 
             //     if (angleIsShallow) {
@@ -320,6 +349,21 @@ function initControl() {
             //look at their quats alone
             //planePart part is the bisector of their positions
             //compose the right hand's dq with the reflection to get an fl called rightBireflection
+
+            
+
+            //one of the extra planes is where one of your hands is
+            //other is halfway between
+            // let pl = extraPlanes[LEFT]
+            // let planeFl = handPosition.joinPt(pointPart, dq0).inner(planePart, fl0)
+            // pl.position.copy(hands[LEFT].position)
+
+            // let firstPos = hands[LEFT].position
+
+            // planeFlToMesh(extraPlanes[hand], planeFl, oddGrabbee.markupPos)
+            // planeFlToMesh(extraPlanes[hand], planeFl, oddGrabbee.markupPos)
+
+            
         }
 
         for(let hand = 0; hand < 2; ++hand) {

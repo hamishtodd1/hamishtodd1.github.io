@@ -1,4 +1,11 @@
 /*
+    Could have two planes: one where the point is and one between hands
+    Or just a long capsule shape
+    Could have another plane, rectangular
+        One of its sides is on the line between your two hands
+        It extends to the center of the disk
+
+
     For transflection: When holding, have all 3
         It's so unlikely you actually want a transflection that we can get rid of all 3 mirrors
         So markupPos is the place where TWO of the plane positions are
@@ -14,12 +21,12 @@ function initFlVizes() {
     let planePart = new Fl()
     let pointPart = new Fl()
 
-    let planeMatFront = new THREE.MeshPhongMaterial({ 
+    let diskMatFront = new THREE.MeshPhongMaterial({ 
         side: THREE.FrontSide,
         color: 0x00FFFF,
         transparent: true,
         opacity: .4 })
-    let planeMatBack = new THREE.MeshPhongMaterial({
+    let diskMatBack = new THREE.MeshPhongMaterial({
         side: THREE.BackSide,
         color: 0x00FF00,
         transparent: true,
@@ -28,24 +35,26 @@ function initFlVizes() {
     let pointMat = new THREE.MeshPhongMaterial({
         color: 0xFF0000,
     })
-    let planeGeo = new THREE.CircleGeometry(.2, 32)
-    planeGeo.computeBoundingBox()
+    let diskGeo = new THREE.CircleGeometry(.2, 32)
+    diskGeo.computeBoundingBox()
     let pointGeo = new THREE.SphereGeometry(.004)
     pointGeo.computeBoundingBox()
 
-    function updatePlaneMesh(planeMesh, plane, pos) {
-        pos.pointToGibbsVec(planeMesh.position)
-        let e3OnPos = e3.projectOn(pos, fl1)
+    let planePos = new Fl()
+    let e3OnPos = new Fl()
+    function planeMeshQuat(planeMesh, plane) {
+        planePos.pointFromGibbsVec(planeMesh.position)
+        e3.projectOn(planePos, e3OnPos)
         plane.mulReverse(e3OnPos, dq0).sqrtSelf().toQuaternion(planeMesh.quaternion)
     }
 
     // let extraPlanes = [
     //     new THREE.Group().add(
-    //         new THREE.Mesh(planeGeo, planeMatFront),
-    //         new THREE.Mesh(planeGeo, planeMatBack)),
+    //         new THREE.Mesh(diskGeo, diskMatFront),
+    //         new THREE.Mesh(diskGeo, diskMatBack)),
     //     new THREE.Group().add(
-    //         new THREE.Mesh(planeGeo, planeMatFront),
-    //         new THREE.Mesh(planeGeo, planeMatBack)),
+    //         new THREE.Mesh(diskGeo, diskMatFront),
+    //         new THREE.Mesh(diskGeo, diskMatBack)),
     // ]
     // extraPlanes.forEach(plane => {
     //     plane.visible = false
@@ -60,7 +69,7 @@ function initFlVizes() {
     let planePosition = new Fl()
     let evenPart = new Dq()
     let axisBiv = new Dq()
-    
+
     class FlViz extends THREE.Group {
 
         constructor(omitFromSnappables = false) {
@@ -81,30 +90,34 @@ function initFlVizes() {
             this.fl.zero()
             this.markupPos = new Fl().point(0.,1.2,0.,1.)
 
-            this.arrow1 = new Arrow(0xFF00FF, false, pointMat, true)
+            this.arrow1 = new Arrow( pointMat.color, false, pointMat, true )
             this.add(this.arrow1)
-            this.arrow2 = new Arrow(0xFF00FF, false, pointMat, false)
+            this.arrow2 = new Arrow( pointMat.color, false, pointMat, false )
             this.add(this.arrow2)
 
             //arrowbar crossing through mirror was the next thing we were gonna do
             //don't be tempted to try to hack the extraShaft into being this. Extrashaft SHOULD be arrow1.
-            // this.arrowBar
+            //so you need TWO little balls for the thing anyway
+            this.arrowBar = new THREE.Mesh(this.arrow1.extraShaft.geometry, pointMat )
+            this.add(this.arrowBar)
+            this.arrowBarCup = this.arrow1.cup.clone()
+            this.add(this.arrowBarCup)
 
-            this.planeMesh = new THREE.Group()
-            this.planeMesh.visible = false
-            scene.add(this.planeMesh)
-            this.planeMesh.add(
-                new THREE.Mesh(planeGeo, planeMatFront), 
-                new THREE.Mesh(planeGeo, planeMatBack))
+            this.diskGroup = new THREE.Group()
+            this.diskGroup.scale.setScalar(0.)
+            this.add(this.diskGroup)
+            this.diskGroup.add(
+                new THREE.Mesh(diskGeo, diskMatFront), 
+                new THREE.Mesh(diskGeo, diskMatBack))
 
             this.pointMesh = new THREE.Mesh(pointGeo, pointMat)
             this.pointMesh.visible = false
-            scene.add(this.pointMesh)
+            this.add(this.pointMesh)
 
             this.idealPointMeshes = Array(new THREE.Mesh(pointGeo, pointMat), new THREE.Mesh(pointGeo, pointMat))
             this.idealPointMeshes.forEach((pt,i) => {
                 pt.visible = false
-                scene.add(pt)
+                this.add(pt)
                 pt.scale.setScalar( 50. )
             })
 
@@ -113,8 +126,9 @@ function initFlVizes() {
 
                 this.boundingBox.makeEmpty()
                 this.pointMesh.visible = false
-                this.planeMesh.visible = false
                 this.idealPointMeshes.forEach(pt => pt.visible = false)
+                this.arrowBar.visible = false
+                this.arrowBarCup.visible = false
 
                 if(this.fl.isZero())
                     return
@@ -161,6 +175,8 @@ function initFlVizes() {
                 else {
                     this.arrow1.visible = true
                     this.arrow2.visible = true
+                    this.arrowBar.visible = true
+                    this.arrowBarCup.visible = true
 
                     this.fl.mul(planePart, evenPart) //guaranteed positive scalar => guaranteed < 180deg rotation
                     evenPart.sqrt(halfWay)
@@ -188,15 +204,29 @@ function initFlVizes() {
 
                         this.boundingBox)
 
+                    //it's not going all the way because of the arrowhead, silly
+
+                    let arrow1End = halfWay.sandwich( this.markupPos, fl0 )
+                    arrow1End.joinPt(arrow2Start,dq1)
+                    arrow1End.pointToGibbsVec(this.arrowBarCup.position)
+
+                    arrow2Start.pointToGibbsVec(this.arrowBar.position)
+                    e13.projectOn(arrow2Start, dq0)
+                    dq1.mulReverse( dq0, dq2 ).sqrtSelf().toQuaternion(this.arrowBar.quaternion)
+                    this.arrowBar.scale.y = arrow1End.distanceToPt(arrow2Start)
+
                     // evenPart.selectGrade(2, axisBiv)
                     // let plane1 = axisBiv.joinPt( this.markupPos, fl0 )
-                    // updatePlaneMesh( extraPlanes[0], plane1, this.markupPos )
+                    // planeMeshQuat( extraPlanes[0], plane1, this.markupPos )
                     // let plane2 = axisBiv.joinPt( arrow2Start, fl0 )
-                    // updatePlaneMesh( extraPlanes[1], plane2, arrow2Start )
+                    // planeMeshQuat( extraPlanes[1], plane2, arrow2Start )
                 }
-
-                if (hasPlane) {
-                    this.planeMesh.visible = true
+                
+                //plane
+                {
+                    let scaleSpeed = 3.5
+                    let newScale = clamp(this.diskGroup.scale.x + (hasPlane ? 1. : -1.) * scaleSpeed * frameDelta,0.,1.)
+                    this.diskGroup.scale.setScalar(newScale)
 
                     if(!hasPoint)
                         this.markupPos.projectOn(planePart, planePosition).normalizePoint()
@@ -207,15 +237,14 @@ function initFlVizes() {
                         this.markupPos.addScaled(fl0, this.markupPos[7] / fl0[7], planePosition)
                     }
 
-                    planePosition.pointToGibbsVec(this.planeMesh.position) 
-                    let e3OnPos = e3.projectOn(planePosition, fl1)
-                    planePart.mulReverse(e3OnPos, dq0).sqrtSelf().toQuaternion(this.planeMesh.quaternion)
-
-                    updatePlaneMesh(this.planeMesh, planePart, planePosition)
+                    planePosition.pointToGibbsVec(v1)
+                    this.diskGroup.position.lerp(v1, .13)
+                    if(hasPlane)
+                        planeMeshQuat(this.diskGroup, planePart, planePosition)
                     
-                    box0.copy(planeGeo.boundingBox)
-                    this.planeMesh.updateMatrixWorld()
-                    box0.applyMatrix4(this.planeMesh.matrixWorld)
+                    box0.copy(diskGeo.boundingBox)
+                    this.diskGroup.updateMatrixWorld()
+                    box0.applyMatrix4(this.diskGroup.matrixWorld)
                     this.boundingBox.union(box0)
                 }
 
@@ -225,28 +254,43 @@ function initFlVizes() {
 
         regularizeMarkupPos() {
 
-            // debugger
+            //markupPos is only relevant when we have rotoreflection or transflection, so this will probably only be called then
+            //And away from the plane
+            //push the markupPos away from the axis of the rotation
 
             this.fl.selectGrade( 1, planePart )
             this.fl.selectGrade( 3, pointPart )
             let hasPlane = !planePart.isZero()
             let hasPoint = !pointPart.isZero()
 
-            let start = null
-            if(hasPoint && hasPlane)
-                start = pointPart
-            else if(hasPlane && !hasPoint)
-                start = comfortableLookPos(fl3).projectOn(planePart, fl5).normalizePoint()
+            if(!hasPlane || !hasPoint)
+                return
 
-            let awayFromCamera = camera.mvs.dq.sandwich(e012, fl2).multiplyScalar(.1, fl1)
-            start.add(awayFromCamera, this.markupPos)
+            let maxDistFromPlane = .015
+            if(planePart.distanceToPt(this.markupPos) > maxDistFromPlane)
+                clampPointDistanceFromThing(this.markupPos, planePart, maxDistFromPlane, 1.)
 
-            if(hasPlane) {
-                let awayFromPlane = planePart.mul(e0123, fl0).multiplyScalar(.1, fl1)
-                this.markupPos.add(awayFromPlane, this.markupPos)
-            }
+            planePart.inner(pointPart, axisBiv)
+            if (Math.abs(axisBiv.eNormSq()) > eps)
+                clampPointDistanceFromThing(this.markupPos, axisBiv, .05)
 
-            this.markupPos.normalizePoint()
+
+
+            // let start = null
+            // if(hasPoint && hasPlane)
+            //     start = pointPart
+            // else if(hasPlane && !hasPoint)
+            //     start = comfortableLookPos(fl3).projectOn(planePart, fl5).normalizePoint()
+
+            // let awayFromCamera = camera.mvs.dq.sandwich(e012, fl2).multiplyScalar(.1, fl1)
+            // start.add(awayFromCamera, this.markupPos)
+
+            // if(hasPlane) {
+            //     let awayFromPlane = planePart.mul(e0123, fl0).multiplyScalar(.1, fl1)
+            //     this.markupPos.add(awayFromPlane, this.markupPos)
+            // }
+
+            // this.markupPos.normalizePoint()
         }
 
         dispose() {
@@ -254,6 +298,8 @@ function initFlVizes() {
         }
     }
     window.FlViz = FlViz
+
+
 
     debugFls = [
         new FlViz(true), new FlViz(true),
@@ -264,16 +310,8 @@ function initFlVizes() {
         dfl.markupPos.pointFromGibbsVec(outOfSightVec3)
     })
 
-    // let myFlViz = new FlViz()
-    // myFlViz.fl.copy(e3)
-
-    // myFlViz.fl.copy(e012)
-    // // myFlViz.fl.multiplyScalar(-1., myFlViz.fl)
-
     // blankFunction = () => {
     //     myFlViz.fl[7] = sq(Math.cos(frameCount * .02))
     //     myFlViz.fl[4] = -sq(Math.sin(frameCount * .02))
     // }
-    
-
 }

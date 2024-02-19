@@ -196,23 +196,12 @@ function initDqVizes() {
 
             let bivPart = this.dq.selectGrade(2, dq0)
 
+            //if this has no rotation component, fuck it
             //could have something about it going to being closer to your line of sight
-
             if ( Math.abs(bivPart.eNormSq()) < eps )
                 return
 
-            //want to pull it in a good direction
-            let markupPosOnRotAxis = this.markupPos.projectOn( bivPart, fl0 )
-            let out = markupPosOnRotAxis.dqTo(this.markupPos, dq1).normalizeTranslation()
-            let dist = out.translationDistance()
-            let newDist = clamp(dist, .015, .06)
-            out[1] *= newDist / dist
-            out[2] *= newDist / dist
-            out[3] *= newDist / dist
-
-            log(dist, newDist)
-
-            out.sandwich( markupPosOnRotAxis, this.markupPos )
+            clampPointDistanceFromThing( this.markupPos, bivPart, .015, .06 )
         }
 
         dispose() {

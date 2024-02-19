@@ -106,7 +106,6 @@ async function init() {
     document.body.appendChild(container)
 
     initDqMeshes()
-    init31()
     
     initArrows()
     initDqVizes()
@@ -124,7 +123,7 @@ async function init() {
     initPotentialSpectatorReception()
     initControl()
 
-    initCircuits()
+    // initCircuits()
 
     // initRecording()
 

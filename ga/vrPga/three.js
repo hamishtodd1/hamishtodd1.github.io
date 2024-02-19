@@ -19504,9 +19504,11 @@
 
 		}
 
-		if (injections !== undefined) {
+		if (injections ) {
 			
 			injections.forEach((injection) => {
+                if(typeof injection === `string`)
+                    return
 				let current = injection.type === `vertex` ? vertexShader : fragmentShader
 				let location = current.indexOf(injection.precedes)
 				let result = current.slice(0, location)
@@ -20003,7 +20005,12 @@
 
 			const HAS_ATTRIBUTE_UV2 = !! geometry.attributes.uv2;
 
+            if(material.injections && typeof material.injections[0] !== `string`)
+                console.error("injections need id")
+
 			const parameters = {
+
+                injectionId: material.injections?material.injections[0] : null,
 
 				isWebGL2: IS_WEBGL2,
 
@@ -20220,7 +20227,12 @@
 
 			}
 
+            array.push(parameters.injectionId)
+
 			array.push( parameters.customProgramCacheKey );
+
+            // if(parameters.injections)
+            //     log(array.join())
 
 			return array.join();
 

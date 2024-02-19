@@ -1,5 +1,21 @@
 function initArrows() {
+
+    let infix = `
+        //get the correct alongness and the slight alongness
+        float[8] myDqLog; dqLog( dq, myDqLog );
+        float[8] alongLog; multiplyScalar( myDqLog, alongness, alongLog );
+        float[8] along; dqExp( alongLog, along );
+
+        vec4 start = vec4(extraVec1,1.);
+        // vec4 startAlonged = sandwichDqPoint(dq, start);
+        vec4 startDerivative = commutator(start, myDqLog);
+        float[8] aroundLogUnnormalized; joinPt(start, startDerivative, aroundLogUnnormalized);
+        float[8] aroundLog; dqNormalize(aroundLogUnnormalized, aroundLog);
+        float[8] around; fromUnitAxisAndSeparation( aroundLog, angleAround, around );
+    `
+
     let arrowMatInjections = [
+        `arrow`,
         {
             type: `vertex`,
             precedes: ``,
@@ -16,43 +32,65 @@ function initArrows() {
             precedes: `	#include <project_vertex>`,
             str: `
 
-                float[8] oneDq; oneDq[0] = 1.;
-
-                vec4 start = vec4(extraVec1,1.);
-
                 bool isShaft = position.y <= 1.;
                 bool isTip = position.y >= 2.;
                 float headStart = extraVec3.y; //it's a proportion
                 float alongness = isShaft ? headStart * position.y : headStart + (1.-headStart) * (position.y - 1.);
                 alongness = alongness < 0. ? 0. : alongness;
-                float headOutnessAtArrowBase = extraVec3.x;
-                float outness = isShaft ? 1. : isTip ? 0. : headOutnessAtArrowBase * (1.-alongness);
+                float headOutnessAtBase = extraVec3.x;
+                float outness = isShaft ? 1. : isTip ? 0. : headOutnessAtBase * (1.-alongness);
                 bool noShaft = headStart < 0.;
                 if(noShaft && isShaft)
                     outness = 0.;
 
-                //get the correct alongness and the slight alongness
-                float[8] myDqLog; dqLog( dq, myDqLog );
-                float[8] alongLog; multiplyScalar( myDqLog, alongness, alongLog );
-                float[8] along; dqExp( alongLog, along );
-
-                // vec4 startAlonged = sandwichDqPoint(dq, start);
-                vec4 startDerivative = commutator(start, myDqLog);
-                float[8] aroundLogUnnormalized; joinPt(start, startDerivative, aroundLogUnnormalized);
-                float[8] aroundLog; dqNormalize(aroundLogUnnormalized, aroundLog);
                 float angleAround = isTip ? 0. : .5 * atan(transformed.z,transformed.x);
-                float[8] around; fromUnitAxisAndSeparation( aroundLog, angleAround, around );
+
+                `+infix+`
 
                 vec4 outed = vec4(extraVec1 + outness*extraVec2,1.);
                 vec4 arounded = sandwichDqPoint( around, outed );
                 vec4 alonged = sandwichDqPoint( along, arounded ); //purposefully last
                 transformed = alonged.xyz / alonged.w;
                 
-                // transformed.xyz += ;
-
                 vNormal = 
                     isTip ? vec3(0.,0.,0.) : 
                     (arounded - start).xyz;
+            `,
+            //` transformed.y += 0.; vNormal.x += 0.;\n`
+        },
+    ]
+
+    let shaftMatInjections = [
+        `shaft`,
+        {
+            type: `vertex`,
+            precedes: ``,
+            str: egaVerboseGlsl + egaGlsl + `
+                float TAU = 6.283185307179586;
+                uniform float[8] dq;
+                uniform vec3 extraVec1; //start
+                uniform vec3 extraVec2; //"out vector" at base
+                uniform vec3 extraVec3; //x and y do separate things
+            \n`
+        },
+        {
+            type: `vertex`,
+            precedes: `	#include <project_vertex>`,
+            str: `
+
+                float headStart = extraVec3.y; // it's a proportion
+                float alongness = position.y;
+
+                float angleAround = .5 * atan(transformed.z,transformed.x);
+
+                `+infix+`
+
+                vec4 outed = vec4(extraVec1 + extraVec2,1.);
+                vec4 arounded = sandwichDqPoint( around, outed );
+                vec4 alonged = sandwichDqPoint( along, arounded ); //purposefully last
+                transformed = alonged.xyz / alonged.w;
+
+                vNormal = (arounded - start).xyz;
             `,
             //` transformed.y += 0.; vNormal.x += 0.;\n`
         },
@@ -70,7 +108,7 @@ function initArrows() {
         let heightSegments = shaftSegments + headSegments + 1
         var dqArrowGeo = new THREE.ConeGeometry(
             1., //irrelevant radius
-            heightSegments, //we are about to modify y's
+            heightSegments, //"height", but we are about to modify y's
             radialSegments, heightSegments, true) //first half is shaft, second is head
         let attr = dqArrowGeo.attributes.position
         for (let i = 0; i < attr.count; ++i) {
@@ -83,15 +121,13 @@ function initArrows() {
             attr.array[i * 3 + 1] = y
         }
 
-        var headlessGeo = new THREE.CylinderGeometry(
-            1., 1.,
-            1.,
-            radialSegments, shaftSegments, false)
+        var headlessGeo = new THREE.CylinderGeometry( 1., 1., 1.,
+            radialSegments, shaftSegments, true)
         headlessGeo.translate(0.,0.5,0.)
         // dqArrowGeo = headlessGeo
         
-        var extraShaftGeo = new THREE.CylinderGeometry(arrowRadius, arrowRadius, 2000., radialSegments, 1, true)
-        extraShaftGeo.translate(0., 1000., 0.)
+        var extraShaftGeo = new THREE.CylinderGeometry(arrowRadius, arrowRadius, 1., radialSegments, 1, true)
+        extraShaftGeo.translate(0., .5, 0.)
     } 
     
     let nonNetherArrowStart = new Fl()
@@ -108,7 +144,7 @@ function initArrows() {
                 transparent,
                 opacity: transparent ? .4 : 1.
             })
-            mat.injections = arrowMatInjections
+            mat.injections = headless ? shaftMatInjections : arrowMatInjections
 
             super(headless ? headlessGeo : dqArrowGeo, mat )
             this.matrixAutoUpdate = false
@@ -162,12 +198,13 @@ function initArrows() {
                 nonNetherArrowStart.copy(startPoint)
             }
             else {
-                this.extraShaft.visible = false
+                this.extraShaft.visible = true
 
                 startPoint.pointToGibbsVec(this.extraShaft.position)
 
                 let joinedPlane = bivPart.joinPt(e123, fl0)
                 joinedPlane.mulReverse(e2, dq0).normalize().sqrtSelf().toQuaternion(this.extraShaft.quaternion)
+                this.extraShaft.scale.y = 2.
 
                 //arrow should be offset to start in some faraway place
                 //and take you back to where nonNetherDq takes startPoint
@@ -188,8 +225,8 @@ function initArrows() {
             {
                 let arrowArcLength = this.material.dq.pointTrajectoryArcLength(nonNetherArrowStart, 16)
                 let headStart = (1. - headArcLength / arrowArcLength)
-                let headOutnessAtArrowBase = arrowArcLength * finalHeadRadiusFactor
-                this.material.extraVec3.set(headOutnessAtArrowBase, headStart, 0.)
+                let headOutnessAtBase = arrowArcLength * finalHeadRadiusFactor
+                this.material.extraVec3.set(headOutnessAtBase, headStart, 0.)
                 if (headArcLength > arrowArcLength) //really if you're at this stage, you should move startPoint
                     this.cup.scale.setScalar(1. / (1. - headStart))
                 else

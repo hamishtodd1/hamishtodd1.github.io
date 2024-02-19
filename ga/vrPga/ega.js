@@ -6,6 +6,16 @@ function initEgaWithoutDeclarations() {
             super(8)
         }
 
+        zeroPlanePart() {
+            this[0] = 0.; this[1] = 0.; this[2] = 0.; this[3] = 0.;
+            return this
+        }
+
+        zeroPointPart() {
+            this[4] = 0.; this[5] = 0.; this[6] = 0.; this[7] = 0.;
+            return this
+        }
+
         normalizePoint() {
             this.multiplyScalar(1. / this[7], this)
             return this
@@ -164,7 +174,8 @@ function initEgaWithoutDeclarations() {
         }
 
         translationDistance() {
-            return Math.sqrt(this[1] * this[1] + this[2] * this[2] + this[3] * this[3]) / this[0]
+            let iNormBiv = Math.sqrt(this[1] * this[1] + this[2] * this[2] + this[3] * this[3])
+            return Math.abs( iNormBiv / this[0] ) //feel free change to keeping sign if you like! Just check all uses!
         }
 
         slerp(end, t, target) {
@@ -565,6 +576,22 @@ function initEgaWithoutDeclarations() {
         e031 = e0.mulDq(e31)
 
         e0123 = e0.mulFl(e123)
+    }
+
+    let onThing = new Fl()
+    let out = new Dq()
+    clampPointDistanceFromThing = (point, thing, minDist, maxDist = Infinity) => {
+
+        point.projectOn(thing, onThing)
+        onThing.dqTo(point, out).normalizeTranslation()
+        let dist = out.translationDistance()
+        let newDist = clamp(dist, minDist, maxDist)
+        out[1] *= newDist / dist
+        out[2] *= newDist / dist
+        out[3] *= newDist / dist
+
+        out.sandwich(onThing, point)
+        return point
     }
     
 /*END*/}
