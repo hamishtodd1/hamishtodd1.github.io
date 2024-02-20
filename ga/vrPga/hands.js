@@ -13,7 +13,10 @@ function initHands() {
     scene.add(handLeft)
     // e123.dqTo(comfortableLookPos(fl0, 0., -.42), handRight.dq)
 
-    const laserPointerGeo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 0, -1)])
+    const laserPointerGeo = new THREE.BufferGeometry().setFromPoints([
+        new THREE.Vector3(0, 0, 0), 
+        new THREE.Vector3(0, 0, -1)
+    ])
     function bestowHandProperties() {
         handRight.laserDq = new Dq().copy(e12)
         handLeft.laserDq  = new Dq().copy(e12)
@@ -61,8 +64,8 @@ function initHands() {
             }
 
             //mouse rewind IF THIS ISN'T WORKING CHECK SCRIPT, MAY NEED TO CHANGE WINDOW NAME
-            // if (event.key === "6" && event.ctrlKey)
-            //     doSomething() //deleteHeld(focusHand)
+            if (event.key === "6" && event.ctrlKey)
+                log("rewind pressed") //deleteHeld(focusHand)
             // if (event.key === "5" && event.ctrlKey) //mouse fast forward
             //     document.dispatchEvent(new Event(`mouseFastForward`))
 
@@ -276,7 +279,6 @@ function initHands() {
 
                     ++i
                 }
-
             }
 
             scene.add(vrRight)

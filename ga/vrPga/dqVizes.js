@@ -171,7 +171,7 @@ function initDqVizes() {
                         let rotationAxis = rotationPart.selectGrade(2, dq1)
                         e31.dqTo( rotationAxis.projectOn(e123, dq0), this.rotAxisMesh.dq ).toQuaternion(this.rotAxisMesh.quaternion)
                         pointHalfWayAlongArrow.projectOn(rotationAxis, fl1).pointToGibbsVec(this.rotAxisMesh.position)
-                        this.rotAxisMesh.scale.y = this.boundingBox.getSize(v0).length() * 1.8
+                        this.rotAxisMesh.scale.y = 3.5 * this.boundingBox.getSize(v0).length()
                         //funny: pointHalfWayAlongArrow is point pair at infinity for netherDqs
                     }
 

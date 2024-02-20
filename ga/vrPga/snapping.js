@@ -40,7 +40,8 @@ function initSnapping() {
         return null
     }
 
-    let toSnapLog = new Dq()
+    let toSnapLogNormalized = new Dq()
+    let potentialSnapLogNormalized = new Dq()
     let potentialSnap = null
     let psDq = new Dq()
     let psFl = new Fl()
@@ -55,6 +56,8 @@ function initSnapping() {
                 return false
 
             let l1Norm = Infinity
+
+            let advantage = 1.
 
             switch (opName) {
 
@@ -76,16 +79,25 @@ function initSnapping() {
 
                     l1Norm = potentialSnap.l1NormTo(gradeGPart)
 
-                    let handicap = 5. // whatever it needs to make it feel right for tolerance = 1
-                    l1Norm /= handicap
+                    advantage = 5. // whatever it needs to make it feel right for tolerance = 1
+                    
+                    break
 
+                case `dqTo`:
+
+                    toBeSnapped.mv.logarithm(toSnapLogNormalized).normalize()
+                    potentialSnap.logarithm(potentialSnapLogNormalized).normalize()
+
+                    l1Norm = toSnapLogNormalized.l1NormTo(potentialSnapLogNormalized)
+                    advantage = 4.
+                    
                     break
                 
                 default:
-                    potentialSnap.l1NormTo(toBeSnapped.mv)
-
-                    return
+                    l1Norm = potentialSnap.l1NormTo(toBeSnapped.mv)
             }
+
+            l1Norm /= advantage
 
             let isLowest = l1Norm < l1NormLowest
             if (isLowest)
@@ -101,7 +113,7 @@ function initSnapping() {
             let ineligible0 =
                 snappables[i] === toBeSnapped || 
                 aDependsOnB(snappables[i],toBeSnapped) || 
-                (mv0.constructor === Dq && mv0.isScalarMultipleOf(oneDq))
+                (mv0.constructor === Dq && mv0.isScalar())
                 
             if(ineligible0)
                 continue
@@ -136,7 +148,7 @@ function initSnapping() {
                             outputType !== toBeSnapped.mv.constructor ||
                             snappables[j] === toBeSnapped || 
                             aDependsOnB( snappables[j], toBeSnapped ) ||  //maybe one day
-                            (mv1.constructor === Dq && mv1.isScalarMultipleOf(oneDq)) || //for what?
+                            (mv1.constructor === Dq && mv1.isScalar()) || //for what?
                             i === j //mulReverse would get identity, add would do nothing, mul covered by log, join meet would be 0, inner would be scalar
 
                         if( ineligible1 )

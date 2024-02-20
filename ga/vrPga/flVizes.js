@@ -272,27 +272,10 @@ function initFlVizes() {
             if(planePart.distanceToPt(this.markupPos) > maxDistFromPlane)
                 clampPointDistanceFromThing(this.markupPos, planePart, maxDistFromPlane, 1.)
 
+            //TODO it should be far enough away from the axis that the arrow goes a larger arclength
             planePart.inner(pointPart, axisBiv)
             if (Math.abs(axisBiv.eNormSq()) > eps)
                 clampPointDistanceFromThing(this.markupPos, axisBiv, .05)
-
-
-
-            // let start = null
-            // if(hasPoint && hasPlane)
-            //     start = pointPart
-            // else if(hasPlane && !hasPoint)
-            //     start = comfortableLookPos(fl3).projectOn(planePart, fl5).normalizePoint()
-
-            // let awayFromCamera = camera.mvs.dq.sandwich(e012, fl2).multiplyScalar(.1, fl1)
-            // start.add(awayFromCamera, this.markupPos)
-
-            // if(hasPlane) {
-            //     let awayFromPlane = planePart.mul(e0123, fl0).multiplyScalar(.1, fl1)
-            //     this.markupPos.add(awayFromPlane, this.markupPos)
-            // }
-
-            // this.markupPos.normalizePoint()
         }
 
         dispose() {

@@ -6,56 +6,12 @@ function initEgaWithoutDeclarations() {
             super(8)
         }
 
-        getTypeAndParts( planePart, pointPart ) {
-
-            this.normalize()
-            this.selectGrade(1, planePart)
-            this.selectGrade(3, pointPart)
-
-            let pointIsZero = pointPart.isZero()
-            let planeIsZero = planePart.isZero()
-            if(pointIsZero && planeIsZero)
-                return ZERO_BLADE
-            else if(pointIsZero)
-                return PLANE
-            else if(planeIsZero)
-                return POINT
-
-            let evenVersion = this.mul(planePart, newDq )
-            let evenVersionAxis = newDq
-            evenVersion.selectGrade(2, evenVersionAxis)
-            evenVersion.normalize()
-
-            // let handsDistToAxis = evenVersionAxis.distanceToPt(pointBetweenHands)
-            let pointBetweenHands = newFl.pointFromGibbsVec(v1.addVectors(hands[0].position, hands[1].position).multiplyScalar(.5))
-            let distTaken = pointBetweenHands.distanceToPt(evenVersion.sandwich(pointBetweenHands, newFl))
-
-            let eNormSqAxis = Math.sqrt(Math.abs(evenVersionAxis.eNormSq()))
-            let angle = 4. * Math.abs(Math.atan2(eNormSqAxis, evenVersion[0]))
-            //4 because double cover, or WHATEVER
-
-            let thingThisIs = TRANSFLECTION
-            if (angle > Math.PI * .9)
-                thingThisIs = POINT
-            else if (angle > Math.PI * .2)
-                thingThisIs = ROTOREFLECTION
-            else if (distTaken < .13)
-                thingThisIs = PLANE
-
-            return thingThisIs
-        }
-
-        zeroPlanePart() {
-            this[0] = 0.; this[1] = 0.; this[2] = 0.; this[3] = 0.;
-            return this
-        }
-
-        zeroPointPart() {
-            this[4] = 0.; this[5] = 0.; this[6] = 0.; this[7] = 0.;
-            return this
+        isScalar() {
+            return false
         }
 
         normalizePoint() {
+            this.zeroGrade(1)
             this.multiplyScalar(1. / this[7], this)
             return this
         }
@@ -204,6 +160,10 @@ function initEgaWithoutDeclarations() {
         constructor() {
             super(8)
             this[0] = 1.
+        }
+
+        isScalar() {
+            return this[0] !== 0. && this[1] === 0. && this[2] === 0. && this[3] === 0. && this[4] === 0. && this[5] === 0. && this[6] === 0. && this[7] === 0.
         }
 
         normalizeTranslation() {
@@ -632,6 +592,7 @@ function initEgaWithoutDeclarations() {
         out[3] *= newDist / dist
 
         out.sandwich(onThing, point)
+        point.normalizePoint()
         return point
     }
     

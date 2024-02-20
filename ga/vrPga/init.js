@@ -4,6 +4,15 @@
         Grab dq and you're holding the markupPos; other hand modifies what it does
         Gotta be experimenting!
 
+    If you put too many training wheels on things
+        (eg normalizing, taking logs, grade selecting)
+        then what's the point of emphasizing understanding PGA?
+
+    Redo snapping
+        When you holding a pure plane, plane snaps appear, in yellow or whatever
+        When you holding a pure point, point snaps appear
+        Will probably be rounding things to pure rotation and pure translations... could round to 180s
+
     Snap button:
         You keep your hands held in place
         You press the button

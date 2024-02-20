@@ -10,6 +10,13 @@ function initMultivectorWithoutDeclarations() {
             return Math.abs(subtraction[0]) + Math.abs(subtraction[1]) + Math.abs(subtraction[2]) + Math.abs(subtraction[3]) + Math.abs(subtraction[4]) + Math.abs(subtraction[5]) + Math.abs(subtraction[6]) + Math.abs(subtraction[7])
         }
 
+        zeroGrade(g) {
+            for (let i = 0; i < 8; ++i) {
+                if (this.constructor.indexGrades[i] === g )
+                    this[i] = 0.
+            }
+        }
+
         gradeDiff(that) {
             let thisGrade = this.grade()
             let thatGrade = that.grade()
@@ -90,19 +97,6 @@ function initMultivectorWithoutDeclarations() {
             numerator.mulReverse(toBeProjectedOn, target)
 
             return target
-        }
-
-        isScalarMultipleOf(b) {
-            if(this.constructor !== b.constructor)
-                return false
-
-            let ratio = this.divide(b,newDq)
-            if(ratio[0] === 0.)
-                return false
-            ratio[0] /= ratio[0]
-            return ratio.approxEquals(oneDq)
-            // return (ratio[0] !== 0. && 
-            //     ratio[1] === 0. && ratio[2] === 0. && ratio[3] === 0. && ratio[4] === 0. && ratio[5] === 0. && ratio[6] === 0. && ratio[7] === 0.)
         }
 
         divide(b, target) {
