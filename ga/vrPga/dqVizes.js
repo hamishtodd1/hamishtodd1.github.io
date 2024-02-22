@@ -38,7 +38,7 @@
 */
 
 
-function initDqVizes() {
+function initDqVizes(transparentOpacity) {
 
     let dqCol = 0x00FFFF
     /*
@@ -63,7 +63,7 @@ function initDqVizes() {
     let pointHalfWayAlongArrow = new Fl()
     class DqViz extends THREE.Group {
         
-        constructor(color, transparent = false, omitFromSnappables = false) {
+        constructor(color, omitFromSnappables = false, transparent = false) {
 
             super()
             scene.add(this)
@@ -73,6 +73,9 @@ function initDqVizes() {
 
             if (!omitFromSnappables)
                 giveSnappableProperties(this)
+            this.affecters = [
+                null, null, -1
+            ]
         
             this.dq = new Dq() //better to say mv really, disambiguate from dqMeshes
             this.mv = this.dq
@@ -87,7 +90,7 @@ function initDqVizes() {
             let axisMat = new THREE.MeshPhongMaterial({
                 color,
                 transparent,
-                opacity: .65
+                opacity: transparentOpacity
             })
             this.rotAxisMesh = new THREE.Mesh(rotAxisGeo, axisMat)
             this.rotAxisMesh.visible = false
@@ -116,15 +119,14 @@ function initDqVizes() {
             obj3dsWithOnBeforeRenders.push(this)
             this.onBeforeRender = () => {
 
-                this.boundingBox.makeEmpty()
-
-                // if(frameCount === 400)
-                //     debugger
-
-                // this.markupPos.lerp(this.markupPosAttractor, .1)
-
+                if (spectatorMode)
+                    this.visible = false
                 if (!this.visible)
                     return
+                
+                this.boundingBox.makeEmpty()
+
+                // this.markupPos.lerp(this.markupPosAttractor, .1)
 
                 this.dq.selectGrade(2, bivPart)
                 
@@ -172,7 +174,7 @@ function initDqVizes() {
                         e31.dqTo( rotationAxis.projectOn(e123, dq0), this.rotAxisMesh.dq ).toQuaternion(this.rotAxisMesh.quaternion)
                         pointHalfWayAlongArrow.projectOn(rotationAxis, fl1).pointToGibbsVec(this.rotAxisMesh.position)
                         this.rotAxisMesh.scale.y = 3.5 * this.boundingBox.getSize(v0).length()
-                        //funny: pointHalfWayAlongArrow is point pair at infinity for netherDqs
+                        //funny: pointHalfWayAlongArrow is point pair at infinity for negaDqs
                     }
 
                     if (translationPart.approxEquals(oneDq))
@@ -192,16 +194,23 @@ function initDqVizes() {
             }
         }
 
-        regularizeMarkupPos() {
+        setTransparency(isTransparent) {
+            let opacity = isTransparent ? transparentOpacity : 1.
+            this.rotAxisMesh.material.opacity = opacity
+            this.arrow.material.opacity = opacity
+        }
 
-            let bivPart = this.dq.selectGrade(2, dq0)
+        regularizeMarkupPos(noUpperLimit) {
 
+            this.dq.invariantDecomposition(rotationPart, translationPart)
+            rotationPart.selectGrade(2, bivPart)
+            
             //if this has no rotation component, fuck it
             //could have something about it going to being closer to your line of sight
             if ( Math.abs(bivPart.eNormSq()) < eps )
                 return
 
-            clampPointDistanceFromThing( this.markupPos, bivPart, .015, .06 )
+            clampPointDistanceFromThing(this.markupPos, bivPart, .015, noUpperLimit ? Infinity : .06 )
         }
 
         dispose() {
@@ -309,10 +318,10 @@ function initDqVizes() {
     }
 
     debugDqVizes = [
-        new DqViz(0xFF0000, false, true), new DqViz(0xFF0000, false, true)
+        new DqViz(0xFF0000, true, false), new DqViz(0xFF0000, true, false)
     ]
-    debugDqVizes.forEach(ddq => {
-        ddq.dq.zero()
-        ddq.markupPos.pointFromGibbsVec(outOfSightVec3)
+    debugDqVizes.forEach(dq => {
+        dq.dq.zero()
+        dq.markupPos.pointFromGibbsVec(outOfSightVec3)
     })
 }

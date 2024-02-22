@@ -1,5 +1,7 @@
 function initArrows() {
 
+    const arrowRadius = .006
+
     let infix = `
         //get the correct alongness and the slight alongness
         float[8] myDqLog; dqLog( dq, myDqLog );
@@ -130,10 +132,10 @@ function initArrows() {
         extraShaftGeo.translate(0., .5, 0.)
     } 
     
-    let nonNetherArrowStart = new Fl()
+    let nonNegaArrowStart = new Fl()
     let finalHeadRadiusFactor = headRadiusFactor / headArcLength
 
-    let nonNetherDq = new Dq()
+    let nonNegaDq = new Dq()
 
     class Arrow extends THREE.Mesh {
         
@@ -142,7 +144,7 @@ function initArrows() {
             let mat = new THREE.MeshPhong2Material({
                 color,
                 transparent,
-                opacity: transparent ? .4 : 1.
+                opacity: transparent ? .65 : 1.
             })
             mat.injections = headless ? shaftMatInjections : arrowMatInjections
 
@@ -158,7 +160,7 @@ function initArrows() {
         }
 
         update(
-            possiblyNetherDq,
+            possiblyNegaDq,
             rotationPart,
             translationPart,
             bivPart,
@@ -172,16 +174,16 @@ function initArrows() {
 
             //extend bounding box
             {
-                //if you're non-nether, you have an extraShaft, but that isn't "arrow" for these purposes
-                nonNetherDq.copy(possiblyNetherDq)
-                var isNether = nonNetherDq[0] < 0. && Math.abs(bivPart.eNormSq()) < eps
-                if (isNether)
-                    nonNetherDq.multiplyScalar(-1., nonNetherDq)
+                //if you're non-nega, you have an extraShaft, but that isn't "arrow" for these purposes
+                nonNegaDq.copy(possiblyNegaDq)
+                var isNega = nonNegaDq[0] < 0. && Math.abs(bivPart.eNormSq()) < eps
+                if (isNega)
+                    nonNegaDq.multiplyScalar(-1., nonNegaDq)
 
                 //bounding box and determination of arrow arclength
                 let numSamples = 8
                 for (let i = 0; i < numSamples; ++i) {
-                    nonNetherDq.pow(i / (numSamples - 1), dq0)
+                    nonNegaDq.pow(i / (numSamples - 1), dq0)
                     dq0.sandwichFl(startPoint, fl0).pointToGibbsVec(v1)
                     boundingBox.expandByPoint(v1)
                 }
@@ -190,12 +192,12 @@ function initArrows() {
                 boundingBox.union(box0)
             }
 
-            //you MIGHT want nether transflections one day, keep this stuff here
-            if (!isNether) {
+            //you MIGHT want nega transflections one day, keep this stuff here
+            if (!isNega) {
                 this.extraShaft.visible = false
 
                 translationPart.mul(rotationPart, this.material.dq)
-                nonNetherArrowStart.copy(startPoint)
+                nonNegaArrowStart.copy(startPoint)
             }
             else {
                 this.extraShaft.visible = true
@@ -207,23 +209,23 @@ function initArrows() {
                 this.extraShaft.scale.y = 2.
 
                 //arrow should be offset to start in some faraway place
-                //and take you back to where nonNetherDq takes startPoint
+                //and take you back to where nonNegaDq takes startPoint
                 let offseterDq = dq1
                 offseterDq.copy(bivPart)
-                let dqDist = bivPart.getDual(dq3).eNorm() / -possiblyNetherDq[0]
+                let dqDist = bivPart.getDual(dq3).eNorm() / -possiblyNegaDq[0]
                 offseterDq.multiplyScalar(-100. / dqDist, offseterDq)
                 offseterDq[0] = 1.
 
-                offseterDq.sandwichFl(startPoint, nonNetherArrowStart)
-                nonNetherDq.mulReverse(offseterDq, this.material.dq)
+                offseterDq.sandwichFl(startPoint, nonNegaArrowStart)
+                nonNegaDq.mulReverse(offseterDq, this.material.dq)
                 this.material.dq[4] = 0.; this.material.dq[5] = 0.; this.material.dq[6] = 0.; this.material.dq[7] = 0.;
             }
 
-            nonNetherArrowStart.pointToGibbsVec(this.material.extraVec1)
+            nonNegaArrowStart.pointToGibbsVec(this.material.extraVec1)
 
             //Head radius and arrow base stuff
             {
-                let arrowArcLength = this.material.dq.pointTrajectoryArcLength(nonNetherArrowStart, 16)
+                let arrowArcLength = this.material.dq.pointTrajectoryArcLength(nonNegaArrowStart, 16)
                 let headStart = (1. - headArcLength / arrowArcLength)
                 let headOutnessAtBase = arrowArcLength * finalHeadRadiusFactor
                 this.material.extraVec3.set(headOutnessAtBase, headStart, 0.)
@@ -233,7 +235,7 @@ function initArrows() {
                     this.cup.scale.setScalar(1.)
                 
                 //out vector at base
-                let spineLineAtNominalStart = nonNetherArrowStart.momentumLineFromRotor(this.material.dq, dq0)
+                let spineLineAtNominalStart = nonNegaArrowStart.momentumLineFromRotor(this.material.dq, dq0)
                 let randomPlaneContainingLine = spineLineAtNominalStart.joinPt(randomPt, fl1)
                 let outDqAtStartLog = randomPlaneContainingLine.meet(e0, dq0).normalize()
                 this.material.extraVec2.set(
@@ -243,7 +245,7 @@ function initArrows() {
             }
 
             if (pointHalfWayAlongArrow)
-                nonNetherDq.sqrt(dq0).sandwich(startPoint, pointHalfWayAlongArrow)
+                nonNegaDq.sqrt(dq0).sandwich(startPoint, pointHalfWayAlongArrow)
         }
     }
     window.Arrow = Arrow

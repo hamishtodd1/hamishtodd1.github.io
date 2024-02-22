@@ -1,3 +1,20 @@
+/*
+    On a new wifi? 
+        On the laptop, cmd, "ipconfig". You want the IPv4 address
+        In oculus browser, add "http://[ip address]:8000" to the trusted things in that one place
+        And then go to there
+    
+    Debugging:
+        Connect with mirco usb
+        "adb devices" to hopefully see the thing
+        If there's an old one sitting there saying "disconnected" clear it out with "adb disconnect"
+        "adb shell ip route" - the ip address of the headset is the second one
+        "adb tcpip 5555"
+        "adb connect [ip address]:5555" though maybe it works without ip address?
+        chrome://inspect/#devices
+ */
+
+
 ///////////////
 // IMPORTING //
 ///////////////

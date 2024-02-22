@@ -16,7 +16,7 @@
  */
 
 
-function initFlVizes() {
+function initFlVizes(transparentOpacity) {
 
     let planePart = new Fl()
     let pointPart = new Fl()
@@ -31,9 +31,6 @@ function initFlVizes() {
         color: 0x00FF00,
         transparent: true,
         opacity: .4
-    })
-    let pointMat = new THREE.MeshPhongMaterial({
-        color: 0xFF0000,
     })
     let diskGeo = new THREE.CircleGeometry(.2, 32)
     diskGeo.computeBoundingBox()
@@ -73,10 +70,16 @@ function initFlVizes() {
 
     class FlViz extends THREE.Group {
 
-        constructor(omitFromSnappables = false) {
+        constructor(color = 0xFF0000, omitFromSnappables = false, transparent = false) {
             
             super()
             scene.add(this)
+
+            let pointMat = new THREE.MeshPhongMaterial({
+                color,
+                transparent,
+                opacity: transparent ? transparentOpacity : 1.
+            })
 
             this.boundingBox = new THREE.Box3()
             this.boxHelper = new THREE.BoxHelper()
@@ -85,6 +88,9 @@ function initFlVizes() {
 
             if (!omitFromSnappables)
                 giveSnappableProperties(this)
+            this.affecters = [
+                null, null, -1
+            ]
 
             this.fl = new Fl()
             this.mv = this.fl
@@ -92,16 +98,20 @@ function initFlVizes() {
             this.markupPos = new Fl().point(0.,1.2,0.,1.)
 
             this.arrow1 = new Arrow( pointMat.color, false, pointMat, true )
+            this.arrow1.visible = false
             this.add(this.arrow1)
             this.arrow2 = new Arrow( pointMat.color, false, pointMat, false )
+            this.arrow2.visible = false
             this.add(this.arrow2)
 
             //arrowbar crossing through mirror was the next thing we were gonna do
             //don't be tempted to try to hack the extraShaft into being this. Extrashaft SHOULD be arrow1.
             //so you need TWO little balls for the thing anyway
             this.arrowBar = new THREE.Mesh(this.arrow1.extraShaft.geometry, pointMat )
+            this.arrowBar.visible = false
             this.add(this.arrowBar)
             this.arrowBarCup = this.arrow1.cup.clone()
+            this.arrowBarCup.visible = false
             this.add(this.arrowBarCup)
 
             this.diskGroup = new THREE.Group()
@@ -125,11 +135,16 @@ function initFlVizes() {
             obj3dsWithOnBeforeRenders.push(this)
             this.onBeforeRender = () => {
 
-                this.boundingBox.makeEmpty()
+                if (spectatorMode)
+                    this.visible = false
+                if (!this.visible)
+                    return
+
                 this.pointMesh.visible = false
-                this.idealPointMeshes.forEach(pt => pt.visible = false)
                 this.arrowBar.visible = false
                 this.arrowBarCup.visible = false
+                this.idealPointMeshes.forEach(pt => pt.visible = false)
+                this.boundingBox.makeEmpty()
 
                 if(this.fl.isZero())
                     return
@@ -252,6 +267,13 @@ function initFlVizes() {
 
                 updateBoxHelper(this.boxHelper, this.boundingBox)
             }
+        }
+
+        setTransparency(isTransparent) {
+            let opacity = isTransparent ? transparentOpacity : 1.
+            this.rotAxisMesh.material.opacity = opacity
+            this.arrow1.material.opacity = opacity
+            this.arrow2.material.opacity = opacity
         }
 
         regularizeMarkupPos() {

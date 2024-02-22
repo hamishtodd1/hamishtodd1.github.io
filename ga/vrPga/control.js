@@ -46,7 +46,31 @@
 
 function initControl() {
 
+    initButtonLabels()
     initControlHelpers()
+
+    const paintees = [null, null]
+    const highlightees = [null, null]
+
+    const evenGrabbees = [null, null]
+    const oddGrabbee = null
+    const handsHoldingOdd = [false, false]
+
+    const rightFl = new Fl()
+    const rotationPart = new Dq()
+    const translationPart = new Dq()
+
+    // document.addEventListener(`mouseRewind`, () => { log("yo") })
+
+    let showMarkupVizes = true
+    let oldDqVizes = [new DqViz( 0xFF0000, true, true ), new DqViz( 0xFF0000, true, true )]
+    oldDqVizes[0].visible = false; oldDqVizes[1].visible = false;
+    let movementSinceGrabViz = [new DqViz(0xFF0000, true, true), new DqViz(0xFF0000, true, true)]
+    movementSinceGrabViz[0].visible = false; movementSinceGrabViz[1].visible = false;
+
+    let handDqOnGrabs = [new Dq(), new Dq()]
+    let snappableDqOnGrabs = [new Dq(), new Dq()]
+    // let smootheningRecords = [new Dq(), new Dq()]
 
     let highlightedColor = new THREE.Color(0xFFFFFF)
     let grabbedColor = new THREE.Color(0x00FF00)
@@ -54,31 +78,52 @@ function initControl() {
     let highlighteeIsAffecteeCol = new THREE.Color(0xFF0000)
     let highlighteeIsAffectorCol = new THREE.Color(0x00FFFF)
 
-    let rightFl = new Fl()
+    let snapMode = false
+    {
+        var numPotentialSnaps = -1
+        var potentialSnapDqVizes = []
+        var potentialSnapFlVizes = []
+        //they shouldn't be snappables, but they SHOULD be updated based on their affecters
+        function turnOffSnapMode() {
+            snapMode = false
+            numPotentialSnaps = -1
+            for (let i = 0, il = potentialSnapDqVizes.length; i < il; ++i)
+                potentialSnapDqVizes[i].visible = false
+            for (let i = 0, il = potentialSnapFlVizes.length; i < il; ++i)
+                potentialSnapFlVizes[i].visible = false
+        }
+        onSnapButtonUp = () => {
+            turnOffSnapMode()
+        }
+        onSnapButtonDown = () => {
 
-    initButtonLabels()
+            let toBeSnapped = oddGrabbee || evenGrabbees[0] || evenGrabbees[1]
+            if (toBeSnapped === null || snapMode)
+                return
+        
+            snapMode = true
 
-    // document.addEventListener(`mouseRewind`, () => { log("yo") })
+            let potentialSnapsVizes = toBeSnapped.constructor === DqViz ? potentialSnapDqVizes : potentialSnapFlVizes
+            numPotentialSnaps = generatePotentialSnaps(potentialSnapsVizes, toBeSnapped)
+        }
+    }
 
-    let showMarkupVizes = true
+    doSnap = (toBeSnapped, potentialSnaps, snapIndex) => {
+        if (snapIndex === -1)
+            makeUnaffected(toBeSnapped)
+        else {
 
-    let oldDqVizes = [new DqViz( 0xFF0000, true, true ), new DqViz( 0xFF0000, true, true )]
-    oldDqVizes[0].visible = false; oldDqVizes[1].visible = false;
-    log(oldDqVizes[0].arrow.cup.material)
-    let dispDqVizes = [new DqViz(0xFF0000, true, true), new DqViz(0xFF0000, true, true)]
-    dispDqVizes[0].visible = false; dispDqVizes[1].visible = false;
-    let handDqOnGrabs = [new Dq(), new Dq()]
-    let snappableDqOnGrabs = [new Dq(), new Dq()]
-    // let smootheningRecords = [new Dq(), new Dq()]
+            let bestRatedSnap = potentialSnaps[snapIndex]
+            for (let i = 0; i < 3; ++i)
+                toBeSnapped.affecters[i] = bestRatedSnap.affecters[i]
 
-    let paintees = [null,null]
-    let highlightees = [null,null]
-    let evenGrabbees = [null,null]
-    
-    let oddGrabbee = null
-    let handsHoldingOdd = [false, false]
+            // log(toBeSnapped.affecters)
+            updateFromAffecters(toBeSnapped)
+            toBeSnapped.regularizeMarkupPos()
+        }
+    }
 
-    onHandButtonDown = (isTriggerButton, isSideButton, focusHand) => {
+    onSideButtonDown = (focusHand) => {
 
         //make it so paintingButtonHeld is defined
 
@@ -90,97 +135,97 @@ function initControl() {
 
         let otherHand = 1-focusHand
             
-        if ( isSideButton ) {
+        if(oddGrabbee)
+            return
 
-            if(oddGrabbee)
-                return
+        let grabbee = paintees[focusHand] || paintees[otherHand] || highlightees[focusHand]
 
-            if (paintees[focusHand] !== null) {
-                // later: it controls a float, press-amount-dependent
-                //but do a face with eyes first
-                return 
-            }
-            else {
+        let isOddVersor = 
+            (evenGrabbees[otherHand] !== null && evenGrabbees[otherHand] === grabbee ) ||
+            (grabbee !== null && grabbee.constructor === FlViz) ||
+            oddGrabbee !== null
+        if (isOddVersor) {
+
+            if (evenGrabbees[otherHand] !== null ) {
+                //switch it to being an fl
+                let newViz = new FlViz()
                 
-                let grabbee = paintees[otherHand] || highlightees[focusHand]
+                newViz.sclptable = evenGrabbees[otherHand].sclptable
+                let oldDqViz = evenGrabbees[otherHand]
+                evenGrabbees[otherHand] = null
+                oldDqViz.sclptable = null
+                oldDqViz.dispose()
 
-                let isOddVersor = 
-                    (evenGrabbees[otherHand] !== null && evenGrabbees[otherHand] === grabbee ) ||
-                    (grabbee !== null && grabbee.constructor === FlViz) ||
-                    oddGrabbee !== null
-                if (isOddVersor) {
-
-                    if (evenGrabbees[otherHand] !== null ) {
-                        //switch it to being an fl
-                        let newViz = new FlViz()
-                        
-                        newViz.sclptable = evenGrabbees[otherHand].sclptable
-                        let oldDqViz = evenGrabbees[otherHand]
-                        evenGrabbees[otherHand] = null
-                        oldDqViz.sclptable = null
-                        oldDqViz.dispose()
-
-                        grabbee = newViz
-                    }
-
-                    oddGrabbee = grabbee
-                    handsHoldingOdd[focusHand] = true
-
-                    evenGrabbees[LEFT] = null
-                    evenGrabbees[RIGHT] = null
-                    paintees[LEFT] = null
-                    paintees[RIGHT] = null
-
-                    dispDqVizes[focusHand].visible = false
-                    oldDqVizes[focusHand].visible = false
-                }
-                else {
-
-                    evenGrabbees[focusHand] = grabbee
-
-                    if( evenGrabbees[focusHand] === null )
-                        evenGrabbees[focusHand] = new DqViz()
-
-                    if(evenGrabbees[focusHand].dq === undefined)
-                        debugger
-    
-                    if (evenGrabbees[focusHand].dq.isScalar())
-                        getIndicatedHandPosition( focusHand, evenGrabbees[focusHand].markupPos )
-    
-                    handDqOnGrabs[focusHand].copy(hands[focusHand].dq)
-                    snappableDqOnGrabs[focusHand].copy(evenGrabbees[focusHand].dq)
-    
-                    oldDqVizes[focusHand].dq.copy(snappableDqOnGrabs[focusHand])
-                    oldDqVizes[focusHand].markupPos.copy(evenGrabbees[focusHand].markupPos)
-                    oldDqVizes[focusHand].dq.sandwich(oldDqVizes[focusHand].markupPos, dispDqVizes[focusHand].markupPos)
-                    dispDqVizes[focusHand].dq.copy(oneDq)
-                }
+                grabbee = newViz
             }
+
+            oddGrabbee = grabbee
+            handsHoldingOdd[focusHand] = true
+
+            evenGrabbees[LEFT] = null
+            evenGrabbees[RIGHT] = null
+            paintees[LEFT] = null
+            paintees[RIGHT] = null
+
+            movementSinceGrabViz[focusHand].visible = false
+            oldDqVizes[focusHand].visible = false
         }
-        else if(isTriggerButton) {
+        else {
 
-            if( evenGrabbees[focusHand] !== null ) {
-                evenGrabbees[focusHand].dispose()
-                evenGrabbees[focusHand] = null
-                dispDqVizes[focusHand].visible = false
-                oldDqVizes[focusHand].visible = false
-            }
-            else if (oddGrabbee !== null) {
-                oddGrabbee.dispose()
-                oddGrabbee = null
-                handsHoldingOdd[0] = false
-                handsHoldingOdd[1] = false
-            }
-            else {
+            evenGrabbees[focusHand] = grabbee
 
-                paintees[focusHand] = evenGrabbees[otherHand] || paintees[otherHand] || highlightees[focusHand]
+            if( evenGrabbees[focusHand] === null )
+                evenGrabbees[focusHand] = new DqViz()
 
-                if (paintees[focusHand] === null)
-                    paintees[focusHand] = new DqViz()
+            if(evenGrabbees[focusHand].dq === undefined)
+                debugger
 
-                if( paintees[focusHand].sclptable === null)
-                    paintees[focusHand].sclptable = new Sclptable(paintees[focusHand])
-            }
+            if (evenGrabbees[focusHand].dq.isScalar())
+                getIndicatedHandPosition( focusHand, evenGrabbees[focusHand].markupPos )
+
+            handDqOnGrabs[focusHand].copy(hands[focusHand].dq)
+            snappableDqOnGrabs[focusHand].copy(evenGrabbees[focusHand].dq)
+
+            oldDqVizes[focusHand].dq.copy(snappableDqOnGrabs[focusHand])
+            oldDqVizes[focusHand].markupPos.copy(evenGrabbees[focusHand].markupPos)
+            oldDqVizes[focusHand].dq.sandwich(oldDqVizes[focusHand].markupPos, movementSinceGrabViz[focusHand].markupPos)
+            movementSinceGrabViz[focusHand].dq.copy(oneDq)
+        }
+    }
+
+    onTriggerButtonDown = (focusHand) => {
+
+        let otherHand = 1 - focusHand
+
+        if( evenGrabbees[focusHand] !== null ) {
+            evenGrabbees[focusHand].dispose()
+            evenGrabbees[focusHand] = null
+            movementSinceGrabViz[focusHand].visible = false
+            oldDqVizes[focusHand].visible = false
+        }
+        else if (oddGrabbee !== null) {
+            oddGrabbee.dispose()
+            oddGrabbee = null
+            handsHoldingOdd[0] = false
+            handsHoldingOdd[1] = false
+        }
+        else {
+
+            paintees[focusHand] = evenGrabbees[otherHand] || paintees[otherHand] || highlightees[focusHand]
+
+            if (paintees[focusHand] === null)
+                paintees[focusHand] = new DqViz()
+
+            if( paintees[focusHand].sclptable === null)
+                paintees[focusHand].sclptable = new Sclptable(paintees[focusHand])
+        }
+    }
+
+    onTriggerButtonUp = (focusHand) => {
+        if (paintees[focusHand] !== null) {
+            // toggleButtonsVisibility()
+            paintees[focusHand].sclptable.emitSelf()
+            paintees[focusHand] = null
         }
     }
 
@@ -202,39 +247,62 @@ function initControl() {
             hands[RIGHT].dq.sandwich(e123, oddGrabbee.markupPos)
             oddGrabbee.regularizeMarkupPos()
 
+            if(snapMode) {
+                let bestSnapIndex = getBestSnap( potentialSnapFlVizes, oddGrabbee, numPotentialSnaps )
+                potentialSnapFlVizes.forEach((psfv,i) => {
+                    psfv.setTransparency(i === bestSnapIndex)
+                })
+            }
         }
 
+        /////////////////////
+        // MOVING GRABBEES //
+        /////////////////////
         for(let hand = 0; hand < 2; ++hand) {
 
-            /////////////////////
-            // MOVING GRABBEES //
-            /////////////////////
-            if ( oddGrabbee === null && evenGrabbees[hand] !== null) {
+            if ( evenGrabbees[hand] !== null) {
                 highlightees[hand] = evenGrabbees[hand]
 
-                // hands[hand].dq.mulReverse(handDqOnGrabs[hand], dispDqVizes[hand].dq)
-                // dispDqVizes[hand].dq.mul(oldDqVizes[hand].dq, evenGrabbees[hand].dq)
+                // hands[hand].dq.mulReverse(handDqOnGrabs[hand], movementSinceGrabViz[hand].dq)
+                // movementSinceGrabViz[hand].dq.mul(oldDqVizes[hand].dq, evenGrabbees[hand].dq)
 
                 // smootheningRecords[hand].add(hands[hand].dq, dq0).normalize()
 
-                let movementSinceGrab = hands[hand].dq.mulReverse(handDqOnGrabs[hand], dq0)
+                hands[hand].dq.mulReverse(handDqOnGrabs[hand], movementSinceGrabViz[hand].dq)
                 // some mild snapping here miiiight be nice?
-                movementSinceGrab.mul(snappableDqOnGrabs[hand], evenGrabbees[hand].dq )
-                evenGrabbees[hand].dq.normalize()
-                dispDqVizes[hand].dq.copy(movementSinceGrab)
+                movementSinceGrabViz[hand].dq.mul( snappableDqOnGrabs[hand], evenGrabbees[hand].dq )
+                // evenGrabbees[hand].dq.normalize()
+
+                evenGrabbees[hand].dq.invariantDecomposition(rotationPart, translationPart)
+                let translationThreshold = .4
+                let rotationThreshold = .4
+                // if(rotationPart.l1NormTo(oneDq) < translationThreshold)
+                //     evenGrabbees[hand].dq.copy(translationPart)
+                // if (translationPart.l1NormTo(oneDq) < rotationThreshold)
+                //     evenGrabbees[hand].dq.copy(rotationPart)
                 
-                let didSnap = snap(evenGrabbees[hand])
+                // let didSnap = snapOld(evenGrabbees[hand])
 
                 if (showMarkupVizes) {
-                    dispDqVizes[hand].visible = !oldDqVizes[hand].dq.equals(oneDq)
-                    oldDqVizes[hand].visible = dispDqVizes[hand].visible
+                    movementSinceGrabViz[hand].visible = !oldDqVizes[hand].dq.equals(oneDq)
+                    oldDqVizes[hand].visible = movementSinceGrabViz[hand].visible
                 }
 
                 socket.emit("snappable", {
                     dqCoefficientsArray: evenGrabbees[hand].dq,
                     i: snappables.indexOf(evenGrabbees[hand])
                 })
+
+                if(snapMode) {
+                    let bestSnapIndex = getBestSnap(potentialSnapDqVizes, evenGrabbees[hand], numPotentialSnaps)
+                    potentialSnapDqVizes.forEach((psdv, i) => {
+                        psdv.setTransparency(i === bestSnapIndex)
+                    })
+                }
             }
+        }
+
+        for(let hand = 0; hand < 2; ++hand) {
 
             //////////////
             // PAINTING //
@@ -258,10 +326,8 @@ function initControl() {
                     highlightees[hand] = null
                 else
                     highlightees[hand] = nearest
-
             }
         }
-
 
         //////////////////////////////
         // REACTING TO HIGHLIGHTING //
@@ -293,6 +359,8 @@ function initControl() {
             highlightees.forEach((highlightee,hand) => {
                 if(highlightee === null)
                     return
+
+                // log(highlightee.affecters, snappable.affecters)
 
                 if (highlightee === snappable) {
                     snappable.boxHelper.visible = true
@@ -333,16 +401,14 @@ function initControl() {
             }
         })
     }
-    
-    onHandButtonUp = (isTriggerButton, isSideButton, focusHand) => {
 
-        if (paintees[focusHand] !== null && isTriggerButton ) {
-            // toggleButtonsVisibility()
-            paintees[focusHand].sclptable.emitSelf()
-            paintees[focusHand] = null
-        }
+    onSideButtonUp = (focusHand) => {
+        if (evenGrabbees[focusHand]) {
 
-        if (evenGrabbees[focusHand] && isSideButton ) {
+            if(snapMode) {
+                let bestSnapIndex = getBestSnap(potentialSnapDqVizes, evenGrabbees[focusHand], numPotentialSnaps)
+                doSnap(evenGrabbees[focusHand], potentialSnapDqVizes, bestSnapIndex)
+            }
 
             if (evenGrabbees[focusHand].sclptable) {
                 evenGrabbees[focusHand].dq
@@ -350,23 +416,32 @@ function initControl() {
                     .sandwich(
                         evenGrabbees[focusHand].dq.sandwich(evenGrabbees[focusHand].sclptable.com, fl0),
                         evenGrabbees[focusHand].markupPos)
+                evenGrabbees[focusHand].regularizeMarkupPos(true)
             }
 
             evenGrabbees[focusHand] = null
 
-            dispDqVizes[focusHand].visible = false
+            movementSinceGrabViz[focusHand].visible = false
             oldDqVizes[focusHand].visible = false
         }
 
-        if (oddGrabbee !== null && isSideButton) {
-            
+        if (oddGrabbee !== null) {
+
             handsHoldingOdd[focusHand] = false
             if (!handsHoldingOdd[0] && !handsHoldingOdd[1]) {
+
+                if (snapMode) {
+                    let bestSnapIndex = getBestSnap(potentialSnapFlVizes, oddGrabbee, numPotentialSnaps)
+                    doSnap(oddGrabbee, potentialSnapFlVizes, bestSnapIndex)
+                }
 
                 normalizeFlToTypes(oddGrabbee.fl, true)
 
                 oddGrabbee = null
             }
         }
+
+        if (snapMode && evenGrabbees[0] === null && evenGrabbees[1] === null && oddGrabbee === null)
+            turnOffSnapMode()
     }
 }

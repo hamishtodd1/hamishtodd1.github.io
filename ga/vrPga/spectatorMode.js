@@ -18,7 +18,7 @@ function initPotentialSpectatorReception() {
         turnOnSpectatorMode()
 
         if (snappables[msg.i] === undefined) {
-            snappables[msg.i] = new DqViz(0xFF0000,false,true)
+            snappables[msg.i] = new DqViz(0xFF0000, true, false) //TODO bug this thing must be showing up
             snappables[msg.i].sclptable = new Sclptable(snappables[msg.i])
             snappables[msg.i].visible = false
         }
@@ -46,14 +46,11 @@ function initPotentialSpectatorReception() {
         
         backedUpMsgs.forEach((msg) => {
             if (snappables[msg.i] === undefined)
-                snappables[msg.i] = new DqViz(0xFF0000, false, true)
+                snappables[msg.i] = new DqViz(0xFF0000, true, false)
 
             for (let j = 0; j < 8; ++j) {
                 snappables[msg.i].dq[j] = msg.dqCoefficientsArray[j]
-                // log(snappables[msg.i].dq[j])
             }
-
-            // snappables[msg.i].sclptable.
             
         })
         

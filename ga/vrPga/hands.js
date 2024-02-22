@@ -17,12 +17,13 @@ function initHands() {
         new THREE.Vector3(0, 0, 0), 
         new THREE.Vector3(0, 0, -1)
     ])
+    let laserMat = new THREE.LineBasicMaterial({ color: 0xFFFFFF })
     function bestowHandProperties() {
         handRight.laserDq = new Dq().copy(e12)
         handLeft.laserDq  = new Dq().copy(e12)
-        handRight.laser = new THREE.Line( laserPointerGeo )
+        handRight.laser = new THREE.Line( laserPointerGeo, laserMat )
         handRight.add( handRight.laser )
-        handLeft.laser = new THREE.Line( laserPointerGeo )
+        handLeft.laser  = new THREE.Line( laserPointerGeo, laserMat )
         handLeft.add(handLeft.laser)
         hands[RIGHT] = handRight
         hands[LEFT]  = handLeft
@@ -54,7 +55,7 @@ function initHands() {
         e123.dqTo(lazyHandPosRight, handRight.dq)
         e123.dqTo(lazyHandPosLeft, handLeft.dq)
 
-        function mouseControlKeyEvents(event) {
+        function nonVrKeyDowns(event) {
             if (event.key === ` `) {
                 
                 // onHandButtonUp(true, false, focusHand)
@@ -64,14 +65,19 @@ function initHands() {
             }
 
             //mouse rewind IF THIS ISN'T WORKING CHECK SCRIPT, MAY NEED TO CHANGE WINDOW NAME
-            if (event.key === "6" && event.ctrlKey)
-                log("rewind pressed") //deleteHeld(focusHand)
+            if (event.key === "z" )
+                onSnapButtonDown() //deleteHeld(focusHand)
             // if (event.key === "5" && event.ctrlKey) //mouse fast forward
             //     document.dispatchEvent(new Event(`mouseFastForward`))
 
             keyToDiscreteStick(event.key, discreteStickNew)
         }
-        document.addEventListener(`keydown`, mouseControlKeyEvents)
+        document.addEventListener(`keydown`, nonVrKeyDowns)
+        function nonVrKeyUps(event) {
+            if (event.key === "z")
+                onSnapButtonUp()
+        }
+        document.addEventListener(`keyup`, nonVrKeyUps)
 
         let mouseWheelTransform = new Dq().copy(oneDq)
         let mouseWheelTransformOld = new Dq().copy(oneDq)
@@ -161,14 +167,16 @@ function initHands() {
         }
 
         function onMouseButtonDown(event) {
-            let isLeftButton = event.button === 0
-            let isRightButton = event.button === 2
-            onHandButtonDown(isLeftButton, isRightButton, focusHand)
+            if (event.button === 0)
+                onTriggerButtonDown(focusHand)
+            if (event.button === 2)
+                onSideButtonDown(focusHand)
         }
         function onMouseButtonUp(event) {
-            let isLeftButton = event.button === 0
-            let isRightButton = event.button === 2
-            onHandButtonUp(isLeftButton, isRightButton, focusHand)
+            if (event.button === 0)
+                onTriggerButtonUp(focusHand)
+            if (event.button === 2)
+                onSideButtonUp(focusHand)
         }
         document.addEventListener("mousedown", onMouseButtonDown )
         document.addEventListener("mouseup", onMouseButtonUp )
@@ -178,7 +186,8 @@ function initHands() {
 
             document.removeEventListener('mousemove', onMouseMove)
             document.removeEventListener('wheel', onMouseWheel)
-            document.removeEventListener('keydown', mouseControlKeyEvents)
+            document.removeEventListener('keydown', nonVrKeyDowns)
+            document.removeEventListener('keyup', nonVrKeyUps)
             document.removeEventListener('mousedown', onMouseButtonDown)
             document.removeEventListener('mouseup', onMouseButtonUp)
             orbitControls.enabled = false
@@ -195,8 +204,11 @@ function initHands() {
         //yes, you need these, and you add objects to them
         let vrRight = renderer.xr.getController(LEFT)
         let vrLeft = renderer.xr.getController(RIGHT)
+        let quatsOld = [new THREE.Quaternion(), new THREE.Quaternion() ]
         vrRight.dq = new Dq()
         vrLeft.dq = new Dq()
+
+        let buttonStates = [false, false, false, false, false]
 
         //"grips" are needed for the appearance, but their transforms are weird, do not use them
         const controllerModelFactory = new XRControllerModelFactory()
@@ -205,20 +217,38 @@ function initHands() {
         gripLeft.add(controllerModelFactory.createControllerModel(gripLeft))
         gripRight.add(controllerModelFactory.createControllerModel(gripRight))
 
-        //Responds a bit weirdly
-        vrLeft .addEventListener('selectstart',  () => { onHandButtonDown ( true, false, LEFT  ) } ) //log(`0`) })
-        vrLeft .addEventListener('selectend',    () => { onHandButtonUp   ( true, false, LEFT  ) } ) //log(`1`) })
-        vrRight.addEventListener('selectstart',  () => { onHandButtonDown ( true, false, RIGHT   ) } ) //log(`2`) })
-        vrRight.addEventListener('selectend',    () => { onHandButtonUp   ( true, false, RIGHT   ) } ) //log(`3`) })
-        vrLeft .addEventListener('squeezestart', () => { onHandButtonDown ( false, true, LEFT  ) } ) //log(`4`) })
-        vrLeft .addEventListener('squeezeend',   () => { onHandButtonUp   ( false, true, LEFT  ) } ) //log(`5`) })
-        vrRight.addEventListener('squeezestart', () => { onHandButtonDown ( false, true, RIGHT   ) } ) //log(`6`) })
-        vrRight.addEventListener('squeezeend',   () => { onHandButtonUp   ( false, true, RIGHT   ) } ) //log(`7`) })
+        vrLeft .addEventListener('selectstart',  () => { onTriggerButtonDown ( LEFT  ) } ) //log(`0`) })
+        vrLeft .addEventListener('selectend',    () => { onTriggerButtonUp   ( LEFT  ) } ) //log(`1`) })
+        vrRight.addEventListener('selectstart',  () => { onTriggerButtonDown ( RIGHT ) } ) //log(`2`) })
+        vrRight.addEventListener('selectend',    () => { onTriggerButtonUp   ( RIGHT ) } ) //log(`3`) })
+        vrLeft .addEventListener('squeezestart', () => { onSideButtonDown    ( LEFT  ) } ) //log(`4`) })
+        vrLeft .addEventListener('squeezeend',   () => { onSideButtonUp      ( LEFT  ) } ) //log(`5`) })
+        vrRight.addEventListener('squeezestart', () => { onSideButtonDown    ( RIGHT ) } ) //log(`6`) })
+        vrRight.addEventListener('squeezeend',   () => { onSideButtonUp      ( RIGHT ) } ) //log(`7`) })
 
         let discreteSticks    = [new THREE.Vector2(),new THREE.Vector2()]
         let discreteSticksOld = [new THREE.Vector2(),new THREE.Vector2()]
         
         onEnterVrFirstTime = (session) => {
+
+            let buttonOnDowns = [
+                () => { },
+                () => { },
+                () => { },
+                () => { },
+                onSnapButtonDown,
+                () => { },
+                () => { },
+            ]
+            let buttonOnUps = [
+                () => { },
+                () => { },
+                () => { },
+                () => { },
+                onSnapButtonUp,
+                () => { },
+                () => { },
+            ]
 
             scene.remove(handRight)
             scene.remove(handLeft)
@@ -252,13 +282,36 @@ function initHands() {
                 //there's something sad going on here, which is that we appear to be losing double cover info
                 //one way to avoid this might be to store the old one,
                 //then compare the diff to the new with the diff to the new*-1
-                vrRight.dq.fromPosQuat(vrRight.position, vrRight.quaternion)
-                vrLeft.dq.fromPosQuat(vrLeft.position, vrLeft.quaternion)
 
-                vrRight.dq.sandwich(e12, vrRight.laserDq)
-                vrLeft.dq.sandwich( e12, vrLeft.laserDq )
-                vrRight.dq.sandwich(e3, vrRight.laserPlane)
-                vrLeft.dq.sandwich( e3, vrLeft.laserPlane )
+                hands.forEach((hand,i)=>{
+
+                    // if(frameCount > 100 &&
+                    //     (vrRightQuatOld.x > 0.) !== (vrRight.quaternion.x > 0.) &&
+                    //     (vrRightQuatOld.y > 0.) !== (vrRight.quaternion.y > 0.) &&
+                    //     (vrRightQuatOld.z > 0.) !== (vrRight.quaternion.z > 0.) &&
+                    //     (vrRightQuatOld.w > 0.) !== (vrRight.quaternion.w > 0.) )
+                    //     debugger
+
+                    let handQuat = q1
+                    handQuat.copy(hand.quaternion)
+
+                    //because you will pry the double cover from my cold dead fingers
+                    {
+                        let handQuatNeg = q2
+                        handQuatNeg.copy(handQuat)
+                        handQuatNeg.x *= -1.; handQuatNeg.y *= -1.; handQuatNeg.z *= -1.; handQuatNeg.w *= -1.;
+
+                        if (handQuat.dot(quatsOld[i]) < handQuatNeg.dot(quatsOld[i]))
+                            handQuat.copy(handQuatNeg)
+
+                        quatsOld[i].copy(handQuat)
+                    }
+
+                    hand.dq.fromPosQuat(hand.position, handQuat)
+
+                    hand.dq.sandwich(e12, hand.laserDq)
+                    hand.dq.sandwich(e3, hand.laserPlane)
+                })
 
                 let i = 0
                 for (const source of session.inputSources) {
@@ -267,6 +320,17 @@ function initHands() {
 
                     discreteSticksOld[i].copy(discreteSticks[i])
                     vrControllerAxesToDiscreteStick(source.gamepad.axes, discreteSticks[i])
+
+                    for(let i = 0, il = buttonStates.length; i < il; ++i) {
+                        if(source.gamepad.buttons[i].pressed && !buttonStates[i] )
+                            buttonOnDowns[i]()
+                        if(!source.gamepad.buttons[i].pressed && buttonStates[i] )
+                            buttonOnUps[i]()
+
+                        buttonStates[i] = source.gamepad.buttons[i].pressed
+                    }
+                    //".value" is how you get the analogue part of the side button
+
 
                     //THIS LETS YOU SEE WHICH BUTTONS ARE WHICH
                     //A and B are 4 and 5

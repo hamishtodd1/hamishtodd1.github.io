@@ -20,14 +20,14 @@ function initControlHelpers() {
         // })
 
         // {
-        //     var flViz0 = new FlViz()
-        //     comfortableLookPos(flViz0.fl)
-        //     var flViz1 = new FlViz()
-        //     comfortableLookPos(flViz1.fl, .5)
+            var flViz0 = new FlViz()
+            comfortableHandPos(flViz0.fl)
+            var flViz1 = new FlViz()
+            comfortableHandPos(flViz1.fl, .5)
 
-        //     var dqViz5 = new DqViz()
-        //     e23.projectOn(flViz0.fl.addScaled(e012, .01, fl0), dqViz5.dq)
-        //     snap(dqViz5)
+            // var dqViz5 = new DqViz()
+            // e23.projectOn(flViz0.fl.addScaled(e012, .01, fl0), dqViz5.dq)
+            // snapOld(dqViz5)
 
         //     debugUpdates.push(()=>{
         //     })
@@ -142,6 +142,13 @@ function initControlHelpers() {
         return [nearest, nearestDistSq]
     }
 
+    let ZERO_BLADE = -1
+    let PLANE = 1
+    let LINE = 2
+    let POINT = 3
+    let ROTOREFLECTION = 5
+    let TRANSFLECTION = 6
+
     let evenVersionAxis = new Dq()
     let evenVersion = new Dq()
     let pointBetweenHands = new Fl()
@@ -184,9 +191,9 @@ function initControlHelpers() {
 
         if (bladesOnly) {
             if (thingThisIs === POINT || thingThisIs === TRANSFLECTION)
-                oddGrabbee.fl.zeroGrade(1)
+                fl.zeroGrade(1)
             else
-                oddGrabbee.fl.zeroGrade(3)
+                fl.zeroGrade(3)
         }
         else {
             if (thingThisIs === TRANSFLECTION) {
@@ -196,15 +203,15 @@ function initControlHelpers() {
                 let newPointAtInf = pointBetweenHands.joinPt(pointPart, dq0).meet(e0, fl0)
                 let scalar = .5 * distTaken / Math.sqrt(newPointAtInf.iNormSq())
                 planePart.normalize()
-                planePart.addScaled(newPointAtInf, scalar, oddGrabbee.fl).normalize()
+                planePart.addScaled(newPointAtInf, scalar, fl).normalize()
 
             }
             else if (thingThisIs === PLANE) {
-                oddGrabbee.fl.zeroGrade(3)
-                oddGrabbee.markupPos.copy(pointBetweenHands)
+                fl.zeroGrade(3)
+                // oddGrabbee.markupPos.copy(pointBetweenHands)
             }
             else if (thingThisIs === POINT)
-                oddGrabbee.fl.zeroGrade(1)
+                fl.zeroGrade(1)
         }
 
         return thingThisIs

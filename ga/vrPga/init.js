@@ -9,8 +9,6 @@
         then what's the point of emphasizing understanding PGA?
 
     Redo snapping
-        When you holding a pure plane, plane snaps appear, in yellow or whatever
-        When you holding a pure point, point snaps appear
         Will probably be rounding things to pure rotation and pure translations... could round to 180s
 
     Snap button:
@@ -19,6 +17,9 @@
         It cycles through the potential snaps
 
     TODO for FoC demo:
+        A face button should be paint instead, so grab is trigger, and side is a float
+        Round screws to the nearest rotation or translation
+        Some bug where loooooads of stuff just gets made. It happened after making a few models
         Just an eye that rotates in place
             Join eye position with initial eyeFocusPoint (at infinity), get line
             Join eye position with focusPoint, get line
@@ -48,7 +49,7 @@
             One likes dynamism or something, just "seeing more stuff happen"
         Undo
     Beyond:
-        ACTUALLY, there is such a thing as a "nether screw". It has no logarithm or sqrt but it's a thing
+        ACTUALLY, there is such a thing as a "nega screw". It has no logarithm or sqrt but it's a thing
         How come hand can't do anything more than 180deg arrow?
         Are you using the measurer for anything? If so, some numbers...
         If passthrough, maybe have a warning saying to do it in the middle of a field
@@ -92,7 +93,7 @@
         IRL, you can ONLY change things by moving something
             Well, sort of. There's switches, and speaking. Both technically are movement. But, movement is irrelevant
 
-    Code for "nether screw"
+    Code for "nega screw"
     let transform = new Dq()
     let initialPos = new Fl().point(0., 0., -0.5, 1.)
     camera.position.z += 1.
@@ -116,9 +117,10 @@ async function init() {
 
     initDqMeshes()
     
+    let transparentOpacity = .2//.65
     initArrows()
-    initDqVizes()
-    initFlVizes()
+    initDqVizes(transparentOpacity)
+    initFlVizes(transparentOpacity)
 
     initCamera(container)
     initSurroundings()

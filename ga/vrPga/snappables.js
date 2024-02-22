@@ -1,3 +1,9 @@
+function makeUnaffected(viz) {
+    viz.affecters[0] = null
+    viz.affecters[1] = null
+    viz.affecters[2] = -1
+}
+
 function operate(affecters, target) {
 
     let op = operators[affecters[2]]
@@ -19,10 +25,6 @@ function giveSnappableProperties(s) {
     s.boxHelper.visible = false
     s.boxHelper.matrixAutoUpdate = false
 
-    s.affecters = [
-        null, null, -1
-    ]
-
     s.sclptable = null
 
     snappables.push(s)
@@ -38,21 +40,21 @@ function updateFromAffecters(a) {
         })
     }
 
-    let op = operators[a.affecters[2]]
     let affecter0 = a.affecters[0]
     let affecter1 = a.affecters[1]
+    let op = operators[a.affecters[2]]
     
-    if(op === `joinPt` && a.mv.constructor === Dq && a.mv.includesGrade(2)) {
+    // if(op === `joinPt` && a.mv.constructor === Dq && a.mv.includesGrade(2)) {
 
-        fl0.copy(affecter0.mv).normalizePoint()
-        fl1.copy(affecter1.mv).normalizePoint()
-        let midPoint = fl0.add(fl1, fl2).multiplyScalar(.5, fl2)
-        a.markupPos.copy(midPoint)
-        a.markupPos[4] += .01; a.markupPos[5] += .01; a.markupPos[6] += .01;
-        a.regularizeMarkupPos()
-        // a.markupPos.log()
+    //     fl0.copy(affecter0.mv).normalizePoint()
+    //     fl1.copy(affecter1.mv).normalizePoint()
+    //     let midPoint = fl0.add(fl1, fl2).multiplyScalar(.5, fl2)
+    //     a.markupPos.copy(midPoint)
+    //     a.markupPos[4] += .01; a.markupPos[5] += .01; a.markupPos[6] += .01;
+    //     a.regularizeMarkupPos()
+    //     // a.markupPos.log()
     
-    }
+    // }
 }
 
 function interdependencyExists(a, b) {

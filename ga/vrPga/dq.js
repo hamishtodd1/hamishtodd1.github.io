@@ -1,3 +1,8 @@
+/*
+    This file was written by Hamish Todd and is public domain
+    This statement does not apply to other files in this repo unless otherwise stated
+*/
+
 let dqVerbose = 
 `mulDq(b, target) {
 
