@@ -53,8 +53,8 @@ function initControl() {
     const highlightees = [null, null]
 
     const evenGrabbees = [null, null]
-    const oddGrabbee = null
     const handsHoldingOdd = [false, false]
+    let oddGrabbee = null
 
     const rightFl = new Fl()
     const rotationPart = new Dq()
@@ -100,6 +100,11 @@ function initControl() {
             let toBeSnapped = oddGrabbee || evenGrabbees[0] || evenGrabbees[1]
             if (toBeSnapped === null || snapMode)
                 return
+
+            let dqv1 = snappables.find(sn => sn.constructor === DqViz && sn !== toBeSnapped)
+            let dqv2 = snappables.find(sn => { return sn.constructor === DqViz && sn !== dqv1 && sn !== toBeSnapped})
+            if (dqv1 !== undefined && dqv2 !== undefined)
+                debugger
         
             snapMode = true
 
@@ -108,7 +113,7 @@ function initControl() {
         }
     }
 
-    doSnap = (toBeSnapped, potentialSnaps, snapIndex) => {
+    snapIfAcceptable = (toBeSnapped, potentialSnaps, snapIndex) => {
         if (snapIndex === -1)
             makeUnaffected(toBeSnapped)
         else {
@@ -116,6 +121,7 @@ function initControl() {
             let bestRatedSnap = potentialSnaps[snapIndex]
             for (let i = 0; i < 3; ++i)
                 toBeSnapped.affecters[i] = bestRatedSnap.affecters[i]
+            toBeSnapped.markupPos.copy(bestRatedSnap.markupPos)
 
             // log(toBeSnapped.affecters)
             updateFromAffecters(toBeSnapped)
@@ -241,16 +247,22 @@ function initControl() {
             hands[LEFT].dq.mul(e1, rightFl)
             //...the transform that would get the place where the right hand is to that
             rightFl.mulReverse(hands[RIGHT].dq, oddGrabbee.fl)
-            
-            normalizeFlToTypes(oddGrabbee.fl, false)
 
+            if (oddGrabbee.lockedGrade === 1)
+                oddGrabbee.fl.zeroGrade(3)
+            else if (oddGrabbee.lockedGrade === 3)
+                oddGrabbee.fl.zeroGrade(1)
+            else 
+                normalizeFlToTypes(oddGrabbee.fl, false)
+
+            //doesn't matter much
             hands[RIGHT].dq.sandwich(e123, oddGrabbee.markupPos)
             oddGrabbee.regularizeMarkupPos()
 
             if(snapMode) {
-                let bestSnapIndex = getBestSnap( potentialSnapFlVizes, oddGrabbee, numPotentialSnaps )
+                let bestSnapIndex = getBestAcceptableSnap( potentialSnapFlVizes, oddGrabbee, numPotentialSnaps )
                 potentialSnapFlVizes.forEach((psfv,i) => {
-                    psfv.setTransparency(i === bestSnapIndex)
+                    psfv.setTransparency(i === bestSnapIndex ? .5+.5*sq(Math.sin(frameCount * .05)) : translucentOpacity)
                 })
             }
         }
@@ -269,20 +281,16 @@ function initControl() {
                 // smootheningRecords[hand].add(hands[hand].dq, dq0).normalize()
 
                 hands[hand].dq.mulReverse(handDqOnGrabs[hand], movementSinceGrabViz[hand].dq)
-                // some mild snapping here miiiight be nice?
                 movementSinceGrabViz[hand].dq.mul( snappableDqOnGrabs[hand], evenGrabbees[hand].dq )
-                // evenGrabbees[hand].dq.normalize()
 
                 evenGrabbees[hand].dq.invariantDecomposition(rotationPart, translationPart)
                 let translationThreshold = .4
                 let rotationThreshold = .4
-                // if(rotationPart.l1NormTo(oneDq) < translationThreshold)
-                //     evenGrabbees[hand].dq.copy(translationPart)
-                // if (translationPart.l1NormTo(oneDq) < rotationThreshold)
-                //     evenGrabbees[hand].dq.copy(rotationPart)
+                if(rotationPart.l1NormTo(oneDq) < translationThreshold)
+                    evenGrabbees[hand].dq.copy(translationPart)
+                if (translationPart.l1NormTo(oneDq) < rotationThreshold)
+                    evenGrabbees[hand].dq.copy(rotationPart)
                 
-                // let didSnap = snapOld(evenGrabbees[hand])
-
                 if (showMarkupVizes) {
                     movementSinceGrabViz[hand].visible = !oldDqVizes[hand].dq.equals(oneDq)
                     oldDqVizes[hand].visible = movementSinceGrabViz[hand].visible
@@ -294,9 +302,9 @@ function initControl() {
                 })
 
                 if(snapMode) {
-                    let bestSnapIndex = getBestSnap(potentialSnapDqVizes, evenGrabbees[hand], numPotentialSnaps)
+                    let bestSnapIndex = getBestAcceptableSnap(potentialSnapDqVizes, evenGrabbees[hand], numPotentialSnaps)
                     potentialSnapDqVizes.forEach((psdv, i) => {
-                        psdv.setTransparency(i === bestSnapIndex)
+                        psdv.setTransparency(i === bestSnapIndex ? sq(Math.sin(frameCount * .03)) : translucentOpacity)
                     })
                 }
             }
@@ -406,8 +414,8 @@ function initControl() {
         if (evenGrabbees[focusHand]) {
 
             if(snapMode) {
-                let bestSnapIndex = getBestSnap(potentialSnapDqVizes, evenGrabbees[focusHand], numPotentialSnaps)
-                doSnap(evenGrabbees[focusHand], potentialSnapDqVizes, bestSnapIndex)
+                let bestSnapIndex = getBestAcceptableSnap(potentialSnapDqVizes, evenGrabbees[focusHand], numPotentialSnaps)
+                snapIfAcceptable(evenGrabbees[focusHand], potentialSnapDqVizes, bestSnapIndex)
             }
 
             if (evenGrabbees[focusHand].sclptable) {
@@ -431,11 +439,16 @@ function initControl() {
             if (!handsHoldingOdd[0] && !handsHoldingOdd[1]) {
 
                 if (snapMode) {
-                    let bestSnapIndex = getBestSnap(potentialSnapFlVizes, oddGrabbee, numPotentialSnaps)
-                    doSnap(oddGrabbee, potentialSnapFlVizes, bestSnapIndex)
+                    let bestSnapIndex = getBestAcceptableSnap(potentialSnapFlVizes, oddGrabbee, numPotentialSnaps)
+                    snapIfAcceptable(oddGrabbee, potentialSnapFlVizes, bestSnapIndex)
                 }
 
-                normalizeFlToTypes(oddGrabbee.fl, true)
+                if (oddGrabbee.affecters[0] === null) {
+                    normalizeFlToTypes(oddGrabbee.fl, true)
+                    let has1 = oddGrabbee.hasGrade(1)
+                    let has3 = oddGrabbee.hasGrade(3)
+                    oddGrabbee.lockedGrade = has1 && !has3 ? 1 : has3 && !has1 ? 3 : -1
+                }
 
                 oddGrabbee = null
             }

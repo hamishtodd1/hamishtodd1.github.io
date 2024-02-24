@@ -75,6 +75,8 @@ function initFlVizes(transparentOpacity) {
             super()
             scene.add(this)
 
+            this.lockedGrade = -1
+
             let pointMat = new THREE.MeshPhongMaterial({
                 color,
                 transparent,
@@ -269,8 +271,7 @@ function initFlVizes(transparentOpacity) {
             }
         }
 
-        setTransparency(isTransparent) {
-            let opacity = isTransparent ? transparentOpacity : 1.
+        setTransparency(opacity) {
             this.rotAxisMesh.material.opacity = opacity
             this.arrow1.material.opacity = opacity
             this.arrow2.material.opacity = opacity

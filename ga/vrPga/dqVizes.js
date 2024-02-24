@@ -194,8 +194,7 @@ function initDqVizes(transparentOpacity) {
             }
         }
 
-        setTransparency(isTransparent) {
-            let opacity = isTransparent ? transparentOpacity : 1.
+        setTransparency(opacity) {
             this.rotAxisMesh.material.opacity = opacity
             this.arrow.material.opacity = opacity
         }

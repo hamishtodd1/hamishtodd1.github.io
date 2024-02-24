@@ -2,6 +2,14 @@ function initMultivectorWithoutDeclarations() {
     
     class Multivector extends Float32Array {
 
+        addNoise(firstIndex, lastIndex, radius) {
+            
+            for (let i = firstIndex; i < lastIndex; ++i)
+                this[i] = radius*(Math.random() * 2. - 1.)
+
+            return this
+        }
+
         l1NormTo(that) {
             if(this.constructor !== that.constructor)
                 return Infinity

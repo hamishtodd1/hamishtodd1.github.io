@@ -4,7 +4,7 @@ let vizBeingModified = null
 let spectatorMode = null
 const snappables = []
 let vrSession = null
-const passThroughMode = false
+const passThroughMode = true
 
 const RIGHT = 0
 const LEFT = 1
@@ -18,7 +18,9 @@ const obj3dsWithOnBeforeRenders = []
 const socket = io()
 const eps = .0001 //not been tweaked for anything yet, so feel free to change
 
-const randomPt = new Fl().point(0.2448657087518873, 0.07640275431752674, 0.360207610338215, 1.)
+const randomPt = new Fl().point(0.2448657087518873, 0.07640275431752674, 0.360207610338215, 0.)
+
+const translucentOpacity = .65
 
 const operators = [
     // `mul`, `mulReverse`, `add`, `sandwich`,

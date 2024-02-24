@@ -20,10 +20,10 @@ function initControlHelpers() {
         // })
 
         // {
-            var flViz0 = new FlViz()
-            comfortableHandPos(flViz0.fl)
-            var flViz1 = new FlViz()
-            comfortableHandPos(flViz1.fl, .5)
+            // var flViz0 = new FlViz()
+            // comfortableHandPos(flViz0.fl)
+            // var flViz1 = new FlViz()
+            // comfortableHandPos(flViz1.fl, .5)
 
             // var dqViz5 = new DqViz()
             // e23.projectOn(flViz0.fl.addScaled(e012, .01, fl0), dqViz5.dq)
@@ -170,19 +170,20 @@ function initControlHelpers() {
             return POINT
 
         fl.mul(planePart, evenVersion)
-        evenVersion.selectGrade(2, evenVersionAxis)
         evenVersion.normalize()
+        evenVersion.selectGrade(2, evenVersionAxis)
 
+        let eNormSqAxis = Math.sqrt(evenVersionAxis.eNormSq())
+        let angle = 2. * Math.abs(Math.atan2(eNormSqAxis, evenVersion[0]))
+
+        //potentially useful at some point
         // let handsDistToAxis = evenVersionAxis.distanceToPt(pointBetweenHands)
+
         pointBetweenHands.pointFromGibbsVec(v1.addVectors(hands[0].position, hands[1].position).multiplyScalar(.5))
         let distTaken = pointBetweenHands.distanceToPt(evenVersion.sandwich(pointBetweenHands, fl0))
 
-        let eNormSqAxis = Math.sqrt(Math.abs(evenVersionAxis.eNormSq()))
-        let angle = 4. * Math.abs(Math.atan2(eNormSqAxis, evenVersion[0]))
-        //not really sure why 4 on this occasion!
-
         let thingThisIs = TRANSFLECTION
-        if (angle > Math.PI * .9)
+        if (angle > Math.PI * .52)
             thingThisIs = POINT
         else if (angle > Math.PI * .2)
             thingThisIs = ROTOREFLECTION

@@ -8,16 +8,11 @@
         (eg normalizing, taking logs, grade selecting)
         then what's the point of emphasizing understanding PGA?
 
-    Redo snapping
-        Will probably be rounding things to pure rotation and pure translations... could round to 180s
-
-    Snap button:
-        You keep your hands held in place
-        You press the button
-        It cycles through the potential snaps
+    No it's not that bad. There's what snaps you offer, and there's what you can put in the spreadsheet
 
     TODO for FoC demo:
-        A face button should be paint instead, so grab is trigger, and side is a float
+        Just tried lockedGrade, see what that's like
+        A face button should be paint instead, so grab is trigger, and side is the kob
         Round screws to the nearest rotation or translation
         Some bug where loooooads of stuff just gets made. It happened after making a few models
         Just an eye that rotates in place
@@ -117,7 +112,7 @@ async function init() {
 
     initDqMeshes()
     
-    let transparentOpacity = .2//.65
+    let transparentOpacity = .65
     initArrows()
     initDqVizes(transparentOpacity)
     initFlVizes(transparentOpacity)

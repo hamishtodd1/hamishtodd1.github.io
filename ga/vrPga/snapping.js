@@ -3,6 +3,8 @@
 function initSnapping() {
 
     const tolerance = .15// .06 for users
+    let toSnapLogNormalized = new Dq()
+    let potentialSnapLogNormalized = new Dq()
 
     function getType(opName, type1, type2) {
         if (opName === `sandwich`)
@@ -38,6 +40,76 @@ function initSnapping() {
 
         console.error("type weirdness: ", opName, type1, type2)
         return null
+    }
+
+    generatePotentialSnaps = (potentialSnapsVizes, toBeSnapped) => {
+
+        let lowestUnused = 0
+
+        function addPs(i, j, k) {
+            if (potentialSnapsVizes[lowestUnused] === undefined)
+                potentialSnapsVizes[lowestUnused] = new toBeSnapped.constructor(0x666666, true, true)
+
+            let psv = potentialSnapsVizes[lowestUnused]
+            psv.affecters[0] = snappables[i]
+            psv.affecters[1] = snappables[j]
+            psv.affecters[2] = k
+            updateFromAffecters(psv)
+
+            psv.markupPos.addNoise(4,7, .06)
+            psv.regularizeMarkupPos()
+            psv.visible = true
+
+            ++lowestUnused
+        }
+
+        for (let i = 0, il = snappables.length; i < il; i++) {
+
+            let mv0 = snappables[i].mv
+
+            let ineligible0 =
+                snappables[i] === toBeSnapped ||
+                mv0.isZero()
+            aDependsOnB(snappables[i], toBeSnapped) ||
+                (mv0.constructor === Dq && mv0.isScalar())
+
+            if (ineligible0)
+                continue
+
+            for (let k = 0, kl = operators.length; k < kl; k++) {
+
+                let isSingleArgumentOp = mv0[operators[k]].length === 1
+                if (isSingleArgumentOp) {
+
+                    let outputType = getType(operators[k], mv0.constructor)
+                    if (outputType !== toBeSnapped.mv.constructor)
+                        continue
+
+                    addPs(i, -1, k)
+                }
+                else for (let j = /*i+1*/0, jl = snappables.length; j < jl; j++) {
+
+                    let mv1 = snappables[j].mv
+
+                    let outputType = getType(operators[k], mv0.constructor, mv1.constructor)
+
+                    let ineligible1 =
+                        outputType !== toBeSnapped.mv.constructor ||
+                        mv1.isZero() ||
+                        snappables[j] === toBeSnapped ||
+                        aDependsOnB(snappables[j], toBeSnapped) ||  //maybe one day
+                        (mv1.constructor === Dq && mv1.isScalar()) || //for what?
+                        i === j //mulReverse would get identity, add would do nothing, mul covered by log, join meet would be 0, inner would be scalar
+
+                    if (ineligible1)
+                        continue
+
+                    addPs(i, j, k)
+                }
+            }
+        }
+
+        return lowestUnused
     }
 
     function rate(opName, potentialSnap, toBeSnapped) {
@@ -96,13 +168,7 @@ function initSnapping() {
         return l1Norm
     }
 
-    let toSnapLogNormalized = new Dq()
-    let potentialSnapLogNormalized = new Dq()
-    let potentialSnap = null
-    let psDq = new Dq()
-    let psFl = new Fl()
-
-    getBestSnap = ( potentialSnaps, toBeSnapped, numPotentialSnaps ) => {
+    getBestAcceptableSnap = ( potentialSnaps, toBeSnapped, numPotentialSnaps ) => {
 
         let lowestRating = Infinity
         let lowestRatingIndex = -1
@@ -123,168 +189,4 @@ function initSnapping() {
         else
             return -1
     }
-
-    generatePotentialSnaps = (potentialSnapsVizes, toBeSnapped) => {
-
-        let lowestUnused = 0
-
-        function addPs(i,j,k, val) {
-            if (potentialSnapsVizes[lowestUnused] === undefined)
-                potentialSnapsVizes[lowestUnused] = new toBeSnapped.constructor(0x666666, true, true)
-            
-            let psv = potentialSnapsVizes[lowestUnused]
-            psv.mv.copy(val)
-            psv.affecters[0] = snappables[i]
-            psv.affecters[1] = snappables[j]
-            psv.affecters[2] = k
-            
-            psv.regularizeMarkupPos()
-            psv.visible = true
-
-            ++lowestUnused
-        }
-
-        for (let i = 0, il = snappables.length; i < il; i++) {
-
-            let mv0 = snappables[i].mv
-
-            let ineligible0 =
-                snappables[i] === toBeSnapped ||
-                mv0.isZero()
-                aDependsOnB(snappables[i], toBeSnapped) ||
-                (mv0.constructor === Dq && mv0.isScalar())
-
-            if (ineligible0)
-                continue
-
-            for (let k = 0, kl = operators.length; k < kl; k++) {
-
-                let isSingleArgumentOp = mv0[operators[k]].length === 1
-                if (isSingleArgumentOp) {
-
-                    let outputType = getType(operators[k], mv0.constructor)
-                    if (outputType !== toBeSnapped.mv.constructor)
-                        continue
-                    
-                    let val = mv0[operators[k]](toBeSnapped.constructor === Dq?dq0:fl0).normalize()
-                    addPs(i,-1,k,val)
-                }
-                else for (let j = /*i+1*/0, jl = snappables.length; j < jl; j++) {
-
-                    let mv1 = snappables[j].mv
-
-                    let outputType = getType(operators[k], mv0.constructor, mv1.constructor)
-
-                    let ineligible1 =
-                        outputType !== toBeSnapped.mv.constructor ||
-                        mv1.isZero() ||
-                        snappables[j] === toBeSnapped ||
-                        aDependsOnB(snappables[j], toBeSnapped) ||  //maybe one day
-                        (mv1.constructor === Dq && mv1.isScalar()) || //for what?
-                        i === j //mulReverse would get identity, add would do nothing, mul covered by log, join meet would be 0, inner would be scalar
-
-                    if (ineligible1)
-                        continue
-
-                    let val = mv0[operators[k]](mv1, toBeSnapped.mv.constructor === Dq ? dq0 : fl0)
-                    addPs(i, j, k, val.normalize())
-                }
-            }
-        }
-
-        return lowestUnused
-    }
-
-
-    // snapOld = (toBeSnapped) => {
-
-    //     let ratingLowest = Infinity
-    //     potentialAffecters[0] = -1; potentialAffecters[1] = -1; potentialAffecters[2] = -1;
-        
-    //     for (let i = 0, il = snappables.length; i < il; i++) {
-
-    //         let mv0 = snappables[i].mv
-
-    //         let ineligible0 =
-    //             snappables[i] === toBeSnapped || 
-    //             aDependsOnB(snappables[i],toBeSnapped) || 
-    //             (mv0.constructor === Dq && mv0.isScalar())
-                
-    //         if(ineligible0)
-    //             continue
-
-    //         for (let k = 0, kl = operators.length; k < kl; k++) {
-
-    //             let isSingleArgumentOp = mv0[operators[k]].length === 1
-    //             if( isSingleArgumentOp ) {
-
-    //                 let outputType = getType(operators[k], mv0.constructor)
-    //                 if (outputType !== toBeSnapped.mv.constructor)
-    //                     continue
-
-    //                 potentialSnap = outputType === Dq ? psDq : psFl
-    //                 mv0[operators[k]]( potentialSnap ).normalize()
-
-    //                 let rating = rate(operators[k], potentialSnap, toBeSnapped)
-    //                 if( rating < ratingLowest ) {
-    //                     potentialAffecters[0] = i 
-    //                     potentialAffecters[1] = -1
-    //                     potentialAffecters[2] = k
-    //                     ratingLowest = rating
-    //                 }
-    //             }
-    //             else {
-                    
-    //                 for (let j = 0, jl = snappables.length; j < jl; j++) {
-
-    //                     let mv1 = snappables[j].mv
-
-    //                     let outputType = getType( operators[k], mv0.constructor, mv1.constructor )
-
-    //                     let ineligible1 = 
-    //                         outputType !== toBeSnapped.mv.constructor ||
-    //                         snappables[j] === toBeSnapped || 
-    //                         aDependsOnB( snappables[j], toBeSnapped ) ||  //maybe one day
-    //                         (mv1.constructor === Dq && mv1.isScalar()) || //for what?
-    //                         i === j //mulReverse would get identity, add would do nothing, mul covered by log, join meet would be 0, inner would be scalar
-
-    //                     if( ineligible1 )
-    //                         continue
-
-    //                     potentialSnap = outputType === Dq ? psDq : psFl
-    //                     mv0[operators[k]](mv1, potentialSnap).normalize()
-
-    //                     let rating = rate(operators[k], potentialSnap, toBeSnapped)
-    //                     if( rating < ratingLowest ) {
-    //                         potentialAffecters[0] = i
-    //                         potentialAffecters[1] = j
-    //                         potentialAffecters[2] = k
-    //                         ratingLowest = rating
-    //                     }
-    //                 }
-    //             }
-    //         }
-    //     }
-        
-    //     let acceptableSnapFound = Math.abs(ratingLowest) < tolerance
-    //     if (!acceptableSnapFound) {
-    //         toBeSnapped.affecters[0] = null
-    //         toBeSnapped.affecters[1] = null
-    //         toBeSnapped.affecters[2] = -1
-    //     }
-    //     else {
-
-    //         log(operators[potentialAffecters[2]], potentialAffecters[0], potentialAffecters[1])
-
-    //         toBeSnapped.affecters[0] = snappables[potentialAffecters[0]]
-    //         toBeSnapped.affecters[1] = potentialAffecters[1] === -1 ? null : snappables[potentialAffecters[1]]
-    //         toBeSnapped.affecters[2] = potentialAffecters[2]
-
-    //         updateFromAffecters(toBeSnapped)
-    //         toBeSnapped.regularizeMarkupPos()
-            
-    //     }
-
-    //     return acceptableSnapFound
-    // }    
 }

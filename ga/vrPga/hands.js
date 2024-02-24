@@ -56,6 +56,10 @@ function initHands() {
         e123.dqTo(lazyHandPosLeft, handLeft.dq)
 
         function nonVrKeyDowns(event) {
+
+            if (event.repeat)
+                return
+
             if (event.key === ` `) {
                 
                 // onHandButtonUp(true, false, focusHand)
@@ -208,7 +212,10 @@ function initHands() {
         vrRight.dq = new Dq()
         vrLeft.dq = new Dq()
 
-        let buttonStates = [false, false, false, false, false]
+        let buttonStateses = [
+            [false, false, false, false, false, false],
+            [false, false, false, false, false, false]
+        ]
 
         //"grips" are needed for the appearance, but their transforms are weird, do not use them
         const controllerModelFactory = new XRControllerModelFactory()
@@ -318,14 +325,20 @@ function initHands() {
                     if (!source.gamepad)
                         continue
 
+                    let focusHand = source.handedness === `left` ? LEFT : RIGHT
+
                     discreteSticksOld[i].copy(discreteSticks[i])
                     vrControllerAxesToDiscreteStick(source.gamepad.axes, discreteSticks[i])
 
+                    let buttonStates = buttonStateses[focusHand]
                     for(let i = 0, il = buttonStates.length; i < il; ++i) {
                         if(source.gamepad.buttons[i].pressed && !buttonStates[i] )
-                            buttonOnDowns[i]()
+                            buttonOnDowns[i](focusHand)
                         if(!source.gamepad.buttons[i].pressed && buttonStates[i] )
-                            buttonOnUps[i]()
+                            buttonOnUps[i](focusHand)
+
+                        // if(buttonOnDowns[i] === onSnapButtonDown )
+                        //     log(buttonStates[i], source.gamepad.buttons[i].pressed)
 
                         buttonStates[i] = source.gamepad.buttons[i].pressed
                     }

@@ -44,17 +44,33 @@ function updateFromAffecters(a) {
     let affecter1 = a.affecters[1]
     let op = operators[a.affecters[2]]
     
-    // if(op === `joinPt` && a.mv.constructor === Dq && a.mv.includesGrade(2)) {
+    if(op === `joinPt` && 
+        a.mv.includesGrade(2) && 
+        affecter0.mv.includesGrade(3) && 
+        affecter1.mv.includesGrade(3)) {
 
-    //     fl0.copy(affecter0.mv).normalizePoint()
-    //     fl1.copy(affecter1.mv).normalizePoint()
-    //     let midPoint = fl0.add(fl1, fl2).multiplyScalar(.5, fl2)
-    //     a.markupPos.copy(midPoint)
-    //     a.markupPos[4] += .01; a.markupPos[5] += .01; a.markupPos[6] += .01;
-    //     a.regularizeMarkupPos()
-    //     // a.markupPos.log()
-    
-    // }
+        a.mv[0] = 0.
+        a.mv[7] = 0.
+
+        if (affecter0.fl === undefined || affecter1.fl === undefined) {
+            debugger
+        }
+
+        if (affecter0.fl[7] !== 0. && affecter1.fl[7] !== 0.) {
+            fl0.copy(affecter0.mv).normalizePoint()
+            fl1.copy(affecter1.mv).normalizePoint()
+            let midPoint = fl0.add(fl1, fl2).multiplyScalar(.5, fl2)
+            midPoint.add(randomPt, a.markupPos)
+        }
+        else if (affecter0.fl[7] !== 0. || affecter1.fl[7] !== 0.) {
+            let reachablePt = fl0.copy(affecter0.fl[7] !== 0. ? affecter0.fl : affecter1.fl).normalizePoint()
+            reachablePt.add(randomPt, a.markupPos)
+        }
+
+        //no idea what this will do for both ideal
+        a.regularizeMarkupPos()
+
+    }
 }
 
 function interdependencyExists(a, b) {
