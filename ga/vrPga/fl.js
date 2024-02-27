@@ -1,5 +1,6 @@
 /*
-    This file was written by Hamish Todd and is public domain
+    This file was written by Hamish Todd, significantly based on code generated from Bivector.net which was created by Steven De Keninck
+    It is public domain
     This statement does not apply to other files in this repo unless otherwise stated
 */
 

@@ -4,7 +4,7 @@ let vizBeingModified = null
 let spectatorMode = null
 const snappables = []
 let vrSession = null
-const passThroughMode = true
+const passThroughMode = false
 
 const RIGHT = 0
 const LEFT = 1

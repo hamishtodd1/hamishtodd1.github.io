@@ -12,7 +12,7 @@
 
     TODO for FoC demo:
         Just tried lockedGrade, see what that's like
-        A face button should be paint instead, so grab is trigger, and side is the kob
+        markupPosAttractor
         Round screws to the nearest rotation or translation
         Some bug where loooooads of stuff just gets made. It happened after making a few models
         Just an eye that rotates in place

@@ -57,8 +57,12 @@ function initControl() {
     let oddGrabbee = null
 
     const rightFl = new Fl()
-    const rotationPart = new Dq()
-    const translationPart = new Dq()
+    const rotationPart = new DqViz(0xFF0000, true, true)
+    const translationPart = new DqViz(0xFF0000, true, true)
+    translationPart.scaleAxisRadius(.95)
+    rotationPart.scaleAxisRadius(.95)
+    rotationPart.visible = false
+    translationPart.visible = false
 
     // document.addEventListener(`mouseRewind`, () => { log("yo") })
 
@@ -129,7 +133,7 @@ function initControl() {
         }
     }
 
-    onSideButtonDown = (focusHand) => {
+    onGrabButtonDown = (focusHand) => {
 
         //make it so paintingButtonHeld is defined
 
@@ -199,7 +203,7 @@ function initControl() {
         }
     }
 
-    onTriggerButtonDown = (focusHand) => {
+    onPaintButtonDown = (focusHand) => {
 
         let otherHand = 1 - focusHand
 
@@ -225,9 +229,11 @@ function initControl() {
             if( paintees[focusHand].sclptable === null)
                 paintees[focusHand].sclptable = new Sclptable(paintees[focusHand])
         }
+
+        log(paintees[focusHand])
     }
 
-    onTriggerButtonUp = (focusHand) => {
+    onPaintButtonUp = (focusHand) => {
         if (paintees[focusHand] !== null) {
             // toggleButtonsVisibility()
             paintees[focusHand].sclptable.emitSelf()
@@ -270,26 +276,57 @@ function initControl() {
         /////////////////////
         // MOVING GRABBEES //
         /////////////////////
+        rotationPart.visible = false
+        translationPart.visible = false
+        // if(frameCount === 1)
+        //     evenGrabbees[0] = new DqViz()
         for(let hand = 0; hand < 2; ++hand) {
 
-            if ( evenGrabbees[hand] !== null) {
+            if ( evenGrabbees[hand] !== null)
+            {
+                //TODO if you're using both hands at once
+                rotationPart.visible = true
+                translationPart.visible = true
                 highlightees[hand] = evenGrabbees[hand]
-
-                // hands[hand].dq.mulReverse(handDqOnGrabs[hand], movementSinceGrabViz[hand].dq)
-                // movementSinceGrabViz[hand].dq.mul(oldDqVizes[hand].dq, evenGrabbees[hand].dq)
 
                 // smootheningRecords[hand].add(hands[hand].dq, dq0).normalize()
 
                 hands[hand].dq.mulReverse(handDqOnGrabs[hand], movementSinceGrabViz[hand].dq)
-                movementSinceGrabViz[hand].dq.mul( snappableDqOnGrabs[hand], evenGrabbees[hand].dq )
 
-                evenGrabbees[hand].dq.invariantDecomposition(rotationPart, translationPart)
-                let translationThreshold = .4
-                let rotationThreshold = .4
-                if(rotationPart.l1NormTo(oneDq) < translationThreshold)
-                    evenGrabbees[hand].dq.copy(translationPart)
-                if (translationPart.l1NormTo(oneDq) < rotationThreshold)
-                    evenGrabbees[hand].dq.copy(rotationPart)
+                //test case where you see the nastiness. Just have evenGrabbees[0] = new DqViz() above
+                {
+                    // movementSinceGrabViz[hand].dq.set(   -0.7683607935905457,  -0.4085609018802643,  0.030873481184244156,  0.42651650309562683,  -0.4561571776866913,  -0.2540922164916992,  -0.370107501745224,  0.0666247233748436)
+                    // evenGrabbees[hand].markupPos.set(0, 0, 0, 0, -0.28697729110717773, 0.8521061539649963, -0.2557181417942047, 1.)
+                }
+                
+                //could have the markupPos's move if you're not at a pure rotn or trans, so tip always at hand
+                {
+                    rotationPart.dq.copy(movementSinceGrabViz[hand].dq)
+                    translationPart.dq.copy(oneDq)
+                    let numIterations = 5//1 + Math.floor(frameCount / 100) % 10
+                    for(let i = 0; i < numIterations; ++i) {
+                        rotationPart.dq.invariantDecomposition(dq0, dq1)
+                        rotationPart.dq.copy(dq0)
+
+                        dq2.copy(translationPart.dq)
+                        dq1.mul(dq2, translationPart.dq)
+                    }
+                }
+
+                let translationThreshold = .97
+                let rotationThreshold = .025
+                if (translationPart.dq.l1NormTo(oneDq) < rotationThreshold)
+                    movementSinceGrabViz[hand].dq.copy(rotationPart.dq)
+                if (Math.abs(rotationPart.dq[0]) >  translationThreshold) {
+                    let start = movementSinceGrabViz[hand].markupPos
+                    let end = movementSinceGrabViz[hand].dq.sandwich(start, fl0)
+                    end.mulReverse(start, movementSinceGrabViz[hand].dq ).sqrtSelf()
+                }
+
+                rotationPart.markupPos.copy(evenGrabbees[hand].markupPos)
+                rotationPart.getArrowTip(translationPart.markupPos)
+
+                movementSinceGrabViz[hand].dq.mul(snappableDqOnGrabs[hand], evenGrabbees[hand].dq)
                 
                 if (showMarkupVizes) {
                     movementSinceGrabViz[hand].visible = !oldDqVizes[hand].dq.equals(oneDq)
@@ -349,7 +386,7 @@ function initControl() {
 
         hands.forEach((hand,i) => {
 
-            let len = 0.
+            let len = 0.02
             let highlightee = highlightees[i]
             if(highlightee !== null) {
                 if(highlightee.sclptable)
@@ -410,7 +447,7 @@ function initControl() {
         })
     }
 
-    onSideButtonUp = (focusHand) => {
+    onGrabButtonUp = (focusHand) => {
         if (evenGrabbees[focusHand]) {
 
             if(snapMode) {
@@ -445,9 +482,9 @@ function initControl() {
 
                 if (oddGrabbee.affecters[0] === null) {
                     normalizeFlToTypes(oddGrabbee.fl, true)
-                    let has1 = oddGrabbee.hasGrade(1)
-                    let has3 = oddGrabbee.hasGrade(3)
-                    oddGrabbee.lockedGrade = has1 && !has3 ? 1 : has3 && !has1 ? 3 : -1
+                    let has1 = oddGrabbee.fl.hasGrade(1)
+                    let has3 = oddGrabbee.fl.hasGrade(3)
+                    oddGrabbee.lockedGrade = has1 && !has3 ? 1 : 3 //nobody wants rotoreflections/transflections
                 }
 
                 oddGrabbee = null

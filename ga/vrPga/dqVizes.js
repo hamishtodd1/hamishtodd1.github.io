@@ -255,6 +255,13 @@ function initDqVizes(transparentOpacity) {
             strippedAxis.joinPt(camera.mvs.pos, target)
         }
 
+        scaleAxisRadius(factor) {
+            this.rotAxisMesh.scale.x *= factor
+            this.rotAxisMesh.scale.y *= factor
+            this.trnAxisMesh.scale.x *= factor
+            this.trnAxisMesh.scale.y *= factor
+        }
+
     }
     window.DqViz = DqViz
 
@@ -317,10 +324,12 @@ function initDqVizes(transparentOpacity) {
     }
 
     debugDqVizes = [
-        new DqViz(0xFF0000, true, false), new DqViz(0xFF0000, true, false)
+        new DqViz(0xFFFF00, true, false), new DqViz(0xFFFF00, true, false)
     ]
-    debugDqVizes.forEach(dq => {
-        dq.dq.zero()
-        dq.markupPos.pointFromGibbsVec(outOfSightVec3)
+    debugDqVizes.forEach(ddqv=>ddqv)
+    debugDqVizes.forEach(ddqv => {
+        ddqv.scaleAxisRadius(.95)
+        ddqv.dq.zero()
+        ddqv.markupPos.pointFromGibbsVec(outOfSightVec3)
     })
 }

@@ -45,9 +45,9 @@ function updateFromAffecters(a) {
     let op = operators[a.affecters[2]]
     
     if(op === `joinPt` && 
-        a.mv.includesGrade(2) && 
-        affecter0.mv.includesGrade(3) && 
-        affecter1.mv.includesGrade(3)) {
+        a.mv.hasGrade(2) && 
+        affecter0.mv.hasGrade(3) && 
+        affecter1.mv.hasGrade(3)) {
 
         a.mv[0] = 0.
         a.mv[7] = 0.
@@ -61,6 +61,7 @@ function updateFromAffecters(a) {
             fl1.copy(affecter1.mv).normalizePoint()
             let midPoint = fl0.add(fl1, fl2).multiplyScalar(.5, fl2)
             midPoint.add(randomPt, a.markupPos)
+            clampPointDistanceFromThing( a.markupPos, camera.mvs.pos, 0., .5 )
         }
         else if (affecter0.fl[7] !== 0. || affecter1.fl[7] !== 0.) {
             let reachablePt = fl0.copy(affecter0.fl[7] !== 0. ? affecter0.fl : affecter1.fl).normalizePoint()

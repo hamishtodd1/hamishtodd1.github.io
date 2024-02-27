@@ -172,15 +172,15 @@ function initHands() {
 
         function onMouseButtonDown(event) {
             if (event.button === 0)
-                onTriggerButtonDown(focusHand)
+                onPaintButtonDown(focusHand)
             if (event.button === 2)
-                onSideButtonDown(focusHand)
+                onGrabButtonDown(focusHand)
         }
         function onMouseButtonUp(event) {
             if (event.button === 0)
-                onTriggerButtonUp(focusHand)
+                onPaintButtonUp(focusHand)
             if (event.button === 2)
-                onSideButtonUp(focusHand)
+                onGrabButtonUp(focusHand)
         }
         document.addEventListener("mousedown", onMouseButtonDown )
         document.addEventListener("mouseup", onMouseButtonUp )
@@ -224,37 +224,41 @@ function initHands() {
         gripLeft.add(controllerModelFactory.createControllerModel(gripLeft))
         gripRight.add(controllerModelFactory.createControllerModel(gripRight))
 
-        vrLeft .addEventListener('selectstart',  () => { onTriggerButtonDown ( LEFT  ) } ) //log(`0`) })
-        vrLeft .addEventListener('selectend',    () => { onTriggerButtonUp   ( LEFT  ) } ) //log(`1`) })
-        vrRight.addEventListener('selectstart',  () => { onTriggerButtonDown ( RIGHT ) } ) //log(`2`) })
-        vrRight.addEventListener('selectend',    () => { onTriggerButtonUp   ( RIGHT ) } ) //log(`3`) })
-        vrLeft .addEventListener('squeezestart', () => { onSideButtonDown    ( LEFT  ) } ) //log(`4`) })
-        vrLeft .addEventListener('squeezeend',   () => { onSideButtonUp      ( LEFT  ) } ) //log(`5`) })
-        vrRight.addEventListener('squeezestart', () => { onSideButtonDown    ( RIGHT ) } ) //log(`6`) })
-        vrRight.addEventListener('squeezeend',   () => { onSideButtonUp      ( RIGHT ) } ) //log(`7`) })
+        vrLeft .addEventListener('selectstart',  () => { onGrabButtonDown ( LEFT  ) } ) //log(`0`) })
+        vrLeft .addEventListener('selectend',    () => { onGrabButtonUp   ( LEFT  ) } ) //log(`1`) })
+        vrRight.addEventListener('selectstart',  () => { onGrabButtonDown ( RIGHT ) } ) //log(`2`) })
+        vrRight.addEventListener('selectend',    () => { onGrabButtonUp   ( RIGHT ) } ) //log(`3`) })
+        // vrLeft .addEventListener('squeezestart', () => { onGrabButtonDown    ( LEFT  ) } ) //log(`4`) })
+        // vrLeft .addEventListener('squeezeend',   () => { onGrabButtonUp      ( LEFT  ) } ) //log(`5`) })
+        // vrRight.addEventListener('squeezestart', () => { onGrabButtonDown    ( RIGHT ) } ) //log(`6`) })
+        // vrRight.addEventListener('squeezeend',   () => { onGrabButtonUp      ( RIGHT ) } ) //log(`7`) })
 
         let discreteSticks    = [new THREE.Vector2(),new THREE.Vector2()]
         let discreteSticksOld = [new THREE.Vector2(),new THREE.Vector2()]
         
         onEnterVrFirstTime = (session) => {
 
+            vrSession = session
+
+            // window.location.reload()
             let buttonOnDowns = [
-                () => { },
-                () => { },
-                () => { },
-                () => { },
-                onSnapButtonDown,
-                () => { },
-                () => { },
+                () => {},
+                () => {},
+                () => {}, //dunno how to get this to fire!
+                () => {
+                    vrSession.end()
+                    window.location.reload()
+                },
+                onPaintButtonDown, //face button 2
+                onSnapButtonDown,  //face button 1
             ]
             let buttonOnUps = [
                 () => { },
                 () => { },
                 () => { },
                 () => { },
+                onPaintButtonUp,
                 onSnapButtonUp,
-                () => { },
-                () => { },
             ]
 
             scene.remove(handRight)
@@ -271,6 +275,7 @@ function initHands() {
                     if (!source.gamepad)
                         continue
 
+                    // if there's a problem with which hand is which, it might be because both controllers weren't connected
                     if (!discreteSticksOld[i].equals(discreteSticks[i]))
                         updatePaletteFromDiscreteStick(discreteSticks[i], session.inputSources[i].handedness === `left` ? LEFT : RIGHT)
 

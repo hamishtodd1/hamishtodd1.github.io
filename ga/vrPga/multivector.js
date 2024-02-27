@@ -1,3 +1,8 @@
+/*
+    This file was written by Hamish Todd and is public domain
+    This statement does not apply to other files in this repo unless otherwise stated
+*/
+
 function initMultivectorWithoutDeclarations() {
     
     class Multivector extends Float32Array {
@@ -105,24 +110,6 @@ function initMultivectorWithoutDeclarations() {
             numerator.mulReverse(toBeProjectedOn, target)
 
             return target
-        }
-
-        divide(b, target) {
-            return this.mul(b.rigorousInverse(newDq), target)
-        }
-
-        rigorousInverse(target) {
-            if (target === undefined)
-                target = new this.constructor()
-
-            let thisReverse = this.getReverse(this.constructor === Dq ? newDq : newFl)
-
-            let thisThisReverse = this.mul(thisReverse, newDq) //potentially study
-            let thisThisReverseInverse = newDq;
-            thisThisReverseInverse[0] = 1. / thisThisReverse[0]
-            thisThisReverseInverse[7] = -thisThisReverse[7] / (thisThisReverse[0] * thisThisReverse[0])
-
-            return thisReverse.mulDq(thisThisReverseInverse, target)
         }
 
         dqToSq(b, target) {
@@ -235,7 +222,7 @@ function initMultivectorWithoutDeclarations() {
             return ret
         }
 
-        includesGrade(g) {
+        hasGrade(g) {
             
             for(let i = 0; i < 8; ++i) {
                 if(this.constructor.indexGrades[i] === g && Math.abs(this[i]) > eps)

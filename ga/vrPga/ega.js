@@ -167,6 +167,21 @@ function initEgaWithoutDeclarations() {
             this[0] = 1.
         }
 
+        rigorousInverse(target) {
+            if (target === undefined)
+                target = new Dq()
+
+            let thisReverse = this.getReverse( newDq )
+
+            let thisThisReverse = this.mul(thisReverse, newDq) //potentially study
+            let thisThisReverseInverse = newDq;
+            thisThisReverseInverse.zero()
+            thisThisReverseInverse[0] = 1. / thisThisReverse[0]
+            thisThisReverseInverse[7] = -thisThisReverse[7] / (thisThisReverse[0] * thisThisReverse[0])
+
+            return thisReverse.mulDq(thisThisReverseInverse, target)
+        }
+
         isScalar() {
             return this[0] !== 0. && this[1] === 0. && this[2] === 0. && this[3] === 0. && this[4] === 0. && this[5] === 0. && this[6] === 0. && this[7] === 0.
         }
@@ -243,6 +258,7 @@ function initEgaWithoutDeclarations() {
             if (trnsTarget === undefined)
                 trnsTarget = new Dq()
 
+            // let potentiallyFlipped = this.multiplyScalar(this[0] < 0. ? 1.:1., newDq)
             let normalized = this.getNormalization(newDq)
 
             if (Math.abs(normalized[7]) < eps) {
@@ -259,7 +275,7 @@ function initEgaWithoutDeclarations() {
             }
             else {
                 let numerator   = normalized.selectGrade(4, newDq)
-                let denominator = normalized.selectGrade(2, newDq).getReverse(newDq)
+                let denominator = normalized.selectGrade(2, rotnTarget).rigorousInverse(newDq)
                 numerator.mul(denominator, trnsTarget)
                 trnsTarget[0] += 1.
     
@@ -373,32 +389,40 @@ function initEgaWithoutDeclarations() {
             return this[0] * this[0] + this[4] * this[4] + this[5] * this[5] + this[6] * this[6]
         }
 
+        //an example that doesn't decompose very nicely is -0.25878000259399414, 0.20370851457118988, 0.2851245403289795, 0.8831866979598999, 0.13258354365825653, 0.09167366474866867, -0.9523919820785522, 0.19621264934539795
         getNormalization(target) {
 
             if(target === undefined)
                 target = new Dq()
 
-            let eNormSq = this.eNormSq()
+            let thisThisReverse = this.mulReverse(this, newDq)
+            let eNormSq = thisThisReverse[0]
 
             if(eNormSq === 0.) {
                 let iNormSq = this.getDual(newDq).eNormSq()
-                if (iNormSq !== 0.)
+                if (iNormSq !== 0.) //it's a translation axis
                     return this.multiplyScalar(1. / Math.sqrt(iNormSq), target)
                 else {
-                    console.warn("zero dual quaternion" )
-                    return target.copy(oneDq)
+                    console.warn("zero dual quaternion normalization from line: ", getWhereThisWasCalledFrom() )
+                    return target.zero()
                 }
             }
 
-            target.copy(this)
+            let invSqrt = newDq
+            invSqrt.zero()
+            invSqrt[0] = 1. / Math.sqrt(eNormSq)
+            invSqrt[7] = -.5 * thisThisReverse[7] * invSqrt[0] * invSqrt[0] * invSqrt[0]
 
-            let s = 1. / Math.sqrt(eNormSq)
-            let d = (target[7] * target[0] - (target[1] * target[6] + target[2] * target[5] + target[3] * target[4])) * s * s
-            target.multiplyScalar(s,target)
-            target[1] += target[6] * d
-            target[2] += target[5] * d
-            target[3] += target[4] * d
-            target[7] -= target[0] * d
+            this.mul(invSqrt, target)
+
+            //optimized version. Unclear if it fucking works though.
+            // let s = 1. / Math.sqrt(eNormSq)
+            // let d = (target[7] * target[0] - (target[1] * target[6] + target[2] * target[5] + target[3] * target[4])) * s * s
+            // target.multiplyScalar( s, target )
+            // target[1] += target[6] * d
+            // target[2] += target[5] * d
+            // target[3] += target[4] * d
+            // target[7] -= target[0] * d
             return target
         }
 
