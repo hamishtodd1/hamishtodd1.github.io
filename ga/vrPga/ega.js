@@ -11,12 +11,10 @@ function initEgaWithoutDeclarations() {
             super(8)
         }
 
-        //assumes no normalization at all
-        goInDirectionByDistance(dir, dist, target) {
-            let thisNormalized = newFl
-
+        //assumes no normalization at all and result isn't normalized either
+        movePointInDirectionByDistance(dir, dist, target) {
             let factor = this[7] * dist / Math.sqrt(sq(dir[4]) + sq(dir[5]) + sq(dir[6]) )
-            thisNormalized.addScaled(dir, factor, target)
+            this.addScaled(dir, factor, target)
             return target
         }
 

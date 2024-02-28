@@ -67,7 +67,7 @@ function updateFromAffecters(output) {
             let planeParallelToLine1ContainingLine0 = mv0.joinPt( mv1.meet(e0, fl0), fl1).zeroGrade(3)
             let startyPoint = planeParallelToLine1ContainingLine0.meet(res.selectGrade(2,dq0), fl3)
             let dirAlongLine0 = mv0.meet(e0, fl4)
-            startyPoint.goInDirectionByDistance( dirAlongLine0, .02, output.markupPos ) //point on line0
+            startyPoint.movePointInDirectionByDistance( dirAlongLine0, .02, output.markupPos ) //point on line0
 
         }
         //yes this is one thing but a more important thing is choosing which things are visible to you
