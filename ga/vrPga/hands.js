@@ -13,6 +13,9 @@ function initHands() {
     scene.add(handLeft)
     // e123.dqTo(comfortableLookPos(fl0, 0., -.42), handRight.dq)
 
+    let discreteSticks = [new THREE.Vector2(), new THREE.Vector2()]
+    let discreteSticksOld = [new THREE.Vector2(), new THREE.Vector2()]
+
     const laserPointerGeo = new THREE.BufferGeometry().setFromPoints([
         new THREE.Vector3(0, 0, 0), 
         new THREE.Vector3(0, 0, -1)
@@ -36,29 +39,27 @@ function initHands() {
     ///////////
     // Mouse //
     ///////////
+    let focusHand = 0
     {
-        let focusHand = 0
-
-        let discreteStickNew = new THREE.Vector2()
-        let discreteStick = new THREE.Vector2()
         getPalletteInput = () => {
-            if (!discreteStick.equals(discreteStickNew))
-                updatePaletteFromDiscreteStick(discreteStick, focusHand)
+            if (!discreteSticksOld[focusHand].equals(discreteSticks[focusHand]))
+                updatePaletteFromDiscreteStick(discreteSticksOld[focusHand], focusHand)
         }
 
-        let lazyHandPosRight = new Fl()
-        comfortableHandPos(lazyHandPosRight)
-        lazyHandPosRight.copy(dq0.translator(0.55, -.03, 0.2).sandwich(lazyHandPosRight, fl0))
-        let lazyHandPosLeft = new Fl().copy(lazyHandPosRight)
-        lazyHandPosLeft[6] *= -1.
-        
-        e123.dqTo(lazyHandPosRight, handRight.dq)
-        e123.dqTo(lazyHandPosLeft, handLeft.dq)
+        function onMouseButtonDown(event) {
+            if (event.button === 0)
+                onGrabButtonDown(focusHand)
+            // if (event.button === 2)
+            //     onPaintButtonDown(focusHand)
+        }
+        function onMouseButtonUp(event) {
+            if (event.button === 0)
+                onGrabButtonUp(focusHand)
+            // if (event.button === 2)
+            //     onPaintButtonUp(focusHand)
+        }
 
         function nonVrKeyDowns(event) {
-
-            if (event.repeat)
-                return
 
             if (event.key === ` `) {
                 
@@ -68,33 +69,63 @@ function initHands() {
                 focusHand = 1-focusHand
             }
 
-            //mouse rewind IF THIS ISN'T WORKING CHECK SCRIPT, MAY NEED TO CHANGE WINDOW NAME
-            if (event.key === "z" )
-                onSnapButtonDown() //deleteHeld(focusHand)
-            // if (event.key === "5" && event.ctrlKey) //mouse fast forward
-            //     document.dispatchEvent(new Event(`mouseFastForward`))
+            //mouse fast forward and rewind
+            //IF THIS ISN'T WORKING CHECK SCRIPT, MAY NEED TO CHANGE WINDOW NAME
+            if (event.key === "6")
+                onPaintButtonDown(focusHand)
+            if (event.key === "5")
+                onSnapButtonDown()
 
-            keyToDiscreteStick(event.key, discreteStickNew)
+            keyToDiscreteStick(event.key, discreteSticks[focusHand])
         }
-        document.addEventListener(`keydown`, nonVrKeyDowns)
         function nonVrKeyUps(event) {
-            if (event.key === "z")
+            // if (event.key === "5")
+            //     onSnapButtonUp()
+            if (event.key === "6")
+                onPaintButtonUp(focusHand)
+            if (event.key === "5")
                 onSnapButtonUp()
         }
-        document.addEventListener(`keyup`, nonVrKeyUps)
 
+        document.addEventListener(`keydown`, nonVrKeyDowns)
+        document.addEventListener(`keyup`, nonVrKeyUps)
+        document.addEventListener("mousedown", onMouseButtonDown)
+        document.addEventListener("mouseup", onMouseButtonUp)
+    }
+    
+    //mouse movement/ray
+    {
         let mouseWheelTransform = new Dq().copy(oneDq)
         let mouseWheelTransformOld = new Dq().copy(oneDq)
+
+        let mouseOrigin = new Fl()
+        let mouseDirection = new Fl()
+
+        let raycaster = new THREE.Raycaster()
+        let mouse2d = new THREE.Vector2()
+
+        let workingPlane = new Fl()
+        let rayToMouse = new Dq().copy(e12)
 
         getIndicatedHandPosition = (isLeft, target) => {
             return workingPlane.meet(hands[isLeft].laserDq, target)
         }
 
-        let posIndicator = new THREE.Mesh(new THREE.SphereGeometry(.01), new THREE.MeshPhongMaterial({color:0x00FF00}))
+        let posIndicator = new THREE.Mesh(new THREE.SphereGeometry(.01), new THREE.MeshPhongMaterial({ color: 0x00FF00 }))
         scene.add(posIndicator)
 
-        let workingPlane = new Fl()
-        let rayToMouse = new Dq().copy(e12)
+        let lazyHandPosRight = new Fl()
+        let lazyHandPosLeft = new Fl()
+        {
+            comfortableHandPos(lazyHandPosRight)
+            lazyHandPosRight.copy(dq0.translator(0.55, -.03, 0.2).sandwich(lazyHandPosRight, fl0))
+            lazyHandPosLeft.copy(lazyHandPosRight)
+            lazyHandPosLeft[6] *= -1.
+
+            e123.dqTo(lazyHandPosRight, handRight.dq)
+            e123.dqTo(lazyHandPosLeft, handLeft.dq)
+        }
+        
         updateHandMvs = () => {
 
             mouseWheelTransformOld.copy(mouseWheelTransform)
@@ -116,89 +147,63 @@ function initHands() {
 
             hand.dq.sandwich(e3, hand.laserPlane)
 
-            discreteStick.copy(discreteStickNew)
-            discreteStickNew.set(0.,0.)
+            discreteSticksOld[focusHand].copy(discreteSticks[focusHand])
+            discreteSticks[focusHand].set(0.,0.)
+        }
+            
+        //strictly decoupled from hand! That is updated each frame!
+        function updateMouseRay(event) {
+            mouse2d.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouse2d.y = -(event.clientY / window.innerHeight) * 2 + 1;
+            raycaster.setFromCamera(mouse2d, camera)
+
+            //would prefer to do this ourselves, using camera GA
+            mouseOrigin.pointFromGibbsVec(raycaster.ray.origin)
+            mouseDirection.pointFromNormal(raycaster.ray.direction)
+            mouseOrigin.joinPt(mouseDirection, rayToMouse)
+        }
+
+        function onMouseMove(event) {
+            updateMouseRay(event)
+
+            event.preventDefault()
+        }
+        
+        resetMouseWheelTransform = () => {
+            mouseWheelTransform.copy(oneDq)
+        }
+
+        let angle = .0125 * TAU
+        let turnRight = new Dq().set(Math.cos(angle), 0., 0., 0., Math.sin(angle), 0., 0., 0.)
+        let turnLeft = new Dq().set(Math.cos(-angle), 0., 0., 0., Math.sin(-angle), 0., 0., 0.)
+        function onMouseWheel(event) {
+
+            let mouseTurn = event.deltaY < 0 ? turnLeft : turnRight
+            mouseWheelTransform.append(mouseTurn)
+            // if (Math.abs( 1. - mouseWheelTransform[0]) < .003)
+            //     mouseWheelTransform.copy(oneDq)
+            // if (Math.abs(-1. - mouseWheelTransform[0]) < .003)
+            //     oneDq.multiplyScalar(-1, mouseWheelTransform)
 
         }
 
-        //mouse movement/ray
-        {
-            let mouseOrigin = new Fl()
-            let mouseDirection = new Fl()
+        document.addEventListener('mousemove', onMouseMove)
+        document.addEventListener('wheel', onMouseWheel)
+    }
 
-            let raycaster = new THREE.Raycaster()
-            let mouse2d = new THREE.Vector2()
+    removeMouseEventListeners = () => {
+        console.log(`Removing mouse event listeners`)
 
-            //strictly decoupled from hand! That is updated each frame!
-            function updateMouseRay(event) {
-                mouse2d.x = (event.clientX / window.innerWidth) * 2 - 1;
-                mouse2d.y = -(event.clientY / window.innerHeight) * 2 + 1;
-                raycaster.setFromCamera(mouse2d, camera)
+        document.removeEventListener('mousemove', onMouseMove)
+        document.removeEventListener('wheel', onMouseWheel)
+        document.removeEventListener('keydown', nonVrKeyDowns)
+        document.removeEventListener('keyup', nonVrKeyUps)
+        document.removeEventListener('mousedown', onMouseButtonDown)
+        document.removeEventListener('mouseup', onMouseButtonUp)
+        orbitControls.enabled = false
 
-                //would prefer to do this ourselves, using camera GA
-                mouseOrigin.pointFromGibbsVec(raycaster.ray.origin)
-                mouseDirection.pointFromNormal(raycaster.ray.direction)
-                mouseOrigin.joinPt(mouseDirection, rayToMouse)
-            }
+        scene.remove(posIndicator)
 
-            function onMouseMove(event) {
-                updateMouseRay(event)
-
-                event.preventDefault()
-            }
-        }
-
-        {
-            resetMouseWheelTransform = () => {
-                mouseWheelTransform.copy(oneDq)
-            }
-
-            let angle = .0125 * TAU
-            let turnRight = new Dq().set(Math.cos(angle), 0., 0., 0., Math.sin(angle), 0., 0., 0.)
-            let turnLeft = new Dq().set(Math.cos(-angle), 0., 0., 0., Math.sin(-angle), 0., 0., 0.)
-            function onMouseWheel(event) {
-                let mouseTurn = event.deltaY < 0 ? turnLeft : turnRight
-                mouseWheelTransform.append(mouseTurn)
-                // if (Math.abs( 1. - mouseWheelTransform[0]) < .003)
-                //     mouseWheelTransform.copy(oneDq)
-                // if (Math.abs(-1. - mouseWheelTransform[0]) < .003)
-                //     oneDq.multiplyScalar(-1, mouseWheelTransform)
-
-            }
-
-            document.addEventListener('mousemove', onMouseMove)
-            document.addEventListener('wheel', onMouseWheel)
-        }
-
-        function onMouseButtonDown(event) {
-            if (event.button === 0)
-                onPaintButtonDown(focusHand)
-            if (event.button === 2)
-                onGrabButtonDown(focusHand)
-        }
-        function onMouseButtonUp(event) {
-            if (event.button === 0)
-                onPaintButtonUp(focusHand)
-            if (event.button === 2)
-                onGrabButtonUp(focusHand)
-        }
-        document.addEventListener("mousedown", onMouseButtonDown )
-        document.addEventListener("mouseup", onMouseButtonUp )
-
-        removeMouseEventListeners = () => {
-            console.log(`Removing mouse event listeners`)
-
-            document.removeEventListener('mousemove', onMouseMove)
-            document.removeEventListener('wheel', onMouseWheel)
-            document.removeEventListener('keydown', nonVrKeyDowns)
-            document.removeEventListener('keyup', nonVrKeyUps)
-            document.removeEventListener('mousedown', onMouseButtonDown)
-            document.removeEventListener('mouseup', onMouseButtonUp)
-            orbitControls.enabled = false
-
-            scene.remove(posIndicator)
-
-        }
     }
 
     ////////////////////
@@ -233,9 +238,6 @@ function initHands() {
         // vrRight.addEventListener('squeezestart', () => { onGrabButtonDown    ( RIGHT ) } ) //log(`6`) })
         // vrRight.addEventListener('squeezeend',   () => { onGrabButtonUp      ( RIGHT ) } ) //log(`7`) })
 
-        let discreteSticks    = [new THREE.Vector2(),new THREE.Vector2()]
-        let discreteSticksOld = [new THREE.Vector2(),new THREE.Vector2()]
-        
         onEnterVrFirstTime = (session) => {
 
             vrSession = session

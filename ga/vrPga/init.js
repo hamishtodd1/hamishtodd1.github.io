@@ -1,6 +1,17 @@
 /*
     Business partner idea: Sam Partridge
 
+    Control which ones are visibl, which ones are fodder for snapping
+        Could have it be that only the last 3 you made are visible, like a stack
+            Delete something and one of the ones last seen comes back
+            To bring back one of the old ones, "make" it with your hands and it'll snap to BEING that one
+                And maybe its affecters appear too?
+                Or you can press a button to show everything?
+                    Or a button to show "the next layer", eg things that affect what you can currently see?
+            But yeah basically when it's out of sight it could be gone for good
+        Spreadsheet would work but it's the nuclear option. 7 year old, very unlikely
+    Give some markup influence from dqTo
+
     A relatively different approach is: one hand grabs a dq, other hand modifies
         Grab sclptable and other hand adds stuff to it
         Grab dq and you're holding the markupPos; other hand modifies what it does
@@ -13,18 +24,16 @@
     No it's not that bad. There's what snaps you offer, and there's what you can put in the spreadsheet
 
     TODO for FoC demo:
-        Just tried lockedGrade, see what that's like
         markupPosAttractor
-        Round screws to the nearest rotation or translation
-        Some bug where loooooads of stuff just gets made. It happened after making a few models
         Just an eye that rotates in place
             Join eye position with initial eyeFocusPoint (at infinity), get line
             Join eye position with focusPoint, get line
             Do dqTo
-        // Make a head with a rotating eye
-        //     Make an eye somewhere in space, and a head somwhere else. headDq, eyeDq, unmovedEyeToUnmovedEyeSocketDq
-        //     Make a line from where the eye socket
-        //     eyeDq = headDq * headToEyeSocketDq * ()
+        Some bug where loooooads of stuff just gets made. It happened after making a few models
+        Make a head with a rotating eye
+            Make an eye somewhere in space, and a head somwhere else. headDq, eyeDq, unmovedEyeToUnmovedEyeSocketDq
+            Make a line from where the eye socket
+            eyeDq = headDq * headToEyeSocketDq * ()
         // Make the silly old Ram
         //     Trigger button controls boolean, for mouth
         //     Hold it by the head

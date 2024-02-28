@@ -231,8 +231,6 @@ function initControl() {
             if( paintees[focusHand].sclptable === null)
                 paintees[focusHand].sclptable = new Sclptable(paintees[focusHand])
         }
-
-        log(paintees[focusHand])
     }
 
     onPaintButtonUp = (focusHand) => {
