@@ -52,19 +52,18 @@ function initControl() {
     const paintees = [null, null]
     const highlightees = [null, null]
 
-    const evenGrabbees = [null, null]
     const handsHoldingOdd = [false, false]
     let oddGrabbee = null
-
     const rightFl = new Fl()
+
+    const evenGrabbees = [null, null]
     const rotationPart = new DqViz(0xFF0000, true, true)
     const translationPart = new DqViz(0xFF0000, true, true)
     translationPart.scaleAxisRadius(.95)
     rotationPart.scaleAxisRadius(.95)
     rotationPart.visible = false
     translationPart.visible = false
-
-    // document.addEventListener(`mouseRewind`, () => { log("yo") })
+    let rotationFirst = true
 
     let showMarkupVizes = true
     let oldDqVizes = [new DqViz( 0xFF0000, true, true ), new DqViz( 0xFF0000, true, true )]
@@ -83,6 +82,7 @@ function initControl() {
     let highlighteeIsAffectorCol = new THREE.Color(0x00FFFF)
 
     let snapMode = false
+    let numGens = 0
     {
         var numPotentialSnaps = -1
         var potentialSnapDqVizes = []
@@ -107,13 +107,15 @@ function initControl() {
 
             let dqv1 = snappables.find(sn => sn.constructor === DqViz && sn !== toBeSnapped)
             let dqv2 = snappables.find(sn => { return sn.constructor === DqViz && sn !== dqv1 && sn !== toBeSnapped})
-            if (dqv1 !== undefined && dqv2 !== undefined)
-                debugger
-        
+            
             snapMode = true
 
             let potentialSnapsVizes = toBeSnapped.constructor === DqViz ? potentialSnapDqVizes : potentialSnapFlVizes
+            // if (dqv1 !== undefined && dqv2 !== undefined)
+            //     debugger
             numPotentialSnaps = generatePotentialSnaps(potentialSnapsVizes, toBeSnapped)
+            logPotentialSnaps(potentialSnapsVizes, numPotentialSnaps)
+            ++numGens
         }
     }
 
@@ -241,11 +243,15 @@ function initControl() {
         }
     }
 
+    let rotationAroundStartPoint = new Dq()
     movingPaintingHighlightingHandLabels = () => {
 
         if (paintees[0] === null && paintees[1] === null)
             getPalletteInput()
 
+        /////////
+        // ODD //
+        /////////
         if (oddGrabbee !== null) {
 
             //the right hand is the left hand preceded (that is, algebraically followed...) by a reflection in e1
@@ -266,16 +272,13 @@ function initControl() {
             oddGrabbee.regularizeMarkupPos()
 
             if(snapMode) {
-                let bestSnapIndex = getBestAcceptableSnap( potentialSnapFlVizes, oddGrabbee, numPotentialSnaps )
-                potentialSnapFlVizes.forEach((psfv,i) => {
-                    psfv.setTransparency(i === bestSnapIndex ? .5+.5*sq(Math.sin(frameCount * .05)) : translucentOpacity)
-                })
+                // handleSnaps(potentialSnapFlVizes, oddGrabbee, numPotentialSnaps)
             }
         }
 
-        /////////////////////
-        // MOVING GRABBEES //
-        /////////////////////
+        //////////
+        // EVEN //
+        //////////
         rotationPart.visible = false
         translationPart.visible = false
         // if(frameCount === 1)
@@ -284,50 +287,59 @@ function initControl() {
 
             if ( evenGrabbees[hand] !== null)
             {
-                //TODO if you're using both hands at once
-                rotationPart.visible = true
-                translationPart.visible = true
-                highlightees[hand] = evenGrabbees[hand]
+                //TODO need more stuff if you're using both hands at once
+
+                highlightees[hand] = null
 
                 // smootheningRecords[hand].add(hands[hand].dq, dq0).normalize()
 
+                let hViz = evenGrabbees[hand]
+                
                 hands[hand].dq.mulReverse(handDqOnGrabs[hand], movementSinceGrabViz[hand].dq)
+                movementSinceGrabViz[hand].dq.mul(snappableDqOnGrabs[hand], hViz.dq)
 
-                //test case where you see the nastiness. Just have evenGrabbees[0] = new DqViz() above
-                {
-                    // movementSinceGrabViz[hand].dq.set(   -0.7683607935905457,  -0.4085609018802643,  0.030873481184244156,  0.42651650309562683,  -0.4561571776866913,  -0.2540922164916992,  -0.370107501745224,  0.0666247233748436)
-                    // evenGrabbees[hand].markupPos.set(0, 0, 0, 0, -0.28697729110717773, 0.8521061539649963, -0.2557181417942047, 1.)
-                }
-                
                 //could have the markupPos's move if you're not at a pure rotn or trans, so tip always at hand
-                {
-                    rotationPart.dq.copy(movementSinceGrabViz[hand].dq)
-                    translationPart.dq.copy(oneDq)
-                    let numIterations = 5//1 + Math.floor(frameCount / 100) % 10
-                    for(let i = 0; i < numIterations; ++i) {
-                        rotationPart.dq.invariantDecomposition(dq0, dq1)
-                        rotationPart.dq.copy(dq0)
+                hViz.dq.invariantDecomposition(rotationPart.dq, translationPart.dq)
+                //are there circumstances under which it should decompose into a shorter rotation and a nether translation
 
-                        dq2.copy(translationPart.dq)
-                        dq1.mul(dq2, translationPart.dq)
-                    }
-                }
+                let translationThreshold = .09
+                let rotationThreshold = .09
+                let translationMeasure = rotationPart.markupPos.distanceToPt(rotationPart.getArrowTip(fl0))
+                let rotationMeasure = translationPart.markupPos.distanceToPt(translationPart.getArrowTip(fl0))
 
-                let translationThreshold = .97
-                let rotationThreshold = .025
-                if (translationPart.dq.l1NormTo(oneDq) < rotationThreshold)
-                    movementSinceGrabViz[hand].dq.copy(rotationPart.dq)
-                if (Math.abs(rotationPart.dq[0]) >  translationThreshold) {
-                    let start = movementSinceGrabViz[hand].markupPos
-                    let end = movementSinceGrabViz[hand].dq.sandwich(start, fl0)
-                    end.mulReverse(start, movementSinceGrabViz[hand].dq ).sqrtSelf()
-                }
-
-                rotationPart.markupPos.copy(evenGrabbees[hand].markupPos)
-                rotationPart.getArrowTip(translationPart.markupPos)
-
-                movementSinceGrabViz[hand].dq.mul(snappableDqOnGrabs[hand], evenGrabbees[hand].dq)
+                // let snapToRotation = translationPart.dq.l1NormTo(oneDq) < rotationThreshold
+                // let snapToTranslation = Math.abs(rotationPart.dq[0]) > translationThreshold
+                let snapToRotation = rotationMeasure < rotationThreshold
+                let snapToTranslation = translationMeasure < translationThreshold
                 
+                rotationPart.visible = true
+                translationPart.visible = true
+                if (snapToRotation) {
+                    hViz.dq.copy(rotationPart.dq)
+
+                    //TODO would be nice to try this thing too
+                    // rotationPart.dq.projectOn(hViz.markupPos, rotationAroundStartPoint)
+                    // hViz.dq.copy(rotationAroundStartPoint)
+
+                    rotationPart.visible = false
+                    rotationFirst = true
+                }
+                else if (snapToTranslation) {
+                    hViz.dq.copy(translationPart.dq)
+
+                    translationPart.visible = false
+                    rotationFirst = false
+                }
+
+                if (rotationFirst) {
+                    rotationPart.markupPos.copy(evenGrabbees[hand].markupPos)
+                    rotationPart.getArrowTip(translationPart.markupPos)
+                }
+                else {
+                    translationPart.markupPos.copy(evenGrabbees[hand].markupPos)
+                    translationPart.getArrowTip(rotationPart.markupPos)
+                }
+
                 if (showMarkupVizes) {
                     movementSinceGrabViz[hand].visible = !oldDqVizes[hand].dq.equals(oneDq)
                     oldDqVizes[hand].visible = movementSinceGrabViz[hand].visible
@@ -339,10 +351,7 @@ function initControl() {
                 })
 
                 if(snapMode) {
-                    let bestSnapIndex = getBestAcceptableSnap(potentialSnapDqVizes, evenGrabbees[hand], numPotentialSnaps)
-                    potentialSnapDqVizes.forEach((psdv, i) => {
-                        psdv.setTransparency(i === bestSnapIndex ? sq(Math.sin(frameCount * .03)) : translucentOpacity)
-                    })
+                    // handleSnaps(potentialSnapDqVizes, evenGrabbees[hand], numPotentialSnaps)
                 }
             }
         }
@@ -451,8 +460,8 @@ function initControl() {
         if (evenGrabbees[focusHand]) {
 
             if(snapMode) {
-                let bestSnapIndex = getBestAcceptableSnap(potentialSnapDqVizes, evenGrabbees[focusHand], numPotentialSnaps)
-                snapIfAcceptable(evenGrabbees[focusHand], potentialSnapDqVizes, bestSnapIndex)
+                // let bestSnapIndex = getBestAcceptableSnap(potentialSnapDqVizes, evenGrabbees[focusHand], numPotentialSnaps)
+                // snapIfAcceptable(evenGrabbees[focusHand], potentialSnapDqVizes, bestSnapIndex)
             }
 
             if (evenGrabbees[focusHand].sclptable) {
@@ -476,8 +485,8 @@ function initControl() {
             if (!handsHoldingOdd[0] && !handsHoldingOdd[1]) {
 
                 if (snapMode) {
-                    let bestSnapIndex = getBestAcceptableSnap(potentialSnapFlVizes, oddGrabbee, numPotentialSnaps)
-                    snapIfAcceptable(oddGrabbee, potentialSnapFlVizes, bestSnapIndex)
+                    // let bestSnapIndex = getBestAcceptableSnap(potentialSnapFlVizes, oddGrabbee, numPotentialSnaps)
+                    // snapIfAcceptable(oddGrabbee, potentialSnapFlVizes, bestSnapIndex)
                 }
 
                 if (oddGrabbee.affecters[0] === null) {

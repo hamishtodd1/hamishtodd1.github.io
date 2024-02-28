@@ -67,6 +67,8 @@ function initDqVizes(transparentOpacity) {
 
             super()
             scene.add(this)
+
+            this.snapRating = -1
             
             this.boundingBox = new THREE.Box3()
             this.boxHelper = new THREE.BoxHelper()

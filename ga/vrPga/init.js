@@ -1,4 +1,6 @@
 /*
+    Business partner idea: Sam Partridge
+
     A relatively different approach is: one hand grabs a dq, other hand modifies
         Grab sclptable and other hand adds stuff to it
         Grab dq and you're holding the markupPos; other hand modifies what it does
@@ -44,6 +46,7 @@
             One likes dynamism or something, just "seeing more stuff happen"
         Undo
     Beyond:
+        Think about what hand gestures bring about loop translations
         ACTUALLY, there is such a thing as a "nega screw". It has no logarithm or sqrt but it's a thing
         How come hand can't do anything more than 180deg arrow?
         Are you using the measurer for anything? If so, some numbers...
@@ -167,9 +170,9 @@ async function init() {
             movingPaintingHighlightingHandLabels()
             updatePaletteAnimation()
             
-            snappables.forEach(s => {
-                updateFromAffecters(s)
-            })
+            // snappables.forEach(s => {
+            //     updateFromAffecters(s)
+            // })
 
             updateRecording()
             //then broadcast

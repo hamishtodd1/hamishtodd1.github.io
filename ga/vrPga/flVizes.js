@@ -75,6 +75,8 @@ function initFlVizes(transparentOpacity) {
             super()
             scene.add(this)
 
+            this.snapRating = -1
+
             this.lockedGrade = -1
 
             let pointMat = new THREE.MeshPhongMaterial({
@@ -310,8 +312,8 @@ function initFlVizes(transparentOpacity) {
 
 
     debugFls = [
-        new FlViz(true), new FlViz(true),
-        new FlViz(true), new FlViz(true)
+        new FlViz(0xFFFF00, true, false), new FlViz(0xFFFF00, true, false),
+        new FlViz(0xFFFF00, true, false), new FlViz(0xFFFF00, true, false)
     ]
     debugFls.forEach(dfl => {
         dfl.fl.zero()

@@ -98,6 +98,8 @@ function initPotentialSpectatorReception() {
         spectatorCamera.updateMatrixWorld()
         spectatorCamera.updateProjectionMatrix() //and need to do frustum things too
 
+        return spectatorCamera
+
         addStage(spectatorCamera, weAreSpectator)
 
         if (!weAreSpectator) {

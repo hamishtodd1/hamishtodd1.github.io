@@ -30,47 +30,54 @@ function giveSnappableProperties(s) {
     snappables.push(s)
 }
 
-function updateFromAffecters(a) {
-    if (a.affecters[0] !== null) {
-        operate(a.affecters, a.mv)
-        a.mv.normalize()
+function updateFromAffecters(output) {
+    if (output.affecters[0] !== null) {
+        operate(output.affecters, output.mv)
+        output.mv.normalize()
         socket.emit("snappable", {
-            dqCoefficientsArray: a.mv,
-            i: snappables.indexOf(a)
+            dqCoefficientsArray: output.mv,
+            i: snappables.indexOf(output)
         })
     }
 
-    let affecter0 = a.affecters[0]
-    let affecter1 = a.affecters[1]
-    let op = operators[a.affecters[2]]
+    let mv0 = output.affecters[0].mv
+    let mv1 = output.affecters[1].mv
+    let op = operators[output.affecters[2]]
+
+    if(op === `dqTo` ) {
+        //arrow should go from the markupPos of the one it's coming from ofc
+        if (mv0.hasGrade(2) && mv1.hasGrade(2) && Math.abs(mv0.meet(mv1, dq0)[7]) < eps) {
+            //arrow's plane should be 
+        }
+        //yes this is one thing but a more important thing is choosing which things are visible to you
+        //also reducing by half the number of things
+    }
+
+    if(op === `joinPt` ) {
+
+        let isTwoPoints = output.mv.hasGrade(2) &&
+                          mv0.hasGrade(3) &&
+                          mv1.hasGrade(3)
+
+        if (isTwoPoints) {
+            output.mv[0] = 0.
+            output.mv[7] = 0.
     
-    if(op === `joinPt` && 
-        a.mv.hasGrade(2) && 
-        affecter0.mv.hasGrade(3) && 
-        affecter1.mv.hasGrade(3)) {
-
-        a.mv[0] = 0.
-        a.mv[7] = 0.
-
-        if (affecter0.fl === undefined || affecter1.fl === undefined) {
-            debugger
+            if (mv0[7] !== 0. && mv1[7] !== 0.) {
+                fl0.copy(mv0).normalizePoint()
+                fl1.copy(mv1).normalizePoint()
+                let midPoint = fl0.add(fl1, fl2).multiplyScalar(.5, fl2)
+                midPoint.add(randomPt, output.markupPos)
+                clampPointDistanceFromThing( output.markupPos, camera.mvs.pos, 0., .5 )
+            }
+            else if (mv0[7] !== 0. || mv1[7] !== 0.) {
+                let reachablePt = fl0.copy(mv0[7] !== 0. ? mv0 : mv1).normalizePoint()
+                reachablePt.add(randomPt, output.markupPos)
+            }
+            
+            //no idea what this will do for both ideal
+            output.regularizeMarkupPos()
         }
-
-        if (affecter0.fl[7] !== 0. && affecter1.fl[7] !== 0.) {
-            fl0.copy(affecter0.mv).normalizePoint()
-            fl1.copy(affecter1.mv).normalizePoint()
-            let midPoint = fl0.add(fl1, fl2).multiplyScalar(.5, fl2)
-            midPoint.add(randomPt, a.markupPos)
-            clampPointDistanceFromThing( a.markupPos, camera.mvs.pos, 0., .5 )
-        }
-        else if (affecter0.fl[7] !== 0. || affecter1.fl[7] !== 0.) {
-            let reachablePt = fl0.copy(affecter0.fl[7] !== 0. ? affecter0.fl : affecter1.fl).normalizePoint()
-            reachablePt.add(randomPt, a.markupPos)
-        }
-
-        //no idea what this will do for both ideal
-        a.regularizeMarkupPos()
-
     }
 }
 

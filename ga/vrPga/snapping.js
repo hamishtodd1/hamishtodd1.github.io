@@ -1,4 +1,9 @@
+/*
+    So they come in pairs: A*B and B*A. Alright, but you only need one
+        So, maybe only show the one that's closer
 
+    When there's a dqTo
+ */
 
 function initSnapping() {
 
@@ -42,6 +47,18 @@ function initSnapping() {
         return null
     }
 
+    logPotentialSnap = (ps) => {
+        log( snappables.indexOf(ps.affecters[0]), ps.affecters[0] )
+        log( snappables.indexOf(ps.affecters[1]), ps.affecters[1] )
+        log( operators[ps.affecters[2]] )
+    }
+
+    logPotentialSnaps = (potentialSnapsVizes, num) => {
+        log("\n\nBUNCH OF SNAPS\n\n")
+        for (let i = 0; i < num; ++i)
+            logPotentialSnap( potentialSnapsVizes[i] )
+    }
+
     generatePotentialSnaps = (potentialSnapsVizes, toBeSnapped) => {
 
         let lowestUnused = 0
@@ -55,10 +72,10 @@ function initSnapping() {
             psv.affecters[1] = snappables[j]
             psv.affecters[2] = k
             updateFromAffecters(psv)
-
-            psv.markupPos.addNoise(4,7, .06)
-            psv.regularizeMarkupPos()
             psv.visible = true
+
+            // psv.markupPos.addNoise(4,7, .06)
+            // psv.regularizeMarkupPos()
 
             ++lowestUnused
         }
@@ -69,8 +86,9 @@ function initSnapping() {
 
             let ineligible0 =
                 snappables[i] === toBeSnapped ||
-                mv0.isZero()
-            aDependsOnB(snappables[i], toBeSnapped) ||
+                mv0.isZero() ||
+                snappables[i].visible === false ||
+                aDependsOnB(snappables[i], toBeSnapped) ||
                 (mv0.constructor === Dq && mv0.isScalar())
 
             if (ineligible0)
@@ -89,12 +107,14 @@ function initSnapping() {
                 }
                 else for (let j = /*i+1*/0, jl = snappables.length; j < jl; j++) {
 
+                    let outputType = getType(operators[k], mv0.constructor, mv1.constructor)
+                    if (outputType !== toBeSnapped.mv.constructor)
+                        continue
+
                     let mv1 = snappables[j].mv
 
-                    let outputType = getType(operators[k], mv0.constructor, mv1.constructor)
-
                     let ineligible1 =
-                        outputType !== toBeSnapped.mv.constructor ||
+                        snappables[j].visible === false ||
                         mv1.isZero() ||
                         snappables[j] === toBeSnapped ||
                         aDependsOnB(snappables[j], toBeSnapped) ||  //maybe one day
@@ -112,7 +132,7 @@ function initSnapping() {
         return lowestUnused
     }
 
-    function rate(opName, potentialSnap, toBeSnapped) {
+    rate = (opName, potentialSnap, toBeSnapped) => {
 
         if (potentialSnap.isZero())
             return false
@@ -168,7 +188,45 @@ function initSnapping() {
         return l1Norm
     }
 
-    getBestAcceptableSnap = ( potentialSnaps, toBeSnapped, numPotentialSnaps ) => {
+
+    let variantsDq = [new Dq(), new Dq(), new Dq(), new Dq()]
+    let variantsFl = [new Fl(), new Fl(), new Fl(), new Fl()]
+    handleSnaps = (potentialSnaps, toBeSnapped, numPotentialSnaps) => {
+        for (let i = 0; i < numPotentialSnaps; ++i)
+            potentialSnaps[i].snapRating = rate(operators[ps.affecters[2]], ps.mv, toBeSnapped)
+
+        for (let i = 0; i < numPotentialSnaps; ++i) {
+
+            let ps = potentialSnaps[i]
+        
+            ps.setTransparency(i === bestSnapIndex ? .5 + .5 * sq(Math.sin(frameCount * .08)) : translucentOpacity)
+
+            //and, look for ones that are similar to it and only show better rated version
+            let variants = ps.mv.constructor === Dq ? variantsDq : variantsFl
+            variants[0].copy(ps.mv)
+            ps.mv.multiplyScalar(-1., variants[0])
+            ps.mv.getReverse(variants[1])
+            negated.getReverse(variants[2])
+            //I mean really if the bivector part is the same then they're similar
+
+            for(let j = 0; j < numPotentialSnaps; ++j) {
+                
+                if (i === j)
+                    return
+
+                let ps2 = potentialSnaps[j]
+
+                variants.forEach(variant => {
+                    if (ps2.mv.l1NormTo(variant) < eps) {
+                        let lowerRated = ps2.snapRating < ps.snapRating ? ps2 : ps
+                        lowerRated.visible = false
+                    }
+                })
+            }
+        }
+    }
+
+    getBestAcceptableSnap = ( potentialSnaps, numPotentialSnaps ) => {
 
         let lowestRating = Infinity
         let lowestRatingIndex = -1
@@ -176,10 +234,8 @@ function initSnapping() {
         for (let i = 0; i < numPotentialSnaps; ++i) {
             let ps = potentialSnaps[i]
     
-            let rating = rate(operators[ps.affecters[2]], ps.mv, toBeSnapped)
-    
-            if (rating < lowestRating) {
-                lowestRating = rating
+            if (ps.snapRating < lowestRating) {
+                lowestRating = ps.snapRating
                 lowestRatingIndex = i
             }
         }
