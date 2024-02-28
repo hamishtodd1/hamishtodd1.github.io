@@ -42,12 +42,33 @@ function updateFromAffecters(output) {
 
     let mv0 = output.affecters[0].mv
     let mv1 = output.affecters[1].mv
+    let res = output.mv
     let op = operators[output.affecters[2]]
 
     if(op === `dqTo` ) {
+
         //arrow should go from the markupPos of the one it's coming from ofc
-        if (mv0.hasGrade(2) && mv1.hasGrade(2) && Math.abs(mv0.meet(mv1, dq0)[7]) < eps) {
-            //arrow's plane should be 
+
+        // res.sqrt(dq0)
+
+        // UNTESTED
+
+        if(mv0.hasGrade(3) || mv1.hasGrade(3)) {
+            let firstHasIt = mv0.hasGrade(3)
+            let p1 = (firstHasIt ? mv0 : mv1).selectGrade(3, fl0).normalizePoint()
+            let p2 = p1.projectOn(firstHasIt ? mv1 : mv0, fl0).normalizePoint()
+            let midPoint = p1.add(p2, fl3)
+            res.sqrt(dq0).getReverse(dq1).sandwich( midPoint, output.markupPos )
+        }
+
+        if (mv0.hasGrade(2) && mv1.hasGrade(2) ) {
+            
+            //will be their common plane if coplanar
+            let planeParallelToLine1ContainingLine0 = mv0.joinPt( mv1.meet(e0, fl0), fl1).zeroGrade(3)
+            let startyPoint = planeParallelToLine1ContainingLine0.meet(res.selectGrade(2,dq0), fl3)
+            let dirAlongLine0 = mv0.meet(e0, fl4)
+            startyPoint.goInDirectionByDistance( dirAlongLine0, .02, output.markupPos ) //point on line0
+
         }
         //yes this is one thing but a more important thing is choosing which things are visible to you
         //also reducing by half the number of things
