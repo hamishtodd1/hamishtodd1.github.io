@@ -1,29 +1,34 @@
 function initBasises() {
 
     let projectorBiv = new Bivec()
-    let scalorBiv = new Bivec()
+    let sb0 = new Bivec()
+    let sb1 = new Bivec()
     let equidistantUnavec = new Unavec()
     let nullUnavec = new Unavec()
     let bv = new Unavec()
     let projectivePointFl = new Fl()
-    let originIndexSigned = _epm.cast(scalorBiv).lowestNonzeroSigned()
+    let originIndexSigned = _epm.cast(sb0).lowestNonzeroSigned()
+
+    let basisFls = [e021, e013, e032, e123]
 
     class Basis {
 
+        //you get ep, em, e0, automatically
         constructor(basis) {
+            
 
-            this.idealIndicesA = Array(basis.length)
-            this.idealIndicesB = Array(basis.length)
+            // this.idealIndicesA = Array(basis.length)
+            // this.idealIndicesB = Array(basis.length)
 
-            for(let i = 0; i < basis.length; ++i) {
+            // for(let i = 0; i < basis.length; ++i) {
 
-                basis[i].meet(_e0, tw0).cast(scalorBiv)
+            //     basis[i].meet(_e0, tw0).cast(sb0)
 
-                //A and B are either plus or minus parts of our meets with e0
-                this.idealIndicesA[i] = scalorBiv.lowestNonzeroSigned()
-                scalorBiv[ Math.abs( this.idealIndicesA[i] ) ] = 0.
-                this.idealIndicesB[i] = scalorBiv.lowestNonzeroSigned()
-            }
+            //     //A and B are either plus or minus parts of our meets with e0
+            //     this.idealIndicesA[i] = sb0.lowestNonzeroSigned()
+            //     sb0[ Math.abs( this.idealIndicesA[i] ) ] = 0.
+            //     this.idealIndicesB[i] = sb0.lowestNonzeroSigned()
+            // }
 
             let origin = new Tw()
             origin.copy( oneTw )
@@ -39,27 +44,77 @@ function initBasises() {
                 basis.length === 4 ? new Hexavec() :
                 console.error("weird basis length")
             origin.meet(_epm, tw0).cast(this.pss)
+
+            if(basis.length === 3)
+            {
+                function charTo1Vec(char) {
+                    return char === `0` ? _e0 : basis[parseInt(char) - 1]
+                }
+
+                let basisPluckers = Array(6)
+                for (let i = 0; i < 6; ++i) { //no scalar or pss
+                    basisPluckers[i] = new Bivec()
+                    let a = charTo1Vec(Dq.basisNames[i + 1][0])
+                    let b = charTo1Vec(Dq.basisNames[i + 1][1])
+                    a.meet(b, tw0).cast(basisPluckers[i])
+                }
+
+                let basisFlatPoints = Array(4)
+                let pssInverse = this.pss.cast(tw0).negate(tw0)
+                for (let i = 0; i < 4; ++i) { //no scalar or pss
+                    basisFlatPoints[i] = new Bivec()
+                    const basisName = Fl.basisNames[i + 4]
+                    let a = charTo1Vec( basisName[0] )
+                    let b = charTo1Vec( basisName[1] )
+                    let c = charTo1Vec( basisName[2] )
+                    a.meet(b, tw3).meet(c, tw1)
+                    tw1.inner(pssInverse,tw2).cast(basisFlatPoints[i])
+                    if( basisName !== `123`)
+                        basisFlatPoints[i].multiplyScalar(.5, basisFlatPoints[i])
+                }
+
+                this.dqToBiv = ( dqEga, targetBiv ) => {
+                    
+                    targetBiv.zero()
+                    for (let i = 0; i < 6; ++i)
+                        targetBiv.addScaled(basisPluckers[i], dqEga[i + 1], targetBiv)
+                }
+                this.scalorBivToFlatPoint = (scalorBiv, targetFl) => {
+                    
+                    targetFl.zero()
+                    for(let i = 0; i < 4; ++i ) {
+
+                        let factor = 0.
+                        for (let j = 0, jl = scalorBiv.length; j < jl; ++j)
+                            factor += basisFlatPoints[i][j] * scalorBiv[j]
+                            
+                        targetFl.addScaled( basisFls[i], factor, targetFl )
+                    }
+                    return targetFl
+                }
+            }
         }
 
         scalorBivToGibbsVec(scalorBiv, gibbsVec) {
-            this.scalorBivToFl(scalorBiv, projectivePointFl)
+            this.scalorBivToFlatPoint(scalorBiv, projectivePointFl)
             return projectivePointFl.pointToGibbsVec(gibbsVec)
         }
 
-        scalorBivToFl(scalorBiv, targetFl) {
+        // scalorBivToFl(scalorBiv, targetFl) {
 
-            targetFl.zero()
+        //     targetFl.zero()
             
-            targetFl[7] = scalorBiv.getAtSignedIndex( originIndexSigned )
+        //     targetFl[7] = scalorBiv.getAtSignedIndex( originIndexSigned )
             
-            for (let i = 0, il = this.idealIndicesA.length; i < il; ++i ) {
-                targetFl[6-i] = .5 * (
-                    scalorBiv.getAtSignedIndex( this.idealIndicesA[i] ) +
-                    scalorBiv.getAtSignedIndex( this.idealIndicesB[i] ) )
-            }
+        //     for (let i = 0, il = this.idealIndicesA.length; i < il; ++i ) {
+        //         targetFl[6-i] = .5 * (
+        //             scalorBiv.getAtSignedIndex( this.idealIndicesA[i] ) +
+        //             scalorBiv.getAtSignedIndex( this.idealIndicesB[i] ) )
+        //     }
+        //     //can't do signed index in glsl, so next thing to do is probably remove that shite.
 
-            return targetFl
-        }
+        //     return targetFl
+        // }
 
         ppToGibbsVecs( pp, target1, target2 ) {
             //geometric interpretation: we go from a n-reflection to scalor that preserves the n-reflection axis
@@ -82,16 +137,16 @@ function initBasises() {
                 // projectorBiv lies on e0, eg projectorBiv ^ e0 = 0
 
                 target2.copy(outOfSightVec3)
-                scalorBiv.copy(projectorBiv)    
+                sb0.copy(projectorBiv)    
             }
             else {
                 projectorBiv.inner( equidistantUnavec, bv )
-                equidistantUnavec.add( bv, nullUnavec ).meetE0(scalorBiv)
-                this.scalorBivToGibbsVec(scalorBiv, target2 )
-                equidistantUnavec.sub( bv, nullUnavec ).meetE0(scalorBiv)
+                equidistantUnavec.add( bv, nullUnavec ).meetE0(sb0)
+                this.scalorBivToGibbsVec(sb0, target2 )
+                equidistantUnavec.sub( bv, nullUnavec ).meetE0(sb0)
             }
 
-            this.scalorBivToGibbsVec(scalorBiv, target1 )
+            this.scalorBivToGibbsVec(sb0, target1 )
 
             // if (Math.abs(1. - projectorBiv.innerSelfScalar()) > .1) {
             //     console.error("projectorBiv norm is: " + projectorBiv.innerSelfScalar())
@@ -146,11 +201,11 @@ function initBasises() {
             else {
                 projectorBiv.inner( equidistantUnavec, bv )
                 equidistantUnavec.add( bv, nullUnavec ).meetE0(scalorBiv)
-                this.scalorBivToGibbsVec(scalorBiv, target2 )
+                scalorBivToGibbsVec(scalorBiv, target2 )
                 equidistantUnavec.sub( bv, nullUnavec ).meetE0(scalorBiv)
             }
 
-            this.scalorBivToGibbsVec(scalorBiv, target1 )
+            scalorBivToGibbsVec(scalorBiv, target1 )
         }
 
         //from the nullUnavec, you should also be able to read off the direction the thing is facing in
@@ -165,38 +220,6 @@ function initBasises() {
     basis123t   = new Basis([_e1, _e2, _e3, _et]) //3+1 CSTA / PGA
     
 
-    basis12t.dqToBiv = (rDq, r32) => {
-        //e1 is e1, e0 is e0
-        //e2 in 32 is e3 in ega
-        //et in 32 is e2 in ega
-
-        tw0.zero()
-        tw0.addScaled(_e10, -rDq[1], tw0)
-        tw0.addScaled(_e20, -rDq[3], tw0)
-        tw0.addScaled(_et0, -rDq[2], tw0)
-        tw0.addScaled(_e12, -rDq[5], tw0) //-rDq[5] = e13
-        tw0.addScaled(_e1t,  rDq[4], tw0) // rDq[5] = e12
-        tw0.addScaled(_e2t, -rDq[6], tw0) // rDq[6] = e23
-
-        tw0.cast(r32)
-
-        return r32
-    }
-
-    basis123.dqToBiv = (rDq, target) => {
-
-        tw0.zero()
-        tw0.addScaled(_e10, -rDq[1], tw0)
-        tw0.addScaled(_e20, -rDq[2], tw0)
-        tw0.addScaled(_e30, -rDq[3], tw0)
-        tw0.addScaled(_e12,  rDq[4], tw0)
-        tw0.addScaled(_e13, -rDq[5], tw0)
-        tw0.addScaled(_e23,  rDq[6], tw0)
-
-        tw0.cast(target)
-
-        return target
-    }
 
     basis123.pointFlToTriv = (fl, target) => {
         target.zero()

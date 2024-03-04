@@ -160,8 +160,11 @@ function init42() {
 
     _e1t = _e1.meet(_et, new Tw()) //boost preserving the origin
     _e10 = _e1.meet(_e0, new Tw()) //translation in space
+    _e01 = _e0.meet(_e1, new Tw())
     _e20 = _e2.meet(_e0, new Tw()) //translation in space
+    _e02 = _e0.meet(_e2, new Tw())
     _e30 = _e3.meet(_e0, new Tw()) //translation in space
+    _e03 = _e0.meet(_e3, new Tw())
     _e12 = _e1.meet(_e2, new Tw()) //rotation
     _e23 = _e2.meet(_e3, new Tw()) //rotation
     _e31 = _e3.meet(_e1, new Tw()) //rotation, NOTE THAT e13 is stored not e31
@@ -180,6 +183,8 @@ function init42() {
     _e023 = _e0.meet(_e23, new Tw())
     _e013 = _e0.meet(_e13, new Tw())
     _e031 = _e0.meet(_e31, new Tw())
+
+    _e0123 = _e01.meet(_e23, new Tw())
 
     oneTw = new Tw().fromFloatAndIndex(1., 0)
 

@@ -1,4 +1,6 @@
 /*
+    A more modest thing:
+
     A modest and realistic thing for Hiley is:
         You can pick up planes, spheres etc and move them around
         You have a teapot and can select the transform it is subject to
@@ -33,10 +35,10 @@ async function init() {
 
     init42()
     initPluckerVizes()
-    // initMrh()
     
     initBasises()
     initDebugDisplay()
+    initShader()
 
     window.addEventListener('resize', () => {
 

@@ -414,7 +414,7 @@ function initMultivectorWithoutDeclarations() {
 
             let thisReverse = this.getReverse(this.constructor === Dq ? newDq : newFl)
 
-            let thisThisReverse = this.mul(thisReverse, newDq) //potentially study
+            let thisThisReverse = this.mul( thisReverse, newDq ) //potentially study
             let thisThisReverseInverse = newDq;
             thisThisReverseInverse[0] = 1. / thisThisReverse[0]
             thisThisReverseInverse[7] = -thisThisReverse[7] / (thisThisReverse[0] * thisThisReverse[0])

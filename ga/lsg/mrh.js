@@ -52,7 +52,7 @@ function initMrh() {
             \n`
         },
     ]
-    let mesh = new THREE.Mesh(geo, mat)
+    let mesh = new THREE.Mesh(geo)
     mat.extraVec1.set(1., 0., 0., 0.)
     mesh.position.y = 1.6
     mesh.position.x = 1.

@@ -497,7 +497,9 @@ function initEgaWithoutDeclarations() {
 
         e123 = e1.mulDq(e23)
         e012 = e0.mulDq(e12)
+        e021 = e02.mulFl(e1)
         e023 = e0.mulDq(e23)
+        e032 = e03.mulFl(e2)
         e013 = e0.mulDq(e13)
         e031 = e0.mulDq(e31)
 

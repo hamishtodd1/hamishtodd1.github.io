@@ -27,20 +27,24 @@ function initDebugDisplay() {
     let coords = geo.attributes.position.array
 
     let rayDq = new Dq()
-    let ray123 = new Bivec()
-    let renderedSphere = _ep.addScaled( _em, -0.7, tw0 ).cast( new Unavec() ) //slightly smaller than unit sphere
+    let rayBiv = new Bivec()
+    let renderedObj = _ep.addScaled( _em, -0.7, tw0 ).cast( new Unavec() ) //slightly smaller than unit sphere
+    let basis = basis12t
     let pp = new Trivec()
+
+    // log(basis123.dqToBiv)
 
     let pretendCamPos = new Fl()
     pretendCamPos.point(1.,1.,-1.,1.)
+
 
     update22 = () => {
 
         geo.attributes.position.needsUpdate = true
         // return
 
-        let angle = frameCount * .00
-        _ep.multiplyScalar(Math.cos(angle), tw0).addScaled(_e1, Math.sin(angle), tw1).cast(renderedSphere)
+        let angle = frameCount * .01
+        // _ep.multiplyScalar(Math.cos(angle), tw0).addScaled(_e1, Math.sin(angle), tw1).cast(renderedObj)
 
         for(let i = 0; i < numPixels; ++i) {
 
@@ -50,14 +54,15 @@ function initDebugDisplay() {
 
             //debugging
             // rayDq.copy(e12)
-            // let thingy = e12.multiplyScalar(camera.position.x, dq0).addScaled(e23, -camera.position.z, dq0)
+            // let rayDependingOnCamPos = e12.multiplyScalar(camera.position.x, dq0).addScaled(e23, -camera.position.z, dq0)
             // let scale = 1. / Math.sqrt(sq(camera.position.x) + sq(camera.position.z))
-            // e31.addScaled(thingy, scale, rayDq)
+            // e31.addScaled(rayDependingOnCamPos, scale, rayDq)
             // debugPluckers[0].dq.copy(rayDq)
-
-            basis123.dqToBiv( rayDq, ray123 )
-            renderedSphere.meet( ray123, pp )
-            basis123.ppToGibbsVecs( pp, v1, v2 )
+            
+            // debugger
+            basis.dqToBiv( rayDq, rayBiv )
+            renderedObj.meet( rayBiv, pp )
+            basis.ppToGibbsVecs( pp, v1, v2 )
 
             let oneToUse = v1.distanceToSquared(camera.position) < v2.distanceToSquared(camera.position) ? v1 : v2
             pointsObj3d.worldToLocal(oneToUse).toArray( coords, i*3 )
