@@ -37,7 +37,7 @@ async function init() {
     initPluckerVizes()
     
     initBasises()
-    initDebugDisplay()
+    // initDebugDisplay()
     initShader()
 
     window.addEventListener('resize', () => {
@@ -68,7 +68,7 @@ async function init() {
 
         blankFunction()
 
-        update22()
+        // update22()
 
         obj3dsWithOnBeforeRenders.forEach( obj3d => obj3d.onBeforeRender() )
 

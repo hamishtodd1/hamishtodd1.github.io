@@ -85,6 +85,16 @@ void joinPt(in vec4 a, in vec4 b, out float[8] target) {
     target[0] = 0.;
 }
 
+void joinPt(in vec3 a, in vec3 b, out float[8] target) {
+	joinPt(vec4(a,1.), vec4(b,1.), target);
+}
+void joinPt(in vec4 a, in vec3 b, out float[8] target) {
+	joinPt(a, vec4(b,1.), target);
+}
+void joinPt(in vec3 a, in vec4 b, out float[8] target) {
+	joinPt(vec4(a,1.), b, target);
+}
+
 void multiplyScalar(in float[8] thing, in float scalar, out float[8] target) {
     for(int i = 0; i < 8; ++i)
         target[i] = thing[i] * scalar;

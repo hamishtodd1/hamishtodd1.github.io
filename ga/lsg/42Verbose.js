@@ -1,3 +1,84 @@
+let verbose42Glsl = `
+#define BIV_LEN 15
+
+void triInnerPent( in float[20] tri, in float[6] pent, out float[BIV_LEN] target ) {
+    target[ 0] =  tri[16] * pent[ 0] + tri[17] * pent[ 1] - tri[18] * pent[ 2] - tri[19] * pent[ 3];
+    target[ 1] =  tri[15] * pent[ 2] - tri[13] * pent[ 0] - tri[14] * pent[ 1] - tri[19] * pent[ 4];
+    target[ 2] =  tri[11] * pent[ 0] + tri[12] * pent[ 1] + tri[15] * pent[ 3] + tri[18] * pent[ 4];
+    target[ 3] =  tri[10] * pent[ 0] + tri[12] * pent[ 2] + tri[14] * pent[ 3] + tri[17] * pent[ 4];
+    target[ 4] =  tri[10] * pent[ 1] - tri[11] * pent[ 2] - tri[13] * pent[ 3] - tri[16] * pent[ 4];
+    target[ 5] =  tri[ 7] * pent[ 0] + tri[ 8] * pent[ 1] - tri[19] * pent[ 5] - tri[ 9] * pent[ 2];
+    target[ 6] =  tri[18] * pent[ 5] - tri[ 5] * pent[ 0] - tri[ 6] * pent[ 1] - tri[ 9] * pent[ 3];
+    target[ 7] =  tri[17] * pent[ 5] - tri[ 4] * pent[ 0] - tri[ 6] * pent[ 2] - tri[ 8] * pent[ 3];
+    target[ 8] =  tri[ 5] * pent[ 2] + tri[ 7] * pent[ 3] - tri[16] * pent[ 5] - tri[ 4] * pent[ 1];
+    target[ 9] =  tri[ 2] * pent[ 0] + tri[ 3] * pent[ 1] - tri[15] * pent[ 5] - tri[ 9] * pent[ 4];
+    target[10] =  tri[ 1] * pent[ 0] + tri[ 3] * pent[ 2] - tri[14] * pent[ 5] - tri[ 8] * pent[ 4];
+    target[11] =  tri[13] * pent[ 5] + tri[ 1] * pent[ 1] + tri[ 7] * pent[ 4] - tri[ 2] * pent[ 2];
+    target[12] =  tri[12] * pent[ 5] + tri[ 3] * pent[ 3] + tri[ 6] * pent[ 4] - tri[ 0] * pent[ 0];
+    target[13] = -tri[ 0] * pent[ 1] - tri[11] * pent[ 5] - tri[ 2] * pent[ 3] - tri[ 5] * pent[ 4];
+    target[14] = -tri[ 0] * pent[ 2] - tri[10] * pent[ 5] - tri[ 1] * pent[ 3] - tri[ 4] * pent[ 4];
+}
+
+void unaMeetBivec(in float[6] una, in float[BIV_LEN] biv, out float[20] target) {
+    target[ 0] = una[ 0] * biv[ 5] + una[ 2] * biv[ 0] - una[ 1] * biv[ 1];
+    target[ 1] = una[ 0] * biv[ 6] + una[ 3] * biv[ 0] - una[ 1] * biv[ 2];
+    target[ 2] = una[ 0] * biv[ 7] + una[ 4] * biv[ 0] - una[ 1] * biv[ 3];
+    target[ 3] = una[ 0] * biv[ 8] + una[ 5] * biv[ 0] - una[ 1] * biv[ 4];
+    target[ 4] = una[ 0] * biv[ 9] + una[ 3] * biv[ 1] - una[ 2] * biv[ 2];
+    target[ 5] = una[ 0] * biv[10] + una[ 4] * biv[ 1] - una[ 2] * biv[ 3];
+    target[ 6] = una[ 0] * biv[11] + una[ 5] * biv[ 1] - una[ 2] * biv[ 4];
+    target[ 7] = una[ 0] * biv[12] + una[ 4] * biv[ 2] - una[ 3] * biv[ 3];
+    target[ 8] = una[ 0] * biv[13] + una[ 5] * biv[ 2] - una[ 3] * biv[ 4];
+    target[ 9] = una[ 0] * biv[14] + una[ 5] * biv[ 3] - una[ 4] * biv[ 4];
+    target[10] = una[ 1] * biv[ 9] + una[ 3] * biv[ 5] - una[ 2] * biv[ 6];
+    target[11] = una[ 1] * biv[10] + una[ 4] * biv[ 5] - una[ 2] * biv[ 7];
+    target[12] = una[ 1] * biv[11] + una[ 5] * biv[ 5] - una[ 2] * biv[ 8];
+    target[13] = una[ 1] * biv[12] + una[ 4] * biv[ 6] - una[ 3] * biv[ 7];
+    target[14] = una[ 1] * biv[13] + una[ 5] * biv[ 6] - una[ 3] * biv[ 8];
+    target[15] = una[ 1] * biv[14] + una[ 5] * biv[ 7] - una[ 4] * biv[ 8];
+    target[16] = una[ 2] * biv[12] + una[ 4] * biv[ 9] - una[ 3] * biv[10];
+    target[17] = una[ 2] * biv[13] + una[ 5] * biv[ 9] - una[ 3] * biv[11];
+    target[18] = una[ 2] * biv[14] + una[ 5] * biv[10] - una[ 4] * biv[11];
+    target[19] = una[ 3] * biv[14] + una[ 5] * biv[12] - una[ 4] * biv[13];
+}
+
+void bivInnerUna( in float[BIV_LEN] biv, in float[6] b, out float[6] target ) {
+    target[0] = biv[0] * b[1] + biv[1] * b[2] + biv[2] * b[3] - biv[3] * b[4] - biv[4] * b[5];
+    target[1] = biv[5] * b[2] + biv[6] * b[3] - biv[0] * b[0] - biv[7] * b[4] - biv[8] * b[5];
+    target[2] = biv[9] * b[3] - biv[10] * b[4] - biv[11] * b[5] - biv[1] * b[0] - biv[5] * b[1];
+    target[3] = -biv[12] * b[4] - biv[13] * b[5] - biv[2] * b[0] - biv[6] * b[1] - biv[9] * b[2];
+    target[4] = -biv[10] * b[2] - biv[12] * b[3] - biv[14] * b[5] - biv[3] * b[0] - biv[7] * b[1];
+    target[5] = biv[14] * b[4] - biv[11] * b[2] - biv[13] * b[3] - biv[4] * b[0] - biv[8] * b[1];
+}
+
+void bivInnerE0( in float[BIV_LEN] biv, out float[6] target) {
+    //only b[ 3] and b[ 4] are nonzero, and they are both 1
+    target[ 0] =  biv[ 2] - biv[ 3];
+    target[ 1] =  biv[ 6] - biv[ 7];
+    target[ 2] =  biv[ 9] - biv[10];
+    target[ 3] = -biv[12];
+    target[ 4] = -biv[12];
+    target[ 5] =  biv[14] - biv[13];
+}
+
+void unaMeetE0(in float[6] una, out float[BIV_LEN] target) {
+    target[ 0] = 0.;
+    target[ 1] = 0.;
+    target[ 2] = una[0];
+    target[ 3] = una[0];
+    target[ 4] = 0.;
+    target[ 5] = 0.;
+    target[ 6] = una[1];
+    target[ 7] = una[1];
+    target[ 8] = 0.;
+    target[ 9] = una[2];
+    target[10] = una[2];
+    target[11] = 0.;
+    target[12] = una[3] - una[4];
+    target[13] = -una[5];
+    target[14] = -una[5];
+}`
+
 //1D CGA bivector! And other things
 class Unavec extends GeneralVector {
 
@@ -10,13 +91,18 @@ class Unavec extends GeneralVector {
     }
 
     meetE0(target) {
-        target.zero()
+        target[ 0] = 0.
+        target[ 1] = 0.
         target[ 2] = this[0]
         target[ 3] = this[0]
+        target[ 4] = 0.
+        target[ 5] = 0.
         target[ 6] = this[1]
         target[ 7] = this[1]
+        target[ 8] = 0.
         target[ 9] = this[2]
         target[10] = this[2]
+        target[11] = 0.
         target[12] = this[3] - this[4]
         target[13] = -this[5]
         target[14] = -this[5]
@@ -161,12 +247,12 @@ class Bivec extends GeneralVector {
 
     innerE0(target) {
         //only b[ 3] and b[ 4] are nonzero, and they are both 1
-        target[ 0] =  this[ 2] * 1. - this[ 3] * 1.;
-        target[ 1] =  this[ 6] * 1. - this[ 7] * 1.;
-        target[ 2] =  this[ 9] * 1. - this[10] * 1.;
-        target[ 3] = - this[12] * 1.;
-        target[ 4] = - this[12] * 1.;
-        target[ 5] =  this[14] * 1. - this[13] * 1.;
+        target[ 0] =  this[ 2] - this[ 3];
+        target[ 1] =  this[ 6] - this[ 7];
+        target[ 2] =  this[ 9] - this[10];
+        target[ 3] = - this[12];
+        target[ 4] = - this[12];
+        target[ 5] =  this[14] - this[13];
 
         return target
     }

@@ -41,7 +41,6 @@ function initDebugDisplay() {
     update22 = () => {
 
         geo.attributes.position.needsUpdate = true
-        // return
 
         let angle = frameCount * .01
         // _ep.multiplyScalar(Math.cos(angle), tw0).addScaled(_e1, Math.sin(angle), tw1).cast(renderedObj)

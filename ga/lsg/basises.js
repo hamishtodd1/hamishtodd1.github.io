@@ -3,19 +3,24 @@ function initBasises() {
     let projectorBiv = new Bivec()
     let sb0 = new Bivec()
     let sb1 = new Bivec()
-    let equidistantUnavec = new Unavec()
-    let nullUnavec = new Unavec()
+    let numBivecCoefs = sb0.length
+    let equidistantUna = new Unavec()
+    let nullUna = new Unavec()
     let bv = new Unavec()
     let projectivePointFl = new Fl()
     let originIndexSigned = _epm.cast(sb0).lowestNonzeroSigned()
 
     let basisFls = [e021, e013, e032, e123]
+    let zyxw = `zyxw`
 
     class Basis {
 
         //you get ep, em, e0, automatically
         constructor(basis) {
             
+            let self = this
+
+            this.prefix = verbose42Glsl
 
             // this.idealIndicesA = Array(basis.length)
             // this.idealIndicesB = Array(basis.length)
@@ -79,19 +84,69 @@ function initBasises() {
                     for (let i = 0; i < 6; ++i)
                         targetBiv.addScaled(basisPluckers[i], dqEga[i + 1], targetBiv)
                 }
+
+                //eventually basisPluckers and basisPoints will be uniforms
+                //fun stuff to show: a screw motion preserving a hyperboloid
+                //the exponential of a perabol, circle, hyperbola
+                //ugh but need exponential. Could use 2,2 exponential?
+
+                function vecToGlslStr(name,vec) {
+                    let ret = `\n    float `+name+`[`+vec.length+`] = float[](`
+                    for (let j = 0, jl = vec.length; j < jl; ++j)
+                        ret += vec[j].toFixed(1) + (j === vec.length - 1 ? `` : `,`)
+                    return ret + `);`
+                }
+                
+                let extra0 = `
+                    \nvoid dqToBiv(in float[8] dqEga, out float[BIV_LEN] targetBiv) {
+                    \n    for(int i = 0; i < BIV_LEN; ++i) targetBiv[i] = 0.;\n`
+                for(let i = 0; i < 6; ++i) {
+                    extra0 += 
+                        `  ` + vecToGlslStr(`basisPlucker`+i,basisPluckers[i])
+
+                    extra0 += 
+                    `\n   for(int i = 0; i < BIV_LEN; ++i)`+
+                    `\n     targetBiv[i] = targetBiv[i] + dqEga[`+ (i + 1) +`] * basisPlucker`+i+`[i];`
+                }
+                extra0 += `\n}`
+                log(extra0)
+                this.prefix += extra0
+                
                 this.scalorBivToFlatPoint = (scalorBiv, targetFl) => {
                     
                     targetFl.zero()
                     for(let i = 0; i < 4; ++i ) {
-
-                        let factor = 0.
-                        for (let j = 0, jl = scalorBiv.length; j < jl; ++j)
-                            factor += basisFlatPoints[i][j] * scalorBiv[j]
-                            
-                        targetFl.addScaled( basisFls[i], factor, targetFl )
+                        for (let j = 0; j < numBivecCoefs; ++j)
+                            targetFl[4 + i] += basisFlatPoints[i][j] * scalorBiv[j] //
                     }
                     return targetFl
                 }
+
+                let extra1 = `\nvoid scalorBivToFlatPoint(in float[BIV_LEN] scalorBiv, out vec4 targetFl) {\n`
+
+                for(let i = 0; i < 4; ++i) {
+                    
+                    extra1 +=
+                        vecToGlslStr(`basisFlatPoints`+zyxw[i].toUpperCase(), basisFlatPoints[i]) +
+                        `\n    targetFl.`+zyxw[i]+` = 0.;`+
+                        `\n    for (int j = 0; j < BIV_LEN; ++j)`+
+                        `\n        targetFl.`+zyxw[i]+` += basisFlatPoints`+zyxw[i].toUpperCase()+`[j] * scalorBiv[j];\n`
+                }
+                extra1 += `\n}`
+                log(extra1)
+                this.prefix += extra1
+
+                this.prefix += defaultBasisPrefix
+
+                let extra2 = `\nfloat ppToGibbsVecs( in float[20] pp, out vec3 target1, out vec3 target2 ) {`+
+                    `\n    float projectorBiv[BIV_LEN];`+
+                    vecToGlslStr(`pss`, this.pss) +
+                    `\n    triInnerPent( pp, pss, projectorBiv );`+
+                    `\n    float ret = projectorBivToGibbsVecs( projectorBiv, target1, target2 );`+
+                    `\n    return ret;` +
+                `\n}\n`
+                this.prefix += extra2
+                // log(extra2)
             }
         }
 
@@ -129,21 +184,22 @@ function initBasises() {
                 // "point pair" was actually a circle, line, maybe zero radius circle/line at infinity
                 target1.copy(outOfSightVec3)
                 target2.copy(outOfSightVec3)
+                return
             }
 
             projectorBiv.multiplyScalar(-1. / Math.sqrt(bivSq), projectorBiv)
-            projectorBiv.innerE0( equidistantUnavec )
-            if(equidistantUnavec.e0Multiple()) {
+            projectorBiv.innerE0( equidistantUna )
+            if(equidistantUna.e0Multiple()) {
                 // projectorBiv lies on e0, eg projectorBiv ^ e0 = 0
 
                 target2.copy(outOfSightVec3)
                 sb0.copy(projectorBiv)    
             }
             else {
-                projectorBiv.inner( equidistantUnavec, bv )
-                equidistantUnavec.add( bv, nullUnavec ).meetE0(sb0)
+                projectorBiv.inner( equidistantUna, bv )
+                equidistantUna.add( bv, nullUna ).meetE0(sb0)
                 this.scalorBivToGibbsVec(sb0, target2 )
-                equidistantUnavec.sub( bv, nullUnavec ).meetE0(sb0)
+                equidistantUna.sub( bv, nullUna ).meetE0(sb0)
             }
 
             this.scalorBivToGibbsVec(sb0, target1 )
@@ -155,60 +211,84 @@ function initBasises() {
         }
     }
 
-    `
-        struct Basis {
-            int[3] idealIndicesA;
-            int[3] idealIndicesB;
-            float[something] pss;
-        }
+    let defaultBasisPrefix = `
+void addUnas( in float[6] a, in float[6] b, out float[6] target) {
+    for (int i = 0; i < 6; ++i)
+        target[i] = a[i] + b[i];
+}
 
-        void addUnavecs( in float[6] a, in float[6] b, out float[6] target) {
-            for (int i = 0; i < 6; ++i)
-                target[i] = a[i] + b[i];
-        }
+void subUnas( in float[6] a, in float[6] b, out float[6] target) {
+    for (int i = 0; i < 6; ++i)
+        target[i] = a[i] - b[i];
+}
 
-        void subUnavecs( in float[6] a, in float[6] b, out float[6] target) {
-            for (int i = 0; i < 6; ++i)
-                target[i] = a[i] - b[i];
-        }
+void zeroUna(out float[6] una) {
+    for(int i = 0; i < 6; ++i)
+        una[i] = 0.;
+}
 
-        void bivMultiplyScalar( in float[15] biv, in float scalar, out float[15] target {
-            for (int i = 0; i < 15; ++i)
-                target[i] = biv[i] * scalar;
-        }
+void bivMultiplyScalar( in float[BIV_LEN] biv, in float scalar, out float[BIV_LEN] target ) {
+    for (int i = 0; i < BIV_LEN; ++i)
+        target[i] = biv[i] * scalar;
+}
 
-        void ppToGibbsVecs( in float[15] projectorBiv, out vec3 target1, out vec3 target2 ) {
+float bivInnerSelfScalar(in float[BIV_LEN] biv) {
+    return biv[10] * biv[10] + biv[11] * biv[11] + biv[12] * biv[12] + biv[13] * biv[13] + biv[ 3] * biv[ 3] + biv[ 4] * biv[ 4] + biv[ 7] * biv[ 7] + biv[ 8] * biv[ 8] - biv[ 0] * biv[ 0] - biv[14] * biv[14] - biv[ 1] * biv[ 1] - biv[ 2] * biv[ 2] - biv[ 5] * biv[ 5] - biv[ 6] * biv[ 6] - biv[ 9] * biv[ 9];
+}
 
-            float[6] equidistantUnavec;
-            float[6] nullUnavec;
-            float[6] bv;
+bool e0Multiple(in float[6] una) {
+    return una[3] != 0. && una[3] == una[4] && una[0] == 0. && una[1] == 0. && una[2] == 0. && una[5] == 0.;
+}
 
-            float bivSq = bivInnerSelfScalar(projectorBiv);
-            if (0. >= bivSq) {
-                // "point pair" is actually some other kind of object
-                target1 = vec3( 999., 999., 999. );
-                target2 = vec3( 999., 999., 999. );
-            }
+vec3 scalorBivToGibbsVec( in float[BIV_LEN] scalorBiv ) {
+    vec4 ret4;
+    scalorBivToFlatPoint( scalorBiv, ret4 );
+    return ret4.xyz / ret4.w;
+}
 
-            bivMultiplyScalar( projectorBiv, 1. / sqrt(bivSq), projectorBiv );
-            bivInnerE0(  projectorBiv, equidistantUnavec );
-            if(equidistantUnavec.e0Multiple()) {
-                // projectorBiv lies on e0, eg projectorBiv ^ e0 = 0
+float projectorBivToGibbsVecs( in float[BIV_LEN] projectorBiv, out vec3 target1, out vec3 target2 ) {
 
-                target2.copy(outOfSightVec3)
-                scalorBiv.copy(projectorBiv)
-            }
-            else {
-                projectorBiv.inner( equidistantUnavec, bv )
-                equidistantUnavec.add( bv, nullUnavec ).meetE0(scalorBiv)
-                scalorBivToGibbsVec(scalorBiv, target2 )
-                equidistantUnavec.sub( bv, nullUnavec ).meetE0(scalorBiv)
-            }
+    float[6] equidistantUna;
+    float[6] nullUna;
+    float[6] bv;
+    float[BIV_LEN] sb0;
 
-            scalorBivToGibbsVec(scalorBiv, target1 )
-        }
+    float bivSq = bivInnerSelfScalar(projectorBiv);
+    if (0. >= bivSq) {
+        // "point pair" is actually some other kind of object
+        target1 = vec3( 999., 999., 999. );
+        target2 = vec3( 999., 999., 999. );
+        return .5;
+    }
 
-        //from the nullUnavec, you should also be able to read off the direction the thing is facing in
+    float ret = 0.;
+
+    bivMultiplyScalar( projectorBiv, 1. / sqrt(bivSq), projectorBiv );
+    bivInnerE0(  projectorBiv, equidistantUna );
+    if(e0Multiple(equidistantUna)) {
+        // projectorBiv lies on e0, eg projectorBiv ^ e0 = 0
+
+        target2 = vec3( 999., 999., 999. );
+        for(int i = 0; i < BIV_LEN; ++i)
+            sb0[i] = projectorBiv[i];
+
+        ret = 1.;
+    }
+    else {
+        bivInnerUna(projectorBiv, equidistantUna, bv);
+        addUnas(equidistantUna, bv, nullUna);
+        unaMeetE0(nullUna, sb0);
+        target2 = scalorBivToGibbsVec(sb0 );
+        subUnas(equidistantUna, bv, nullUna);
+        unaMeetE0(nullUna, sb0);
+    }
+
+    target1 = scalorBivToGibbsVec(sb0 );
+
+    return ret;
+}
+
+//from the nullUnavec, you should also be able to read off the direction the thing is facing in
     `
 
     basis1      = new Basis([_e1])                //1D  CGA  / PGA
