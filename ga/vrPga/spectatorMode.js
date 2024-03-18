@@ -7,10 +7,7 @@ function initPotentialSpectatorReception() {
 
     socket.on(`disposeSnappable`, msg=>{
 
-        let s = snappables[msg.i]
-        snappables[msg.i] = null
-
-        s.dispose()
+        snappables[msg.i].dispose()
 
     })
     
@@ -19,12 +16,15 @@ function initPotentialSpectatorReception() {
 
         if (snappables[msg.i] === undefined) {
             snappables[msg.i] = new DqViz(0xFF0000, true, false) //TODO bug this thing must be showing up
-            snappables[msg.i].sclptable = new Sclptable(snappables[msg.i])
             snappables[msg.i].visible = false
         }
+        if (snappables[msg.i].sclptable === null || snappables[msg.i].sclptable === undefined)
+            snappables[msg.i].sclptable = new Sclptable(snappables[msg.i])
 
         // sclptables[msg.i].brushStroke(fl0.point(0., 1.2, 0., 1.))
 
+        // if (snappables[msg.i].sclptable === undefined)
+        //     debugger
         let cs = snappables[msg.i].sclptable.children[msg.color]
         cs.vAttr.needsUpdate = true
         cs.vAttr.updateRange.offset = 0
@@ -97,8 +97,6 @@ function initPotentialSpectatorReception() {
 
         spectatorCamera.updateMatrixWorld()
         spectatorCamera.updateProjectionMatrix() //and need to do frustum things too
-
-        return spectatorCamera
 
         addStage(spectatorCamera, weAreSpectator)
 

@@ -96,8 +96,6 @@ function initControlHelpers() {
     let myRay = new THREE.Ray()
     myRay.origin.set(0.,0.,0.)
     myRay.direction.set(0.,1.,0.)
-    let myBox = new THREE.Box3(v2.set(-0.5, 0.5, -0.5), v3.set(0.5, 1.5, 0.5))
-    myRay.intersectBox(myBox, v1)
 
     let testPoint = new Fl()
     let joinPlane = new Fl()
@@ -109,6 +107,8 @@ function initControlHelpers() {
         let nearest = null
         let nearestDistSq = Infinity
         snappables.forEach(snappable => {
+            if(snappable === null)
+                return
 
             let distSq = Infinity
             testPoint.pointFromGibbsVec(snappable.boundingBox.getCenter(v1)).normalizePoint()
@@ -149,72 +149,161 @@ function initControlHelpers() {
     let ROTOREFLECTION = 5
     let TRANSFLECTION = 6
 
-    let evenVersionAxis = new Dq()
-    let evenVersion = new Dq()
-    let pointBetweenHands = new Fl()
-    let planePart = new Fl()
-    let pointPart = new Fl()
-    normalizeFlToTypes = (fl, bladesOnly) => {
+    {
+        let evenVersionAxis = new Dq()
+        let evenVersion = new Dq()
+        let pointBetweenHands = new Fl()
+        let planePart = new Fl()
+        let pointPart = new Fl()
+        roundFlToTypes = (fl, bladesOnly) => {
 
-        fl.normalize()
-        fl.selectGrade(1, planePart)
-        fl.selectGrade(3, pointPart)
+            fl.normalize()
+            fl.selectGrade(1, planePart)
+            fl.selectGrade(3, pointPart)
 
-        let pointIsZero = pointPart.isZero()
-        let planeIsZero = planePart.isZero()
-        if (pointIsZero && planeIsZero)
-            return ZERO_BLADE
-        else if (pointIsZero)
-            return PLANE
-        else if (planeIsZero)
-            return POINT
+            let pointIsZero = pointPart.isZero()
+            let planeIsZero = planePart.isZero()
+            if (pointIsZero && planeIsZero)
+                return ZERO_BLADE
+            else if (pointIsZero)
+                return PLANE
+            else if (planeIsZero)
+                return POINT
 
-        fl.mul(planePart, evenVersion)
-        evenVersion.normalize()
-        evenVersion.selectGrade(2, evenVersionAxis)
+            fl.mul(planePart, evenVersion)
+            evenVersion.normalize()
+            evenVersion.selectGrade(2, evenVersionAxis)
 
-        let eNormSqAxis = Math.sqrt(evenVersionAxis.eNormSq())
-        let angle = 2. * Math.abs(Math.atan2(eNormSqAxis, evenVersion[0]))
+            let eNormSqAxis = Math.sqrt(evenVersionAxis.eNormSq())
+            let angle = 2. * Math.abs(Math.atan2(eNormSqAxis, evenVersion[0]))
 
-        //potentially useful at some point
-        // let handsDistToAxis = evenVersionAxis.distanceToPt(pointBetweenHands)
+            //potentially useful at some point
+            // let handsDistToAxis = evenVersionAxis.distanceToPt(pointBetweenHands)
 
-        pointBetweenHands.pointFromGibbsVec(v1.addVectors(hands[0].position, hands[1].position).multiplyScalar(.5))
-        let distTaken = pointBetweenHands.distanceToPt(evenVersion.sandwich(pointBetweenHands, fl0))
+            pointBetweenHands.pointFromGibbsVec(v1.addVectors(hands[0].position, hands[1].position).multiplyScalar(.5))
+            let distTaken = pointBetweenHands.distanceToPt(evenVersion.sandwich(pointBetweenHands, fl0))
 
-        let thingThisIs = TRANSFLECTION
-        if (angle > Math.PI * .52)
-            thingThisIs = POINT
-        else if (angle > Math.PI * .2)
-            thingThisIs = ROTOREFLECTION
-        else if (distTaken < .13)
-            thingThisIs = PLANE
+            let thingThisIs = TRANSFLECTION
+            if (angle > Math.PI * .52)
+                thingThisIs = POINT
+            else if (angle > Math.PI * .2)
+                thingThisIs = ROTOREFLECTION
+            else if (distTaken < .13)
+                thingThisIs = PLANE
 
-        if (bladesOnly) {
-            if (thingThisIs === POINT || thingThisIs === TRANSFLECTION)
-                fl.zeroGrade(1)
+            if (bladesOnly) {
+                if (thingThisIs === POINT || thingThisIs === TRANSFLECTION)
+                    fl.zeroGrade(1)
+                else
+                    fl.zeroGrade(3)
+            }
+            else {
+                if (thingThisIs === TRANSFLECTION) {
+
+                    let distTaken = pointBetweenHands.distanceToPt(evenVersion.sandwich(pointBetweenHands, fl4))
+
+                    let newPointAtInf = pointBetweenHands.joinPt(pointPart, dq0).meet(e0, fl0)
+                    let scalar = .5 * distTaken / Math.sqrt(newPointAtInf.iNormSq())
+                    planePart.normalize()
+                    planePart.addScaled(newPointAtInf, scalar, fl).normalize()
+
+                }
+                else if (thingThisIs === PLANE) {
+                    fl.zeroGrade(3)
+                    // oddGrabbee.markupPos.copy(pointBetweenHands)
+                }
+                else if (thingThisIs === POINT)
+                    fl.zeroGrade(1)
+            }
+
+            return thingThisIs
+        }
+
+        const rightFl = new Fl()
+        handleOddGestures = (oddGrabbee) => {
+            
+            //the right hand is the left hand preceded (that is, algebraically followed...) by a reflection in e1
+            //so this is the transform that would reflect the right hand then get it to where left hand is
+            hands[LEFT].dq.mul(e1, rightFl)
+            //...the transform that would get the place where the right hand is to that
+            rightFl.mulReverse(hands[RIGHT].dq, oddGrabbee.fl)
+
+            if (oddGrabbee.lockedGrade === 1)
+                oddGrabbee.fl.zeroGrade(3)
+            else if (oddGrabbee.lockedGrade === 3)
+                oddGrabbee.fl.zeroGrade(1)
             else
-                fl.zeroGrade(3)
+                roundFlToTypes(oddGrabbee.fl, false)
+
+            //doesn't matter much
+            hands[RIGHT].dq.sandwich(e123, oddGrabbee.markupPos)
+            oddGrabbee.regularizeMarkupPos()
         }
-        else {
-            if (thingThisIs === TRANSFLECTION) {
+    }
 
-                let distTaken = pointBetweenHands.distanceToPt(evenVersion.sandwich(pointBetweenHands, fl4))
-
-                let newPointAtInf = pointBetweenHands.joinPt(pointPart, dq0).meet(e0, fl0)
-                let scalar = .5 * distTaken / Math.sqrt(newPointAtInf.iNormSq())
-                planePart.normalize()
-                planePart.addScaled(newPointAtInf, scalar, fl).normalize()
-
-            }
-            else if (thingThisIs === PLANE) {
-                fl.zeroGrade(3)
-                // oddGrabbee.markupPos.copy(pointBetweenHands)
-            }
-            else if (thingThisIs === POINT)
-                fl.zeroGrade(1)
+    {
+        const rotationPart = new DqViz(0x00FFFF, true, true)
+        const translationPart = new DqViz(0x00FFFF, true, true)
+        hideDqDecompositionVizes = ()=>{
+            rotationPart.visible = false
+            translationPart.visible = false
         }
+        translationPart.scaleAxisRadius(.95)
+        rotationPart.scaleAxisRadius(.95)
+        rotationPart.visible = false
+        translationPart.visible = false
+        // let rotationFirst = true
+        roundEvenGestures = (evenGrabbee, snapMode) => {
 
-        return thingThisIs
+            //could have the markupPos's move if you're not at a pure rotn or trans, so tip always at hand
+            evenGrabbee.dq.invariantDecomposition(rotationPart.dq, translationPart.dq)
+            //are there circumstances under which it should decompose into a shorter rotation and a nether translation
+
+            let thresholdTranslation = .09
+            let thresholdRotation = .09
+            let threshold180 = .05
+            let translationMeasure = rotationPart.markupPos.distanceToPt(rotationPart.getArrowTip(fl0))
+            let rotationMeasure = translationPart.markupPos.distanceToPt(translationPart.getArrowTip(fl0))
+
+            let snapToRotation = rotationMeasure < thresholdRotation
+            let snapTo180 = snapToRotation && Math.abs(rotationPart.dq[0]) < threshold180
+            let snapToTranslation = translationMeasure < thresholdTranslation
+
+            rotationPart.visible = true
+            translationPart.visible = true
+            if (snapToRotation) {
+                if (snapTo180) {
+                    rotationPart.dq[0] = 0.
+                    rotationPart.dq.normalize()
+                }
+                evenGrabbee.dq.copy(rotationPart.dq)
+
+                //TODO would be nice to try this thing too
+                // rotationPart.dq.projectOn(evenGrabbee.dq.markupPos, rotationAroundStartPoint)
+                // evenGrabbee.dq.copy(rotationAroundStartPoint)
+
+                // rotationPart.visible = false
+                // rotationFirst = true
+            }
+            else if (snapToTranslation) {
+                evenGrabbee.dq.copy(translationPart.dq)
+
+                // translationPart.visible = false
+                // rotationFirst = false
+            }
+
+            // if (rotationFirst) {
+                rotationPart.markupPos.copy(evenGrabbee.markupPos)
+                // rotationPart.getArrowTip(translationPart.markupPos)
+                translationPart.markupPos.copy(evenGrabbee.markupPos)
+            // }
+            // else {
+            //     translationPart.markupPos.copy(evenGrabbee.markupPos)
+            //     translationPart.getArrowTip(rotationPart.markupPos)
+            // }
+
+            //rather messy when you have a small rotation part
+            //ok so being "close to a translation" with a hand is actually close to an equal mixture
+        }
     }
 }

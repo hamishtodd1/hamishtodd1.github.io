@@ -27,9 +27,11 @@ function initVrButton() {
                 //
                 button.style.display = '';
                 button.style.cursor = 'pointer';
-                button.style.left = 'calc(50% - 50px)';
-                button.style.width = '100px';
+                let w = 700
+                button.style.width = w+'px';
+                button.style.left = 'calc(50% - '+w/2+'px)';
                 button.textContent = 'ENTER VR';
+                button.style.font = 'normal 135px sans-serif';
 
                 button.onmouseenter = function () {
                     button.style.opacity = '1.0';

@@ -32,7 +32,7 @@ function initFlVizes(transparentOpacity) {
         transparent: true,
         opacity: .4
     })
-    let diskGeo = new THREE.CircleGeometry(.2, 32)
+    let diskGeo = new THREE.CircleGeometry(.15, 32)
     diskGeo.computeBoundingBox()
     let pointRadius = .004
     let pointGeo = new THREE.SphereGeometry(pointRadius)
@@ -87,11 +87,12 @@ function initFlVizes(transparentOpacity) {
 
             this.boundingBox = new THREE.Box3()
             this.boxHelper = new THREE.BoxHelper()
-
-            this.hasExtraPlanes = false
+            this.add(this.boxHelper)
+            this.boxHelper.visible = false
+            this.boxHelper.matrixAutoUpdate = false
 
             if (!omitFromSnappables)
-                giveSnappableProperties(this)
+                makeSnappable(this)
             this.affecters = [
                 null, null, -1
             ]
@@ -155,7 +156,6 @@ function initFlVizes(transparentOpacity) {
 
                 this.fl.selectGrade(1, planePart)
                 this.fl.selectGrade(3, pointPart)
-                
                 let hasPlane = /*Math.abs(planePart[0]) > eps || */Math.abs(planePart[1]) > eps || Math.abs(planePart[2]) > eps || Math.abs(planePart[3]) > eps
                 let hasPoint = pointPart.isZero() === false
                 let pointIsIdeal = this.fl[7] === 0.
@@ -170,7 +170,7 @@ function initFlVizes(transparentOpacity) {
                         box0.copy(pointGeo.boundingBox)
                         this.pointMesh.updateMatrixWorld()
                         box0.applyMatrix4(this.pointMesh.matrixWorld)
-                        box0.expandByScalar(pointRadius * 1.5)
+                        box0.expandByScalar(pointRadius * 3.5)
                         this.boundingBox.union(box0)
                     }
                     else {
@@ -249,17 +249,8 @@ function initFlVizes(transparentOpacity) {
                     let newScale = clamp(this.diskGroup.scale.x + (hasPlane ? 1. : -1.) * scaleSpeed * frameDelta,0.,1.)
                     this.diskGroup.scale.setScalar(newScale)
 
-                    if(!hasPoint)
-                        this.markupPos.projectOn(planePart, planePosition).normalizePoint()
-                    else if(!pointIsIdeal)
-                        planePosition.copy( pointPart )
-                    else {
-                        this.fl.sandwich( this.markupPos, fl0 )
-                        this.markupPos.addScaled(fl0, this.markupPos[7] / fl0[7], planePosition)
-                    }
-
-                    planePosition.pointToGibbsVec(v1)
-                    this.diskGroup.position.lerp(v1, .13)
+                    this.getSettledDiskPosition(planePosition)
+                    this.diskGroup.position.lerp(planePosition.pointToGibbsVec(v1), .13)
                     if(hasPlane)
                         planeMeshQuat(this.diskGroup, planePart, planePosition)
                     
@@ -273,8 +264,33 @@ function initFlVizes(transparentOpacity) {
             }
         }
 
+        getSettledDiskPosition(target) {
+
+            this.fl.selectGrade(1, planePart)
+            this.fl.selectGrade(3, pointPart)
+            let hasPoint = pointPart.isZero() === false
+            let pointIsIdeal = this.fl[7] === 0.
+
+            if (!hasPoint)
+                this.markupPos.projectOn(planePart, target).normalizePoint()
+            else if (!pointIsIdeal)
+                target.copy(pointPart)
+            else {
+                this.fl.sandwich(this.markupPos, fl0)
+                this.markupPos.addScaled(fl0, this.markupPos[7] / fl0[7], target)
+            }
+
+            return target
+        }
+
+        settleDiskPosition() {
+            this.getSettledDiskPosition(planePosition)
+            planePosition.pointToGibbsVec(this.diskGroup.position)
+        }
+
         setTransparency(opacity) {
-            this.rotAxisMesh.material.opacity = opacity
+            //plane is already transparent soooo
+            this.pointMesh.material.opacity = opacity
             this.arrow1.material.opacity = opacity
             this.arrow2.material.opacity = opacity
         }
@@ -308,8 +324,6 @@ function initFlVizes(transparentOpacity) {
         }
     }
     window.FlViz = FlViz
-
-
 
     debugFls = [
         new FlViz(0xFFFF00, true, false), new FlViz(0xFFFF00, true, false),

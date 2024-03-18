@@ -1,6 +1,17 @@
 /*
     Business partner idea: Sam Partridge
 
+    How scalars work
+        Any rotation, translation (and maybe roto/transflection) has a distance and angle implicitly
+        The scalar doesn't have to be an extra object, it's just inferred from those
+        There are braces/compasses which appear in place indicating that it's involved
+        Alright, so what are scalars used for?
+            You take powers with them.
+            You have == < > != >= <= which then go into if statements
+                Another way of saying it is "sign"
+                == and !== are unlikely because everything is continuous
+                Can maybe do all with (translationDist > 0 ? 1 : 0)*:
+
     Control which ones are visibl, which ones are fodder for snapping
         Could have it be that only the last 3 you made are visible, like a stack
             Delete something and one of the ones last seen comes back
@@ -12,34 +23,32 @@
         Spreadsheet would work but it's the nuclear option. 7 year old, very unlikely
     Give some markup influence from dqTo
 
-    A relatively different approach is: one hand grabs a dq, other hand modifies
-        Grab sclptable and other hand adds stuff to it
-        Grab dq and you're holding the markupPos; other hand modifies what it does
-        Gotta be experimenting!
-
     If you put too many training wheels on things
         (eg normalizing, taking logs, grade selecting)
         then what's the point of emphasizing understanding PGA?
-
-    No it's not that bad. There's what snaps you offer, and there's what you can put in the spreadsheet
+        Letting people do more in the spreadsheet
 
     TODO for FoC demo:
-        markupPosAttractor
+        Redo website!
+        Spreadsheet
+        Need a centralized "updateMarkupPoses"
+            markupPosAttractor
         Just an eye that rotates in place
             Join eye position with initial eyeFocusPoint (at infinity), get line
             Join eye position with focusPoint, get line
             Do dqTo
+            Then parenting...
         Some bug where loooooads of stuff just gets made. It happened after making a few models
-        Make a head with a rotating eye
-            Make an eye somewhere in space, and a head somwhere else. headDq, eyeDq, unmovedEyeToUnmovedEyeSocketDq
-            Make a line from where the eye socket
-            eyeDq = headDq * headToEyeSocketDq * ()
-        // Make the silly old Ram
-        //     Trigger button controls boolean, for mouth
-        //     Hold it by the head
-        //     Body follows
-        //     Legs pump when moved, eg the instantaneous movement is known
+        Make the silly old Ram
+            Hand controls head
+            Body always in a certain plane
+                Its transform is the rejection from the plane of the head's transform? Uh maybe
+            Trigger button controls boolean, for mouth
+            Hold it by the head
+            Body follows
+            Legs pump when moved, eg the instantaneous movement is known
         Paint eraser "color"
+        Meshes can have fl's as their transform
     Jon demo:
         arrow starts move slowly to correct position instead of teleporting
         Levels. Just 4 or so
@@ -55,6 +64,8 @@
             One likes dynamism or something, just "seeing more stuff happen"
         Undo
     Beyond:
+        Bounding cylinders, not cuboids
+            One line L, a plane P in the middle, a radius r and a height h
         Think about what hand gestures bring about loop translations
         ACTUALLY, there is such a thing as a "nega screw". It has no logarithm or sqrt but it's a thing
         How come hand can't do anything more than 180deg arrow?
@@ -124,7 +135,7 @@ async function init() {
 
     initDqMeshes()
     
-    let transparentOpacity = .65
+    let transparentOpacity = .45
     initArrows()
     initDqVizes(transparentOpacity)
     initFlVizes(transparentOpacity)
@@ -139,6 +150,7 @@ async function init() {
     
     initSnapping()
     initPotentialSpectatorReception()
+    initStack()
     initControl()
 
     // initCircuits()
@@ -179,9 +191,11 @@ async function init() {
             movingPaintingHighlightingHandLabels()
             updatePaletteAnimation()
             
-            // snappables.forEach(s => {
-            //     updateFromAffecters(s)
-            // })
+            snappables.forEach(s => {
+                if(s === null)
+                    return
+                updateFromAffecters(s)
+            })
 
             updateRecording()
             //then broadcast

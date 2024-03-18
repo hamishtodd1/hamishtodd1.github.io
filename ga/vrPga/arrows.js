@@ -1,6 +1,12 @@
 function initArrows() {
 
     const arrowRadius = .006
+    let nonNegaArrowStart = new Fl()
+    const headArcLength = arrowRadius * 5.
+    const headRadiusFactor = 2.1
+    let finalHeadRadiusFactor = headRadiusFactor / headArcLength
+    let spineLineAtNominalStart = new Dq()
+    let nonNegaDq = new Dq()
 
     let infix = `
         //get the correct alongness and the slight alongness
@@ -98,12 +104,9 @@ function initArrows() {
         },
     ]
 
-    const headArcLength = arrowRadius * 5.
-    const headRadiusFactor = 2.1
-
     {
         let radialSegments = 14
-        var cupGeo = new THREE.SphereGeometry(arrowRadius, radialSegments)
+        var cupGeo = new THREE.SphereGeometry(arrowRadius, radialSegments, 16, 0., TAU, 0., TAU * .32)
 
         let headSegments = 8
         let shaftSegments = 37
@@ -130,12 +133,7 @@ function initArrows() {
         
         var extraShaftGeo = new THREE.CylinderGeometry(arrowRadius, arrowRadius, 1., radialSegments, 1, true)
         extraShaftGeo.translate(0., .5, 0.)
-    } 
-    
-    let nonNegaArrowStart = new Fl()
-    let finalHeadRadiusFactor = headRadiusFactor / headArcLength
-
-    let nonNegaDq = new Dq()
+    }
 
     class Arrow extends THREE.Mesh {
         
@@ -170,9 +168,7 @@ function initArrows() {
             pointHalfWayAlongArrow ) 
             {
 
-            startPoint.pointToGibbsVec(this.cup.position)
-
-            //extend bounding box
+            //extend viz's bounding box
             {
                 //if you're non-nega, you have an extraShaft, but that isn't "arrow" for these purposes
                 nonNegaDq.copy(possiblyNegaDq)
@@ -229,19 +225,30 @@ function initArrows() {
                 let headStart = (1. - headArcLength / arrowArcLength)
                 let headOutnessAtBase = arrowArcLength * finalHeadRadiusFactor
                 this.material.extraVec3.set(headOutnessAtBase, headStart, 0.)
-                if (headArcLength > arrowArcLength) //really if you're at this stage, you should move startPoint
+                if (headArcLength > arrowArcLength) //really if you're at this stage, you should move startPoint. Wouldn't affect a translation tho
                     this.cup.scale.setScalar(1. / (1. - headStart))
                 else
                     this.cup.scale.setScalar(1.)
                 
                 //out vector at base
-                let spineLineAtNominalStart = nonNegaArrowStart.momentumLineFromRotor(this.material.dq, dq0)
+                nonNegaArrowStart.momentumLineFromRotor(this.material.dq, spineLineAtNominalStart)
                 let randomPlaneContainingLine = spineLineAtNominalStart.joinPt(randomPt, fl1)
                 let outDqAtStartLog = randomPlaneContainingLine.meet(e0, dq0).normalize()
                 this.material.extraVec2.set(
                     outDqAtStartLog[1],
                     outDqAtStartLog[2],
                     outDqAtStartLog[3]).multiplyScalar(arrowRadius)
+
+                e13.dqTo(spineLineAtNominalStart,dq1).toQuaternion(this.cup.quaternion)
+                startPoint.pointToGibbsVec(this.cup.position)
+            }
+
+            v1.subVectors(boundingBox.max, boundingBox.min)
+            let minLen = .08
+            if (v1.length() < minLen) {
+                v2.copy(v1).setLength(minLen).sub(v1).multiplyScalar(.5)
+                boundingBox.max.add(v2)
+                boundingBox.min.sub(v2)
             }
 
             if (pointHalfWayAlongArrow)

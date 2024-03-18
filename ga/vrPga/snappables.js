@@ -1,7 +1,31 @@
-function makeUnaffected(viz) {
-    viz.affecters[0] = null
-    viz.affecters[1] = null
-    viz.affecters[2] = -1
+function initStack() {
+    let stackLength = 3 
+    let stack = Array(stackLength).fill(null)
+    putOnStack = (s) => {
+        if(stack.indexOf(snappables.indexOf(s)) !== -1)
+            return
+
+        let end = stack.indexOf(null)
+        if(end === -1)
+            end = stackLength - 1
+        for(let i = end; i > 0; --i)
+            stack[i] = stack[i - 1]
+
+        stack[0] = snappables.indexOf(s)
+
+        snappables.forEach((sn,i) => {
+            if(sn !== null)
+                sn.visible = stack.indexOf(i) !== -1
+        })
+    }
+}
+
+function copySnappable(from, to) {
+    for (let i = 0; i < 3; ++i)
+        to.affecters[i] = from.affecters[i]
+    to.markupPos.copy(from.markupPos)
+    to.mv.copy(from.mv)
+    to.markupPos.copy(from.markupPos)
 }
 
 function operate(affecters, target) {
@@ -10,7 +34,6 @@ function operate(affecters, target) {
     let affecter0 = affecters[0]
     let affecter1 = affecters[1]
 
-    // debugger
     if (affecter0.mv[op].length === 1)
         affecter0.mv[op](target)
     else
@@ -19,31 +42,26 @@ function operate(affecters, target) {
     target.normalize()
 }
 
-function giveSnappableProperties(s) {
-    
-    s.add(s.boxHelper)
-    s.boxHelper.visible = false
-    s.boxHelper.matrixAutoUpdate = false
-
-    s.sclptable = null
-
-    snappables.push(s)
-}
-
 function updateFromAffecters(output) {
-    if (output.affecters[0] !== null) {
-        operate(output.affecters, output.mv)
-        output.mv.normalize()
-        socket.emit("snappable", {
-            dqCoefficientsArray: output.mv,
-            i: snappables.indexOf(output)
-        })
-    }
+    if (output.affecters[0] === null)
+        return
 
-    let mv0 = output.affecters[0].mv
-    let mv1 = output.affecters[1].mv
     let res = output.mv
+    let mv0 = output.affecters[0].mv
     let op = operators[output.affecters[2]]
+    let mv1 = null
+    
+    if (output.affecters[1] === null)
+        mv0[op](res)
+    else {
+        mv1 = output.affecters[1].mv
+        mv0[op](mv1, res)
+    }
+    res.normalize() //sell-out!
+    socket.emit("snappable", {
+        dqCoefficientsArray: output.mv,
+        i: snappables.indexOf(output)
+    })
 
     if(op === `dqTo` ) {
 
@@ -67,7 +85,7 @@ function updateFromAffecters(output) {
             let planeParallelToLine1ContainingLine0 = mv0.joinPt( mv1.meet(e0, fl0), fl1).zeroGrade(3)
             let startyPoint = planeParallelToLine1ContainingLine0.meet(res.selectGrade(2,dq0), fl3)
             let dirAlongLine0 = mv0.meet(e0, fl4)
-            startyPoint.movePointInDirectionByDistance( dirAlongLine0, .02, output.markupPos ) //point on line0
+            startyPoint.movePointInDirectionByDistance( dirAlongLine0, .15, output.markupPos ) //point on line0
 
         }
         //yes this is one thing but a more important thing is choosing which things are visible to you
@@ -89,17 +107,37 @@ function updateFromAffecters(output) {
                 fl1.copy(mv1).normalizePoint()
                 let midPoint = fl0.add(fl1, fl2).multiplyScalar(.5, fl2)
                 midPoint.add(randomPt, output.markupPos)
-                clampPointDistanceFromThing( output.markupPos, camera.mvs.pos, 0., .5 )
+
+                //Really, you maybe want an "along" line rather than an "around" line
+                clampPointDistanceFromThing( output.markupPos, camera.mvs.pos, 0., .15 )
             }
             else if (mv0[7] !== 0. || mv1[7] !== 0.) {
                 let reachablePt = fl0.copy(mv0[7] !== 0. ? mv0 : mv1).normalizePoint()
                 reachablePt.add(randomPt, output.markupPos)
             }
+            //else both at infinity! Translation, perhaps
             
             //no idea what this will do for both ideal
             output.regularizeMarkupPos()
         }
     }
+}
+
+function makeSnappable(s) {
+
+    s.sclptable = null
+
+    let lastIndex = snappables.length - 1
+    if (snappables[lastIndex] === null)
+        snappables[lastIndex] = s
+    else
+        snappables.push(s)
+}
+
+function makeUnaffected(viz) {
+    viz.affecters[0] = null
+    viz.affecters[1] = null
+    viz.affecters[2] = -1
 }
 
 function interdependencyExists(a, b) {
@@ -124,11 +162,10 @@ function disposeMostOfSnappable(sn) {
     if (snappables.indexOf(sn) !== -1) {
 
         let i = snappables.indexOf(sn)
-
+        snappables[i] = null
         if (spectatorMode === false)
             socket.emit(`disposeSnappable`, { i })
-
-        snappables.splice(i, 1)
+        
     }
 
     if (sn.sclptable !== null) {

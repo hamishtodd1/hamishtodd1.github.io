@@ -11,6 +11,12 @@ function initEgaWithoutDeclarations() {
             super(8)
         }
 
+        userPow(amountDq, target) {
+            let dist = amountDq.translationDistance()
+            let unitLength = .1
+            return this.pow(dist * unitLength, target)
+        }
+
         //assumes no normalization at all and result isn't normalized either
         movePointInDirectionByDistance(dir, dist, target) {
             let factor = this[7] * dist / Math.sqrt(sq(dir[4]) + sq(dir[5]) + sq(dir[6]) )

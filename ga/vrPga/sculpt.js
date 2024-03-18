@@ -14,8 +14,7 @@ function initSclptables()
     const maxVoxels = 30000 //eyeballed
     const numWide = 3 // this isn't affected by currentSize yet
 
-    let currentColor = 3
-
+    let currentColor = 12
 
     establishSculptablePointSize = () => {
         if (coloredPointMats[0] === null) {
@@ -29,13 +28,12 @@ function initSclptables()
 
     let coloredPointMats = []
     {
-        let hueDivisions = 10
+        let hueDivisions = 9
         let greyDivisions = 3
-        var numCols = hueDivisions + greyDivisions
-        var cols = Array(numCols)
-        for (let i = 0; i < numCols; ++i) {
+        var cols = []
+        for (let i = 0, il = hueDivisions + greyDivisions; i < il; ++i) {
 
-            cols[i] = new THREE.Color()
+            cols.push(new THREE.Color())
             if (i < hueDivisions)
                 cols[i].setHSL(i / hueDivisions, 1., .5)
             else {
@@ -43,6 +41,8 @@ function initSclptables()
                 cols[i].setRGB(grey, grey, grey)
             }
         }
+        cols.push(new THREE.Color(0xDF9686))
+        var numCols = cols.length
 
         cols.forEach((col, i) => { 
             coloredPointMats[i] = null
@@ -248,6 +248,7 @@ function initSclptables()
             currentSize = Math.max(0, Math.min(sizes.length - 1, currentSize))
 
             currentColor = (currentColor + numCols + joystickVec.x) % numCols
+            log(currentColor)
         }
     }
     

@@ -36,6 +36,15 @@ function initHands() {
     handLeft.laser.rotation.x = TAU / 2.
     handRight.laser.rotation.x = TAU / 2.
 
+    let buttonDqVizes = [new DqViz(0xFFFF00,true), new DqViz(0xFFFF00,true)]
+    let analogueButtonValues = [0., 0.]
+    debugUpdates.push(() => {
+        buttonDqVizes[ LEFT].dq.translator(0., .11 * analogueButtonValues[ LEFT], 0.)
+        hands[ LEFT].dq.sandwich(e123, buttonDqVizes[ LEFT].markupPos)
+        buttonDqVizes[RIGHT].dq.translator(0., .11 * analogueButtonValues[RIGHT], 0.)
+        hands[RIGHT].dq.sandwich(e123, buttonDqVizes[RIGHT].markupPos)
+    })
+
     ///////////
     // Mouse //
     ///////////
@@ -49,14 +58,14 @@ function initHands() {
         function onMouseButtonDown(event) {
             if (event.button === 0)
                 onGrabButtonDown(focusHand)
-            // if (event.button === 2)
-            //     onPaintButtonDown(focusHand)
+            if (event.button === 2)
+                analogueButtonValues[focusHand] = 1.
         }
         function onMouseButtonUp(event) {
             if (event.button === 0)
                 onGrabButtonUp(focusHand)
-            // if (event.button === 2)
-            //     onPaintButtonUp(focusHand)
+            if (event.button === 2)
+                analogueButtonValues[focusHand] = 0.
         }
 
         function nonVrKeyDowns(event) {
@@ -68,6 +77,11 @@ function initHands() {
 
                 focusHand = 1-focusHand
             }
+
+            if (event.key === `[`)
+                analogueButtonValues[ LEFT] = 1.
+            if (event.key === `]`)
+                analogueButtonValues[RIGHT] = 1.
 
             //mouse fast forward and rewind
             //IF THIS ISN'T WORKING CHECK SCRIPT, MAY NEED TO CHANGE WINDOW NAME
@@ -85,6 +99,11 @@ function initHands() {
                 onPaintButtonUp(focusHand)
             if (event.key === "5")
                 onSnapButtonUp()
+
+            if (event.key === `[`)
+                analogueButtonValues[LEFT] = 0.
+            if (event.key === `]`)
+                analogueButtonValues[RIGHT] = 0.
         }
 
         document.addEventListener(`keydown`, nonVrKeyDowns)
@@ -111,7 +130,7 @@ function initHands() {
             return workingPlane.meet(hands[isLeft].laserDq, target)
         }
 
-        let posIndicator = new THREE.Mesh(new THREE.SphereGeometry(.01), new THREE.MeshPhongMaterial({ color: 0x00FF00 }))
+        var posIndicator = new THREE.Mesh(new THREE.SphereGeometry(.01), new THREE.MeshPhongMaterial({ color: 0x00FF00 }))
         scene.add(posIndicator)
 
         let lazyHandPosRight = new Fl()
@@ -247,9 +266,15 @@ function initHands() {
                 () => {},
                 () => {},
                 () => {}, //dunno how to get this to fire!
-                () => {
-                    vrSession.end()
-                    window.location.reload()
+                (focusHand) => {
+                    if(!focusHand) {
+                        vrSession.end()
+                        window.location.reload()
+                    }
+                    else {
+                        debuggerTrigger = true
+                    }
+                    log(debuggerTrigger)
                 },
                 onPaintButtonDown, //face button 2
                 onSnapButtonDown,  //face button 1
@@ -351,6 +376,7 @@ function initHands() {
                     }
                     //".value" is how you get the analogue part of the side button
 
+                    analogueButtonValues[focusHand] = source.gamepad.buttons[1].value
 
                     //THIS LETS YOU SEE WHICH BUTTONS ARE WHICH
                     //A and B are 4 and 5
@@ -358,8 +384,6 @@ function initHands() {
                     //     if(button.pressed)
                     //         log(j, source.handedness, button)
                     // })
-                    // if(source.gamepad.buttons[0].pressed)
-                    //     deleteHeld(i)
 
                     ++i
                 }

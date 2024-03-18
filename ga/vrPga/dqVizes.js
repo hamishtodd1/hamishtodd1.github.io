@@ -3,6 +3,8 @@
         A null bivector, hey man, that's still valid - it's a translation to infinity
         So, Just the beginning of the arrow, going off into the sky
 
+    Possibly 180s should have no arrow at all
+
     Possibly should have points at infinity where the axes meet the sky
 
     The box should be at the center of the circle that all three points fall on
@@ -72,9 +74,12 @@ function initDqVizes(transparentOpacity) {
             
             this.boundingBox = new THREE.Box3()
             this.boxHelper = new THREE.BoxHelper()
+            this.add(this.boxHelper)
+            this.boxHelper.visible = false
+            this.boxHelper.matrixAutoUpdate = false
 
             if (!omitFromSnappables)
-                giveSnappableProperties(this)
+                makeSnappable(this)
             this.affecters = [
                 null, null, -1
             ]
@@ -163,8 +168,7 @@ function initDqVizes(transparentOpacity) {
                     
                     this.boundingBox,
                     pointHalfWayAlongArrow)
-                updateBoxHelper(this.boxHelper, this.boundingBox)
-
+                
                 //axes
                 {
                     if (rotationPart.approxEquals(oneDq))
@@ -193,6 +197,8 @@ function initDqVizes(transparentOpacity) {
 
                     }
                 }
+
+                updateBoxHelper(this.boxHelper, this.boundingBox)
             }
         }
 

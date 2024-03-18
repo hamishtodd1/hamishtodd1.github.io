@@ -7,6 +7,21 @@ function initMultivectorWithoutDeclarations() {
     
     class Multivector extends Float32Array {
 
+        adhocNormSq() {
+            let adHocNormSq = this.eNormSq()
+            if (adHocNormSq === 0.)
+                adHocNormSq = this.iNormSq()
+            return adHocNormSq
+        }
+
+        velocityUnder(rotor, target) {
+            if (target === undefined)
+                target = new this.constructor()
+
+            let rotorLogarithm = rotor.logarithm(newDq)
+            return this.commutator(rotorLogarithm, target)
+        }
+
         addNoise(firstIndex, lastIndex, radius) {
             
             for (let i = firstIndex; i < lastIndex; ++i)
@@ -28,12 +43,14 @@ function initMultivectorWithoutDeclarations() {
                 if (this.constructor.indexGrades[i] === g )
                     this[i] = 0.
             }
+            return this
         }
 
         gradeDiff(that) {
             let thisGrade = this.grade()
             let thatGrade = that.grade()
-            if (thisGrade === -1 || thisGrade === -2 || thatGrade === -1 || thatGrade === -2)
+            if (thisGrade === Infinity || thisGrade === -2 || thisGrade === -1 || 
+                thatGrade === Infinity || thatGrade === -2 || thatGrade === -1)
                 console.error("grade error at " + getWhereThisWasCalledFrom())
             return Math.abs(thisGrade - thatGrade)
         }
@@ -100,6 +117,16 @@ function initMultivectorWithoutDeclarations() {
         mulReverse(b, target) {
             let bReverse = b.getReverse(b.constructor === Fl ? newFl : newDq)
             return this.mul(bReverse, target)
+        }
+
+        projectTransformOn(toBeProjectedOn, target) {
+            if (target === undefined)
+                target = new this.constructor()
+
+            let numerator = this.meet(toBeProjectedOn, this.constructor === toBeProjectedOn.constructor ? newDq : newFl)
+            numerator.mulReverse(toBeProjectedOn, target)
+
+            return target
         }
 
         projectOn(toBeProjectedOn, target) {
@@ -249,16 +276,16 @@ function initMultivectorWithoutDeclarations() {
             return target
         }
 
-        //0 is grade -1, and mixtures of any kind are grade -2
+        //0 is grade Infinity; even versors are grade -2; odd versors are grade -1
         grade() {
-            let grade = -1 //0 is grade -1!
+            let grade = Infinity //0 has this grade
             for (let i = 0; i < 8; ++i) {
                 if (Math.abs(this[i]) > eps) {
                     let extraGrade = this.constructor.indexGrades[i]
-                    if (grade === -1)
+                    if (grade === Infinity)
                         grade = extraGrade
                     else if (grade !== extraGrade) //combination
-                        grade = -2
+                        grade = this.constructor === Dq ? -2 : -1
                 }
             }
 
@@ -310,6 +337,11 @@ function initMultivectorWithoutDeclarations() {
                 target[i] = s * this[i]
 
             return target
+        }
+
+        //mostly here for the snapping
+        copyTo(target) {
+            return target.copy(this)
         }
 
         copy(b) {
