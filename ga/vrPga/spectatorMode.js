@@ -15,7 +15,7 @@ function initPotentialSpectatorReception() {
         turnOnSpectatorMode()
 
         if (snappables[msg.i] === undefined) {
-            snappables[msg.i] = new DqViz(0xFF0000, true, false) //TODO bug this thing must be showing up
+            snappables[msg.i] = new DqViz(0xFF0000, true, false, true) //TODO bug this thing must be showing up
             snappables[msg.i].visible = false
         }
         if (snappables[msg.i].sclptable === null || snappables[msg.i].sclptable === undefined)
@@ -46,7 +46,7 @@ function initPotentialSpectatorReception() {
         
         backedUpMsgs.forEach((msg) => {
             if (snappables[msg.i] === undefined)
-                snappables[msg.i] = new DqViz(0xFF0000, true, false)
+                snappables[msg.i] = new DqViz(0xFF0000, true, false, true)
 
             for (let j = 0; j < 8; ++j) {
                 snappables[msg.i].dq[j] = msg.dqCoefficientsArray[j]

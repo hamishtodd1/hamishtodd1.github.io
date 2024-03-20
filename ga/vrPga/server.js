@@ -7,6 +7,7 @@
         "adb shell ip route" - the ip address of the headset is the second one
         "adb connect [ip address]:5555" though maybe it works without ip address?
         chrome://inspect/#devices
+        Seeing "VR not allowed"? Check the console, something might not have let the function return
 
     On a new wifi? 
         On the laptop, cmd, "ipconfig". You want the IPv4 address

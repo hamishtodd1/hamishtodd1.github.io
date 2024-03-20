@@ -65,10 +65,16 @@ function initDqVizes(transparentOpacity) {
     let pointHalfWayAlongArrow = new Fl()
     class DqViz extends THREE.Group {
         
-        constructor(color, omitFromSnappables = false, transparent = false) {
+        constructor(color, omitFromSnappables = false, transparent = false, backgroundSnappable = false) {
 
             super()
+            vizes.push(this)
+            // log(vizes.length-1, getWhereThisWasCalledFrom())
+            this.dontUpdateMarkupPos = true
+            this.backgroundSnappable = backgroundSnappable
             scene.add(this)
+
+            this.sclptable = null
 
             this.snapRating = -1
             
@@ -87,7 +93,7 @@ function initDqVizes(transparentOpacity) {
             this.dq = new Dq() //better to say mv really, disambiguate from dqMeshes
             this.mv = this.dq
 
-            if(color === undefined) {
+            if(!color) {
                 color = new THREE.Color()
                 let i = (colFactor * 3.) % 3
                 color.lerpColors(discreteViridis[Math.floor(i)].color, discreteViridis[Math.ceil(i)].color, i % 1.)
@@ -132,8 +138,6 @@ function initDqVizes(transparentOpacity) {
                     return
                 
                 this.boundingBox.makeEmpty()
-
-                // this.markupPos.lerp(this.markupPosAttractor, .1)
 
                 this.dq.selectGrade(2, bivPart)
                 
@@ -207,19 +211,6 @@ function initDqVizes(transparentOpacity) {
             this.arrow.material.opacity = opacity
         }
 
-        regularizeMarkupPos(noUpperLimit) {
-
-            this.dq.invariantDecomposition(rotationPart, translationPart)
-            rotationPart.selectGrade(2, bivPart)
-            
-            //if this has no rotation component, fuck it
-            //could have something about it going to being closer to your line of sight
-            if ( Math.abs(bivPart.eNormSq()) < eps )
-                return
-
-            clampPointDistanceFromThing(this.markupPos, bivPart, .015, noUpperLimit ? Infinity : .06 )
-        }
-
         dispose() {
 
             disposeMostOfSnappable(this)
@@ -248,19 +239,6 @@ function initDqVizes(transparentOpacity) {
 
         getArrowCenter(target) {
             return this.dq.sqrt(dq0).sandwichFl(this.markupPos, target)
-        }
-
-        getNicePlane(target) {
-            
-            this.dq.invariantDecomposition(rotationPart, translationPart)
-
-            let strippedAxis = dq1
-            if (rotationPart.approxEquals(oneDq))
-                translationPart.selectGrade(2, strippedAxis)
-            else
-                rotationPart.selectGrade(2, strippedAxis)
-
-            strippedAxis.joinPt(camera.mvs.pos, target)
         }
 
         scaleAxisRadius(factor) {
@@ -332,7 +310,7 @@ function initDqVizes(transparentOpacity) {
     }
 
     debugDqVizes = [
-        new DqViz(0xFFFF00, true, false), new DqViz(0xFFFF00, true, false)
+        new DqViz(0xFFFF00, true, false, true), new DqViz(0xFFFF00, true, false, true)
     ]
     debugDqVizes.forEach(ddqv=>ddqv)
     debugDqVizes.forEach(ddqv => {

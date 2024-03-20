@@ -159,10 +159,6 @@ function initSclptables()
                 }
             }
 
-            this.dqViz.dq.getReverse(dq0)
-            this.com.getNormalization(fl0)
-            dq0.sandwichFl(fl0, this.dqViz.markupPos)
-
             updateBoxHelper(this.boxHelper, this.boundingBox)
 
         }
@@ -248,7 +244,6 @@ function initSclptables()
             currentSize = Math.max(0, Math.min(sizes.length - 1, currentSize))
 
             currentColor = (currentColor + numCols + joystickVec.x) % numCols
-            log(currentColor)
         }
     }
     

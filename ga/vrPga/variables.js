@@ -10,6 +10,9 @@ const RIGHT = 0
 const LEFT = 1
 const hands = Array(2)
 let debuggerTrigger = false
+let oddGrabbee = null
+const evenGrabbees = [null, null]
+const vizes = []
 
 let frameDelta = 0.
 let frameCount = 0

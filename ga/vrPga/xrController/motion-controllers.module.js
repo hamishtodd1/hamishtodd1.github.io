@@ -59,7 +59,6 @@ async function fetchProfilesList(basePath) {
   }
 
   const profileListFileName = 'profilesList.json';
-    log(`${basePath}/${profileListFileName}`)
   const profilesList = await fetchJsonFile(`${basePath}/${profileListFileName}`);
   return profilesList;
 }

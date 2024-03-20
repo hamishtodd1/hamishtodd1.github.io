@@ -100,9 +100,6 @@ function initSnapping() {
             updateFromAffecters(psv)
             psv.visible = true
 
-            // psv.markupPos.addNoise(4,7, .06)
-            // psv.regularizeMarkupPos()
-
             ++lowestUnused
         }
 

@@ -66,13 +66,14 @@ function initFlVizes(transparentOpacity) {
     let arrow2Start = new Fl()
     let planePosition = new Fl()
     let evenPart = new Dq()
-    let axisBiv = new Dq()
 
     class FlViz extends THREE.Group {
 
-        constructor(color = 0xFF0000, omitFromSnappables = false, transparent = false) {
+        constructor(color, omitFromSnappables = false, transparent = false) {
             
             super()
+            vizes.push(this)
+            this.dontUpdateMarkupPos = true
             scene.add(this)
 
             this.snapRating = -1
@@ -80,7 +81,7 @@ function initFlVizes(transparentOpacity) {
             this.lockedGrade = -1
 
             let pointMat = new THREE.MeshPhongMaterial({
-                color,
+                color: (color || 0xFF0000),
                 transparent,
                 opacity: transparent ? transparentOpacity : 1.
             })
@@ -235,12 +236,6 @@ function initFlVizes(transparentOpacity) {
                     e13.projectOn(arrow2Start, dq0)
                     dq1.mulReverse( dq0, dq2 ).sqrtSelf().toQuaternion(this.arrowBar.quaternion)
                     this.arrowBar.scale.y = arrow1End.distanceToPt(arrow2Start)
-
-                    // evenPart.selectGrade(2, axisBiv)
-                    // let plane1 = axisBiv.joinPt( this.markupPos, fl0 )
-                    // planeMeshQuat( extraPlanes[0], plane1, this.markupPos )
-                    // let plane2 = axisBiv.joinPt( arrow2Start, fl0 )
-                    // planeMeshQuat( extraPlanes[1], plane2, arrow2Start )
                 }
                 
                 //plane
@@ -249,7 +244,7 @@ function initFlVizes(transparentOpacity) {
                     let newScale = clamp(this.diskGroup.scale.x + (hasPlane ? 1. : -1.) * scaleSpeed * frameDelta,0.,1.)
                     this.diskGroup.scale.setScalar(newScale)
 
-                    this.getSettledDiskPosition(planePosition)
+                    this.getSettledDiskPosition(this.markupPos,planePosition)
                     this.diskGroup.position.lerp(planePosition.pointToGibbsVec(v1), .13)
                     if(hasPlane)
                         planeMeshQuat(this.diskGroup, planePart, planePosition)
@@ -264,7 +259,7 @@ function initFlVizes(transparentOpacity) {
             }
         }
 
-        getSettledDiskPosition(target) {
+        getSettledDiskPosition(pointToProject,target) {
 
             this.fl.selectGrade(1, planePart)
             this.fl.selectGrade(3, pointPart)
@@ -272,19 +267,19 @@ function initFlVizes(transparentOpacity) {
             let pointIsIdeal = this.fl[7] === 0.
 
             if (!hasPoint)
-                this.markupPos.projectOn(planePart, target).normalizePoint()
+                pointToProject.projectOn(planePart, target).normalizePoint()
             else if (!pointIsIdeal)
                 target.copy(pointPart)
             else {
-                this.fl.sandwich(this.markupPos, fl0)
-                this.markupPos.addScaled(fl0, this.markupPos[7] / fl0[7], target)
+                this.fl.sandwich(pointToProject, fl0)
+                pointToProject.addScaled(fl0, pointToProject[7] / fl0[7], target)
             }
 
             return target
         }
 
-        settleDiskPosition() {
-            this.getSettledDiskPosition(planePosition)
+        settleDiskPosition(pointToProject) {
+            this.getSettledDiskPosition(pointToProject,planePosition)
             planePosition.pointToGibbsVec(this.diskGroup.position)
         }
 
@@ -293,30 +288,6 @@ function initFlVizes(transparentOpacity) {
             this.pointMesh.material.opacity = opacity
             this.arrow1.material.opacity = opacity
             this.arrow2.material.opacity = opacity
-        }
-
-        regularizeMarkupPos() {
-
-            //markupPos is only relevant when we have rotoreflection or transflection, so this will probably only be called then
-            //And away from the plane
-            //push the markupPos away from the axis of the rotation
-
-            this.fl.selectGrade( 1, planePart )
-            this.fl.selectGrade( 3, pointPart )
-            let hasPlane = !planePart.isZero()
-            let hasPoint = !pointPart.isZero()
-
-            if(!hasPlane || !hasPoint)
-                return
-
-            let maxDistFromPlane = .015
-            if(planePart.distanceToPt(this.markupPos) > maxDistFromPlane)
-                clampPointDistanceFromThing(this.markupPos, planePart, maxDistFromPlane, 1.)
-
-            //TODO it should be far enough away from the axis that the arrow goes a larger arclength
-            planePart.inner(pointPart, axisBiv)
-            if (Math.abs(axisBiv.eNormSq()) > eps)
-                clampPointDistanceFromThing(this.markupPos, axisBiv, .05)
         }
 
         dispose() {

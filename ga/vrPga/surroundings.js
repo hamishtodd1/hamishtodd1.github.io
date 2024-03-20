@@ -37,7 +37,7 @@ function initSurroundings() {
     scene.add(floor)
 
     if(passThroughMode)
-        floor.scale.set(1.1, 1., .5)
+        floor.scale.set(1.6, 1.6, .5)
     else {
         scene.background = new THREE.Color(0x8F8F8F)
 

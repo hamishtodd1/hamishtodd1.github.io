@@ -46,20 +46,18 @@
 
 function initControl() {
 
-    initButtonLabels()
+    // initButtonLabels()
     initControlHelpers()
 
     const paintees = [null, null]
     const highlightees = [null, null]
 
     const handsHoldingOdd = [false, false]
-    let oddGrabbee = null
     
-    const evenGrabbees = [null, null]
     let showMarkupVizes = false
-    let oldDqVizes = [new DqViz( 0xFF0000, true, true ), new DqViz( 0xFF0000, true, true )]
+    let oldDqVizes = [new DqViz( 0xFF0000, true, true, true ), new DqViz( 0xFF0000, true, true, true)]
     oldDqVizes[0].visible = false; oldDqVizes[1].visible = false;
-    let movementSinceGrabViz = [new DqViz(0xFF0000, true, true), new DqViz(0xFF0000, true, true)]
+    let movementSinceGrabViz = [new DqViz(0xFF0000, true, true, true), new DqViz(0xFF0000, true, true, true)]
     movementSinceGrabViz[0].visible = false; movementSinceGrabViz[1].visible = false;
 
     let handDqOnGrabs = [new Dq(), new Dq()]
@@ -117,6 +115,7 @@ function initControl() {
             let bestRatedSnap = potentialSnaps[snapIndex]
 
             let existingSnappable = snappables.find(s => (
+                s !== null &&
                 s.visible === false && 
                 bestRatedSnap.mv.constructor === s.constructor && 
                 bestRatedSnap.mv.equals(s.mv)))
@@ -158,14 +157,18 @@ function initControl() {
         if (isOddVersor) {
 
             if (evenGrabbees[otherHand] !== null ) {
+
+                handsHoldingOdd[otherHand] = true
+
                 //need to switch it to being an fl
                 let oldDqViz = evenGrabbees[otherHand]
                 let sclptable = oldDqViz.sclptable
                 evenGrabbees[otherHand] = null
                 oldDqViz.sclptable = null
+                log("disposing ", snappables.indexOf(oldDqViz))
                 oldDqViz.dispose()
 
-                let newViz = new FlViz()
+                let newViz = new FlViz(null,false,false)
                 newViz.sclptable = sclptable
                 grabbee = newViz
             }
@@ -174,9 +177,8 @@ function initControl() {
             handsHoldingOdd[focusHand] = true
 
             v1.addVectors(hands[0].position, hands[1].position).multiplyScalar(.5)
-            oddGrabbee.markupPos.pointFromGibbsVec(v1)
             handleOddGestures(oddGrabbee)
-            oddGrabbee.settleDiskPosition()
+            oddGrabbee.settleDiskPosition(fl0.pointFromGibbsVec(v1))
 
             evenGrabbees[LEFT] = null
             evenGrabbees[RIGHT] = null
@@ -193,7 +195,7 @@ function initControl() {
             evenGrabbees[focusHand] = grabbee
 
             if( evenGrabbees[focusHand] === null )
-                evenGrabbees[focusHand] = new DqViz()
+                evenGrabbees[focusHand] = new DqViz(null, false, false, false)
 
             if(evenGrabbees[focusHand].dq === undefined)
                 debugger
@@ -206,10 +208,11 @@ function initControl() {
 
             oldDqVizes[focusHand].dq.copy(snappableDqOnGrabs[focusHand])
             oldDqVizes[focusHand].markupPos.copy(evenGrabbees[focusHand].markupPos)
-            oldDqVizes[focusHand].dq.sandwich(oldDqVizes[focusHand].markupPos, movementSinceGrabViz[focusHand].markupPos)
+            oldDqVizes[focusHand].getArrowTip(movementSinceGrabViz[focusHand].markupPos)
             movementSinceGrabViz[focusHand].dq.copy(oneDq)
 
             evenGrabbees[focusHand].visible = true
+            evenGrabbees[focusHand].dontUpdateMarkupPos = true
         }
     }
 
@@ -277,13 +280,11 @@ function initControl() {
         //////////
         // EVEN //
         //////////
-        hideDqDecompositionVizes()
-        // if(frameCount === 1)
-        //     evenGrabbees[0] = new DqViz()
         for(let hand = 0; hand < 2; ++hand) {
 
-            if ( evenGrabbees[hand] !== null)
-            {
+            if ( evenGrabbees[hand] === null)
+                hideDqDecompositionVizes(hand)
+            else {
                 //TODO need more stuff if you're using both hands at once
 
                 highlightees[hand] = null
@@ -293,8 +294,7 @@ function initControl() {
                 hands[hand].dq.mulReverse(handDqOnGrabs[hand], movementSinceGrabViz[hand].dq)
                 movementSinceGrabViz[hand].dq.mul(snappableDqOnGrabs[hand], evenGrabbees[hand].dq)
 
-                if(snapMode)
-                    roundEvenGestures(evenGrabbees[hand], snapMode)
+                roundEvenGesture(hand, snapMode)
 
                 if (showMarkupVizes) {
                     movementSinceGrabViz[hand].visible = !oldDqVizes[hand].dq.equals(oneDq)
@@ -328,7 +328,7 @@ function initControl() {
             //////////////////
             if (evenGrabbees[hand] === null && paintees[hand] === null && oddGrabbee === null) {
 
-                let [nearest, nearestDistSq] = getNearest(hand) //getNearest(getIndicatedHandPosition(hand, fl0))
+                let [nearest, nearestDistSq] = getNearestGrabbable(hand) //getNearest(getIndicatedHandPosition(hand, fl0))
 
                 //probably threshold should be about whether you are in the cuboid
                 if (nearestDistSq > .01)
@@ -416,6 +416,7 @@ function initControl() {
         if (evenGrabbees[focusHand]) {
 
             let output = evenGrabbees[focusHand]
+            output.dontUpdateMarkupPos = false
             evenGrabbees[focusHand] = null
             movementSinceGrabViz[focusHand].visible = false
             oldDqVizes[focusHand].visible = false
@@ -425,15 +426,6 @@ function initControl() {
                 output = snapIfAcceptable(output, potentialSnapDqVizes, bestSnapIndex)
             }
 
-            if (output.sclptable) {
-                output.dq
-                    .getReverse(dq0)
-                    .sandwich(
-                        output.dq.sandwich(output.sclptable.com, fl0),
-                        output.markupPos)
-                output.regularizeMarkupPos(true)
-            }
-
             putOnStack(output)
         }
 
@@ -441,9 +433,11 @@ function initControl() {
 
             handsHoldingOdd[focusHand] = false
             
+            // debugger
             if (!handsHoldingOdd[0] && !handsHoldingOdd[1]) {
 
                 let output = oddGrabbee
+                output.dontUpdateMarkupPos = false
                 oddGrabbee = null
 
                 if (snapMode) {
@@ -452,14 +446,16 @@ function initControl() {
                 }
 
                 if (output.affecters[0] === null) {
-                    roundFlToTypes(output.fl, true)
+                    
+                    roundFlToTypes(output, true)
                     let has1 = output.fl.hasGrade(1)
                     let has3 = output.fl.hasGrade(3)
                     output.lockedGrade = has1 && !has3 ? 1 : 3 //nobody wants rotoreflections/transflections
 
-                    if(output.lockedGrade === 1) {
+                    //Bit hacky. For rotoreflections.
+                    if (output.lockedGrade === 1) {
                         output.markupPos.pointFromGibbsVec(output.diskGroup.position)
-                        output.settleDiskPosition()
+                        output.settleDiskPosition(output.markupPos)
                     }
                 }
 

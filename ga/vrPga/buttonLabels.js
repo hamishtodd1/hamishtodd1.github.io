@@ -3,6 +3,7 @@
 
  */
 
+putButtonLabelsOnVrControllers = ()=> {}
 function initButtonLabels() {
 
     //on left hand

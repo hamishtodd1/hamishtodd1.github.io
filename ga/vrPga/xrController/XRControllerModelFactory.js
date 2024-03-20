@@ -233,7 +233,6 @@ class XRControllerModelFactory {
 					profile,
 					assetPath
 				);
-                log(assetPath)
 
 				const cachedAsset = this._assetCache[ controllerModel.motionController.assetUrl ];
 				if ( cachedAsset ) {

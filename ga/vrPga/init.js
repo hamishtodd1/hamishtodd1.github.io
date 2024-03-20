@@ -1,5 +1,4 @@
 /*
-    Business partner idea: Sam Partridge
 
     How scalars work
         Any rotation, translation (and maybe roto/transflection) has a distance and angle implicitly
@@ -29,10 +28,8 @@
         Letting people do more in the spreadsheet
 
     TODO for FoC demo:
-        Redo website!
+        Redo personal website and vtbotb
         Spreadsheet
-        Need a centralized "updateMarkupPoses"
-            markupPosAttractor
         Just an eye that rotates in place
             Join eye position with initial eyeFocusPoint (at infinity), get line
             Join eye position with focusPoint, get line
@@ -50,6 +47,7 @@
         Paint eraser "color"
         Meshes can have fl's as their transform
     Jon demo:
+        For rotoreflections/transflections, definitely need the pointy extension of your plane to the axis point
         arrow starts move slowly to correct position instead of teleporting
         Levels. Just 4 or so
         Gauges. Some kind of animation system for this triggered by creating mvs.
@@ -64,6 +62,7 @@
             One likes dynamism or something, just "seeing more stuff happen"
         Undo
     Beyond:
+        Don't want to be loading the xr input profile from the internet. "assetPath" may be a place to start
         Bounding cylinders, not cuboids
             One line L, a plane P in the middle, a radius r and a height h
         Think about what hand gestures bring about loop translations
@@ -134,7 +133,7 @@ async function init() {
     document.body.appendChild(container)
 
     initDqMeshes()
-    
+
     let transparentOpacity = .45
     initArrows()
     initDqVizes(transparentOpacity)
@@ -144,13 +143,13 @@ async function init() {
     initSurroundings()
 
     initHands()
-    initButtons()
     
     initSclptables()
     
     initSnapping()
     initPotentialSpectatorReception()
     initStack()
+    initMarkupPos()
     initControl()
 
     // initCircuits()
@@ -186,7 +185,6 @@ async function init() {
 
             updateCameraMvs()
             updateHandMvs()
-            buttonWhileDowns()
 
             movingPaintingHighlightingHandLabels()
             updatePaletteAnimation()
@@ -197,8 +195,9 @@ async function init() {
                 updateFromAffecters(s)
             })
 
-            updateRecording()
             //then broadcast
+
+            updateMarkupPoses()
         }
         
         obj3dsWithOnBeforeRenders.forEach(obj3d => obj3d.onBeforeRender())

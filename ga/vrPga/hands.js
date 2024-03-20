@@ -36,13 +36,14 @@ function initHands() {
     handLeft.laser.rotation.x = TAU / 2.
     handRight.laser.rotation.x = TAU / 2.
 
-    let buttonDqVizes = [new DqViz(0xFFFF00,true), new DqViz(0xFFFF00,true)]
+    let buttonDqVizes = [new DqViz(0xFFFF00, false, false, true), new DqViz(0xFFFF00, false, false, true)]
+    log(snappables.indexOf(buttonDqVizes[0]), snappables.indexOf(buttonDqVizes[1]))
     let analogueButtonValues = [0., 0.]
     debugUpdates.push(() => {
         buttonDqVizes[ LEFT].dq.translator(0., .11 * analogueButtonValues[ LEFT], 0.)
-        hands[ LEFT].dq.sandwich(e123, buttonDqVizes[ LEFT].markupPos)
+        getIndicatedHandPosition( LEFT, buttonDqVizes[ LEFT].markupPos)
         buttonDqVizes[RIGHT].dq.translator(0., .11 * analogueButtonValues[RIGHT], 0.)
-        hands[RIGHT].dq.sandwich(e123, buttonDqVizes[RIGHT].markupPos)
+        getIndicatedHandPosition(RIGHT, buttonDqVizes[RIGHT].markupPos)
     })
 
     ///////////
@@ -59,55 +60,37 @@ function initHands() {
             if (event.button === 0)
                 onGrabButtonDown(focusHand)
             if (event.button === 2)
-                analogueButtonValues[focusHand] = 1.
+                onPaintButtonDown(focusHand)
         }
         function onMouseButtonUp(event) {
             if (event.button === 0)
                 onGrabButtonUp(focusHand)
             if (event.button === 2)
-                analogueButtonValues[focusHand] = 0.
+                onPaintButtonUp(focusHand)
         }
 
-        function nonVrKeyDowns(event) {
+        let snapMode = true
+        function nonVrKeyDowns(event) { //forget about holding, just use toggles, too much hassle
 
-            if (event.key === ` `) {
-                
-                // onHandButtonUp(true, false, focusHand)
-                // onHandButtonUp(false, true, focusHand)
-
+            if (event.key === ` `)
                 focusHand = 1-focusHand
-            }
-
-            if (event.key === `[`)
-                analogueButtonValues[ LEFT] = 1.
-            if (event.key === `]`)
-                analogueButtonValues[RIGHT] = 1.
+            if (event.key === `6`)
+                analogueButtonValues[ focusHand] = 1. - analogueButtonValues[focusHand]
 
             //mouse fast forward and rewind
             //IF THIS ISN'T WORKING CHECK SCRIPT, MAY NEED TO CHANGE WINDOW NAME
-            if (event.key === "6")
-                onPaintButtonDown(focusHand)
-            if (event.key === "5")
-                onSnapButtonDown()
+            if (event.key === "5" ) {
+                if(!snapMode)
+                    onSnapButtonDown()
+                else
+                    onSnapButtonUp()
+                snapMode = !snapMode
+            }
 
             keyToDiscreteStick(event.key, discreteSticks[focusHand])
         }
-        function nonVrKeyUps(event) {
-            // if (event.key === "5")
-            //     onSnapButtonUp()
-            if (event.key === "6")
-                onPaintButtonUp(focusHand)
-            if (event.key === "5")
-                onSnapButtonUp()
-
-            if (event.key === `[`)
-                analogueButtonValues[LEFT] = 0.
-            if (event.key === `]`)
-                analogueButtonValues[RIGHT] = 0.
-        }
 
         document.addEventListener(`keydown`, nonVrKeyDowns)
-        document.addEventListener(`keyup`, nonVrKeyUps)
         document.addEventListener("mousedown", onMouseButtonDown)
         document.addEventListener("mouseup", onMouseButtonUp)
     }
@@ -126,8 +109,8 @@ function initHands() {
         let workingPlane = new Fl()
         let rayToMouse = new Dq().copy(e12)
 
-        getIndicatedHandPosition = (isLeft, target) => {
-            return workingPlane.meet(hands[isLeft].laserDq, target)
+        getIndicatedHandPosition = (handIndex, target) => {
+            return workingPlane.meet(hands[handIndex].laserDq, target)
         }
 
         var posIndicator = new THREE.Mesh(new THREE.SphereGeometry(.01), new THREE.MeshPhongMaterial({ color: 0x00FF00 }))
@@ -216,7 +199,6 @@ function initHands() {
         document.removeEventListener('mousemove', onMouseMove)
         document.removeEventListener('wheel', onMouseWheel)
         document.removeEventListener('keydown', nonVrKeyDowns)
-        document.removeEventListener('keyup', nonVrKeyUps)
         document.removeEventListener('mousedown', onMouseButtonDown)
         document.removeEventListener('mouseup', onMouseButtonUp)
         orbitControls.enabled = false
@@ -310,8 +292,8 @@ function initHands() {
                 }
             }
 
-            getIndicatedHandPosition = (isLeft, target) => {
-                return target.pointFromGibbsVec(hands[isLeft].position)
+            getIndicatedHandPosition = (handIndex, target) => {
+                return target.pointFromGibbsVec(hands[handIndex].position)
             }
 
             updateHandMvs = () => {
@@ -353,40 +335,41 @@ function initHands() {
                 })
 
                 let i = 0
-                for (const source of session.inputSources) {
-                    if (!source.gamepad)
-                        continue
-
-                    let focusHand = source.handedness === `left` ? LEFT : RIGHT
-
-                    discreteSticksOld[i].copy(discreteSticks[i])
-                    vrControllerAxesToDiscreteStick(source.gamepad.axes, discreteSticks[i])
-
-                    let buttonStates = buttonStateses[focusHand]
-                    for(let i = 0, il = buttonStates.length; i < il; ++i) {
-                        if(source.gamepad.buttons[i].pressed && !buttonStates[i] )
-                            buttonOnDowns[i](focusHand)
-                        if(!source.gamepad.buttons[i].pressed && buttonStates[i] )
-                            buttonOnUps[i](focusHand)
-
-                        // if(buttonOnDowns[i] === onSnapButtonDown )
-                        //     log(buttonStates[i], source.gamepad.buttons[i].pressed)
-
-                        buttonStates[i] = source.gamepad.buttons[i].pressed
+                if (typeof session.inputSources[Symbol.iterator] === 'function') {
+                    for (const source of session.inputSources) {
+                        if (!source.gamepad)
+                            continue
+    
+                        let focusHand = source.handedness === `left` ? LEFT : RIGHT
+    
+                        discreteSticksOld[i].copy(discreteSticks[i])
+                        vrControllerAxesToDiscreteStick(source.gamepad.axes, discreteSticks[i])
+    
+                        let buttonStates = buttonStateses[focusHand]
+                        for(let i = 0, il = buttonStates.length; i < il; ++i) {
+                            if (source.gamepad.buttons[i] === undefined)
+                                continue
+                            if(source.gamepad.buttons[i].pressed && !buttonStates[i] )
+                                buttonOnDowns[i](focusHand)
+                            if(!source.gamepad.buttons[i].pressed && buttonStates[i] )
+                                buttonOnUps[i](focusHand)
+                            if(i===1)
+                                analogueButtonValues[focusHand] = source.gamepad.buttons[i].value
+    
+                            buttonStates[i] = source.gamepad.buttons[i].pressed
+                        }
+    
+                        //THIS LETS YOU SEE WHICH BUTTONS ARE WHICH
+                        //A and B are 4 and 5
+                        // source.gamepad.buttons.forEach((button, j) => {
+                        //     if(button.pressed)
+                        //         log(j, source.handedness, button)
+                        // })
+    
+                        ++i
                     }
-                    //".value" is how you get the analogue part of the side button
-
-                    analogueButtonValues[focusHand] = source.gamepad.buttons[1].value
-
-                    //THIS LETS YOU SEE WHICH BUTTONS ARE WHICH
-                    //A and B are 4 and 5
-                    // source.gamepad.buttons.forEach((button, j) => {
-                    //     if(button.pressed)
-                    //         log(j, source.handedness, button)
-                    // })
-
-                    ++i
                 }
+
             }
 
             scene.add(vrRight)
