@@ -416,7 +416,7 @@ function initEgaWithoutDeclarations() {
                 if (iNormSq !== 0.) //it's a translation axis
                     return this.multiplyScalar(1. / Math.sqrt(iNormSq), target)
                 else {
-                    console.warn("zero dual quaternion normalization from line: ", getWhereThisWasCalledFrom() )
+                    console.warn("zero dual quaternion normalization from line: ", getWhereThisWasCalledFrom(1) )
                     return target.zero()
                 }
             }
@@ -619,23 +619,6 @@ function initEgaWithoutDeclarations() {
         e0123 = e0.mulFl(e123)
     }
 
-    let onThing = new Fl()
-    let out = new Dq()
-    clampPointDistanceFromThing = (point, thing, minDist, maxDist = Infinity) => {
-
-        point.projectOn(thing, onThing)
-        onThing.dqTo(point, out).normalizeTranslation()
-        let dist = out.translationDistance()
-        if (dist === 0.)
-            console.error("zero distance from thing")
-        let newDist = clamp(dist, minDist, maxDist)
-        out[1] *= newDist / dist
-        out[2] *= newDist / dist
-        out[3] *= newDist / dist
-
-        out.sandwich(onThing, point)
-        point.normalizePoint()
-        return point
-    }
+    
     
 /*END*/}

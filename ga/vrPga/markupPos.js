@@ -1,5 +1,24 @@
 function initMarkupPos() {
 
+    let onThing = new Fl()
+    let out = new Dq()
+    clampPointDistanceFromThing = (point, thing, minDist, maxDist = Infinity) => {
+
+        point.projectOn(thing, onThing)
+        onThing.dqTo(point, out).normalizeTranslation()
+        let dist = out.translationDistance()
+        if (dist === 0.)
+            console.error("zero distance from thing")
+        let newDist = clamp(dist, minDist, maxDist)
+        out[1] *= newDist / dist
+        out[2] *= newDist / dist
+        out[3] *= newDist / dist
+
+        out.sandwich(onThing, point)
+        point.normalizePoint()
+        return point
+    }
+
     let rotationPart = new Dq()
     let translationPart = new Dq()
     let planePart = new Fl()
@@ -99,26 +118,31 @@ function initMarkupPos() {
                         mv1.hasGrade(3)
     
                     if (isTwoPoints) {
-                        viz.mv[0] = 0.
-                        viz.mv[7] = 0.
+                        //TODO hacky way to enforce grade locking
+                        viz.dq[0] = 0.
+                        viz.dq[7] = 0.
     
-                        if (mv0[7] !== 0. && mv1[7] !== 0.) {
+                        let neitherIdeal = mv0[7] !== 0. && mv1[7] !== 0.
+                        let atLeastOneFinite = mv0[7] !== 0. || mv1[7] !== 0.
+                        if (neitherIdeal) {
                             fl0.copy(mv0).normalizePoint()
                             fl1.copy(mv1).normalizePoint()
                             let midPoint = fl0.add(fl1, fl2).multiplyScalar(.5, fl2)
-                            midPoint.add(randomPt, viz.markupPos)
+                            // debugger
+                            let midPlane = midPoint.inner(viz.dq, fl3)
+                            let myRandomPoint = fl4.point(-0.34892, 0.4547, 0.0083, 1.)
+                            myRandomPoint.projectOn(midPlane, viz.markupPos)
     
                             //Really, you maybe want an "along" line rather than an "around" line
-                            clampPointDistanceFromThing(viz.markupPos, camera.mvs.pos, 0., .15)
+                            clampPointDistanceFromThing(viz.markupPos, midPoint, 0., .01)
+                            //super close because who cares about the fucking rotation
                         }
-                        else if (mv0[7] !== 0. || mv1[7] !== 0.) {
-                            let reachablePt = fl0.copy(mv0[7] !== 0. ? mv0 : mv1).normalizePoint()
-                            reachablePt.add(randomPt, viz.markupPos)
+                        else if (atLeastOneFinite) {
+                            let finitePt = fl0.copy(mv0[7] !== 0. ? mv0 : mv1).normalizePoint()
+                            finitePt.add(randomPt, viz.markupPos)
+                            regularizeMarkupPos(viz)
                         }
                         //else both at infinity! Translation, perhaps
-    
-                        //no idea what this will do for both ideal
-                        regularizeMarkupPos(viz)
                     }
                 }
             }

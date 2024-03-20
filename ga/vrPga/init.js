@@ -28,8 +28,8 @@
         Letting people do more in the spreadsheet
 
     TODO for FoC demo:
-        Redo personal website and vtbotb
         Spreadsheet
+        Redo personal website and vtbotb
         Just an eye that rotates in place
             Join eye position with initial eyeFocusPoint (at infinity), get line
             Join eye position with focusPoint, get line
