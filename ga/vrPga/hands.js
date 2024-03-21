@@ -7,11 +7,13 @@
 function initHands() {
 
     let standinHandGeo = new THREE.BoxGeometry(.075,.075,.075)
-    handRight = new DqMesh(standinHandGeo, new THREE.MeshPhongMaterial({ color: 0x00FF00 }))
-    handLeft = new DqMesh(standinHandGeo, new THREE.MeshPhongMaterial({ color: 0x0000FF }))
-    scene.add(handRight)
-    scene.add(handLeft)
-    // e123.dqTo(comfortableLookPos(fl0, 0., -.42), handRight.dq)
+    hands[RIGHT] = new THREE.Mesh(standinHandGeo, new THREE.MeshPhongMaterial({ color: 0x00FF00 }))
+    hands[LEFT] = new THREE.Mesh(standinHandGeo, new THREE.MeshPhongMaterial({ color: 0x0000FF }))
+    hands[RIGHT].dq = new Dq()
+    hands[LEFT].dq = new Dq()
+    scene.add(hands[RIGHT])
+    scene.add(hands[LEFT])
+    // e123.dqTo(comfortableLookPos(fl0, 0., -.42), hands[RIGHT].dq)
 
     let discreteSticks = [new THREE.Vector2(), new THREE.Vector2()]
     let discreteSticksOld = [new THREE.Vector2(), new THREE.Vector2()]
@@ -22,22 +24,21 @@ function initHands() {
     ])
     let laserMat = new THREE.LineBasicMaterial({ color: 0xFFFFFF })
     function bestowHandProperties() {
-        handRight.laserDq = new Dq().copy(e12)
-        handLeft.laserDq  = new Dq().copy(e12)
-        handRight.laser = new THREE.Line( laserPointerGeo, laserMat )
-        handRight.add( handRight.laser )
-        handLeft.laser  = new THREE.Line( laserPointerGeo, laserMat )
-        handLeft.add(handLeft.laser)
-        hands[RIGHT] = handRight
-        hands[LEFT]  = handLeft
+        hands[RIGHT].laserDq = new Dq().copy(e12)
+        hands[LEFT].laserDq  = new Dq().copy(e12)
+        hands[RIGHT].laser = new THREE.Line( laserPointerGeo, laserMat )
+        hands[RIGHT].add( hands[RIGHT].laser )
+        hands[LEFT].laser  = new THREE.Line( laserPointerGeo, laserMat )
+        hands[LEFT].add(hands[LEFT].laser)
+        hands[RIGHT] = hands[RIGHT]
+        hands[LEFT]  = hands[LEFT]
     }
     bestowHandProperties()
     //because apparently VR controllers go the opposite way than you might expect
-    handLeft.laser.rotation.x = TAU / 2.
-    handRight.laser.rotation.x = TAU / 2.
+    hands[LEFT].laser.rotation.x = TAU / 2.
+    hands[RIGHT].laser.rotation.x = TAU / 2.
 
     let buttonDqVizes = [new DqViz(0xFFFF00, false, false, true), new DqViz(0xFFFF00, false, false, true)]
-    log(snappables.indexOf(buttonDqVizes[0]), snappables.indexOf(buttonDqVizes[1]))
     let analogueButtonValues = [0., 0.]
     debugUpdates.push(() => {
         buttonDqVizes[ LEFT].dq.translator(0., .11 * analogueButtonValues[ LEFT], 0.)
@@ -124,8 +125,11 @@ function initHands() {
             lazyHandPosLeft.copy(lazyHandPosRight)
             lazyHandPosLeft[6] *= -1.
 
-            e123.dqTo(lazyHandPosRight, handRight.dq)
-            e123.dqTo(lazyHandPosLeft, handLeft.dq)
+            e123.dqTo(lazyHandPosRight, hands[RIGHT].dq)
+            e123.dqTo(lazyHandPosLeft, hands[LEFT].dq)
+
+            hands[RIGHT].dq.toPosQuat(hands[RIGHT].position, hands[RIGHT].quaternion)
+            hands[LEFT].dq.toPosQuat(hands[LEFT].position, hands[LEFT].quaternion)
         }
         
         updateHandMvs = () => {
@@ -151,6 +155,8 @@ function initHands() {
 
             discreteSticksOld[focusHand].copy(discreteSticks[focusHand])
             discreteSticks[focusHand].set(0.,0.)
+
+            hand.dq.toPosQuat(hand.position, hand.quaternion)
         }
             
         //strictly decoupled from hand! That is updated each frame!
@@ -270,10 +276,10 @@ function initHands() {
                 onSnapButtonUp,
             ]
 
-            scene.remove(handRight)
-            scene.remove(handLeft)
-            handRight = vrRight
-            handLeft  = vrLeft
+            scene.remove(hands[RIGHT])
+            scene.remove(hands[LEFT])
+            hands[RIGHT] = vrRight
+            hands[LEFT]  = vrLeft
             bestowHandProperties()
 
             putButtonLabelsOnVrControllers()
@@ -386,8 +392,8 @@ function initHands() {
         // geo.rotateX(-TAU / 8. * 3.)
         geo.rotateZ(TAU / 2.)
 
-        handRight.geometry = geo
-        handLeft.geometry = geo
+        hands[RIGHT].geometry = geo
+        hands[LEFT].geometry = geo
         
     })
 }

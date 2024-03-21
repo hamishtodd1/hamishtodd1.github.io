@@ -1,31 +1,15 @@
 /*
+    When you exponentiate, you use a translation.
+        There are braces/compasses which appear in place indicating that a measurement is involved
+    Can do "if" statements with with (translationDist > 0 ? 1 : 0)*
 
-    How scalars work
-        Any rotation, translation (and maybe roto/transflection) has a distance and angle implicitly
-        The scalar doesn't have to be an extra object, it's just inferred from those
-        There are braces/compasses which appear in place indicating that it's involved
-        Alright, so what are scalars used for?
-            You take powers with them.
-            You have == < > != >= <= which then go into if statements
-                Another way of saying it is "sign"
-                == and !== are unlikely because everything is continuous
-                Can maybe do all with (translationDist > 0 ? 1 : 0)*:
-
-    Control which ones are visibl, which ones are fodder for snapping
-        Could have it be that only the last 3 you made are visible, like a stack
-            Delete something and one of the ones last seen comes back
-            To bring back one of the old ones, "make" it with your hands and it'll snap to BEING that one
-                And maybe its affecters appear too?
-                Or you can press a button to show everything?
-                    Or a button to show "the next layer", eg things that affect what you can currently see?
-            But yeah basically when it's out of sight it could be gone for good
-        Spreadsheet would work but it's the nuclear option. 7 year old, very unlikely
-    Give some markup influence from dqTo
+    visibility
+        When you remake an old one, its affecters appear too?
+        press a button to show everything?
 
     If you put too many training wheels on things
         (eg normalizing, taking logs, grade selecting)
         then what's the point of emphasizing understanding PGA?
-        Letting people do more in the spreadsheet
 
     TODO for FoC demo:
         Spreadsheet
@@ -152,9 +136,18 @@ async function init() {
     initMarkupPos()
     initControl()
 
-    // initCircuits()
+    initSpreadsheet()
 
-    // initRecording()
+    let a = new Spreadsheet()
+    a.quaternion.copy(camera.quaternion)
+    comfortableLookPos(fl0, 0.).pointToGibbsVec(a.position)
+    a.makeExtraCell("boog")
+    a.makeExtraCell(0.5)
+    // a.resizeFromCellWidths()
+    debugUpdates.push(()=>{
+        if(frameCount ===370)
+            a.makeExtraCell("boooooooog")
+    })
 
     window.addEventListener('resize', () => {
 

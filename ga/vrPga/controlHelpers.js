@@ -142,13 +142,7 @@ function initControlHelpers() {
         return [nearest, nearestDistSq]
     }
 
-    let ZERO_BLADE = -1
-    let PLANE = 1
-    let LINE = 2
-    let POINT = 3
-    let ROTOREFLECTION = 5
-    let TRANSFLECTION = 6
-
+    
     {
         let evenVersionAxis = new Dq()
         let evenVersion = new Dq()
@@ -162,15 +156,6 @@ function initControlHelpers() {
             fl.normalize()
             fl.selectGrade(1, planePart)
             fl.selectGrade(3, pointPart)
-
-            let pointIsZero = pointPart.isZero()
-            let planeIsZero = planePart.isZero()
-            if (pointIsZero && planeIsZero)
-                return ZERO_BLADE
-            else if (pointIsZero)
-                return PLANE
-            else if (planeIsZero)
-                return POINT
 
             fl.mul(planePart, evenVersion)
             evenVersion.normalize()

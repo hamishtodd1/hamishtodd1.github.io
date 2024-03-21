@@ -76,6 +76,9 @@ function initMarkupPos() {
                 // viz.markupPos.pointFromGibbsVec(viz.diskGroup.position)
                 // viz.settleDiskPosition()
             }
+            else if (viz.constructor === FlViz && viz.lockedGrade === 3) {
+                viz.markupPos.copy(viz.fl)
+            }
             else if(viz.affecters[0] !== null) {
                 let res = viz.mv
                 let mv0 = viz.affecters[0].mv
@@ -91,11 +94,12 @@ function initMarkupPos() {
                     // UNTESTED
     
                     if (mv0.hasGrade(3) || mv1.hasGrade(3)) {
-                        let firstHasIt = mv0.hasGrade(3)
-                        let p1 = (firstHasIt ? mv0 : mv1).selectGrade(3, fl0).normalizePoint()
-                        let p2 = p1.projectOn(firstHasIt ? mv1 : mv0, fl0).normalizePoint()
-                        let midPoint = p1.add(p2, fl3)
-                        res.sqrt(dq0).getReverse(dq1).sandwich(midPoint, viz.markupPos)
+                        viz.markupPos.copy(viz.affecters[0].markupPos)
+                        // let firstHasIt = mv0.hasGrade(3)
+                        // let p1 = (firstHasIt ? mv0 : mv1).selectGrade(3, fl0).normalizePoint()
+                        // let p2 = p1.projectOn(firstHasIt ? mv1 : mv0, fl0).normalizePoint()
+                        // let midPoint = p1.add(p2, fl3)
+                        // res.sqrt(dq0).getReverse(dq1).sandwich(midPoint, viz.markupPos)
                     }
     
                     if (mv0.hasGrade(2) && mv1.hasGrade(2)) {
@@ -134,7 +138,7 @@ function initMarkupPos() {
                             myRandomPoint.projectOn(midPlane, viz.markupPos)
     
                             //Really, you maybe want an "along" line rather than an "around" line
-                            clampPointDistanceFromThing(viz.markupPos, midPoint, 0., .01)
+                            clampPointDistanceFromThing(viz.markupPos, midPoint, 0., .017)
                             //super close because who cares about the fucking rotation
                         }
                         else if (atLeastOneFinite) {

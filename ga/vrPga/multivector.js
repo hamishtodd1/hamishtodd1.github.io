@@ -63,8 +63,8 @@ function initMultivectorWithoutDeclarations() {
             let m = that.mulReverse(this, mIsDq ? newDq : newFl)
             
             let selected = mIsDq ? newDq : newFl
-            let numerator   =                  Math.sqrt(m.selectGrade(g + 2, selected).eNormSq())
-            let denominator = g === 0 ? m[0] : Math.sqrt(m.selectGrade(    g, selected).eNormSq())
+            let numerator   =                  m.selectGrade(g + 2, selected).eNorm()
+            let denominator = g === 0 ? m[0] : m.selectGrade(    g, selected).eNorm()
 
             return Math.atan2(numerator,denominator)
 
@@ -144,16 +144,15 @@ function initMultivectorWithoutDeclarations() {
             if (target === undefined)
                 target = new Dq()
 
-            if (b.constructor === this.constructor)
-                return b.mulReverse(this, target)
-            else {
-                let ratio = b.mulReverse(this, newFl)
-                return ratio.mul(ratio, target).normalize().sqrtSelf()
-            }
+            //feels like mul should work, since reverse is just sign for blades
+            //On the other hand, it's nice to imagine having a meaning (what??) for non-blades and reverse makes sense there
+            let ratio = b.mulReverse(this, b.constructor === this.constructor ? newDq : newFl)
+            //we make dqToSqSq. Because, flectors *and* netherDqs
+            return ratio.mul(ratio, target).sqrtSelf()
         }
 
         dqTo(b, target) {
-            return this.dqToSq(b, target).normalize().sqrtSelf()
+            return this.dqToSq(b, target).sqrtSelf()
         }
 
         sandwichDq(b, target) {

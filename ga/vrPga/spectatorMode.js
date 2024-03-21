@@ -48,9 +48,8 @@ function initPotentialSpectatorReception() {
             if (snappables[msg.i] === undefined)
                 snappables[msg.i] = new DqViz(0xFF0000, true, false, true)
 
-            for (let j = 0; j < 8; ++j) {
+            for (let j = 0; j < 8; ++j)
                 snappables[msg.i].dq[j] = msg.dqCoefficientsArray[j]
-            }
             
         })
         
@@ -59,7 +58,7 @@ function initPotentialSpectatorReception() {
         backedUpMsgs.length = 0
     }
 
-    function turnOnSpectatorMode() {
+    turnOnSpectatorMode = () => {
 
         if (spectatorMode)
             return
@@ -73,10 +72,10 @@ function initPotentialSpectatorReception() {
 
         removeMouseEventListeners()
 
-        handRight.dq.translator(0., 0., -999.)
-        handLeft.dq.translator(0., 0., -999.)
-        scene.remove(handRight)
-        scene.remove(handLeft)
+        hands[RIGHT].dq.translator(0., 0., -999.)
+        hands[LEFT].dq.translator(0., 0., -999.)
+        scene.remove(hands[RIGHT])
+        scene.remove(hands[LEFT])
 
         removeSurroundings()
     }
@@ -170,11 +169,12 @@ function initPotentialSpectatorReception() {
         cameraToAddTo.add(stage)
         
         stage.position.z = -1.1 * cameraToAddTo.near
-        stage.scale.multiplyScalar(1. / 6.5)
+        stage.scale.multiplyScalar(1. / 5.4)
 
         let imageAspect = 620. / 384.
         // let middleAspect = 253. / 384.
 
+        let frontAndBackWidth = cameraToAddTo.aspect * 1.23 //eyeballed
         if (haveMiddle) {
             textureLoader.load('data/stageBack.png', (texture) => {
                 const mat = new THREE.MeshBasicMaterial({
@@ -183,7 +183,7 @@ function initPotentialSpectatorReception() {
                     side: THREE.DoubleSide
                 })
                 const middle = new THREE.Mesh(new THREE.PlaneGeometry(1., 1.), mat)
-                middle.scale.x = cameraToAddTo.aspect * 1.23 //eyeballed
+                middle.scale.x = frontAndBackWidth
                 stage.add(middle)
             })
         }
@@ -210,6 +210,18 @@ function initPotentialSpectatorReception() {
             curtain.position.x = -(cameraToAddTo.aspect / 2. - curtain.scale.x / 2.)
             curtain.position.z = .001
             stage.add(curtain)
+        })
+        textureLoader.load('data/stageBackground.png', (texture) => {
+            const mat = new THREE.MeshBasicMaterial({
+                transparent: true,
+                map: texture,
+                side: THREE.DoubleSide
+            })
+            const bg = new THREE.Mesh(new THREE.PlaneGeometry(1., 1.), mat)
+            bg.scale.x = frontAndBackWidth
+            bg.scale.multiplyScalar(9.3)
+            stage.add(bg)
+            bg.position.z -= 24.
         })
     }
     // addStage(camera, true)

@@ -14,6 +14,22 @@ let oddGrabbee = null
 const evenGrabbees = [null, null]
 const vizes = []
 
+//spreadsheet copypastes
+    const spreadsheets = []
+    const cellHeight = 0.03
+    var allCellsVisible = false //false: meshes, selected cell, and selected cell's dependencies; true: everything visible
+    const layerWidth = .001
+
+    const NO_VIZ_TYPE = 0
+    const PLANE = 1
+    const ROTOR = 2
+    const POINT = 3
+    const CONFORMAL_POINT = 4
+    const MESH = 5
+    const ROTOREFLECTION = 6
+    const TRANSFLECTION = 7
+    const vizTypes = [NO_VIZ_TYPE, PLANE, ROTOR]
+
 let frameDelta = 0.
 let frameCount = 0
 const log = console.log

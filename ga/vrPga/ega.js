@@ -458,15 +458,17 @@ function initEgaWithoutDeclarations() {
         //assumes normalization! Seriously!
         sqrtSelf() {
             //could do study stuff. But not even steven and martin thought beyond getting sqrt of unnormalized
-
+            
             let ourENorm = this.eNorm()
-            if(this[0] + ourENorm !== 0.) {
+            let scalarWouldBeZero = this[0] + ourENorm === 0.
+            if( !scalarWouldBeZero ) {
                 this[0] += ourENorm
                 this.normalize()    
             }
             else {
+                //effectively, this handles nether dqs
                 this.multiplyScalar(-1., this)
-                this[0] += this.eNorm()
+                this[0] += this.eNorm() //hmmm, surely just recalculating, TODO
                 this.normalize()
                 this.multiplyScalar(-1., this)
             }
@@ -535,6 +537,11 @@ function initEgaWithoutDeclarations() {
             let qPart = newDq.fromQuaternion(q)
             let pPart = newDq.translator(p.x, p.y, p.z)
             return pPart.mul(qPart, this)
+        }
+
+        toPosQuat(p,q) {
+            this.toQuaternion(q)
+            this.sandwichFl(e123, newFl).pointToGibbsVec(p)
         }
 
         /*dqVerbose*/
