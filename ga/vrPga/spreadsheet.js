@@ -1,13 +1,6 @@
 /*
-    You do want a little "lock" symbol next to the columns that you can check to make it stay visible
-
     should be able to hover within a cell, over eg the "e2" in "2e1 + 5e2", and see that thing
 
-    These things will be "minimized" for the average user
-        Won't be able to (or want to) read the text but will be able to copy around
-
-    NoModes: AT ANY TIME you can grab ANY object you can see and modify it
-        Or, create a new object
     So the way it works:
         You're always in drawing mode of some kind
             If you click in space, and there's nothing you're clicking on,
@@ -18,7 +11,7 @@
         You can select a new black cell
 
     When you call a function
-        could inline it, a little box-within-box
+        a little box-within-box?
         or: it's another column. It comes along and sits on the right
 
     Cells should get smaller and become washed out when not visible
@@ -28,20 +21,18 @@
 
  */
 
-function updatePanel(){}
-
 function initSpreadsheet() {
 
     const gridThickness = .09 * cellHeight
     const gridMat = new THREE.MeshBasicMaterial({ color: 0xAAAAAA, side:THREE.DoubleSide })
 
-    const MAX_CELLS = 30 //based on nothing right now
+    const MAX_CELLS = 30 //based on nothing
     let numberMats = Array(MAX_CELLS)
     for(let i = 0; i < MAX_CELLS; i++)
         numberMats[i] = text(i+1, true, `#000000`)
     let numberWidth = cellHeight*numberMats.reduce((a,b)=>Math.max(a,b.getAspect()),0)
 
-    const cellWidthMax = 1.9 // based on nothing probably
+    const cellWidthMax = cellHeight*64. // based on nothing probably
     const textMeshHeight = cellHeight * .7 //you get a .3 padding on all four sides
     const canvasYRez = 32 //eyeballed
 
@@ -105,6 +96,8 @@ function initSpreadsheet() {
             }
 
             refresh() {
+
+                return
 
                 if (this.currentText === this.lastParsedText) {
                     let result = compile(this.parsedTokens)
@@ -271,13 +264,6 @@ function initSpreadsheet() {
             this.numbersBg.scale.x = numberWidth
             this.numbersBg.position.z = -layerWidth
             this.add(this.numbersBg)
-
-            // this.buttons = []
-            // symbolMats.forEach((mat, i) => {
-            //     let btn = new Button(mat, symbolStrings[i])
-            //     this.add(btn)
-            //     this.buttons.push(btn)                
-            // })
 
             {
                 if(title === undefined) 

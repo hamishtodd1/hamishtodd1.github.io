@@ -271,7 +271,8 @@ function initControl() {
         /////////
         if (oddGrabbee !== null) {
 
-            handleOddGestures(oddGrabbee)
+            handleOddGestures(oddGrabbee, )
+            log(oddGrabbee.fl)
 
             if(snapMode)
                 handleSnaps(potentialSnapFlVizes, oddGrabbee, numPotentialSnaps)
@@ -311,30 +312,25 @@ function initControl() {
             }
         }
 
-        for(let hand = 0; hand < 2; ++hand) {
+        for(let handIndex = 0; handIndex < 2; ++handIndex) {
 
             //////////////
             // PAINTING //
             //////////////
-            if (oddGrabbee === null && paintees[hand] !== null) {
-                highlightees[hand] = paintees[hand]
+            if (oddGrabbee === null && paintees[handIndex] !== null) {
+                highlightees[handIndex] = paintees[handIndex]
                 hidePalette()
 
-                paintees[hand].sclptable.brushStroke(getIndicatedHandPosition(hand,fl0))
+                paintees[handIndex].sclptable.brushStroke(getIndicatedHandPosition(handIndex,fl0))
             }
 
             //////////////////
             // HIGHLIGHTING //
             //////////////////
-            if (evenGrabbees[hand] === null && paintees[hand] === null && oddGrabbee === null) {
-
-                let [nearest, nearestDistSq] = getNearestGrabbable(hand) //getNearest(getIndicatedHandPosition(hand, fl0))
-
-                //probably threshold should be about whether you are in the cuboid
-                if (nearestDistSq > .01)
-                    highlightees[hand] = null
-                else
-                    highlightees[hand] = nearest
+            if (evenGrabbees[handIndex] === null && paintees[handIndex] === null && oddGrabbee === null) {
+                let [nearest, nearestDistSq] = getIndicatedGrabbable(handIndex) //getNearest(getIndicatedHandPosition(handIndex, fl0))
+                highlightees[handIndex] = nearest
+                hands[handIndex].laser.scale.z = nearestDistSq === Infinity ? 0.02 : Math.sqrt(nearestDistSq)
             }
         }
 
@@ -351,18 +347,18 @@ function initControl() {
                 snappable.sclptable.boxHelper.visible = false
         })
 
-        hands.forEach((hand,i) => {
+        // hands.forEach((hand, i) => {
 
-            let len = 0.02
-            let highlightee = highlightees[i]
-            if(highlightee !== null) {
-                if(highlightee.sclptable)
-                    highlightee.sclptable.boundingBox.getCenter(v1)
-                len = v1.distanceTo(hand.laser.getWorldPosition(v0))
-            }
-            
-            hand.laser.scale.z = len
-        })
+        //     let len = 0.02
+        //     let highlightee = highlightees[i]
+        //     if (highlightee !== null) {
+        //         if (highlightee.sclptable)
+        //             highlightee.sclptable.boundingBox.getCenter(v1)
+        //         len = v1.distanceTo(hand.laser.getWorldPosition(v0))
+        //     }
+
+        //     hand.laser.scale.z = len
+        // })
 
         snappables.forEach(snappable => {
             if (snappable === null)

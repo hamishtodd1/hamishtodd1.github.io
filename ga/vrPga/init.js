@@ -7,19 +7,23 @@
         When you remake an old one, its affecters appear too?
         press a button to show everything?
 
-    If you put too many training wheels on things
-        (eg normalizing, taking logs, grade selecting)
-        then what's the point of emphasizing understanding PGA?
+    The lockedGrades, the userPow, the dqTo/lack of sqrt, these are training wheels
+
+    FoC demo:
+        Show a creature with eyeballs that track, a bird flapping its wings, maybe a snake
+        Show from your pov making one of them
+
+    Change VelocityUnder to use Jeff's idea
 
     TODO for FoC demo:
-        Spreadsheet
+        Grabbing and moving locked points and planes moves them in a normal way
+        Paint eraser "color"
         Redo personal website and vtbotb
         Just an eye that rotates in place
             Join eye position with initial eyeFocusPoint (at infinity), get line
             Join eye position with focusPoint, get line
             Do dqTo
             Then parenting...
-        Some bug where loooooads of stuff just gets made. It happened after making a few models
         Make the silly old Ram
             Hand controls head
             Body always in a certain plane
@@ -28,15 +32,18 @@
             Hold it by the head
             Body follows
             Legs pump when moved, eg the instantaneous movement is known
-        Paint eraser "color"
-        Meshes can have fl's as their transform
     Jon demo:
+        Spreadsheet
+            Auto-adds vizes
+            Auto-adds affectations
+            Visibility icons I guess
+            dqTo goes into spreadsheet as 1+A~B for same grade, sqrt(sqrt(sq(A~B))) otherwise
+                point-point for a translation is the most likely so it's ok that it's a bit weird
+            userPow goes in as exp(L*distance(T))
         For rotoreflections/transflections, definitely need the pointy extension of your plane to the axis point
         arrow starts move slowly to correct position instead of teleporting
         Levels. Just 4 or so
         Gauges. Some kind of animation system for this triggered by creating mvs.
-        Spreadsheets
-        Infinity is at 10m or whatever
         Eyeballs on vizes
         SFX
             Grade selection is a "snap"
@@ -46,6 +53,8 @@
             One likes dynamism or something, just "seeing more stuff happen"
         Undo
     Beyond:
+        Meshes can have fl's as their transform
+        Infinity is at 10m or whatever
         Don't want to be loading the xr input profile from the internet. "assetPath" may be a place to start
         Bounding cylinders, not cuboids
             One line L, a plane P in the middle, a radius r and a height h
@@ -56,7 +65,6 @@
         If passthrough, maybe have a warning saying to do it in the middle of a field
         Experiment with stage from your POV (but probably keep as is because facing audience is good)
         Hidden surface removal for boxhelpers
-        Flesh colors
         Maybe want a way for a sclptable to be affected by other buttons during the show?
             Have a button that does multiplcation by 0 or 1. And maybe a point that's always present which goes up and down when you do that
         Get rid of "current hand position"; it stinks of the origin
@@ -136,18 +144,18 @@ async function init() {
     initMarkupPos()
     initControl()
 
-    initSpreadsheet()
+    {
+        // initSpreadsheet()
+        // initSpreadsheetHelpers()
 
-    let a = new Spreadsheet()
-    a.quaternion.copy(camera.quaternion)
-    comfortableLookPos(fl0, 0.).pointToGibbsVec(a.position)
-    a.makeExtraCell("boog")
-    a.makeExtraCell(0.5)
-    // a.resizeFromCellWidths()
-    debugUpdates.push(()=>{
-        if(frameCount ===370)
-            a.makeExtraCell("boooooooog")
-    })
+        // let ss = new Spreadsheet()
+        // ss.quaternion.copy(camera.quaternion)
+        // comfortableLookPos(fl0, 0.).pointToGibbsVec(ss.position)
+        // ss.makeExtraCell(`A ∧ B * · ∨`)
+        // ss.makeExtraCell(`⟨C⟩ |C| A/B √`)
+        // selectedSpreadsheet = ss
+        // selectCell(ss, 0)
+    }
 
     window.addEventListener('resize', () => {
 
@@ -180,7 +188,8 @@ async function init() {
             updateHandMvs()
 
             movingPaintingHighlightingHandLabels()
-            updatePaletteAnimation()
+
+            // updateSpreadsheetVisibilitiesAndRefresh()
             
             snappables.forEach(s => {
                 if(s === null)
@@ -190,6 +199,7 @@ async function init() {
 
             //then broadcast
 
+            updatePaletteAnimation()
             updateMarkupPoses()
         }
         

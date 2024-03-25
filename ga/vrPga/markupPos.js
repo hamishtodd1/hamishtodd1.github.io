@@ -67,17 +67,21 @@ function initMarkupPos() {
             You could be holding the thing/have just let go of the thing
         */
 
+        // if(frameCount === 900)
+        //     debugger
         vizes.forEach((viz,vizIndex) => {
 
             //a case that remains external is the decompositions of the hand position, that's simple
             if (viz.dontUpdateMarkupPos)
                 return
+            else if (viz.constructor === FlViz && viz.lockedGrade === 3)
+                viz.markupPos.copy(viz.fl)
             else if (viz.constructor === FlViz && viz.lockedGrade === 1) {
                 // viz.markupPos.pointFromGibbsVec(viz.diskGroup.position)
                 // viz.settleDiskPosition()
             }
-            else if (viz.constructor === FlViz && viz.lockedGrade === 3) {
-                viz.markupPos.copy(viz.fl)
+            else if (viz.sclptable !== null && viz.constructor === DqViz && evenGrabbees.indexOf(viz) === -1) {
+                viz.markupPos.lerp(viz.sclptable.com, .003, viz.markupPos)
             }
             else if(viz.affecters[0] !== null) {
                 let res = viz.mv
@@ -116,10 +120,15 @@ function initMarkupPos() {
                 }
     
                 if (op === `joinPt`) {
+
+                    log("yo")
     
                     let isTwoPoints = viz.mv.hasGrade(2) &&
                         mv0.hasGrade(3) &&
                         mv1.hasGrade(3)
+
+                    //make it so that the potentialSnaps all have their markupPos's as similar as possible to
+                    //your current markupPos
     
                     if (isTwoPoints) {
                         //TODO hacky way to enforce grade locking
@@ -128,38 +137,28 @@ function initMarkupPos() {
     
                         let neitherIdeal = mv0[7] !== 0. && mv1[7] !== 0.
                         let atLeastOneFinite = mv0[7] !== 0. || mv1[7] !== 0.
+                        let pointOnLineNearMarkupPos = fl2
                         if (neitherIdeal) {
                             fl0.copy(mv0).normalizePoint()
                             fl1.copy(mv1).normalizePoint()
-                            let midPoint = fl0.add(fl1, fl2).multiplyScalar(.5, fl2)
-                            // debugger
-                            let midPlane = midPoint.inner(viz.dq, fl3)
-                            let myRandomPoint = fl4.point(-0.34892, 0.4547, 0.0083, 1.)
-                            myRandomPoint.projectOn(midPlane, viz.markupPos)
-    
-                            //Really, you maybe want an "along" line rather than an "around" line
-                            clampPointDistanceFromThing(viz.markupPos, midPoint, 0., .017)
-                            //super close because who cares about the fucking rotation
+                            fl0.add(fl1, pointOnLineNearMarkupPos).multiplyScalar(.5, pointOnLineNearMarkupPos)
                         }
                         else if (atLeastOneFinite) {
-                            let finitePt = fl0.copy(mv0[7] !== 0. ? mv0 : mv1).normalizePoint()
-                            finitePt.add(randomPt, viz.markupPos)
-                            regularizeMarkupPos(viz)
+                            pointOnLineNearMarkupPos.copy(mv0[7] !== 0. ? mv0 : mv1).normalizePoint()
+                            pointOnLineNearMarkupPos.normalizePoint()
                         }
                         //else both at infinity! Translation, perhaps
+
+                        //Really, you maybe want an "along" line rather than an "around" line
+                        
+                        let arrowPlane = pointOnLineNearMarkupPos.inner(viz.dq, fl3)
+                        let myRandomPoint = fl4.point(-0.34892, 0.4547, 0.0083, 1.)
+                        myRandomPoint.projectOn(arrowPlane, viz.markupPos)
+                        clampPointDistanceFromThing(viz.markupPos, pointOnLineNearMarkupPos, 0., .014)
+                        //super close because who cares about the fucking rotation
                     }
                 }
             }
-            else if(viz.sclptable !== null && viz.constructor === DqViz) {
-                viz.dq
-                    .getReverse(dq0)
-                    .sandwich(
-                        viz.dq.sandwich(viz.sclptable.com, fl0),
-                        viz.markupPos)
-                regularizeMarkupPos(viz,)
-            }
-            // else
-            //     log("not sure what to do with the markupPos of viz number", vizIndex, "which is\n", viz)
         })
     }
 

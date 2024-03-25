@@ -18,6 +18,10 @@ function initControlHelpers() {
 
         // })
 
+        var flViz0 = new FlViz(null, false, false, true)
+        flViz0.lockedGrade = 3
+        comfortableLookPos(flViz0.fl, 0., -.2)
+
         // {
             // var flViz0 = new FlViz()
             // comfortableHandPos(flViz0.fl)
@@ -93,13 +97,16 @@ function initControlHelpers() {
     let myRay = new THREE.Ray()
     myRay.origin.set(0.,0.,0.)
     myRay.direction.set(0.,1.,0.)
+    let transformedBox = new THREE.Box3()
 
     let testPoint = new Fl()
-    let joinPlane = new Fl()
-    getNearestGrabbable = (hand) => {
+    getIndicatedGrabbable = (hand) => {
 
-        getIndicatedHandPosition(hand, fl0 ).pointToGibbsVec( myRay.origin )
-        hands[hand].laserDq.meet(e0, fl0).directionToGibbsVec( myRay.direction )
+        // if(frameCount === 900)
+        //     debugger
+
+        getIndicatedHandPosition( hand, fl0 ).pointToGibbsVec( myRay.origin )
+        hands[hand].laserDq.meet( e0, fl0 ).directionToGibbsVec( myRay.direction )
 
         let nearest = null
         let nearestDistSq = Infinity
@@ -113,30 +120,20 @@ function initControlHelpers() {
             let distSq = Infinity
             testPoint.pointFromGibbsVec(snappable.boundingBox.getCenter(v1)).normalizePoint()
             
-            let rayIntersectsBox = null !== myRay.intersectBox(snappable.boundingBox, v1)
+            if ( myRay.intersectBox(snappable.boundingBox, v1))
+                distSq = hands[hand].position.distanceToSquared(v1)
 
-            //let isInFront = hands[hand].laserPlane.joinPt(testPoint)[0] > 0.)
-            if (rayIntersectsBox)
-                distSq = hands[hand].laserDq.joinPt(testPoint, joinPlane).eNormSq()
-
-            if (snappable.sclptable !== null && snappable.sclptable.com[7] !== 0.) {
-                
-                let rayIntersectsSclptableBox = null !== myRay.intersectBox(snappable.sclptable.boundingBox, v1)
-                if(rayIntersectsSclptableBox) {
-                    
-                    snappable.sclptable.getWorldCom(testPoint).normalizePoint()
-                    //let isInFront = hands[hand].laserPlane.joinPt(testPoint)[0] > 0.)
-                    let sclptableDistSq = hands[hand].laserDq.joinPt(testPoint, joinPlane).eNormSq()
-                    if (sclptableDistSq < distSq)
-                        distSq = sclptableDistSq
-                }
+            if (snappable.sclptable !== null ) {
+                transformedBox.copy(snappable.sclptable.boundingBox)
+                transformedBox.applyMatrix4(snappable.sclptable.matrixWorld)
+                if (myRay.intersectBox(transformedBox, v2))
+                    distSq = Math.min(distSq, hands[hand].position.distanceToSquared(v2))
             }
 
             if (distSq < nearestDistSq) {
                 nearest = snappable
                 nearestDistSq = distSq
             }
-
         })
 
         return [nearest, nearestDistSq]
@@ -156,6 +153,10 @@ function initControlHelpers() {
             fl.normalize()
             fl.selectGrade(1, planePart)
             fl.selectGrade(3, pointPart)
+
+            //already rounded
+            if(planePart.isZero() || pointPart.isZero())
+                return
 
             fl.mul(planePart, evenVersion)
             evenVersion.normalize()
@@ -214,6 +215,11 @@ function initControlHelpers() {
 
         const rightFl = new Fl()
         handleOddGestures = (oddGrabbee) => {
+
+            if( oddGrabbee.lockedGrade !== -1 ) {
+                
+                return
+            }
             
             //the right hand is the left hand preceded (that is, algebraically followed...) by a reflection in e1
             //so this is the transform that would reflect the right hand then get it to where left hand is
@@ -252,16 +258,22 @@ function initControlHelpers() {
         let handPosition = new Fl()
         roundEvenGesture = (handIndex, snapMode) => {
 
-            //if you rotate your hand only a little, that's a translation
             let evenGrabbee = evenGrabbees[handIndex]
             let rotationPart = decompositions[handIndex].rotationPart
             let translationPart = decompositions[handIndex].translationPart
 
             evenGrabbee.dq.invariantDecomposition(rotationPart.dq, translationPart.dq)
 
+            if (evenGrabbee.dq.approxEquals(oneDq)) {
+                rotationPart.visible = false
+                translationPart.visible = false
+                return
+            }
+
             if (!snapMode) {
+                //if you rotate your hand only a little, that's a translation
                 let dist = rotationPart.dq.selectGrade(2, dq0).distanceToPt(getIndicatedHandPosition(handIndex, handPosition))
-                if (dist > .35)
+                if (dist > .35 && evenGrabbee.sclptable === null)
                     evenGrabbee.markupPos.dqTo(handPosition, evenGrabbee.dq)
                 
                 rotationPart.visible = false

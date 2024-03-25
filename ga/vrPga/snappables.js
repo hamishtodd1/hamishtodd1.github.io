@@ -17,6 +17,7 @@ function initStack() {
             if(sn !== null && !sn.backgroundSnappable )
                 sn.visible = stack.indexOf(i) !== -1
         })
+        log(stack)
     }
 }
 
@@ -56,6 +57,8 @@ function updateFromAffecters(output) {
     else
         mv0[op](mv1, res)
     
+    if (res.isZero())
+        debugger
     res.normalize() //sell-out!
     socket.emit("snappable", {
         dqCoefficientsArray: output.mv,
@@ -99,6 +102,15 @@ function aDependsOnB(a,b) {
 }
 
 function disposeMostOfSnappable(sn) {
+
+    snappables.forEach((snappable)=>{
+        if(snappable === null)
+            return
+
+        if(snappable.affecters.indexOf(sn) !== -1)
+            makeUnaffected(snappable)
+    })
+
     if (snappables.indexOf(sn) !== -1) {
 
         let i = snappables.indexOf(sn)

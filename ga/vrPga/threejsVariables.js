@@ -48,8 +48,11 @@ const spandrelGeo = new THREE.ShapeGeometry(
 		.lineTo(0., 0.)).translate(0., -.5, 0.)
 
 var debugSphere = new THREE.Mesh(new THREE.SphereGeometry(.0431),new THREE.MeshBasicMaterial({color:0x333333}))
+var debugSphere2 = new THREE.Mesh(new THREE.SphereGeometry(.0431), new THREE.MeshBasicMaterial({ color: 0x333333 }))
 scene.add(debugSphere)
+scene.add(debugSphere2)
 debugSphere.position.copy(outOfSightVec3)
+debugSphere2.position.copy(outOfSightVec3)
 
 THREE.Matrix4.prototype.log = function() {
 	let order = [

@@ -144,11 +144,12 @@ function initMultivectorWithoutDeclarations() {
             if (target === undefined)
                 target = new Dq()
 
-            //feels like mul should work, since reverse is just sign for blades
-            //On the other hand, it's nice to imagine having a meaning (what??) for non-blades and reverse makes sense there
-            let ratio = b.mulReverse(this, b.constructor === this.constructor ? newDq : newFl)
-            //we make dqToSqSq. Because, flectors *and* netherDqs
-            return ratio.mul(ratio, target).sqrtSelf()
+            if (b.constructor === this.constructor)
+                return b.mulReverse(this, target) //having this makes a difference! Somehow! No idea why
+            else {
+                let ratio = b.mulReverse(this, newFl)
+                return ratio.mul(ratio, target).normalize().sqrtSelf()
+            }
         }
 
         dqTo(b, target) {

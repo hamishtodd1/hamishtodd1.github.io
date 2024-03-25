@@ -1,6 +1,6 @@
-updateVisibilitiesAndRefresh = () => { }
+updateSpreadsheetVisibilitiesAndRefresh = () => { }
 
-function initSpreadsheetEntryAndFocus() {
+function initSpreadsheetHelpers() {
 
     let refreshCountdown = -1.
     let currentlyTyping = false
@@ -38,6 +38,48 @@ function initSpreadsheetEntryAndFocus() {
         currentlyTyping = false
     }
 
+    ////////////////
+    // Arrow keys //
+    ////////////////
+
+    let rememberedSelectedRow = 0
+    function incrementRow(increment) {
+        let maxVal = selectedSpreadsheet.cells.length - 1
+        let newVal = clamp(selectedRow + increment, 0, maxVal)
+        selectCell(selectedSpreadsheet, newVal)
+        rememberedSelectedRow = newVal
+    }
+    function incrementSs(increment) {
+        let currentVal = spreadsheets.indexOf(selectedSpreadsheet)
+        let index = ((currentVal + increment) < 0 ? spreadsheets.length - 1 : currentVal + increment) % spreadsheets.length
+        let newSs = spreadsheets[index]
+
+        let newRow = rememberedSelectedRow
+        if (newRow >= newSs.cells.length)
+            newRow = newSs.cells.length - 1
+
+        selectCell(newSs, newRow)
+    }
+    document.addEventListener(`keydown`,event=>{
+        switch(event.key) {
+            case `ArrowUp`:
+                incrementRow(-1)
+                break
+            case `ArrowDown`:
+                incrementRow(1)
+                break
+            case `ArrowRight`:
+                incrementSs(-1)
+                break
+            case `ArrowLeft`:
+                incrementSs(1)
+                break
+            case `Backspace`:
+                clearCurrentCell()
+                break
+        }
+    })
+
     //////////////////
     // Highlighting //
     //////////////////
@@ -73,8 +115,6 @@ function initSpreadsheetEntryAndFocus() {
     ///////////////
     // Modifying //
     ///////////////
-
-    bindButton(`Backspace`, clearCurrentCell)
 
     function onLetterKey(event) {
 
@@ -115,15 +155,12 @@ function initSpreadsheetEntryAndFocus() {
     // Refresh and visibility //
     ////////////////////////////
 
-    // bindButton(`'`, () => {
-    //     allCellsVisible = !allCellsVisible
-    // })
     function clearCurrentCell() {
         selectedSpreadsheet.cells[selectedRow].setText(``)
         selectedSpreadsheet.cells[selectedRow].refresh()
         currentlyTyping = true
     }
-    updateVisibilitiesAndRefresh = () => {
+    updateSpreadsheetVisibilitiesAndRefresh = () => {
         // log(usedSecondarySelectionBoxes)
 
         let selectedCell = selectedSpreadsheet.cells[selectedRow]

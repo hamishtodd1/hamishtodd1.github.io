@@ -11,6 +11,18 @@ function initSnapping() {
     let toSnapLogNormalized = new Dq()
     let potentialSnapLogNormalized = new Dq()
 
+    logPotentialSnap = (ps) => {
+        log(snappables.indexOf(ps.affecters[0]), ps.affecters[0])
+        log(snappables.indexOf(ps.affecters[1]), ps.affecters[1])
+        log(operators[ps.affecters[2]])
+    }
+
+    logPotentialSnaps = (potentialSnapsVizes, num) => {
+        log("\n\nBUNCH OF SNAPS\n\n")
+        for (let i = 0; i < num; ++i)
+            logPotentialSnap(potentialSnapsVizes[i])
+    }
+
     function getType(opName, type1, type2) {
         if (opName === `sandwich`)
             return type2
@@ -33,19 +45,7 @@ function initSnapping() {
         return null
     }
 
-    logPotentialSnap = (ps) => {
-        log( snappables.indexOf(ps.affecters[0]), ps.affecters[0] )
-        log( snappables.indexOf(ps.affecters[1]), ps.affecters[1] )
-        log( operators[ps.affecters[2]] )
-    }
-
-    logPotentialSnaps = (potentialSnapsVizes, num) => {
-        log("\n\nBUNCH OF SNAPS\n\n")
-        for (let i = 0; i < num; ++i)
-            logPotentialSnap( potentialSnapsVizes[i] )
-    }
-
-    function eligibe(opIndex, mv0, mv1) {
+    function typeCheck(opIndex, mv0, mv1) {
         let g0 = mv0.grade()
         let g1 = mv1.grade()
         if ( (g0 === Infinity || g0 === 0 || g0 === 4) ||
@@ -54,31 +54,37 @@ function initSnapping() {
             
         let isObject0 = g0 === 1 || g0 === 2 || g0 === 3
         let isObject1 = g1 === 1 || g1 === 2 || g1 === 3
+        let isNull0 = mv0.eNormSq() === 0.
+        let isNull1 = mv1.eNormSq() === 0.
+
+        //exact 180s and point reflections are for mathematicians
+        let isTransform0 = (g0 === -1 || g0 === -2 || g0 === 1) && !isNull0
+        let isTransform1 = (g1 === -1 || g1 === -2 || g1 === 1) && !isNull1
+
+        //note "transform" is not the opposite of "object", because planes
         switch(operators[opIndex]) {
-            case `mul`:
-                return (!isObject0 || g0 === 1) && (!isObject1 || g1 === 1)
+            case `mul`: // the only thing that can output a rotoreflection
+                return isTransform0 && isTransform1
             case `sandwich`:
-                return isObject1 && (g0 === -1 || g0 === -2 || g0 === 1) //exact 180s and point reflections are for mathematicians
+                return isObject1 && isTransform0
             case `dqTo`:
-                return isObject0 && isObject1
+                return isObject0 && isObject1 && !isNull0 && !isNull1
             case `joinPt`:
                 return (g0 === 2 || g0 === 3) && g1 === 3 //no scalars allowed, for now
-            case `projectTransformOn`:
-                return !isObject0 && isObject1 && g0 !== g1
-            // case `projectOn`:
-            //     return isObject0 && isObject1 && g0 !== g1
-            // case `meet`:
-            //     return g0 < 3 && g1 < 3
+            case `meet`:
+                return (g0 === 1 && (g1 === 1 || g1 === 2)) || (g0 === 2 && g0 === 1)
+            case `add`:
+                return g0 === g1
+            case `projectOn`:
+                return isObject0 && isObject1 && g0 !== g1
             // case `userPow`:
             //     let mv1IsTranslation = !isObject1 &&
             //         mv1[0] !== 0. && mv1[4] === 0. && mv1[5] === 0. && mv1[6] === 0. && mv1[7] === 0.
             //     return g0 === -2 && mv1IsTranslation
             // case `velocityUnder`:
-            //     return !isObject0 && g1 === 3 //not thinking about lines or planes for now
-            // case `add`:
-            //     return g0 === g1
-            // case `inner`:
-            //     return isObject0 && isObject1 && g0 !== g1
+            //     return g0 === -2 && isObject1 //not thinking about lines or planes for now
+            // case `projectTransformOn`:
+            //     return isTransform0 && isObject1
             default: //new, I suppose
                 console.error("no eligibility criteria for ", operators[opIndex])
                 return true
@@ -90,17 +96,20 @@ function initSnapping() {
         let lowestUnused = 0
 
         function addPotentialSnap(i, j, k) {
-            if (potentialSnapsVizes[lowestUnused] === undefined)
+            if (potentialSnapsVizes[lowestUnused] === undefined) {
                 potentialSnapsVizes[lowestUnused] = new toBeSnapped.constructor(0xFFA500, true, true)
+                potentialSnapsVizes[lowestUnused].dontUpdateMarkupPos = false
+            }
 
             let psv = potentialSnapsVizes[lowestUnused]
             psv.affecters[0] = snappables[i]
             psv.affecters[1] = snappables[j]
             psv.affecters[2] = k
             updateFromAffecters(psv)
-            psv.visible = true
-
-            ++lowestUnused
+            if (!psv.mv.isZero()) {
+                psv.visible = true
+                ++lowestUnused
+            }
         }
 
         snappables.forEach((sn, i) => {
@@ -141,7 +150,7 @@ function initSnapping() {
                         snappables[j].visible === false ||
                         snappables[j] === toBeSnapped ||
                         aDependsOnB(snappables[j], toBeSnapped) ||  //maybe one day
-                        !eligibe(k, mv0, mv1)
+                        !typeCheck(k, mv0, mv1)
 
                     let outputType = getType(operators[k], mv0.constructor, mv1.constructor)
                     if (outputType !== toBeSnapped.mv.constructor)
@@ -236,7 +245,6 @@ function initSnapping() {
             // case `projectOn`:
 
             case `sandwich`:
-                // debugger
                 l1Norm = compareBlades()
                 advantage = 5.
                 break

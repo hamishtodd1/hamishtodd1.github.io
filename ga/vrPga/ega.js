@@ -11,12 +11,6 @@ function initEgaWithoutDeclarations() {
             super(8)
         }
 
-        userPow(amountDq, target) {
-            let dist = amountDq.translationDistance()
-            let unitLength = .1
-            return this.pow(dist * unitLength, target)
-        }
-
         //assumes no normalization at all and result isn't normalized either
         movePointInDirectionByDistance(dir, dist, target) {
             let factor = this[7] * dist / Math.sqrt(sq(dir[4]) + sq(dir[5]) + sq(dir[6]) )
@@ -79,7 +73,7 @@ function initEgaWithoutDeclarations() {
             if (adHocNormSq === 0. )
                 adHocNormSq = this.iNormSq()
             if (adHocNormSq === 0. )
-                console.error("just tried to normalize: " + this.toString())
+                console.error("just tried to normalize: " + this.toString() + " at line " + getWhereThisWasCalledFrom())
 
             let factor = 1. / Math.sqrt(adHocNormSq)
             //er, worth asking about this hack
@@ -178,6 +172,12 @@ function initEgaWithoutDeclarations() {
         constructor() {
             super(8)
             this[0] = 1.
+        }
+
+        userPow(amountDq, target) {
+            let dist = amountDq.translationDistance()
+            let unitLength = .1
+            return this.pow(dist * unitLength, target)
         }
 
         rigorousInverse(target) {

@@ -69,15 +69,28 @@ function initFlVizes(transparentOpacity) {
 
     class FlViz extends THREE.Group {
 
-        constructor(color, omitFromSnappables = false, transparent = false) {
+        constructor(color, omitFromSnappables = false, transparent = false, putOnStackImmediately = false) {
             
             super()
             vizes.push(this)
             this.dontUpdateMarkupPos = true
             scene.add(this)
 
-            this.snapRating = -1
+            this.fl = new Fl()
+            this.mv = this.fl
+            this.fl.zero()
+            this.markupPos = new Fl().point(0., 1.2, 0., 1.)
 
+            if (!omitFromSnappables)
+                makeSnappable(this)
+            if (putOnStackImmediately)
+                putOnStack(this)
+            this.affecters = [
+                null, null, -1
+            ]
+
+            //stateful crap
+            this.snapRating = -1
             this.lockedGrade = -1
 
             let pointMat = new THREE.MeshPhongMaterial({
@@ -91,17 +104,6 @@ function initFlVizes(transparentOpacity) {
             this.add(this.boxHelper)
             this.boxHelper.visible = false
             this.boxHelper.matrixAutoUpdate = false
-
-            if (!omitFromSnappables)
-                makeSnappable(this)
-            this.affecters = [
-                null, null, -1
-            ]
-
-            this.fl = new Fl()
-            this.mv = this.fl
-            this.fl.zero()
-            this.markupPos = new Fl().point(0.,1.2,0.,1.)
 
             this.arrow1 = new Arrow( pointMat.color, false, pointMat, true )
             this.arrow1.visible = false
@@ -171,7 +173,7 @@ function initFlVizes(transparentOpacity) {
                         box0.copy(pointGeo.boundingBox)
                         this.pointMesh.updateMatrixWorld()
                         box0.applyMatrix4(this.pointMesh.matrixWorld)
-                        box0.expandByScalar(pointRadius * 3.5)
+                        box0.expandByScalar(pointRadius * 5.5)
                         this.boundingBox.union(box0)
                     }
                     else {
