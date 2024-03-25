@@ -46,6 +46,8 @@
 
 function initControl() {
 
+    
+
     // initButtonLabels()
     initControlHelpers()
 
@@ -54,14 +56,8 @@ function initControl() {
 
     const handsHoldingOdd = [false, false]
     
-    let showMarkupVizes = false
-    let oldDqVizes = [new DqViz( 0xFF0000, true, true, true ), new DqViz( 0xFF0000, true, true, true)]
-    oldDqVizes[0].visible = false; oldDqVizes[1].visible = false;
-    let movementSinceGrabViz = [new DqViz(0xFF0000, true, true, true), new DqViz(0xFF0000, true, true, true)]
-    movementSinceGrabViz[0].visible = false; movementSinceGrabViz[1].visible = false;
-
     let handDqOnGrabs = [new Dq(), new Dq()]
-    let snappableDqOnGrabs = [new Dq(), new Dq()]
+    let holdableDqOnGrabs = [new Dq(), new Dq()]
     // let smootheningRecords = [new Dq(), new Dq()]
 
     let highlightedColor = new THREE.Color(0xFFFFFF)
@@ -98,12 +94,6 @@ function initControl() {
             numPotentialSnaps = generatePotentialSnaps(potentialSnapsVizes, toBeSnapped)
             // logPotentialSnaps(potentialSnapsVizes, numPotentialSnaps)
         }
-    }
-
-    checkIfEyeSituation = (toBeSnapped) => {
-        let dqv1 = snappables.find(sn => sn.constructor === DqViz && sn !== toBeSnapped)
-        let dqv2 = snappables.find(sn => { return sn.constructor === DqViz && sn !== dqv1 && sn !== toBeSnapped })
-        return dqv1 !== undefined && dqv2 !== undefined
     }
 
     snapIfAcceptable = (toBeSnapped, potentialSnaps, snapIndex) => {
@@ -185,9 +175,6 @@ function initControl() {
             paintees[LEFT] = null
             paintees[RIGHT] = null
 
-            movementSinceGrabViz[focusHand].visible = false
-            oldDqVizes[focusHand].visible = false
-
             oddGrabbee.visible = true
         }
         else {
@@ -204,12 +191,7 @@ function initControl() {
                 getIndicatedHandPosition( focusHand, evenGrabbees[focusHand].markupPos )
 
             handDqOnGrabs[focusHand].copy(hands[focusHand].dq)
-            snappableDqOnGrabs[focusHand].copy(evenGrabbees[focusHand].dq)
-
-            oldDqVizes[focusHand].dq.copy(snappableDqOnGrabs[focusHand])
-            oldDqVizes[focusHand].markupPos.copy(evenGrabbees[focusHand].markupPos)
-            oldDqVizes[focusHand].getArrowTip(movementSinceGrabViz[focusHand].markupPos)
-            movementSinceGrabViz[focusHand].dq.copy(oneDq)
+            holdableDqOnGrabs[focusHand].copy(evenGrabbees[focusHand].dq)
 
             evenGrabbees[focusHand].visible = true
             evenGrabbees[focusHand].dontUpdateMarkupPos = true
@@ -225,8 +207,6 @@ function initControl() {
         if( evenGrabbees[focusHand] !== null ) {
             evenGrabbees[focusHand].dispose()
             evenGrabbees[focusHand] = null
-            movementSinceGrabViz[focusHand].visible = false
-            oldDqVizes[focusHand].visible = false
 
             if (snapMode )
                 turnOffSnapMode()
@@ -292,15 +272,10 @@ function initControl() {
 
                 // smootheningRecords[hand].add(hands[hand].dq, dq0).normalize()
 
-                hands[hand].dq.mulReverse(handDqOnGrabs[hand], movementSinceGrabViz[hand].dq)
-                movementSinceGrabViz[hand].dq.mul(snappableDqOnGrabs[hand], evenGrabbees[hand].dq)
+                hands[hand].dq.mulReverse(handDqOnGrabs[hand], dq0)
+                dq0.mul(holdableDqOnGrabs[hand], evenGrabbees[hand].dq)
 
                 roundEvenGesture(hand, snapMode)
-
-                if (showMarkupVizes) {
-                    movementSinceGrabViz[hand].visible = !oldDqVizes[hand].dq.equals(oneDq)
-                    oldDqVizes[hand].visible = movementSinceGrabViz[hand].visible
-                }
 
                 socket.emit("snappable", {
                     dqCoefficientsArray: evenGrabbees[hand].dq,
@@ -414,8 +389,6 @@ function initControl() {
             let output = evenGrabbees[focusHand]
             output.dontUpdateMarkupPos = false
             evenGrabbees[focusHand] = null
-            movementSinceGrabViz[focusHand].visible = false
-            oldDqVizes[focusHand].visible = false
 
             if(snapMode) {
                 let bestSnapIndex = getBestAcceptableSnap(potentialSnapDqVizes, numPotentialSnaps)
