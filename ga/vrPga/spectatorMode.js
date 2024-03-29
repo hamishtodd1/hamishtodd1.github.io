@@ -35,7 +35,7 @@ function initPotentialSpectatorReception() {
         //it's coming in as a literal object, not even an array. Really no good
         let newCount = Object.keys(msg.arr).length / 3
         for (let i = 0, il = newCount; i < il; ++i)
-            cs.fillCubePosition(v1.set(msg.arr[i * 3 + 0], msg.arr[i * 3 + 1], msg.arr[i * 3 + 2]))
+            cs.fillCubePositionIfEmpty(v1.set(msg.arr[i * 3 + 0], msg.arr[i * 3 + 1], msg.arr[i * 3 + 2]))
     })
 
     let backedUpMsgs = []

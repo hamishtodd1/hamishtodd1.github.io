@@ -18,9 +18,9 @@ function initControlHelpers() {
 
         // })
 
-        var flViz0 = new FlViz(null, false, false, true)
-        flViz0.lockedGrade = 3
-        comfortableLookPos(flViz0.fl, 0., -.2)
+        // var flViz0 = new FlViz(null, false, false, true)
+        // flViz0.lockedGrade = 3
+        // comfortableLookPos(flViz0.fl, 0., -.2)
 
         // {
             // var flViz0 = new FlViz()
@@ -130,6 +130,22 @@ function initControlHelpers() {
                     distSq = Math.min(distSq, hands[hand].position.distanceToSquared(v2))
             }
 
+            //TODO test
+            let mv = snappable.mv
+            let hasIdealPt   = mv.hasGrade(3) && mv[7] === 0. 
+            // let hasIdealLine = mv.hasGrade(2) && !(mv.invariantDecomposition(dq0, dq1)[1].equals(oneDq))
+            if( hasIdealPt ) { //|| hasIdealLine ) {
+
+                if (hasIdealPt)
+                    mv.selectGrade(3, fl1).getDual(fl0)
+                // else if (hasIdealLine)
+                //     mv = dq1.selectGrade(2, dq1).getDual(dq0)
+
+                let angle = TAU / 4. - mv.angleTo( hands[hand].laserDq )
+                if (Math.abs(angle) < .1 )
+                    distSq = 0.
+            }
+
             if (distSq < nearestDistSq) {
                 nearest = snappable
                 nearestDistSq = distSq
@@ -214,28 +230,23 @@ function initControlHelpers() {
         }
 
         const rightFl = new Fl()
-        handleOddGestures = (oddGrabbee) => {
+        handleOddGestures = (doubleGrabbee) => {
 
-            if( oddGrabbee.lockedGrade !== -1 ) {
-                
-                return
-            }
-            
             //the right hand is the left hand preceded (that is, algebraically followed...) by a reflection in e1
             //so this is the transform that would reflect the right hand then get it to where left hand is
             hands[LEFT].dq.mul(e1, rightFl)
             //...the transform that would get the place where the right hand is to that
-            rightFl.mulReverse(hands[RIGHT].dq, oddGrabbee.fl)
+            rightFl.mulReverse(hands[RIGHT].dq, doubleGrabbee.fl)
 
-            if (oddGrabbee.lockedGrade === 1)
-                oddGrabbee.fl.zeroGrade(3)
-            else if (oddGrabbee.lockedGrade === 3)
-                oddGrabbee.fl.zeroGrade(1)
+            if (doubleGrabbee.lockedGrade === 1)
+                doubleGrabbee.fl.zeroGrade(3)
+            else if (doubleGrabbee.lockedGrade === 3)
+                doubleGrabbee.fl.zeroGrade(1)
             else
-                roundFlToTypes(oddGrabbee, false)
+                roundFlToTypes(doubleGrabbee, false)
 
-            if(oddGrabbee.fl.grade() === 1)
-                oddGrabbee.markupPos.copy(pointBetweenHands)
+            if(doubleGrabbee.fl.grade() === 1)
+                doubleGrabbee.markupPos.copy(pointBetweenHands)
         }
     }
 
@@ -258,7 +269,7 @@ function initControlHelpers() {
         let handPosition = new Fl()
         roundEvenGesture = (handIndex, snapMode) => {
 
-            let evenGrabbee = evenGrabbees[handIndex]
+            let evenGrabbee = grabbees[handIndex]
             let rotationPart = decompositions[handIndex].rotationPart
             let translationPart = decompositions[handIndex].translationPart
 

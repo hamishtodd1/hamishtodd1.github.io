@@ -16,6 +16,14 @@ function initSclptables()
 
     let currentColor = 12
 
+    let rounded = new Float32Array(3)
+    let unrounded = new THREE.Vector3()
+    function doRounding(p) {
+        rounded[0] = Math.round(p.x / VOXEL_WIDTH) * VOXEL_WIDTH
+        rounded[1] = Math.round(p.y / VOXEL_WIDTH) * VOXEL_WIDTH
+        rounded[2] = Math.round(p.z / VOXEL_WIDTH) * VOXEL_WIDTH
+    }
+
     establishSculptablePointSize = () => {
         if (coloredPointMats[0] === null) {
             //point size different because it's not about size but about subtended angle or something
@@ -27,19 +35,22 @@ function initSclptables()
     }
 
     let coloredPointMats = []
+    let eraserCol = new THREE.Color().setRGB(.1,.2,.3)
     {
-        let hueDivisions = 9
+        let hueDivisions = 8
         let greyDivisions = 3
         var cols = []
-        for (let i = 0, il = hueDivisions + greyDivisions; i < il; ++i) {
+        for (let i = 0, il = hueDivisions + greyDivisions + 1; i < il; ++i) {
 
             cols.push(new THREE.Color())
             if (i < hueDivisions)
                 cols[i].setHSL(i / hueDivisions, 1., .5)
-            else {
+            else if(i - hueDivisions < greyDivisions){
                 let grey = (i - hueDivisions) / (greyDivisions - 1)
                 cols[i].setRGB(grey, grey, grey)
             }
+            else
+                cols[i].copy(eraserCol)
         }
         cols.push(new THREE.Color(0xDF9686))
         var numCols = cols.length
@@ -102,7 +113,18 @@ function initSclptables()
             }
         }
 
-        emitSelf() {
+        finishAndEmit() {
+
+            
+            if (cols[currentColor].equals(eraserCol)) {
+                debugger
+                let bb = this.boundingBox
+                bb.makeEmpty()
+                this.children.forEach( cs => {
+                    cs.geometry.computeBoundingBox()
+                    bb.union(cs.geometry.boundingBox )
+                })
+            }
 
             if( spectatorMode !== false ) {
                 spectatorMode = false
@@ -134,33 +156,52 @@ function initSclptables()
             pos.pointToGibbsVec(posGibbsVec)
             this.worldToLocal(posGibbsVec)
 
-            let cs = this.children[currentColor]
-            cs.vAttr.updateRange.offset = cs.lowestUnusedCube * 3
-            cs.vAttr.updateRange.count = 0
-            cs.vAttr.needsUpdate = true
+            if(currentColor === 11) {
 
-            //both of these are in voxels
-            // let radiusSq = sq(numWide / 2.)
-            let start = -(numWide - 1) / 2.
-            for (let i = 0; i < numWide; ++i) {
-                for (let j = 0; j < numWide; ++j) {
-                    for (let k = 0; k < numWide; ++k) {
+                let eraserWidth = numWide * 2
+                let start = -(eraserWidth - 1) / 2.
+                let ml = this.children.length
+                for (let m = 0; m < ml; ++m) {
 
-                        v2.set(i + start, j + start, k + start)
-                        // if(v2.lengthSq() > radiusSq)
-                        //     continue
-                        v2.multiplyScalar(VOXEL_WIDTH)
-                        v2.add(posGibbsVec)
+                    let cs = this.children[m]
+                    cs.vAttr.updateRange.offset = 0
+                    cs.vAttr.updateRange.count = cs.lowestUnusedCube * 3
+                    cs.vAttr.needsUpdate = true
 
-                        let fillable = cs.checkCubePosition(v2) //could check other ones
-                        if(fillable)
-                            cs.fillCubePosition(v2)
+                    for (let i = 0; i < eraserWidth; ++i)
+                    for (let j = 0; j < eraserWidth; ++j)
+                    for (let k = 0; k < eraserWidth; ++k) {
+    
+                        unrounded.set(i + start, j + start, k + start)
+                        unrounded.multiplyScalar(VOXEL_WIDTH)
+                        unrounded.add(posGibbsVec)
+    
+                        cs.deleteCubePosition(unrounded)
                     }
+                }
+            }
+            else {
+                let cs = this.children[currentColor]
+                cs.vAttr.updateRange.offset = cs.lowestUnusedCube * 3
+                cs.vAttr.updateRange.count = 0
+                cs.vAttr.needsUpdate = true
+
+                //both of these are in voxels
+                // let radiusSq = sq(numWide / 2.)
+                let start = -(numWide - 1) / 2.
+                for (let i = 0; i < numWide; ++i)
+                for (let j = 0; j < numWide; ++j)
+                for (let k = 0; k < numWide; ++k) {
+
+                    unrounded.set(i + start, j + start, k + start)
+                    unrounded.multiplyScalar(VOXEL_WIDTH)
+                    unrounded.add(posGibbsVec)
+
+                    cs.fillCubePositionIfEmpty(unrounded)
                 }
             }
 
             updateBoxHelper(this.boxHelper, this.boundingBox)
-
         }
     }
     window.Sclptable = Sclptable
@@ -178,25 +219,37 @@ function initSclptables()
         }
         let spacing = .024
         palette.position.z = .2
+
         let bg = new THREE.Mesh(new THREE.RingGeometry(spacing * .75, spacing * 3.5, numCols * 2), new THREE.MeshBasicMaterial({ color: 0xCCCCCC }))
         bg.position.z = -.001
         palette.add(bg)
-        let selector = new THREE.Mesh(new THREE.CircleGeometry(1.,16), new THREE.MeshBasicMaterial({ color: 0x555555 }))
+
+        let selector = new THREE.Mesh( new THREE.CircleGeometry(1.,16), new THREE.MeshBasicMaterial({ color: 0x555555 }))
         palette.add(selector)
         selector.position.z = bg.position.z * .5
         selector.scale.setScalar(spacing*.5)
+
         let swatches = []
         cols.forEach((col, i) => {
+
             let swatchesOfSize = []
             swatches.push(swatchesOfSize)
+            let mat = new THREE.MeshBasicMaterial({ color: col })
+
             sizes.forEach((size, j) => {
-                let swatch = new THREE.Mesh(unchangingUnitSquareGeometry, new THREE.MeshBasicMaterial({ color: col }))
+                let swatch = new THREE.Mesh(unchangingUnitSquareGeometry, mat)
                 swatchesOfSize.push(swatch)
                 swatch.scale.set(size*VOXEL_WIDTH, size*VOXEL_WIDTH, 1.)
                 palette.add(swatch)
                 swatch.position.x = (i - numCols / 2. + .5) * spacing
                 swatch.position.y = (j - sizes.length    / 2. + .5) * spacing
             })
+        })
+        textureLoader.load('data/icons/eraser.png', (texture) => {
+            let eraser = palette.children.find(child => child.material.color.equals(eraserCol))
+            eraser.material.map = texture
+            eraser.material.needsUpdate = true
+            eraser.material.color.setRGB(1., 1., 1.)
         })
         
         updatePaletteAnimation = () => {
@@ -247,12 +300,6 @@ function initSclptables()
         }
     }
     
-    let rounded = new Float32Array(3)
-    function doRounding(p) {
-        rounded[0] = Math.round(p.x / VOXEL_WIDTH) * VOXEL_WIDTH
-        rounded[1] = Math.round(p.y / VOXEL_WIDTH) * VOXEL_WIDTH
-        rounded[2] = Math.round(p.z / VOXEL_WIDTH) * VOXEL_WIDTH
-    }
     class ColoredSection extends THREE.Points {
 
         constructor(mat) {
@@ -269,26 +316,51 @@ function initSclptables()
             this.lowestUnusedCube = 0
         }
 
-        checkCubePosition(p) {
-
+        deleteCubePosition(p) {
             doRounding(p)
 
+            // debugger
+            let arr = this.vAttr.array
+            let h = (this.lowestUnusedCube - 1) * 3
             for (let i = 0; i < this.lowestUnusedCube; ++i) {
                 let i3 = i * 3
                 if (
-                    this.vAttr.array[i3 + 0] === rounded[0] &&
-                    this.vAttr.array[i3 + 1] === rounded[1] &&
-                    this.vAttr.array[i3 + 2] === rounded[2]
+                    arr[i3 + 0] === rounded[0] &&
+                    arr[i3 + 1] === rounded[1] &&
+                    arr[i3 + 2] === rounded[2]
                 )
-                    return false
-            }
+                {
+                    //take the coordinates of the last cube and put them in the place of the one we're deleting
+                    arr[i3 + 0] = arr[h + 0]
+                    arr[i3 + 1] = arr[h + 1]
+                    arr[i3 + 2] = arr[h + 2]
 
-            return true
+                    --this.lowestUnusedCube
+                    --this.geometry.drawRange.count
+                    this.parent.com.sub(fl0.pointFromGibbsVec(unrounded), this.parent.com)
+                    
+                    return
+                }
+            }
         }
 
-        fillCubePosition(p) {
+        fillCubePositionIfEmpty(p) {
 
             doRounding(p)
+
+            let arr = this.vAttr.array
+            for (let i = 0; i < this.lowestUnusedCube; ++i) {
+                let i3 = i * 3
+                if (
+                    arr[i3 + 0] === rounded[0] &&
+                    arr[i3 + 1] === rounded[1] &&
+                    arr[i3 + 2] === rounded[2]
+                ) {
+                    return
+                }
+            }
+
+            //THIS ASSUMES THAT rounded CONTAINS p ROUNDED
             
             let c3 = this.lowestUnusedCube * 3
             this.vAttr.array[c3 + 0] = rounded[0]
@@ -296,7 +368,7 @@ function initSclptables()
             this.vAttr.array[c3 + 2] = rounded[2]
 
             if (this.lowestUnusedCube === maxVoxels) 
-                console.error("yeah need more cubes")
+                console.error("Need more cubes")
             else {
                 ++this.lowestUnusedCube
                 this.vAttr.updateRange.count += 3
@@ -305,15 +377,15 @@ function initSclptables()
             let potentialNewDrawRange = this.lowestUnusedCube
             this.geometry.drawRange.count = Math.max(this.geometry.drawRange.count, potentialNewDrawRange)
 
-            let s = this.parent
-            s.com.add(fl0.pointFromGibbsVec(v2), s.com)
+            this.parent.com.add(fl0.pointFromGibbsVec(unrounded), this.parent.com)
 
-            s.boundingBox.min.x = Math.min( s.boundingBox.min.x, v2.x - 1.5 * VOXEL_WIDTH )
-            s.boundingBox.min.y = Math.min( s.boundingBox.min.y, v2.y - 1.5 * VOXEL_WIDTH )
-            s.boundingBox.min.z = Math.min( s.boundingBox.min.z, v2.z - 1.5 * VOXEL_WIDTH )
-            s.boundingBox.max.x = Math.max( s.boundingBox.max.x, v2.x + 1.5 * VOXEL_WIDTH )
-            s.boundingBox.max.y = Math.max( s.boundingBox.max.y, v2.y + 1.5 * VOXEL_WIDTH )
-            s.boundingBox.max.z = Math.max( s.boundingBox.max.z, v2.z + 1.5 * VOXEL_WIDTH )
+            let bb = this.parent.boundingBox
+            bb.min.x = Math.min( bb.min.x, unrounded.x - 1.5 * VOXEL_WIDTH )
+            bb.min.y = Math.min( bb.min.y, unrounded.y - 1.5 * VOXEL_WIDTH )
+            bb.min.z = Math.min( bb.min.z, unrounded.z - 1.5 * VOXEL_WIDTH )
+            bb.max.x = Math.max( bb.max.x, unrounded.x + 1.5 * VOXEL_WIDTH )
+            bb.max.y = Math.max( bb.max.y, unrounded.y + 1.5 * VOXEL_WIDTH )
+            bb.max.z = Math.max( bb.max.z, unrounded.z + 1.5 * VOXEL_WIDTH )
         }
     }
 }

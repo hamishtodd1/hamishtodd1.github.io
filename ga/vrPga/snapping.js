@@ -1,8 +1,4 @@
 /*
-    So they come in pairs: A*B and B*A. Alright, but you only need one
-        So, maybe only show the one that's closer
-
-    When there's a dqTo
  */
 
 function initSnapping() {
@@ -28,7 +24,7 @@ function initSnapping() {
             return type2
         else if (opName === `projectOn` || opName === `copyTo` || opName === `projectTransformOn` )
             return type1
-        else if (opName === `dqTo`)
+        else if (opName === `dqTo` || opName === `userPow`)
             return Dq
         else if (opName === `add` || opName === `sub`)
             return type1
@@ -58,10 +54,10 @@ function initSnapping() {
         let isNull1 = mv1.eNormSq() === 0.
 
         //exact 180s and point reflections are for mathematicians
+        //so, objects and trasforms coincide at reflections
         let isTransform0 = (g0 === -1 || g0 === -2 || g0 === 1) && !isNull0
         let isTransform1 = (g1 === -1 || g1 === -2 || g1 === 1) && !isNull1
 
-        //note "transform" is not the opposite of "object", because planes
         switch(operators[opIndex]) {
             case `mul`: // the only thing that can output a rotoreflection
                 return isTransform0 && isTransform1
@@ -77,10 +73,10 @@ function initSnapping() {
                 return g0 === g1
             case `projectOn`:
                 return isObject0 && isObject1 && g0 !== g1
-            // case `userPow`:
-            //     let mv1IsTranslation = !isObject1 &&
-            //         mv1[0] !== 0. && mv1[4] === 0. && mv1[5] === 0. && mv1[6] === 0. && mv1[7] === 0.
-            //     return g0 === -2 && mv1IsTranslation
+            case `userPow`:
+                let mv1IsTranslation = !isObject1 &&
+                    mv1[0] !== 0. && mv1[4] === 0. && mv1[5] === 0. && mv1[6] === 0. && mv1[7] === 0.
+                return g0 === -2 && mv1IsTranslation
             // case `velocityUnder`:
             //     return g0 === -2 && isObject1 //not thinking about lines or planes for now
             // case `projectTransformOn`:

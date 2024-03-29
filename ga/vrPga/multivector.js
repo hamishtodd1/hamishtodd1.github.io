@@ -7,6 +7,25 @@ function initMultivectorWithoutDeclarations() {
     
     class Multivector extends Float32Array {
 
+        divide(b, target) {
+            return this.mul(b.rigorousInverse(newDq), target)
+        }
+
+        rigorousInverse(target) {
+            if (target === undefined)
+                target = new constructor()
+
+            let thisReverse = this.getReverse(newDq)
+
+            let thisThisReverse = this.mul(thisReverse, newDq) //potentially study
+            let thisThisReverseInverse = newDq;
+            thisThisReverseInverse.zero()
+            thisThisReverseInverse[0] = 1. / thisThisReverse[0]
+            thisThisReverseInverse[7] = -thisThisReverse[7] / (thisThisReverse[0] * thisThisReverse[0])
+
+            return thisReverse.mulDq(thisThisReverseInverse, target)
+        }
+
         adhocNormSq() {
             let adHocNormSq = this.eNormSq()
             if (adHocNormSq === 0.)
@@ -19,7 +38,12 @@ function initMultivectorWithoutDeclarations() {
                 target = new this.constructor()
 
             let rotorLogarithm = rotor.logarithm(newDq)
-            return this.commutator(rotorLogarithm, target)
+            this.mul(rotorLogarithm, target)
+            for(let i = 0; i <5; ++i) {
+                if(!this.hasGrade(i))
+                    target.zeroGrade(i)
+            }
+            return target
         }
 
         addNoise(firstIndex, lastIndex, radius) {

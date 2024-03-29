@@ -1,18 +1,21 @@
 const TAU = Math.PI * 2.
 
-let vizBeingModified = null
-let spectatorMode = null
-const snappables = []
-let vrSession = null
-const passThroughMode = false
-
+const eps = .0001 //not been tweaked for anything yet, so feel free to change
+const translucentOpacity = .65
+const randomPt = new Fl().point(0.2448657087518873, 0.07640275431752674, 0.360207610338215, 0.)
+const notchSpacing = .1 //a decimeter. Very natural, fight me!
 const RIGHT = 0
 const LEFT = 1
-const hands = Array(2)
-let debuggerTrigger = false
-let oddGrabbee = null
-const evenGrabbees = [null, null]
+const passThroughMode = false
+
+let spectatorMode = null
+let vrSession = null
+
+const hands = [null,null]
+const snappables = []
 const vizes = []
+const obj3dsWithOnBeforeRenders = []
+const grabbees = [null, null]
 
 //spreadsheet copypastes
     const spreadsheets = []
@@ -36,13 +39,8 @@ let frameDelta = 0.
 let frameCount = 0
 const log = console.log
 const debugUpdates = []
-const obj3dsWithOnBeforeRenders = []
 const socket = io()
-const eps = .0001 //not been tweaked for anything yet, so feel free to change
-
-const randomPt = new Fl().point(0.2448657087518873, 0.07640275431752674, 0.360207610338215, 0.)
-
-const translucentOpacity = .65
+let debuggerTrigger = false
 
 const operators = [
     //2-argument

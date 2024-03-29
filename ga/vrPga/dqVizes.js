@@ -42,17 +42,9 @@
 
 function initDqVizes(transparentOpacity) {
 
-    let dqCol = 0x00FFFF
-    /*
-        Each vertex has two floats, its u (distance around) and v (distance along)
-        You're sending in:
-            a point at the center of the base of the arrow
-            an AROUND axis tangent to the spine at that point
-            an AWAY axis taking that point away from the spine
-                Could be trans. But if rotor is a scale it could be rotation!
-                Will definitely have an axis that lies on the around axis but not necessarily on the spine
-     */
     
+    
+    let dqCol = 0x00FFFF
     let colFactor = 0.
     let colFactorIncrease = 1./sq(Math.sqrt(5.) / 2. + .5)
     let rotAxisRadius = .0025

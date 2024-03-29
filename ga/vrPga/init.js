@@ -1,29 +1,30 @@
 /*
-    When you exponentiate, you use a translation.
-        There are braces/compasses which appear in place indicating that a measurement is involved
-    Can do "if" statements with with (translationDist > 0 ? 1 : 0)*
+    There are braces/compasses which appear in place indicating that a measurement is involved
+    Can do "if" statements with with thingYouMayNotWant * (translationDist > 0 ? 1 : 0)
 
     visibility
         When you remake an old one, its affecters appear too?
         press a button to show everything?
 
-    The lockedGrades, the userPow, the dqTo/lack of sqrt, these are training wheels
+    Training wheels
+        lockedGrades
+        userPow
+        dqTo
+    Which you have instead of
+        Scalars, norms, normalization
+        Sqrt
+        Grade selection
 
     FoC demo:
         Show a creature with eyeballs that track, a bird flapping its wings, maybe a snake
+        Memories of the Music Hall
         Show from your pov making one of them
 
-    Change VelocityUnder to use Jeff's idea
-
     TODO for FoC demo:
-        Grabbing and moving locked points and planes moves them in a normal way
+        Load test. Make sure you can do exactly what you want to do
         Paint eraser "color"
         Redo personal website and vtbotb
         Just an eye that rotates in place
-            Join eye position with initial eyeFocusPoint (at infinity), get line
-            Join eye position with focusPoint, get line
-            Do dqTo
-            Then parenting...
         Make the silly old Ram
             Hand controls head
             Body always in a certain plane
@@ -41,7 +42,6 @@
                 point-point for a translation is the most likely so it's ok that it's a bit weird
             userPow goes in as exp(L*distance(T))
         For rotoreflections/transflections, definitely need the pointy extension of your plane to the axis point
-        arrow starts move slowly to correct position instead of teleporting
         Levels. Just 4 or so
         Gauges. Some kind of animation system for this triggered by creating mvs.
         Eyeballs on vizes
@@ -54,14 +54,11 @@
         Undo
     Beyond:
         Meshes can have fl's as their transform
-        Infinity is at 10m or whatever
         Don't want to be loading the xr input profile from the internet. "assetPath" may be a place to start
-        Bounding cylinders, not cuboids
-            One line L, a plane P in the middle, a radius r and a height h
+        Infinity is at 10m or whatever
         Think about what hand gestures bring about loop translations
-        ACTUALLY, there is such a thing as a "nega screw". It has no logarithm or sqrt but it's a thing
-        How come hand can't do anything more than 180deg arrow?
-        Are you using the measurer for anything? If so, some numbers...
+            ACTUALLY, there is such a thing as a "nega screw". It has no logarithm or sqrt but it's a thing
+            How come hand can't do anything more than 180deg arrow?
         If passthrough, maybe have a warning saying to do it in the middle of a field
         Experiment with stage from your POV (but probably keep as is because facing audience is good)
         Hidden surface removal for boxhelpers
@@ -81,6 +78,8 @@
         IF you were to do the inertia tensor
             First thing would be, for the sclptables, getting the inertia tensor
             And having you move a line L around, and showing you the I[L]
+        Bounding cylinders, not cuboids
+            One line L, a plane P in the middle, a radius r and a height h
         One idea for visibility
             Your most-recently-created things are visible
             There's max 7 of them at a time
@@ -126,8 +125,8 @@ async function init() {
 
     initDqMeshes()
 
-    let transparentOpacity = .45
     initArrows()
+    let transparentOpacity = .45
     initDqVizes(transparentOpacity)
     initFlVizes(transparentOpacity)
 
@@ -173,6 +172,7 @@ async function init() {
     container.appendChild(renderer.domElement)
 
     initVrButton()
+    // initMeasurer()
 
     function render() {
         let clockDelta = clock.getDelta()
@@ -202,6 +202,7 @@ async function init() {
             updatePaletteAnimation()
             updateMarkupPoses()
         }
+
         
         obj3dsWithOnBeforeRenders.forEach(obj3d => obj3d.onBeforeRender())
 

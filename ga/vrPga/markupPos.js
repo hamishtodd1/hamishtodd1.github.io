@@ -19,48 +19,6 @@ function initMarkupPos() {
         return point
     }
 
-    let rotationPart = new Dq()
-    let translationPart = new Dq()
-    let planePart = new Fl()
-    let pointPart = new Fl()
-    let bivPart = new Dq()
-    let axisBiv = new Dq()
-    function regularizeMarkupPos(viz, noUpperLimit) {
-        if(viz.constructor === DqViz) {
-            viz.dq.invariantDecomposition(rotationPart, translationPart)
-            rotationPart.selectGrade(2, bivPart)
-
-            //if this has no rotation component, fuck it
-            //could have something about it going to being closer to your line of sight
-            if (Math.abs(bivPart.eNormSq()) < eps)
-                return
-
-            clampPointDistanceFromThing(viz.markupPos, bivPart, .015, noUpperLimit ? Infinity : .06)
-        }
-        else {
-            //markupPos is only relevant when we have rotoreflection or transflection, so this will probably only be called then
-            //And away from the plane
-            //push the markupPos away from the axis of the rotation
-
-            viz.fl.selectGrade(1, planePart)
-            viz.fl.selectGrade(3, pointPart)
-            let hasPlane = !planePart.isZero()
-            let hasPoint = !pointPart.isZero()
-
-            if (!hasPlane || !hasPoint)
-                return
-
-            let maxDistFromPlane = .015
-            if (planePart.distanceToPt(viz.markupPos) > maxDistFromPlane)
-                clampPointDistanceFromThing(viz.markupPos, planePart, maxDistFromPlane, 1.)
-
-            //TODO it should be far enough away from the axis that the arrow goes a larger arclength
-            planePart.inner(pointPart, axisBiv)
-            if (Math.abs(axisBiv.eNormSq()) > eps)
-                clampPointDistanceFromThing(viz.markupPos, axisBiv, .05)
-        }
-    }
-
     updateMarkupPoses = () => {
 
         /*To take into account:
@@ -79,8 +37,12 @@ function initMarkupPos() {
             else if (viz.constructor === FlViz && viz.lockedGrade === 1) {
                 // viz.markupPos.pointFromGibbsVec(viz.diskGroup.position)
                 // viz.settleDiskPosition()
+                if( grabbees.indexOf(viz) !== -1 ) {
+                    let handHeldIn = hands[grabbees.indexOf(viz)]
+                    handHeldIn.laserDq.meet(viz.fl, viz.markupPos)
+                }
             }
-            else if (viz.sclptable !== null && viz.constructor === DqViz && evenGrabbees.indexOf(viz) === -1) {
+            else if (viz.sclptable !== null && viz.constructor === DqViz && grabbees.indexOf(viz) === -1) {
                 viz.markupPos.lerp(viz.sclptable.com, .003, viz.markupPos)
             }
             else if(viz.affecters[0] !== null) {

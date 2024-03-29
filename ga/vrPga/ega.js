@@ -30,7 +30,7 @@ function initEgaWithoutDeclarations() {
 
         momentumLine( rateBivector, targetDq ) {
 
-            let derivative = this.commutator(rateBivector, newFl)
+            let derivative = this.velocityUnder(rateBivector, newFl)
             this.joinPt(derivative, targetDq)
             return targetDq
 
@@ -174,25 +174,14 @@ function initEgaWithoutDeclarations() {
             this[0] = 1.
         }
 
-        userPow(amountDq, target) {
-            let dist = amountDq.translationDistance()
-            let unitLength = .1
-            return this.pow(dist * unitLength, target)
+        fromPointsToPoints(q, p) {
+
         }
 
-        rigorousInverse(target) {
-            if (target === undefined)
-                target = new Dq()
-
-            let thisReverse = this.getReverse( newDq )
-
-            let thisThisReverse = this.mul(thisReverse, newDq) //potentially study
-            let thisThisReverseInverse = newDq;
-            thisThisReverseInverse.zero()
-            thisThisReverseInverse[0] = 1. / thisThisReverse[0]
-            thisThisReverseInverse[7] = -thisThisReverse[7] / (thisThisReverse[0] * thisThisReverse[0])
-
-            return thisReverse.mulDq(thisThisReverseInverse, target)
+        userPow(amountDq, target) {
+            let dist = amountDq.translationDistance()
+            dist *= Math.sign(amountDq[0])
+            return this.pow(dist / notchSpacing, target)
         }
 
         isScalar() {
@@ -207,7 +196,7 @@ function initEgaWithoutDeclarations() {
 
         translationDistance() {
             let iNormBiv = Math.sqrt(this[1] * this[1] + this[2] * this[2] + this[3] * this[3])
-            return Math.abs( iNormBiv / this[0] ) //feel free change to keeping sign if you like! Just check all uses!
+            return Math.abs( 2. * iNormBiv / this[0] ) //feel free change to keeping sign if you like! Just check all uses!
         }
 
         slerp(end, t, target) {
@@ -221,22 +210,34 @@ function initEgaWithoutDeclarations() {
 
         align(startPoints,endPoints) {
             
-            let P = newDq;
-            let Q = newDq;
             let r1 = newDq;
-            let r2 = newDq;
-            P.zero(); P[7] = 1.
-            Q.zero(); Q[7] = 1.
+
+            let flP = newFl; let flQ = newFl; let dqP = newDq; let dqQ = newDq;
+            dqP.copy( e0123 )
+            dqQ.copy( e0123 )
 
             this.copy(oneDq)
             for (let i = 0, il = startPoints.length; i < il; ++i) {
-                Q.joinPt(this.sandwichFl(startPoints[i]), P)
-                Q.joinPt(endPoints[i])
-                P.normalize()
-                Q.normalize()
-                Q.mulReverse(P, r1)
+
+                let P = null; let Q = null;
+                if (i % 2 === 0) {
+                    P = dqQ.joinPt(this.sandwich(startPoints[i], newFl), flP)
+                    Q = dqQ.joinPt(endPoints[i], flQ)
+                }
+                else {
+                    P = flQ.joinPt(this.sandwich(startPoints[i], newFl), dqP)
+                    Q = flQ.joinPt(endPoints[i], dqQ)
+                }
+
+                // if(frameCount % 10 === 0)
+                //     log(Q,P,this)
+                // debugger
+                Q.normalize().mulReverse(P.normalize(), r1)
                 r1[0] += 1.
-                this.copy(r1.normalize().mul(this, r2))
+                if(!r1.isZero())
+                    this.copy(r1.normalize().mul(this, newDq))
+                else
+                    this.copy(oneDq)
             }
             
             return this            
@@ -416,6 +417,7 @@ function initEgaWithoutDeclarations() {
                 if (iNormSq !== 0.) //it's a translation axis
                     return this.multiplyScalar(1. / Math.sqrt(iNormSq), target)
                 else {
+                    debugger
                     console.warn("zero dual quaternion normalization from line: ", getWhereThisWasCalledFrom(1) )
                     return target.zero()
                 }
