@@ -42,8 +42,6 @@
 
 function initDqVizes(transparentOpacity) {
 
-    
-    
     let dqCol = 0x00FFFF
     let colFactor = 0.
     let colFactorIncrease = 1./sq(Math.sqrt(5.) / 2. + .5)
@@ -57,7 +55,7 @@ function initDqVizes(transparentOpacity) {
     let pointHalfWayAlongArrow = new Fl()
     class DqViz extends THREE.Group {
         
-        constructor(color, omitFromSnappables = false, transparent = false, backgroundSnappable = false) {
+        constructor(color, omitFromSnappables = false, backgroundSnappable = false) {
 
             super()
             vizes.push(this)
@@ -94,8 +92,7 @@ function initDqVizes(transparentOpacity) {
             }
             let axisMat = new THREE.MeshPhongMaterial({
                 color,
-                transparent,
-                opacity: transparentOpacity
+                transparent: true
             })
             this.rotAxisMesh = new THREE.Mesh(rotAxisGeo, axisMat)
             this.rotAxisMesh.visible = false
@@ -112,7 +109,7 @@ function initDqVizes(transparentOpacity) {
             this.scalarSign.visible = false
             this.add(this.scalarSign)
 
-            this.arrow = new Arrow(color, transparent, axisMat)
+            this.arrow = new Arrow(color, axisMat)
             this.arrow.visible = false
             // this.arrow.castShadow = true //would be nice but it doesn't use the vertex shader
             this.markupPos = new Fl().copy(e123)
@@ -175,7 +172,6 @@ function initDqVizes(transparentOpacity) {
                         let rotationAxis = rotationPart.selectGrade(2, dq1)
                         e31.dqTo( rotationAxis.projectOn(e123, dq0), this.rotAxisMesh.dq ).toQuaternion(this.rotAxisMesh.quaternion)
                         pointHalfWayAlongArrow.projectOn(rotationAxis, fl1).pointToGibbsVec(this.rotAxisMesh.position)
-                        this.rotAxisMesh.scale.y = 3.5 * this.boundingBox.getSize(v0).length()
                         //funny: pointHalfWayAlongArrow is point pair at infinity for negaDqs
                     }
 
@@ -198,7 +194,7 @@ function initDqVizes(transparentOpacity) {
             }
         }
 
-        setTransparency(opacity) {
+        setOpacity(opacity) {
             this.rotAxisMesh.material.opacity = opacity
             this.arrow.material.opacity = opacity
         }
@@ -235,11 +231,8 @@ function initDqVizes(transparentOpacity) {
 
         scaleAxisRadius(factor) {
             this.rotAxisMesh.scale.x *= factor
-            this.rotAxisMesh.scale.y *= factor
             this.trnAxisMesh.scale.x *= factor
-            this.trnAxisMesh.scale.y *= factor
         }
-
     }
     window.DqViz = DqViz
 
@@ -251,7 +244,10 @@ function initDqVizes(transparentOpacity) {
             super()
             
             this.canvas = document.createElement("canvas")
-            this.material = new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(this.canvas), transparent: true })
+            this.material = new THREE.MeshBasicMaterial({ 
+                map: new THREE.CanvasTexture(this.canvas), 
+                transparent: true
+            })
 
             let font = "Arial"
             let padding = 43
@@ -302,9 +298,8 @@ function initDqVizes(transparentOpacity) {
     }
 
     debugDqVizes = [
-        new DqViz(0xFFFF00, true, false, true), new DqViz(0xFFFF00, true, false, true)
+        new DqViz(0xFFFF00, true, true), new DqViz(0xFFFF00, true, true)
     ]
-    debugDqVizes.forEach(ddqv=>ddqv)
     debugDqVizes.forEach(ddqv => {
         ddqv.scaleAxisRadius(.95)
         ddqv.dq.zero()

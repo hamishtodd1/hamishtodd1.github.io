@@ -21,17 +21,6 @@ function initFlVizes(transparentOpacity) {
     let planePart = new Fl()
     let pointPart = new Fl()
 
-    let diskMatFront = new THREE.MeshPhongMaterial({ 
-        side: THREE.FrontSide,
-        color: 0x00FFFF,
-        transparent: true,
-        opacity: .4 })
-    let diskMatBack = new THREE.MeshPhongMaterial({
-        side: THREE.BackSide,
-        color: 0x00FF00,
-        transparent: true,
-        opacity: .4
-    })
     let diskGeo = new THREE.CircleGeometry(.15, 32)
     diskGeo.computeBoundingBox()
     let pointRadius = .004
@@ -69,7 +58,7 @@ function initFlVizes(transparentOpacity) {
 
     class FlViz extends THREE.Group {
 
-        constructor(color, omitFromSnappables = false, transparent = false, putOnStackImmediately = false) {
+        constructor(color, omitFromSnappables = false, putOnStackImmediately = false) {
             
             super()
             vizes.push(this)
@@ -95,8 +84,7 @@ function initFlVizes(transparentOpacity) {
 
             let pointMat = new THREE.MeshPhongMaterial({
                 color: (color || 0xFF0000),
-                transparent,
-                opacity: transparent ? transparentOpacity : 1.
+                transparent: true
             })
 
             this.boundingBox = new THREE.Box3()
@@ -105,10 +93,10 @@ function initFlVizes(transparentOpacity) {
             this.boxHelper.visible = false
             this.boxHelper.matrixAutoUpdate = false
 
-            this.arrow1 = new Arrow( pointMat.color, false, pointMat, true )
+            this.arrow1 = new Arrow( pointMat.color, pointMat, true )
             this.arrow1.visible = false
             this.add(this.arrow1)
-            this.arrow2 = new Arrow( pointMat.color, false, pointMat, false )
+            this.arrow2 = new Arrow( pointMat.color, pointMat, false )
             this.arrow2.visible = false
             this.add(this.arrow2)
 
@@ -125,9 +113,22 @@ function initFlVizes(transparentOpacity) {
             this.diskGroup = new THREE.Group()
             this.diskGroup.scale.setScalar(0.)
             this.add(this.diskGroup)
-            this.diskGroup.add(
-                new THREE.Mesh(diskGeo, diskMatFront), 
-                new THREE.Mesh(diskGeo, diskMatBack))
+            let diskMatFront = new THREE.MeshPhongMaterial({
+                side: THREE.FrontSide,
+                color: 0x00FFFF,
+                transparent: true,
+                opacity: .4
+            })
+            this.diskGroup.add(new THREE.Mesh(diskGeo, diskMatFront))
+            let diskMatBack = new THREE.MeshPhongMaterial({
+                side: THREE.FrontSide,
+                color: 0x00FF00,
+                transparent: true,
+                opacity: .4
+            })
+            let back = new THREE.Mesh(diskGeo, diskMatBack)
+            back.rotation.x = Math.PI
+            this.diskGroup.add(back)
 
             this.pointMesh = new THREE.Mesh(pointGeo, pointMat)
             this.pointMesh.visible = false
@@ -192,7 +193,7 @@ function initFlVizes(transparentOpacity) {
                     }
                 }
 
-                if (!hasPlane || !hasPoint) {
+                if( !hasPlane || !hasPoint) {
                     this.arrow1.visible = false
                     this.arrow2.visible = false
                 }
@@ -246,7 +247,7 @@ function initFlVizes(transparentOpacity) {
                     let newScale = clamp(this.diskGroup.scale.x + (hasPlane ? 1. : -1.) * scaleSpeed * frameDelta,0.,1.)
                     this.diskGroup.scale.setScalar(newScale)
 
-                    this.getSettledDiskPosition(this.markupPos,planePosition)
+                    this.getSettledDiskPosition(planePosition)
                     this.diskGroup.position.lerp(planePosition.pointToGibbsVec(v1), .13)
                     if(hasPlane)
                         planeMeshQuat(this.diskGroup, planePart, planePosition)
@@ -261,7 +262,11 @@ function initFlVizes(transparentOpacity) {
             }
         }
 
-        getSettledDiskPosition(pointToProject,target) {
+        //if it's a pure reflection, this projects the point onto the plane
+        getSettledDiskPosition(target,pointToProject) {
+
+            if(pointToProject === undefined)
+                pointToProject = this.markupPos
 
             this.fl.selectGrade(1, planePart)
             this.fl.selectGrade(3, pointPart)
@@ -281,15 +286,16 @@ function initFlVizes(transparentOpacity) {
         }
 
         settleDiskPosition(pointToProject) {
-            this.getSettledDiskPosition(pointToProject,planePosition)
+            this.getSettledDiskPosition(planePosition, pointToProject)
             planePosition.pointToGibbsVec(this.diskGroup.position)
         }
 
-        setTransparency(opacity) {
-            //plane is already transparent soooo
+        setOpacity(opacity) {
             this.pointMesh.material.opacity = opacity
-            this.arrow1.material.opacity = opacity
-            this.arrow2.material.opacity = opacity
+            // this.arrow1.material.opacity = opacity
+            // this.arrow2.material.opacity = opacity
+            this.diskGroup.children[0].material.opacity = opacity * .4
+            this.diskGroup.children[1].material.opacity = opacity * .4
         }
 
         dispose() {
@@ -298,11 +304,11 @@ function initFlVizes(transparentOpacity) {
     }
     window.FlViz = FlViz
 
-    debugFls = [
-        new FlViz(0xFFFF00, true, false), new FlViz(0xFFFF00, true, false),
-        new FlViz(0xFFFF00, true, false), new FlViz(0xFFFF00, true, false)
+    debugFlVizes = [
+        new FlViz(0xFFFF00, true), new FlViz(0xFFFF00, true),
+        new FlViz(0xFFFF00, true), new FlViz(0xFFFF00, true)
     ]
-    debugFls.forEach(dfl => {
+    debugFlVizes.forEach(dfl => {
         dfl.fl.zero()
         dfl.markupPos.pointFromGibbsVec(outOfSightVec3)
     })

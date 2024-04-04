@@ -1,5 +1,5 @@
 function initStack() {
-    let stackLength = 3 
+    let stackLength = 6
     let stack = Array(stackLength).fill(null)
     putOnStack = (s) => {
         if(stack.indexOf(snappables.indexOf(s)) !== -1)
@@ -13,12 +13,36 @@ function initStack() {
 
         stack[0] = snappables.indexOf(s)
 
-        snappables.forEach((sn,i) => {
-            if(sn !== null && !sn.backgroundSnappable )
-                sn.visible = stack.indexOf(i) !== -1
-        })
-        log(stack)
+        // snappables.forEach((sn,i) => {
+        //     if(sn !== null && !sn.backgroundSnappable )
+        //         sn.visible = stack.indexOf(i) !== -1
+        // })
     }
+}
+
+function updateFromAffecters(output) {
+    if (output.affecters[0] === null)
+        return
+
+    let res = output.mv
+    let holder = output.mv.constructor === Fl ? fl0 : dq0 // because you can be affected by yourself
+    let mv0 = output.affecters[0].mv
+    let op = operators[output.affecters[2]]
+    let mv1 = output.affecters[1] === null ? null : output.affecters[1].mv
+
+    if (output.affecters[1] === null)
+        mv0[op](holder)
+    else
+        mv0[op](mv1, holder)
+    res.copy(holder)
+
+    if (res.isZero())
+        debugger
+    res.normalize() //sell-out!
+    socket.emit("snappable", {
+        dqCoefficientsArray: output.mv,
+        i: snappables.indexOf(output)
+    })
 }
 
 function copySnappable(from, to) {
@@ -41,29 +65,6 @@ function operate(affecters, target) {
         affecter0.mv[op](affecter1.mv, target)
 
     target.normalize()
-}
-
-function updateFromAffecters(output) {
-    if (output.affecters[0] === null)
-        return
-
-    let res = output.mv
-    let mv0 = output.affecters[0].mv
-    let op = operators[output.affecters[2]]
-    let mv1 = output.affecters[1] === null ? null : output.affecters[1].mv
-    
-    if (output.affecters[1] === null)
-        mv0[op](res)
-    else
-        mv0[op](mv1, res)
-    
-    if (res.isZero())
-        debugger
-    res.normalize() //sell-out!
-    socket.emit("snappable", {
-        dqCoefficientsArray: output.mv,
-        i: snappables.indexOf(output)
-    })
 }
 
 function makeSnappable(s) {
@@ -93,9 +94,9 @@ function aDependsOnB(a,b) {
         a.affecters[1] === b)
         ret = true
 
-    if (ret === false && a.affecters[0] !== null)
+    if (ret === false && a.affecters[0] !== null && a.affecters[0] !== a)
         ret = aDependsOnB(a.affecters[0],b)
-    if (ret === false && a.affecters[1] !== null)
+    if (ret === false && a.affecters[1] !== null && a.affecters[1] !== a)
         ret = aDependsOnB(a.affecters[1],b)
 
     return ret

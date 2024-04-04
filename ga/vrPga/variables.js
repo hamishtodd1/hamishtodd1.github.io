@@ -16,6 +16,8 @@ const snappables = []
 const vizes = []
 const obj3dsWithOnBeforeRenders = []
 const grabbees = [null, null]
+const potentialSnapDqVizes = []
+const potentialSnapFlVizes = []
 
 //spreadsheet copypastes
     const spreadsheets = []
@@ -48,6 +50,8 @@ const operators = [
     `dqTo`,
     `joinPt`,
     `sandwich`,
+    `projectOn`,
+    // `velocityUnder`, `userPow`, `add`
 
     //1-argument
     // `copyTo`, `inverse`, `negate`, `userLogarithm`, `getDist`, `invariantDecomposition`

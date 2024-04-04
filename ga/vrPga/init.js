@@ -7,24 +7,19 @@
         press a button to show everything?
 
     Training wheels
-        lockedGrades
-        userPow
-        dqTo
-    Which you have instead of
-        Scalars, norms, normalization
-        Sqrt
-        Grade selection
+        dqTo, userPow, lockedGrades (except maybe PGA is typed so lockedGrades is fundamental...)
+    Instead of
+        Sqrt, grade selection, scalars/norms/normalization        
+
+    Maybe the spreadsheet somehow summarizes plane and point as 0.8*plane+0.6*point
+        and then when you have those on their own you see the reality
+
+    Spreadsheet: comma, not +. You're not really giving people +! Midpoint, yes... could almost have a different symbol...
 
     FoC demo:
         Show a creature with eyeballs that track, a bird flapping its wings, maybe a snake
-        Memories of the Music Hall
         Show from your pov making one of them
-
-    TODO for FoC demo:
-        Load test. Make sure you can do exactly what you want to do
-        Paint eraser "color"
-        Redo personal website and vtbotb
-        Just an eye that rotates in place
+        Make a puppet of maggie? “pizza’s almost here guys”
         Make the silly old Ram
             Hand controls head
             Body always in a certain plane
@@ -33,6 +28,17 @@
             Hold it by the head
             Body follows
             Legs pump when moved, eg the instantaneous movement is known
+
+    TODO for Lauren demo on saturday:
+        Wanna be able to grab points at infinity
+        Psvs visible based on rating, not stack
+        Saving?
+        Rig up a spreadsheet that can be flashed at them at the end
+        Just have the disk pos be extra state
+        Practice!
+            Load test. Make sure you can do exactly what you want to do
+        Redo personal website
+            put non-working ga stuff in "archive"
     Jon demo:
         Spreadsheet
             Auto-adds vizes
@@ -53,6 +59,9 @@
             One likes dynamism or something, just "seeing more stuff happen"
         Undo
     Beyond:
+        Bare hands https://github.com/mrdoob/three.js/blob/master/examples/webxr_vr_handinput_cubes.html
+            Thumb touching index finger is trigger; touching middle is paint
+            Palm is covered in colors, touch them to set that hand to using that color
         Meshes can have fl's as their transform
         Don't want to be loading the xr input profile from the internet. "assetPath" may be a place to start
         Infinity is at 10m or whatever
@@ -140,6 +149,7 @@ async function init() {
     initSnapping()
     initPotentialSpectatorReception()
     initStack()
+
     initMarkupPos()
     initControl()
 
@@ -174,6 +184,17 @@ async function init() {
     initVrButton()
     // initMeasurer()
 
+    // turnOnSpectatorMode()
+
+    timeGrabbable = new DqViz(0x000000, false, true)
+    function updateTimeGrabbable() {
+        
+        // let len = frameCount * .05
+        // oneDq.addScaled(e03, len, timeGrabbable.dq)
+        // comfortableLookPos(timeGrabbable.markupPos, 2., 0.)
+        // timeGrabbable.markupPos[4] += len * .5
+    }
+
     function render() {
         let clockDelta = clock.getDelta()
         frameDelta = clockDelta < .1 ? clockDelta : .1 //clamped because debugger pauses create weirdness
@@ -186,6 +207,7 @@ async function init() {
 
             updateCameraMvs()
             updateHandMvs()
+            updateTimeGrabbable()
 
             movingPaintingHighlightingHandLabels()
 

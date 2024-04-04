@@ -1,4 +1,6 @@
 /*
+    WEIRD AS FUCK THAT THERE IS AN ERASERCOL MESH IN THERE
+
     May want the ability to check if you're ADDING to a blob or making a new one
         Adjacency is an option: if your thing is connected to an existing thing, then yes, that's it
         But apparently bounding boxes go a long way
@@ -115,32 +117,22 @@ function initSclptables()
 
         finishAndEmit() {
 
-            
-            if (cols[currentColor].equals(eraserCol)) {
-                debugger
+            if (spectatorMode !== false) {
+                turnOnPresenterMode()
+            }
+
+            if (!cols[currentColor].equals(eraserCol)) 
+                this.children[currentColor].emitSelf()
+            else {
                 let bb = this.boundingBox
                 bb.makeEmpty()
                 this.children.forEach( cs => {
                     cs.geometry.computeBoundingBox()
                     bb.union(cs.geometry.boundingBox )
+
+                    cs.emitSelf()
                 })
             }
-
-            if( spectatorMode !== false ) {
-                spectatorMode = false
-                makeSpectatorCamera()
-            }
-
-            let vAttr = this.children[currentColor].vAttr
-
-            let arr = new Float32Array(vAttr.count * 3)
-            for(let i = 0; i < vAttr.count * 3; ++i)
-                arr[i] = vAttr.array[i]
-            socket.emit("sclptable", {
-                i: snappables.indexOf(this.dqViz),
-                color: currentColor, //don't change while painting I guess!
-                arr,
-            })
         }
 
         getWorldCom(target) {
@@ -314,6 +306,16 @@ function initSclptables()
             this.vAttr = vAttr
 
             this.lowestUnusedCube = 0
+        }
+
+        emitSelf() {
+            log(this.parent.dqViz, snappables.indexOf(this.parent.dqViz))
+            socket.emit("sclptable", {
+                i: snappables.indexOf(this.parent.dqViz),
+                childIndex: this.parent.children.indexOf(this),
+                arr: this.vAttr.array.toString(), //bad to have it sent as a string, buffer would be better
+                count: this.vAttr.count,
+            })
         }
 
         deleteCubePosition(p) {

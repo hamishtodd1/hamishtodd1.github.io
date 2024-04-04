@@ -20,6 +20,7 @@ function initSnapping() {
     }
 
     function getType(opName, type1, type2) {
+
         if (opName === `sandwich`)
             return type2
         else if (opName === `projectOn` || opName === `copyTo` || opName === `projectTransformOn` )
@@ -30,7 +31,8 @@ function initSnapping() {
             return type1
         else if (opName === `velocityUnder`)
             return type2
-        else if (opName === `joinPt` || opName === `mul` || opName === `mulReverse` || opName === `meet`) {
+        else if (opName === `joinPt` || opName === `mul` || 
+            opName === `mulReverse` || opName === `meet` || opName === `inner`) {
             if (type1 === type2)
                 return Dq
             else
@@ -41,7 +43,7 @@ function initSnapping() {
         return null
     }
 
-    function typeCheck(opIndex, mv0, mv1) {
+    function typeCheck(opIndex, mv0, mv1, toBeSnapped) {
         let g0 = mv0.grade()
         let g1 = mv1.grade()
         if ( (g0 === Infinity || g0 === 0 || g0 === 4) ||
@@ -53,38 +55,53 @@ function initSnapping() {
         let isNull0 = mv0.eNormSq() === 0.
         let isNull1 = mv1.eNormSq() === 0.
 
-        //exact 180s and point reflections are for mathematicians
+        //For now, exact 180s and point reflections are for mathematicians
         //so, objects and trasforms coincide at reflections
         let isTransform0 = (g0 === -1 || g0 === -2 || g0 === 1) && !isNull0
         let isTransform1 = (g1 === -1 || g1 === -2 || g1 === 1) && !isNull1
 
+        let opAcceptsTypes = true
         switch(operators[opIndex]) {
             case `mul`: // the only thing that can output a rotoreflection
-                return isTransform0 && isTransform1
+                opAcceptsTypes = g0 === -2 && g1 === -2 // only evens for now isTransform0 && isTransform1
+                break
             case `sandwich`:
-                return isObject1 && isTransform0
+                opAcceptsTypes = isObject1 && isTransform0
+                break
             case `dqTo`:
-                return isObject0 && isObject1 && !isNull0 && !isNull1
+                opAcceptsTypes = isObject0 && isObject1 && !isNull0 && !isNull1
+                break
             case `joinPt`:
-                return (g0 === 2 || g0 === 3) && g1 === 3 //no scalars allowed, for now
+                opAcceptsTypes = (g0 === 2 || g0 === 3) && g1 === 3 //no scalars allowed, for now
+                break
             case `meet`:
-                return (g0 === 1 && (g1 === 1 || g1 === 2)) || (g0 === 2 && g0 === 1)
+                opAcceptsTypes = (g0 === 1 && (g1 === 1 || g1 === 2)) || (g0 === 2 && g0 === 1)
+                break
             case `add`:
-                return g0 === g1
+                opAcceptsTypes = g0 === g1
+                break
             case `projectOn`:
-                return isObject0 && isObject1 && g0 !== g1
+                opAcceptsTypes = isObject0 && isObject1 && g0 !== g1 && !isNull0 && !isNull1
+                break
             case `userPow`:
                 let mv1IsTranslation = !isObject1 &&
                     mv1[0] !== 0. && mv1[4] === 0. && mv1[5] === 0. && mv1[6] === 0. && mv1[7] === 0.
-                return g0 === -2 && mv1IsTranslation
+                opAcceptsTypes = g0 === -2 && mv1IsTranslation
+                break
             // case `velocityUnder`:
-            //     return g0 === -2 && isObject1 //not thinking about lines or planes for now
+            //     opAcceptsTypes = g0 === -2 && isObject1 //not thinking about lines or planes for now
             // case `projectTransformOn`:
-            //     return isTransform0 && isObject1
+            //     opAcceptsTypes = isTransform0 && isObject1
             default: //new, I suppose
                 console.error("no eligibility criteria for ", operators[opIndex])
-                return true
+                opAcceptsTypes = true
         }
+
+        if(!opAcceptsTypes)
+            return false
+
+        let outputType = getType(operators[opIndex], mv0.constructor, mv1.constructor)
+        return outputType === toBeSnapped.mv.constructor
     }
 
     generatePotentialSnaps = (potentialSnapsVizes, toBeSnapped) => {
@@ -93,7 +110,7 @@ function initSnapping() {
 
         function addPotentialSnap(i, j, k) {
             if (potentialSnapsVizes[lowestUnused] === undefined) {
-                potentialSnapsVizes[lowestUnused] = new toBeSnapped.constructor(0xFFA500, true, true)
+                potentialSnapsVizes[lowestUnused] = new toBeSnapped.constructor(0xFFA500, true)
                 potentialSnapsVizes[lowestUnused].dontUpdateMarkupPos = false
             }
 
@@ -116,6 +133,7 @@ function initSnapping() {
             let mv0 = sn.mv
 
             let ineligible0 =
+                sn === timeGrabbable ||
                 sn === toBeSnapped ||
                 mv0.isZero() ||
                 sn.visible === false ||
@@ -142,15 +160,14 @@ function initSnapping() {
                     let mv1 = snappables[j].mv
 
                     let ineligible1 =
-                        i === j || //mulReverse would get identity, add would do nothing, mul covered by log, join meet would be 0, inner would be scalar
+                        (snappables[j] === timeGrabbable && operators[k] !== `userPow` ) ||
+                        (snappables[j] === toBeSnapped && !(operators[k] === `sandwich` && sn.constructor === DqViz )) ||
+                        mv1.isZero() ||
                         snappables[j].visible === false ||
-                        snappables[j] === toBeSnapped ||
                         aDependsOnB(snappables[j], toBeSnapped) ||  //maybe one day
-                        !typeCheck(k, mv0, mv1)
 
-                    let outputType = getType(operators[k], mv0.constructor, mv1.constructor)
-                    if (outputType !== toBeSnapped.mv.constructor)
-                        continue
+                        i === j || //mulReverse would get identity, add would do nothing, mul covered by log, join meet would be 0, inner would be scalar
+                        !typeCheck(k, mv0, mv1, toBeSnapped)
 
                     if (ineligible1)
                         continue
@@ -161,9 +178,9 @@ function initSnapping() {
                     addPotentialSnap(i, j, k)
                 }
             }
-            
         })
 
+        //the ones that have been made non-visible
         snappables.forEach(s => {
             if (s === null)
                 return
@@ -172,7 +189,7 @@ function initSnapping() {
                 return
 
             if (potentialSnapsVizes[lowestUnused] === undefined)
-                potentialSnapsVizes[lowestUnused] = new toBeSnapped.constructor(0xFFA500, true, true)
+                potentialSnapsVizes[lowestUnused] = new toBeSnapped.constructor(0xFFA500, true )
 
             //a more proper thing might be for this potentialSnapViz to **be** s
             let psv = potentialSnapsVizes[lowestUnused]
@@ -186,8 +203,6 @@ function initSnapping() {
         return lowestUnused
     }
 
-    let filteredDq = new Dq()
-    let filteredFl = new Fl()
     let tbsnFl = new Fl()
     let tbsnDq = new Dq()
     let pscDq = new Dq()
@@ -211,14 +226,27 @@ function initSnapping() {
                 return Infinity
             //gotta make it NOT a screw axis
             toBeSnappedGradeG.normalize()
-            
+
             let potentialSnapComparable = potentialSnap.constructor === Dq ? pscDq : pscFl
             potentialSnapComparable.copy(potentialSnap)
             potentialSnapComparable.normalize()
-            if(g === 3 && potentialSnapComparable[7] !== toBeSnappedGradeG[7])
+            if (g === 3 && potentialSnapComparable[7] !== toBeSnappedGradeG[7])
                 potentialSnapComparable.multiplyScalar(-1., potentialSnapComparable)
 
             return potentialSnapComparable.l1NormTo(toBeSnappedGradeG)
+        }
+
+        function compareDqs() {
+            toBeSnapped.mv.logarithm(toSnapLogNormalized)
+            potentialSnap.logarithm(potentialSnapLogNormalized)
+            if (toSnapLogNormalized.isZero() || potentialSnapLogNormalized.isZero())
+                return Infinity
+            else {
+                potentialSnapLogNormalized.normalize()
+                toSnapLogNormalized.normalize()
+
+                return toSnapLogNormalized.l1NormTo(potentialSnapLogNormalized)
+            }
         }
 
         let opName = opIndex === -1 ? `` : operators[opIndex] 
@@ -233,32 +261,27 @@ function initSnapping() {
 
             case `joinPt`:
                 l1Norm = compareBlades()
-
                 advantage = 5. // whatever it needs to make it feel right for tolerance = 1
-
                 break
 
-            // case `projectOn`:
+            case `projectOn`:
+                l1Norm = compareBlades()
+                advantage = 5.
+                break
 
             case `sandwich`:
                 l1Norm = compareBlades()
                 advantage = 5.
                 break
 
+            case `mul`:
+                l1Norm = compareDqs()
+                advantage = 4.
+                break
+
             case `dqTo`:
-
-                toBeSnapped.mv.logarithm(toSnapLogNormalized)
-                potentialSnap.logarithm(potentialSnapLogNormalized)
-                if (toSnapLogNormalized.isZero() || potentialSnapLogNormalized.isZero())
-                    return Infinity
-                else {
-                    potentialSnapLogNormalized.normalize()
-                    toSnapLogNormalized.normalize()
-    
-                    l1Norm = toSnapLogNormalized.l1NormTo(potentialSnapLogNormalized)
-                    advantage = 4.
-                }
-
+                l1Norm = compareDqs()
+                advantage = 4.
                 break
 
             default: //this includes -1, because sometimes you snap to something not defined by behaviour
@@ -278,68 +301,71 @@ function initSnapping() {
         if (debuggerTrigger)
             debugger
         for (let i = 0; i < numPotentialSnaps; ++i) {
-            let ps = potentialSnaps[i]
-            ps.snapRating = rate(ps.affecters[2], ps.mv, toBeSnapped)
-            ps.visible = true
+            if (i < numPotentialSnaps) {
+                let ps = potentialSnaps[i]
+                ps.snapRating = rate( ps.affecters[2], ps.mv, toBeSnapped )
+            }
+            else
+                ps.snapRating = Infinity
         }
-
-        let bestSnapIndex = getBestAcceptableSnap(potentialSnaps, numPotentialSnaps)
-        // logPotentialSnap(potentialSnaps[bestSnapIndex])
-
-        // debugger
 
         for (let i = 0; i < numPotentialSnaps; ++i) {
 
             let ps = potentialSnaps[i]
-            ps.setTransparency(i === bestSnapIndex ? .5 + .5 * Math.sin(frameCount * .12) : translucentOpacity)
-            ps.boxHelper.visible = i === bestSnapIndex
-
+            
             //and, look for ones that are similar to it and only show better rated version
             let variants = ps.mv.constructor === Dq ? variantsDq : variantsFl
             variants[0].copy(ps.mv)
             ps.mv.multiplyScalar(-1., variants[0])
             ps.mv.getReverse(variants[1])
             variants[0].getReverse(variants[2])
-            //I mean really if the bivector part is the same then they're similar
 
             for(let j = 0; j < numPotentialSnaps; ++j) {
                 
                 if (i === j)
                     continue
 
-                let ps2 = potentialSnaps[j]
+                let potentialJustAVariant = potentialSnaps[j]
 
                 variants.forEach(variant => {
-                    if (ps2.mv.l1NormTo(variant) < eps) {
-                        let betterRated = ps2.snapRating > ps.snapRating ? ps2 : ps
-                        betterRated.visible = false
+                    if (potentialJustAVariant.mv.l1NormTo(variant) < eps) {
+                        let worseRated = potentialJustAVariant.snapRating > ps.snapRating ? potentialJustAVariant : ps
+                        worseRated.snapRating = Infinity
                     }
                 })
             }
         }
 
-        // log(potentialSnaps[bestSnapIndex].visible)
-    }
+        potentialSnaps.sort((a, b) => a.snapRating - b.snapRating)
 
-    getBestAcceptableSnap = ( potentialSnaps, numPotentialSnaps ) => {
+        let flashingOpacity = .5 + .5 * Math.sin(frameCount * .12)
 
-        //something here
-        //those points should have snapped?
-
-        let lowestRating = Infinity
-        let lowestRatingIndex = -1
-
-        for (let i = 0; i < numPotentialSnaps; ++i) {
+        // logPotentialSnap(potentialSnaps[bestSnapIndex])
+        
+        for(let i = 0, il = potentialSnaps.length; i < il; ++i) {
             let ps = potentialSnaps[i]
-    
-            if (ps.snapRating < lowestRating) {
-                lowestRating = ps.snapRating
-                lowestRatingIndex = i
-            }
+            ps.visible = ps.snapRating < tolerance && i < 3
+            ps.setOpacity(translucentOpacity)
+            ps.boxHelper.visible = false
         }
 
-        if (Math.abs(lowestRating) < tolerance)
-            return lowestRatingIndex
+        if( potentialSnaps[0].snapRating < tolerance) {
+
+            let best = potentialSnaps[0]
+            best.boxHelper.visible = false
+            best.setOpacity(flashingOpacity)
+
+            if( best.affecters[0] !== null)
+                best.affecters[0].setOpacity(flashingOpacity)
+            if( best.affecters[1] !== null)
+                best.affecters[1].setOpacity(flashingOpacity)
+        }
+    }
+
+    getBestAcceptableSnap = ( potentialSnaps ) => {
+
+        if (Math.abs(potentialSnaps[0].snapRating) < tolerance)
+            return 0
         else
             return -1
     }

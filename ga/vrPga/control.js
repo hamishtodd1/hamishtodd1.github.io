@@ -65,8 +65,6 @@ function initControl() {
     let snapMode = false
     {
         var numPotentialSnaps = -1
-        var potentialSnapDqVizes = []
-        var potentialSnapFlVizes = []
         //they shouldn't be snappables, but they SHOULD be updated based on their affecters
         function turnOffSnapMode() {
             snapMode = false
@@ -87,6 +85,7 @@ function initControl() {
 
             snapMode = true
 
+            //pt turning invisible somewhere here
             let potentialSnapsVizes = toBeSnapped.constructor === DqViz ? potentialSnapDqVizes : potentialSnapFlVizes
             numPotentialSnaps = generatePotentialSnaps(potentialSnapsVizes, toBeSnapped)
             // logPotentialSnaps(potentialSnapsVizes, numPotentialSnaps)
@@ -94,6 +93,7 @@ function initControl() {
     }
 
     snapIfAcceptable = (toBeSnapped, potentialSnaps, snapIndex) => {
+        
         if (snapIndex === -1) {
             makeUnaffected(toBeSnapped)
             return toBeSnapped
@@ -120,10 +120,7 @@ function initControl() {
         }
     }
 
-    let mrh = 0
     onGrabButtonDown = (focusHand) => {
-
-        ++mrh
 
         let otherHand = 1-focusHand
 
@@ -134,7 +131,7 @@ function initControl() {
             if (grabbees[otherHand].sclptable !== null) 
                 grabbee = null //not allowed!
             else {
-                grabbee = new FlViz(null, false, false)
+                grabbee = new FlViz(null, false)
                 let oldDqViz = grabbees[otherHand]
                 grabbees[otherHand] = grabbee
                 oldDqViz.dispose() //draw a pentagram and summon the garbage collector
@@ -142,7 +139,7 @@ function initControl() {
         }
 
         if (grabbee === null )
-            grabbee = new DqViz(null, false, false, false)
+            grabbee = new DqViz(null, false)
 
         //grabbee is now what it should be! Now a case of doing stuff
 
@@ -186,6 +183,16 @@ function initControl() {
         //////////////
         // Gestures //
         //////////////
+
+        snappables.forEach(snappable => {
+
+            if(snappable === null)
+                return
+
+            //in advance of these being mucked around with
+            snappable.setOpacity(1.)
+        })
+        
         if (grabbees[0] !== null && grabbees[0] === grabbees[1]) {
 
             handleOddGestures(grabbees[0] )
@@ -194,6 +201,7 @@ function initControl() {
                 handleSnaps(potentialSnapFlVizes, grabbees[0], numPotentialSnaps)
         }
         else {
+
             for(let focusHand = 0; focusHand < 2; ++focusHand) {
 
                 let grabbee = grabbees[focusHand]
@@ -295,6 +303,7 @@ function initControl() {
             snappable.circuitVisible = false //fuck that for now
 
             highlightees.forEach((highlightee,hand) => {
+
                 if(highlightee === null)
                     return
 
@@ -315,6 +324,7 @@ function initControl() {
                 }
             })
             grabbees.forEach((grabbee,hand) => {
+
                 if (grabbee === null)
                     return
 
@@ -403,6 +413,7 @@ function initControl() {
     }
 
     onPaintButtonUp = (focusHand) => {
+
         if (paintees[focusHand] !== null) {
             // toggleButtonsVisibility()
             paintees[focusHand].sclptable.finishAndEmit()

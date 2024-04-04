@@ -137,12 +137,12 @@ function initArrows() {
 
     class Arrow extends THREE.Mesh {
         
-        constructor( color, transparent, axisMat, headless) {
+        constructor( color, axisMat, headless) {
 
             let mat = new THREE.MeshPhong2Material({
                 color,
-                transparent,
-                opacity: transparent ? .65 : 1.
+                transparent: true,
+                opacity: 1.
             })
             mat.injections = headless ? shaftMatInjections : arrowMatInjections
 

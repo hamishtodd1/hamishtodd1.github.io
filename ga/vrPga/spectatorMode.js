@@ -5,6 +5,8 @@
 
 function initPotentialSpectatorReception() {
 
+    let spectatorCameraNear = 1.6
+
     socket.on(`disposeSnappable`, msg=>{
 
         snappables[msg.i].dispose()
@@ -15,27 +17,23 @@ function initPotentialSpectatorReception() {
         turnOnSpectatorMode()
 
         if (snappables[msg.i] === undefined) {
-            snappables[msg.i] = new DqViz(0xFF0000, true, false, true) //TODO bug this thing must be showing up
+            snappables[msg.i] = new DqViz(0xFF0000, true, true) //TODO bug this thing must be showing up
             snappables[msg.i].visible = false
         }
-        if (snappables[msg.i].sclptable === null || snappables[msg.i].sclptable === undefined)
-            snappables[msg.i].sclptable = new Sclptable(snappables[msg.i])
+        let sn = snappables[msg.i]
+        if (sn.sclptable === null || sn.sclptable === undefined)
+            sn.sclptable = new Sclptable(sn)
 
-        // sclptables[msg.i].brushStroke(fl0.point(0., 1.2, 0., 1.))
-
-        // if (snappables[msg.i].sclptable === undefined)
-        //     debugger
-        let cs = snappables[msg.i].sclptable.children[msg.color]
+        let cs = sn.sclptable.children[msg.childIndex]
         cs.vAttr.needsUpdate = true
         cs.vAttr.updateRange.offset = 0
         cs.vAttr.updateRange.count = 0
         cs.geometry.drawRange.count = 0
         cs.lowestUnusedCube = 0
 
-        //it's coming in as a literal object, not even an array. Really no good
-        let newCount = Object.keys(msg.arr).length / 3
-        for (let i = 0, il = newCount; i < il; ++i)
-            cs.fillCubePositionIfEmpty(v1.set(msg.arr[i * 3 + 0], msg.arr[i * 3 + 1], msg.arr[i * 3 + 2]))
+        let arr = msg.arr.split(`,`)
+        for (let i = 0, il = parseInt(msg.count); i < il; ++i)
+            cs.fillCubePositionIfEmpty(v1.set( arr[i * 3 + 0], arr[i * 3 + 1], arr[i * 3 + 2] ))
     })
 
     let backedUpMsgs = []
@@ -46,7 +44,7 @@ function initPotentialSpectatorReception() {
         
         backedUpMsgs.forEach((msg) => {
             if (snappables[msg.i] === undefined)
-                snappables[msg.i] = new DqViz(0xFF0000, true, false, true)
+                snappables[msg.i] = new DqViz(0xFF0000, true, true)
 
             for (let j = 0; j < 8; ++j)
                 snappables[msg.i].dq[j] = msg.dqCoefficientsArray[j]
@@ -68,9 +66,9 @@ function initPotentialSpectatorReception() {
         // comfortablePos(0., fl0, 0.).pointToGibbsVec(indicator.position)
         // scene.add(indicator)
 
-        makeSpectatorCamera(true)
-
         removeMouseEventListeners()
+        
+        makeSpectatorCamera()
 
         hands[RIGHT].dq.translator(0., 0., -999.)
         hands[LEFT].dq.translator(0., 0., -999.)
@@ -79,88 +77,92 @@ function initPotentialSpectatorReception() {
 
         removeSurroundings()
     }
-    
-    makeSpectatorCamera = (weAreSpectator) => {
 
+    turnOnPresenterMode = () => {
+
+        spectatorMode = false
         let spectatorCamera = null
-        if (weAreSpectator)
-            spectatorCamera = camera
-        else
-            spectatorCamera = defaultCamera()
+        let camBox = new THREE.Mesh(new THREE.PlaneGeometry(.2, .1, .1), new THREE.MeshBasicMaterial({ color: 0x00FF00 }))
+        
+        socket.on("spectatorCamera", msg => {
 
-        spectatorCamera.fov = 12.
-        comfortableHandPos(fl0).pointToGibbsVec(spectatorCamera.position)
-        spectatorCamera.position.z -= 2.4
-        spectatorCamera.near = .8
-        spectatorCamera.lookAt(comfortableHandPos(fl0).pointToGibbsVec(v1))
-
-        spectatorCamera.updateMatrixWorld()
-        spectatorCamera.updateProjectionMatrix() //and need to do frustum things too
-
-        addStage(spectatorCamera, weAreSpectator)
-
-        if (!weAreSpectator) {
-
-            let cameraHelper = new THREE.CameraHelper(spectatorCamera)
-            scene.add(spectatorCamera)
-            scene.add(cameraHelper)
-
-            cameraHelper.update()
-            cameraHelper.updateMatrixWorld()
+            if (spectatorCamera === null)
+                spectatorCamera = defaultCamera()
             
-            {
-                let surfaces = [
-                    new THREE.Mesh(
-                        new THREE.PlaneGeometry(1., 1., 1, 1),
-                        new THREE.MeshPhongMaterial({ color: 0x333333, side: THREE.DoubleSide, transparent: true, opacity: .8 }) ),
-                    new THREE.Mesh(
-                        new THREE.PlaneGeometry(1., 1., 1, 1),
-                        new THREE.MeshPhongMaterial({ color: 0x555555, side: THREE.DoubleSide, transparent: true, opacity: .8 }) ),
-                    new THREE.Mesh(
-                        new THREE.PlaneGeometry(1., 1., 1, 1),
-                        new THREE.MeshPhongMaterial({ color: 0x555555, side: THREE.DoubleSide, transparent: true, opacity: .8 }) ) ]
+            spectatorCamera.near = spectatorCameraNear
+            spectatorCamera.position.copy(msg.position)
+            spectatorCamera.rotation.copy(msg.rotation)
+            
+            spectatorCamera.fov = msg.fov
+            spectatorCamera.aspect = msg.aspect
+            spectatorCamera.updateProjectionMatrix()
 
-                cameraHelper.add(surfaces[0], surfaces[1], surfaces[2])
-                
-                let pyramidTop = v3.fromArray(cameraHelper.geometry.attributes.position.array, 24*3)
+            scene.add(spectatorCamera)
+            spectatorCamera.add(camBox)
+            // let cameraHelper = new THREE.CameraHelper(spectatorCamera)
+            // scene.add(cameraHelper)
 
-                function surfaceVerts(stageIndex, helperIndex, surfaceIndex) {
-                    let arr = surfaces[surfaceIndex].geometry.attributes.position.array
-                    let corner = v1.fromArray(cameraHelper.geometry.attributes.position.array, helperIndex * 3)
-                    corner.toArray(arr, stageIndex * 3)
+            // cameraHelper.update()
+            // cameraHelper.updateMatrixWorld()
 
-                    v4.subVectors(pyramidTop, corner).multiplyScalar(-1.3).add(corner)
-                    v4.toArray(arr, (stageIndex + 2) * 3)
-                }
+            addStage(spectatorCamera, false)
+        })
+    }
+    
+    makeSpectatorCamera = () => {
 
-                surfaceVerts(0, 42, 1)
-                surfaceVerts(1, 0, 1)
-                surfaceVerts(0, 0, 0)
-                surfaceVerts(1, 1, 0)
-                surfaceVerts(0, 1, 2)
-                surfaceVerts(1, 43, 2)
-            }
+        camera.fov = 12.
+        camera.near = spectatorCameraNear
+        comfortableHandPos(fl0).pointToGibbsVec(v1)
+        camera.position.x = 0.
+        camera.position.z = -2.4 //2.4m, pretty likely irl tbf
+        camera.position.y = v1.y
+        camera.rotation.set(0., Math.PI,0.)
 
+        camera.updateMatrixWorld()
+        camera.updateProjectionMatrix() //and need to do frustum things too
 
-            // let index = 0
-            // debugUpdates.push(() => {
-            //     v1.fromArray(cameraHelper.geometry.attributes.position.array, index * 3)
-            //     cameraHelper.localToWorld(v1)
-            //     debugSphere.position.copy(v1)
+        addStage(camera, true)
 
-            //     log(index)
+        // let test = new THREE.Mesh(new THREE.BoxGeometry(.2,.2,.2), new THREE.MeshBasicMaterial({ color: 0x00FF00 }))
+        // scene.add(test)
+        // debugUpdates.push(() => {
+        //     test.position.y = Math.sin(frameCount * .04) * .3 + .75
+        // })
 
-            //     if (frameCount % 100 === 0) {
-            //         index++
-            //         if (index > cameraHelper.geometry.attributes.position.count)
-            //             index = 0
-            //     }
-            // })
+        function emitCamera() {
+            socket.emit("spectatorCamera", {
+                position: camera.position,
+                rotation: camera.rotation,
+                fov: camera.fov,
+                aspect: camera.aspect
+            })
         }
 
-        return spectatorCamera
+        let angle = .05 * Math.PI
+        let leftQuat  = new THREE.Quaternion().setFromAxisAngle(v1.set(0., 1., 0.),  angle)
+        let rightQuat = new THREE.Quaternion().setFromAxisAngle(v1.set(0., 1., 0.), -angle)
+        document.addEventListener('keydown', event => {
+            if(event.key === `ArrowLeft`) {
+                camera.position.applyQuaternion(leftQuat)
+                camera.rotation.y += angle
+            }
+            else if (event.key === `ArrowRight`) {
+                camera.position.applyQuaternion(rightQuat)
+                camera.rotation.y += -angle
+            }
+            else if(event.key === `ArrowUp`) {
+                camera.position.y -= 1./32.
+            }
+            else if(event.key === `ArrowDown`) {
+                camera.position.y += 1./32.
+            }
+            emitCamera()
+        })
+        emitCamera()
     }
 
+    //feel free to rewrite
     function addStage( cameraToAddTo, haveMiddle ) {
 
         let stage = new THREE.Group()
@@ -169,12 +171,12 @@ function initPotentialSpectatorReception() {
         cameraToAddTo.add(stage)
         
         stage.position.z = -1.1 * cameraToAddTo.near
-        stage.scale.multiplyScalar(1. / 5.4)
+        stage.scale.multiplyScalar(1. / 2.7)
 
         let imageAspect = 620. / 384.
         // let middleAspect = 253. / 384.
 
-        let frontAndBackWidth = cameraToAddTo.aspect * 1.23 //eyeballed
+        let generalWidth = cameraToAddTo.aspect * 1.23 //eyeballed
         if (haveMiddle) {
             textureLoader.load('data/stageBack.png', (texture) => {
                 const mat = new THREE.MeshBasicMaterial({
@@ -183,34 +185,37 @@ function initPotentialSpectatorReception() {
                     side: THREE.DoubleSide
                 })
                 const middle = new THREE.Mesh(new THREE.PlaneGeometry(1., 1.), mat)
-                middle.scale.x = frontAndBackWidth
+                middle.scale.x = generalWidth
                 stage.add(middle)
             })
         }
-        textureLoader.load('data/curtainRight.png', (texture) => {
-            const mat = new THREE.MeshBasicMaterial({
-                transparent: true,
-                map: texture,
-                side: THREE.DoubleSide
-            })
-            const curtain = new THREE.Mesh(new THREE.PlaneGeometry(1., 1.), mat)
-            curtain.scale.x = imageAspect
-            curtain.position.x = cameraToAddTo.aspect / 2. - curtain.scale.x / 2.
-            curtain.position.z = -.001
-            stage.add(curtain)
-        })
+
+        const curtainRight = new THREE.Mesh(new THREE.PlaneGeometry(1., 1.), new THREE.MeshBasicMaterial({
+            transparent: true,
+            side: THREE.DoubleSide
+        }))
+        curtainRight.scale.x = imageAspect
+        curtainRight.position.x = cameraToAddTo.aspect / 2. - curtainRight.scale.x / 2.
+        curtainRight.position.z = -.001
+        stage.add(curtainRight)
+        const curtainLeft = new THREE.Mesh(new THREE.PlaneGeometry(1., 1.), new THREE.MeshBasicMaterial({
+            transparent: true,
+            side: THREE.DoubleSide
+        }))
+        curtainLeft.scale.x = imageAspect
+        curtainLeft.position.x = -(cameraToAddTo.aspect / 2. - curtainLeft.scale.x / 2.)
+        curtainLeft.position.z = .001
+        stage.add(curtainLeft)
+
         textureLoader.load('data/curtainLeft.png', (texture) => {
-            const mat = new THREE.MeshBasicMaterial({
-                transparent: true,
-                map: texture,
-                side: THREE.DoubleSide
-            })
-            const curtain = new THREE.Mesh(new THREE.PlaneGeometry(1., 1.), mat)
-            curtain.scale.x = imageAspect
-            curtain.position.x = -(cameraToAddTo.aspect / 2. - curtain.scale.x / 2.)
-            curtain.position.z = .001
-            stage.add(curtain)
+            curtainLeft.material.map = texture
+            curtainLeft.material.needsUpdate = true
         })
+        textureLoader.load('data/curtainRight.png', (texture) => {
+            curtainRight.material.map = texture
+            curtainRight.material.needsUpdate = true
+        })
+
         textureLoader.load('data/stageBackground.png', (texture) => {
             const mat = new THREE.MeshBasicMaterial({
                 transparent: true,
@@ -218,11 +223,43 @@ function initPotentialSpectatorReception() {
                 side: THREE.DoubleSide
             })
             const bg = new THREE.Mesh(new THREE.PlaneGeometry(1., 1.), mat)
-            bg.scale.x = frontAndBackWidth
+            bg.scale.x = generalWidth
             bg.scale.multiplyScalar(9.3)
             stage.add(bg)
-            bg.position.z -= 24.
+            bg.position.z -= 40.
         })
+
+        {
+            let floor = new THREE.Mesh(
+                new THREE.PlaneGeometry(1., 1., 1, 1),
+                new THREE.MeshPhongMaterial({ color: 0x938572, side: THREE.DoubleSide, transparent: true }))
+            stage.add(floor)
+            floor.rotation.x = TAU / 4.
+            floor.position.y = curtainLeft.scale.y * -.5
+            floor.scale.x = 2. * (Math.abs(curtainLeft.position.x) + Math.abs(curtainLeft.scale.x / 2.))  //why is this not correct?
+            floor.scale.y = generalWidth * .9
+            floor.position.z = -floor.scale.y / 2.
+
+            let wallRight = new THREE.Mesh(
+                new THREE.PlaneGeometry(1., 1., 1, 1),
+                new THREE.MeshBasicMaterial({ color: 0x181818, side: THREE.DoubleSide }))
+            stage.add(wallRight)
+            wallRight.rotation.y = TAU / 4.
+            wallRight.scale.y = Math.abs(curtainLeft.scale.y)
+            wallRight.scale.x = floor.scale.y
+            wallRight.position.z = floor.position.z
+            wallRight.position.x = Math.abs(floor.scale.x / 2.)
+
+            let wallLeft = new THREE.Mesh(
+                new THREE.PlaneGeometry(1., 1., 1, 1),
+                new THREE.MeshBasicMaterial({ color: 0x181818, side: THREE.DoubleSide }))
+            stage.add(wallLeft)
+            wallLeft.rotation.y = TAU / 4.
+            wallLeft.scale.y = Math.abs(curtainLeft.scale.y)
+            wallLeft.scale.x = floor.scale.y
+            wallLeft.position.z = floor.position.z
+            wallLeft.position.x = -Math.abs(floor.scale.x / 2.)
+        }
     }
     // addStage(camera, true)
 }

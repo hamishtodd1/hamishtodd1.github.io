@@ -72,4 +72,12 @@ io.on('connection', socket => {
             s.emit("sclptable", msg)
         })
     })
+    socket.on("spectatorCamera", (msg) => {
+        sockets.forEach(s => {
+            if (s === socket)
+                return
+
+            s.emit("spectatorCamera", msg)
+        })
+    })
 })

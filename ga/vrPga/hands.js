@@ -38,7 +38,7 @@ function initHands() {
     hands[LEFT].laser.rotation.x = TAU / 2.
     hands[RIGHT].laser.rotation.x = TAU / 2.
 
-    let buttonDqVizes = [new DqViz(0xFFFF00, false, false, true), new DqViz(0xFFFF00, false, false, true)]
+    let buttonDqVizes = [new DqViz(0xFFFF00, false, true), new DqViz(0xFFFF00, false, true)]
     let analogueButtonValues = [0., 0.]
     debugUpdates.push(() => {
         buttonDqVizes[ LEFT].dq.translator(0., .11 * analogueButtonValues[ LEFT], 0.)
@@ -245,17 +245,19 @@ function initHands() {
         // vrRight.addEventListener('squeezestart', () => { onGrabButtonDown    ( RIGHT ) } ) //log(`6`) })
         // vrRight.addEventListener('squeezeend',   () => { onGrabButtonUp      ( RIGHT ) } ) //log(`7`) })
 
+        socket.on('reload', window.location.reload )
+
         onEnterVrFirstTime = (session) => {
 
             vrSession = session
 
-            // window.location.reload()
             let buttonOnDowns = [
                 () => {},
                 () => {},
                 () => {}, //dunno how to get this to fire!
                 (focusHand) => {
                     if(!focusHand) {
+                        socket.send(`reload`)
                         vrSession.end()
                         window.location.reload()
                     }

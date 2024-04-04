@@ -18,7 +18,7 @@ function initControlHelpers() {
 
         // })
 
-        // var flViz0 = new FlViz(null, false, false, true)
+        // var flViz0 = new FlViz(null, false, true)
         // flViz0.lockedGrade = 3
         // comfortableLookPos(flViz0.fl, 0., -.2)
 
@@ -253,8 +253,8 @@ function initControlHelpers() {
     {
         class Decomposition {
             constructor() {
-                this.rotationPart = new DqViz(0x00FFFF, true, true, true)
-                this.translationPart = new DqViz(0x00FFFF, true, true, true)
+                this.rotationPart = new DqViz(0x00FFFF, true, true)
+                this.translationPart = new DqViz(0x00FFFF, true, true)
                 this.translationPart.scaleAxisRadius(.95)
                 this.rotationPart.scaleAxisRadius(.95)
             }
