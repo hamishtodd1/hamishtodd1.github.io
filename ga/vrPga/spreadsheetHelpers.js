@@ -129,7 +129,7 @@ function initSpreadsheetHelpers() {
         let selectedCell = selectedSpreadsheet.cells[selectedRow]
         selectedCell.setText(selectedCell.currentText + translateExpression(event.key))
     }
-    document.addEventListener(`keydown`, onLetterKey)
+    // document.addEventListener(`keydown`, onLetterKey)
 
     {
         var carat = new THREE.Mesh(unchangingUnitSquareGeometry, new THREE.MeshBasicMaterial({ color: 0x000000 }))

@@ -7,7 +7,7 @@
         press a button to show everything?
 
     Training wheels
-        dqTo, userPow, lockedGrades (except maybe PGA is typed so lockedGrades is fundamental...)
+        dqTo, userPow, lockedGrades, joinPt (except maybe PGA is typed so lockedGrades is fundamental...)
     Instead of
         Sqrt, grade selection, scalars/norms/normalization        
 
@@ -31,9 +31,6 @@
 
     TODO for Lauren demo on saturday:
         Wanna be able to grab points at infinity
-        Psvs visible based on rating, not stack
-        Saving?
-        Rig up a spreadsheet that can be flashed at them at the end
         Just have the disk pos be extra state
         Practice!
             Load test. Make sure you can do exactly what you want to do
@@ -153,18 +150,9 @@ async function init() {
     initMarkupPos()
     initControl()
 
-    {
-        // initSpreadsheet()
-        // initSpreadsheetHelpers()
-
-        // let ss = new Spreadsheet()
-        // ss.quaternion.copy(camera.quaternion)
-        // comfortableLookPos(fl0, 0.).pointToGibbsVec(ss.position)
-        // ss.makeExtraCell(`A ∧ B * · ∨`)
-        // ss.makeExtraCell(`⟨C⟩ |C| A/B √`)
-        // selectedSpreadsheet = ss
-        // selectCell(ss, 0)
-    }
+    initSpreadsheet()
+    initSpreadsheetHelpers()
+    initTestSpreadsheet()
 
     window.addEventListener('resize', () => {
 
