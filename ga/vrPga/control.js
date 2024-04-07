@@ -44,7 +44,7 @@
     Your "go to next snap" button, if there IS no snap, could just try to do shit with whatever's visible
  */
 
-function initControl() {
+function initControl(potentialSnapDqVizes, potentialSnapFlVizes) {
 
     // initButtonLabels()
     initControlHelpers()
@@ -63,6 +63,7 @@ function initControl() {
     let highlighteeIsAffectorCol = new THREE.Color(0x00FFFF)
 
     let snapMode = false
+    let fuckYouPsvs = []
     {
         var numPotentialSnaps = -1
         //they shouldn't be snappables, but they SHOULD be updated based on their affecters
@@ -73,6 +74,8 @@ function initControl() {
                 potentialSnapDqVizes[i].visible = false
             for (let i = 0, il = potentialSnapFlVizes.length; i < il; ++i)
                 potentialSnapFlVizes[i].visible = false
+
+            fuckYouPsvs.length = 0
         }
         onSnapButtonUp = () => {
             turnOffSnapMode()
@@ -92,14 +95,14 @@ function initControl() {
         }
     }
 
-    snapIfAcceptable = (toBeSnapped, potentialSnaps, snapIndex) => {
+    snapIfAcceptable = (toBeSnapped, potentialSnaps ) => {
         
-        if (snapIndex === -1) {
+        if (potentialSnaps.length === 0 || potentialSnaps[0].visible === false) {
             makeUnaffected(toBeSnapped)
             return toBeSnapped
         }
         else {
-            let bestRatedSnap = potentialSnaps[snapIndex]
+            let bestRatedSnap = potentialSnaps[0]
 
             let existingSnappable = snappables.find(s => (
                 s !== null &&
@@ -164,6 +167,7 @@ function initControl() {
         handDqOnGrabs[focusHand].copy(hands[focusHand].dq)
         grabbee.visible = true
         grabbees[focusHand] = grabbee
+        makeUnaffected(grabbee)
 
         if (grabbee.lockedGrade !== 1)
             grabbee.dontUpdateMarkupPos = true
@@ -198,7 +202,7 @@ function initControl() {
             handleOddGestures(grabbees[0] )
 
             if(snapMode)
-                handleSnaps(potentialSnapFlVizes, grabbees[0], numPotentialSnaps)
+                handleSnaps(potentialSnapFlVizes, grabbees[0], numPotentialSnaps, fuckYouPsvs)
         }
         else {
 
@@ -223,7 +227,7 @@ function initControl() {
                         grabbee.fl.zeroGrade(1)
 
                     if (snapMode)
-                        handleSnaps(potentialSnapFlVizes, grabbee, numPotentialSnaps)
+                        handleSnaps(potentialSnapFlVizes, grabbee, numPotentialSnaps, fuckYouPsvs)
                 }
                 else if (grabbee.constructor === DqViz)  {
     
@@ -235,7 +239,7 @@ function initControl() {
                     // setMeasurer(grabbees[focusHand])
     
                     if(snapMode)
-                        handleSnaps(potentialSnapDqVizes, grabbee, numPotentialSnaps)
+                        handleSnaps(potentialSnapDqVizes, grabbee, numPotentialSnaps, fuckYouPsvs)
 
                     if (grabbee.sclptable) {
                         socket.emit("snappable", {
@@ -357,8 +361,7 @@ function initControl() {
 
         if (snapMode) {
             let psvs = output.constructor === DqViz ? potentialSnapDqVizes : potentialSnapFlVizes
-            let bestSnapIndex = getBestAcceptableSnap(psvs, numPotentialSnaps)
-            output = snapIfAcceptable(output, psvs, bestSnapIndex)
+            output = snapIfAcceptable(output, psvs)
 
             turnOffSnapMode()
         }
@@ -387,6 +390,12 @@ function initControl() {
 
         //if you're holding something in the hand that you pressed the button for, well, that would make no sense
         //so that's the delete button
+        //unless you're in snapMode. Hopefully fuck you button is not needed!
+        //the CORRECT way to do it is: what ever snap you have, this is a composition on top of that
+        //so you move the jaw to the head and let go. Then, you move the jaw down
+        // if (snapMode)
+        //     fuckYouPsvs.push(potentialSnapDqVizes[0])
+        // else 
         if (grabbees[focusHand] !== null) {
 
             if (grabbees[otherHand] === grabbees[focusHand])

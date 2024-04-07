@@ -116,7 +116,7 @@ function initPotentialSpectatorReception() {
         comfortableHandPos(fl0).pointToGibbsVec(v1)
         camera.position.x = 0.
         camera.position.z = -2.4 //2.4m, pretty likely irl tbf
-        camera.position.y = v1.y
+        camera.position.y = v1.y + 6./32.
         camera.rotation.set(0., Math.PI,0.)
 
         camera.updateMatrixWorld()
@@ -242,7 +242,7 @@ function initPotentialSpectatorReception() {
 
             let wallRight = new THREE.Mesh(
                 new THREE.PlaneGeometry(1., 1., 1, 1),
-                new THREE.MeshBasicMaterial({ color: 0x181818, side: THREE.DoubleSide }))
+                new THREE.MeshBasicMaterial({ color: 0x736552, side: THREE.DoubleSide }))
             stage.add(wallRight)
             wallRight.rotation.y = TAU / 4.
             wallRight.scale.y = Math.abs(curtainLeft.scale.y)
@@ -252,7 +252,7 @@ function initPotentialSpectatorReception() {
 
             let wallLeft = new THREE.Mesh(
                 new THREE.PlaneGeometry(1., 1., 1, 1),
-                new THREE.MeshBasicMaterial({ color: 0x181818, side: THREE.DoubleSide }))
+                new THREE.MeshBasicMaterial({ color: 0x736552, side: THREE.DoubleSide }))
             stage.add(wallLeft)
             wallLeft.rotation.y = TAU / 4.
             wallLeft.scale.y = Math.abs(curtainLeft.scale.y)

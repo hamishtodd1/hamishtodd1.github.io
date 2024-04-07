@@ -20,8 +20,7 @@ function initEgaWithoutDeclarations() {
         //assumes no normalization at all and result isn't normalized either
         movePointInDirectionByDistance(dir, dist, target) {
             let factor = this[7] * dist / Math.sqrt(sq(dir[4]) + sq(dir[5]) + sq(dir[6]) )
-            this.addScaled(dir, factor, target)
-            return target
+            return this.addScaled(dir, factor, target)
         }
 
         isScalar() {

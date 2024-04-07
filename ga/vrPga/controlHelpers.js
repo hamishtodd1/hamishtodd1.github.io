@@ -131,20 +131,20 @@ function initControlHelpers() {
             }
 
             //TODO test
-            let mv = snappable.mv
-            let hasIdealPt   = mv.hasGrade(3) && mv[7] === 0. 
-            // let hasIdealLine = mv.hasGrade(2) && !(mv.invariantDecomposition(dq0, dq1)[1].equals(oneDq))
-            if( hasIdealPt ) { //|| hasIdealLine ) {
+            // let mv = snappable.mv
+            // let hasIdealPt   = mv.hasGrade(3) && mv[7] === 0. 
+            // // let hasIdealLine = mv.hasGrade(2) && !(mv.invariantDecomposition(dq0, dq1)[1].equals(oneDq))
+            // if( hasIdealPt ) { //|| hasIdealLine ) {
 
-                if (hasIdealPt)
-                    mv.selectGrade(3, fl1).getDual(fl0)
-                // else if (hasIdealLine)
-                //     mv = dq1.selectGrade(2, dq1).getDual(dq0)
+            //     // if (hasIdealPt)
+            //         mv = mv.selectGrade(3, fl1).getDual(fl0)
+            //     // else if (hasIdealLine)
+            //     //     mv = dq1.selectGrade(2, dq1).getDual(dq0)
 
-                let angle = TAU / 4. - mv.angleTo( hands[hand].laserDq )
-                if (Math.abs(angle) < .1 )
-                    distSq = 0.
-            }
+            //     let angle = TAU / 4. - mv.angleTo( hands[hand].laserDq )
+            //     if (Math.abs(angle) < .2 )
+            //         distSq = 25.
+            // }
 
             if (distSq < nearestDistSq) {
                 nearest = snappable
@@ -255,8 +255,8 @@ function initControlHelpers() {
             constructor() {
                 this.rotationPart = new DqViz(0x00FFFF, true, true)
                 this.translationPart = new DqViz(0x00FFFF, true, true)
-                this.translationPart.scaleAxisRadius(.95)
-                this.rotationPart.scaleAxisRadius(.95)
+                this.translationPart.setAxisRadius(.95)
+                this.rotationPart.setAxisRadius(.95)
             }
         }
         let decompositions = [new Decomposition(), new Decomposition()]
@@ -281,11 +281,16 @@ function initControlHelpers() {
                 return
             }
 
-            if (!snapMode) {
+            if (!snapMode)
+            {
                 //if you rotate your hand only a little, that's a translation
-                let dist = rotationPart.dq.selectGrade(2, dq0).distanceToPt(getIndicatedHandPosition(handIndex, handPosition))
-                if (dist > .35 && evenGrabbee.sclptable === null)
-                    evenGrabbee.markupPos.dqTo(handPosition, evenGrabbee.dq)
+                if(rotationPart.dq.equals(oneDq))
+                    evenGrabbee.markupPos.dqTo(handPosition, evenGrabbee.dq) //TODO isn't that just the translation part?
+                else {
+                    let dist = rotationPart.dq.selectGrade(2, dq0).distanceToPt(getIndicatedHandPosition(handIndex, handPosition))
+                    if (dist > .35 && evenGrabbee.sclptable === null)
+                        evenGrabbee.markupPos.dqTo(handPosition, evenGrabbee.dq)
+                }
                 
                 rotationPart.visible = false
                 translationPart.visible = false

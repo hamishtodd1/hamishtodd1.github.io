@@ -1,7 +1,7 @@
 /*
  */
 
-function initSnapping() {
+function initSnapping(distanceOnlyDqVizes) {
 
     const tolerance = .15// .06 for users
     let toSnapLogNormalized = new Dq()
@@ -84,9 +84,9 @@ function initSnapping() {
                 opAcceptsTypes = isObject0 && isObject1 && g0 !== g1 && !isNull0 && !isNull1
                 break
             case `userPow`:
-                let mv1IsTranslation = !isObject1 &&
+                let mv1IsPureTranslation = !isObject1 &&
                     mv1[0] !== 0. && mv1[4] === 0. && mv1[5] === 0. && mv1[6] === 0. && mv1[7] === 0.
-                opAcceptsTypes = g0 === -2 && mv1IsTranslation
+                opAcceptsTypes = g0 === -2 && mv1IsPureTranslation
                 break
             // case `velocityUnder`:
             //     opAcceptsTypes = g0 === -2 && isObject1 //not thinking about lines or planes for now
@@ -105,6 +105,7 @@ function initSnapping() {
     }
 
     generatePotentialSnaps = (potentialSnapsVizes, toBeSnapped) => {
+
 
         let lowestUnused = 0
 
@@ -133,7 +134,7 @@ function initSnapping() {
             let mv0 = sn.mv
 
             let ineligible0 =
-                sn === timeGrabbable ||
+                distanceOnlyDqVizes.indexOf(sn) !== -1 ||
                 sn === toBeSnapped ||
                 mv0.isZero() ||
                 sn.visible === false ||
@@ -143,8 +144,9 @@ function initSnapping() {
                 return
 
             for (let k = 0, kl = operators.length; k < kl; k++) {
-
-                let isSingleArgumentOp = mv0[operators[k]].length === 1
+                
+                //because it is only had by dqs...
+                let isSingleArgumentOp = operators[k] === `userPow` || mv0[operators[k]].length === 1
                 if (isSingleArgumentOp) {
 
                     let outputType = getType(operators[k], mv0.constructor)
@@ -160,7 +162,7 @@ function initSnapping() {
                     let mv1 = snappables[j].mv
 
                     let ineligible1 =
-                        (snappables[j] === timeGrabbable && operators[k] !== `userPow` ) ||
+                        (distanceOnlyDqVizes.indexOf(snappables[j]) !== -1 && operators[k] !== `userPow`) ||
                         (snappables[j] === toBeSnapped && !(operators[k] === `sandwich` && sn.constructor === DqViz )) ||
                         mv1.isZero() ||
                         snappables[j].visible === false ||
@@ -252,12 +254,11 @@ function initSnapping() {
         let opName = opIndex === -1 ? `` : operators[opIndex] 
         switch (opName) {
 
-            // case `logarithm`:
-            //      toBeSnapped.dq.logarithm(toSnapLog)
-            //     //we merely require closeness to any scalar multiple
-            //     toSnapLog.div( potentialSnap, dq1 ) //we require dq1 is close to scalar
-            //     //scalar is omitted
-            //     l1Norm = Math.abs(dq1[1]) + Math.abs(dq1[2]) + Math.abs(dq1[3]) + Math.abs(dq1[4]) + Math.abs(dq1[5]) + Math.abs(dq1[6])
+            //higher advantage = more likely
+            case `userPow`:
+                l1Norm = compareDqs()
+                advantage = 10.
+                break
 
             case `joinPt`:
                 l1Norm = compareBlades()
@@ -276,7 +277,7 @@ function initSnapping() {
 
             case `mul`:
                 l1Norm = compareDqs()
-                advantage = 4.
+                advantage = 8.
                 break
 
             case `dqTo`:
@@ -296,15 +297,15 @@ function initSnapping() {
 
     let variantsDq = [new Dq(), new Dq(), new Dq(), new Dq()]
     let variantsFl = [new Fl(), new Fl(), new Fl(), new Fl()]
-    handleSnaps = (potentialSnaps, toBeSnapped, numPotentialSnaps) => {
+    handleSnaps = (potentialSnaps, toBeSnapped, numPotentialSnaps, fuckYouPsvs) => {
 
-        if (debuggerTrigger)
+        if(fuckYouPsvs.length > 0)
             debugger
+
         for (let i = 0; i < numPotentialSnaps; ++i) {
-            if (i < numPotentialSnaps) {
-                let ps = potentialSnaps[i]
+            let ps = potentialSnaps[i]
+            if (i < numPotentialSnaps && fuckYouPsvs.indexOf(ps) === -1)
                 ps.snapRating = rate( ps.affecters[2], ps.mv, toBeSnapped )
-            }
             else
                 ps.snapRating = Infinity
         }
@@ -344,12 +345,12 @@ function initSnapping() {
         
         for(let i = 0, il = potentialSnaps.length; i < il; ++i) {
             let ps = potentialSnaps[i]
-            ps.visible = ps.snapRating < tolerance && i < 3
+            ps.visible = i < 3
             ps.setOpacity(translucentOpacity)
             ps.boxHelper.visible = false
         }
 
-        if( potentialSnaps[0].snapRating < tolerance) {
+        if (potentialSnaps.length !== 0 ) {
 
             let best = potentialSnaps[0]
             best.boxHelper.visible = false

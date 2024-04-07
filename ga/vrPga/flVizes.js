@@ -134,12 +134,10 @@ function initFlVizes(transparentOpacity) {
             this.pointMesh.visible = false
             this.add(this.pointMesh)
 
-            this.idealPointMeshes = Array(new THREE.Mesh(pointGeo, pointMat), new THREE.Mesh(pointGeo, pointMat))
-            this.idealPointMeshes.forEach((pt,i) => {
-                pt.visible = false
-                this.add(pt)
-                pt.scale.setScalar( 50. )
-            })
+            this.idealPointMesh = new THREE.Mesh(pointGeo, pointMat)
+            this.idealPointMesh.visible = false
+            this.add(this.idealPointMesh)
+            this.idealPointMesh.scale.setScalar( 50. )
 
             obj3dsWithOnBeforeRenders.push(this)
             this.onBeforeRender = () => {
@@ -152,7 +150,7 @@ function initFlVizes(transparentOpacity) {
                 this.pointMesh.visible = false
                 this.arrowBar.visible = false
                 this.arrowBarCup.visible = false
-                this.idealPointMeshes.forEach(pt => pt.visible = false)
+                this.idealPointMesh.visible = false
                 this.boundingBox.makeEmpty()
 
                 if(this.fl.isZero())
@@ -179,16 +177,17 @@ function initFlVizes(transparentOpacity) {
                     }
                     else {
                         pointPart.fakeThingAtInfinity(fl0)
-                        fl0.pointToGibbsVec(this.idealPointMeshes[0].position)
-                        this.idealPointMeshes[1].position.copy(this.idealPointMeshes[0].position)
+                        fl0.pointToGibbsVec(this.idealPointMesh.position)
 
-                        for(let i = 0; i < 2; ++i) {
-                            this.idealPointMeshes[i].visible = true
-    
-                            // box0.copy(pointGeo.boundingBox)
-                            // this.idealPointMeshes[i].updateMatrixWorld()
-                            // box0.applyMatrix4(this.idealPointMeshes[i].matrixWorld)
-                            // this.boundingBox.union(box0)
+                        //possibly one should be one color and one should be the other. Because adding.
+                        this.idealPointMesh.visible = true
+
+                        if(!hasPlane) {
+                            box0.copy(pointGeo.boundingBox)
+                            this.idealPointMesh.updateMatrixWorld()
+                            box0.applyMatrix4(this.idealPointMesh.matrixWorld)
+                            box0.expandByScalar(1.85)
+                            this.boundingBox.union(box0)
                         }
                     }
                 }
@@ -250,12 +249,14 @@ function initFlVizes(transparentOpacity) {
                     this.getSettledDiskPosition(planePosition)
                     this.diskGroup.position.lerp(planePosition.pointToGibbsVec(v1), .13)
                     if(hasPlane)
+                    {
                         planeMeshQuat(this.diskGroup, planePart, planePosition)
-                    
-                    box0.copy(diskGeo.boundingBox)
-                    this.diskGroup.updateMatrixWorld()
-                    box0.applyMatrix4(this.diskGroup.matrixWorld)
-                    this.boundingBox.union(box0)
+
+                        box0.copy(diskGeo.boundingBox)
+                        this.diskGroup.updateMatrixWorld()
+                        box0.applyMatrix4(this.diskGroup.matrixWorld)
+                        this.boundingBox.union(box0)
+                    }
                 }
 
                 updateBoxHelper(this.boxHelper, this.boundingBox)

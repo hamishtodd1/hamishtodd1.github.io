@@ -229,9 +229,10 @@ function initDqVizes(transparentOpacity) {
             return this.dq.sqrt(dq0).sandwichFl(this.markupPos, target)
         }
 
-        scaleAxisRadius(factor) {
-            this.rotAxisMesh.scale.x *= factor
-            this.trnAxisMesh.scale.x *= factor
+        //just to make it so they don't z-fight
+        setAxisRadius(factor) {
+            this.rotAxisMesh.scale.x = factor
+            this.trnAxisMesh.scale.x = factor
         }
     }
     window.DqViz = DqViz
@@ -301,7 +302,7 @@ function initDqVizes(transparentOpacity) {
         new DqViz(0xFFFF00, true, true), new DqViz(0xFFFF00, true, true)
     ]
     debugDqVizes.forEach(ddqv => {
-        ddqv.scaleAxisRadius(.95)
+        ddqv.setAxisRadius(.95)
         ddqv.dq.zero()
         ddqv.markupPos.pointFromGibbsVec(outOfSightVec3)
     })

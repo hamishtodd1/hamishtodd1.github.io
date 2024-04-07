@@ -1,22 +1,22 @@
 /*
-    There are braces/compasses which appear in place indicating that a measurement is involved
     Can do "if" statements with with thingYouMayNotWant * (translationDist > 0 ? 1 : 0)
 
-    visibility
-        When you remake an old one, its affecters appear too?
-        press a button to show everything?
+    Need to have mul working! So you can have parenting!
+        That means: bring their arrows over
 
-    Training wheels
-        dqTo, userPow, lockedGrades, joinPt (except maybe PGA is typed so lockedGrades is fundamental...)
-    Instead of
-        Sqrt, grade selection, scalars/norms/normalization        
-
-    Maybe the spreadsheet somehow summarizes plane and point as 0.8*plane+0.6*point
-        and then when you have those on their own you see the reality
-
-    Spreadsheet: comma, not +. You're not really giving people +! Midpoint, yes... could almost have a different symbol...
+    Moving things into place
+    Crocodile
+        Jaw must rotate around a line that its head carries around
+        Soooo it's like the head is carrying a transform around with it
+        1. Make the head
+        2. Make the jaw, in place
+        3. Make the "open" transform, next to the jaw
+        4. Make the "open with button" transform, also next to the jaw
+        5. Move the head
+        5. Grab the jaw. Make it the composition of the head movmeent and the "open with button" movement
 
     FoC demo:
+        Put the eye ON the thing damn you!
         Show a creature with eyeballs that track, a bird flapping its wings, maybe a snake
         Show from your pov making one of them
         Make a puppet of maggie? “pizza’s almost here guys”
@@ -28,9 +28,8 @@
             Hold it by the head
             Body follows
             Legs pump when moved, eg the instantaneous movement is known
-
     TODO for Lauren demo on saturday:
-        Wanna be able to grab points at infinity
+        Translation from point to point didn't go very well
         Just have the disk pos be extra state
         Practice!
             Load test. Make sure you can do exactly what you want to do
@@ -93,9 +92,6 @@
             But something else is now invisible 
             You can "scroll back", making your new thing invisible and the thing that just disappeared visible
             Put this on futureofcoding slack
-    MR lectures
-        For sure spreadsheet. Can just have a single column, so variable names are A, B, C, etc
-        Probably make them pretty small, and pretty close to the camera
 
     Crazy zolly idea
         You have an orthographic camera for the spectators
@@ -106,22 +102,26 @@
         If you have arrows you can put end-to-end, do you need gauges?
         IRL, you can ONLY change things by moving something
             Well, sort of. There's switches, and speaking. Both technically are movement. But, movement is irrelevant
+        Training wheels
+            dqTo, userPow, lockedGrades, joinPt (except maybe PGA is typed so lockedGrades is fundamental...)
+        Instead of
+            Sqrt, grade selection, scalars/norms/normalization        
 
     Code for "nega screw"
-    let transform = new Dq()
-    let initialPos = new Fl().point(0., 0., -0.5, 1.)
-    camera.position.z += 1.
-    debugUpdates.push(()=>{
-        let factor = frameCount * .004
-        let transBiv = oneDq.multiplyScalar(-1.,dq4).addScaled( e02, -factor, transform )
-        let rotBiv = e13.multiplyScalar(frameCount*.0033, dq5).exp(dq6)
-        transBiv.mul(rotBiv,transform)
-        // dq1.mul(e13, transform)
-        // biv.zero()
-        transform.sandwich( initialPos, fl0 ).pointToGibbsVec(debugSphere.position)
+        let transform = new Dq()
+        let initialPos = new Fl().point(0., 0., -0.5, 1.)
+        camera.position.z += 1.
+        debugUpdates.push(()=>{
+            let factor = frameCount * .004
+            let transBiv = oneDq.multiplyScalar(-1.,dq4).addScaled( e02, -factor, transform )
+            let rotBiv = e13.multiplyScalar(frameCount*.0033, dq5).exp(dq6)
+            transBiv.mul(rotBiv,transform)
+            // dq1.mul(e13, transform)
+            // biv.zero()
+            transform.sandwich( initialPos, fl0 ).pointToGibbsVec(debugSphere.position)
 
-        camera.position.z = 1.2
-    })
+            camera.position.z = 1.2
+        })
  */
 
 async function init() {
@@ -133,22 +133,37 @@ async function init() {
 
     initArrows()
     let transparentOpacity = .45
-    initDqVizes(transparentOpacity)
-    initFlVizes(transparentOpacity)
+    initDqVizes( transparentOpacity )
+    initFlVizes( transparentOpacity )
 
     initCamera(container)
     initSurroundings()
 
-    initHands()
+    let buttonDqVizes = [new DqViz(0xFFFF00, false, true), new DqViz(0xFFFF00, false, true)]
+    // let timeDqViz = new DqViz(0x000000, false, true)
+    function updateTimeGrabbable() {
+        // let len = frameCount * .0003
+        // timeDqViz.dq.translator(0., len, 0.)
+        // comfortableHandPos(timeDqViz.markupPos, 1.5)
+    }
+    let distanceOnlyDqVizes = [
+        buttonDqVizes[0], buttonDqVizes[1], 
+        // timeDqViz
+    ]
+
+    initHands(buttonDqVizes)
     
     initSclptables()
     
-    initSnapping()
+    initSnapping(distanceOnlyDqVizes)
     initPotentialSpectatorReception()
     initStack()
 
-    initMarkupPos()
-    initControl()
+    const potentialSnapDqVizes = []
+    const potentialSnapFlVizes = []
+    
+    initMarkupPos(potentialSnapDqVizes, potentialSnapFlVizes)
+    initControl(potentialSnapDqVizes, potentialSnapFlVizes)
 
     initSpreadsheet()
     initSpreadsheetHelpers()
@@ -174,15 +189,6 @@ async function init() {
 
     // turnOnSpectatorMode()
 
-    timeGrabbable = new DqViz(0x000000, false, true)
-    function updateTimeGrabbable() {
-        
-        // let len = frameCount * .05
-        // oneDq.addScaled(e03, len, timeGrabbable.dq)
-        // comfortableLookPos(timeGrabbable.markupPos, 2., 0.)
-        // timeGrabbable.markupPos[4] += len * .5
-    }
-
     function render() {
         let clockDelta = clock.getDelta()
         frameDelta = clockDelta < .1 ? clockDelta : .1 //clamped because debugger pauses create weirdness
@@ -201,7 +207,7 @@ async function init() {
 
             // updateSpreadsheetVisibilitiesAndRefresh()
             
-            snappables.forEach(s => {
+            vizes.forEach(s => {
                 if(s === null)
                     return
                 updateFromAffecters(s)
@@ -209,10 +215,9 @@ async function init() {
 
             //then broadcast
 
-            updatePaletteAnimation()
             updateMarkupPoses()
+            updatePaletteAnimation()
         }
-
         
         obj3dsWithOnBeforeRenders.forEach(obj3d => obj3d.onBeforeRender())
 

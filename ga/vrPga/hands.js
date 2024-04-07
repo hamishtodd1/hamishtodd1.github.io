@@ -4,7 +4,7 @@
         moving mouse around changes where they are pointing
  */
 
-function initHands() {
+function initHands(buttonDqVizes) {
 
     let standinHandGeo = new THREE.BoxGeometry(.075,.075,.075)
     hands[RIGHT] = new THREE.Mesh(standinHandGeo, new THREE.MeshPhongMaterial({ color: 0x00FF00 }))
@@ -38,7 +38,6 @@ function initHands() {
     hands[LEFT].laser.rotation.x = TAU / 2.
     hands[RIGHT].laser.rotation.x = TAU / 2.
 
-    let buttonDqVizes = [new DqViz(0xFFFF00, false, true), new DqViz(0xFFFF00, false, true)]
     let analogueButtonValues = [0., 0.]
     debugUpdates.push(() => {
         buttonDqVizes[ LEFT].dq.translator(0., .11 * analogueButtonValues[ LEFT], 0.)
@@ -362,7 +361,7 @@ function initHands() {
                             if(!source.gamepad.buttons[i].pressed && buttonStates[i] )
                                 buttonOnUps[i](focusHand)
                             if(i===1)
-                                analogueButtonValues[focusHand] = source.gamepad.buttons[i].value
+                                analogueButtonValues[focusHand] = 4./3. * Math.max(0.,source.gamepad.buttons[i].value - .25)
     
                             buttonStates[i] = source.gamepad.buttons[i].pressed
                         }
