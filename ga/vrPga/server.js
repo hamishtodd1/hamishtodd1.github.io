@@ -80,12 +80,12 @@ io.on('connection', socket => {
             s.emit("spectatorCamera", msg)
         })
     })
-    socket.on("toggle advancedness", (msg) => {
+    socket.on("refresh", (msg) => {
         sockets.forEach(s => {
             if (s === socket)
                 return
 
-            s.emit("toggle advancedness", msg)
+            s.emit("refresh", msg)
         })
     })
 })

@@ -66,7 +66,7 @@ function initSnapping(distanceOnlyDqVizes) {
                 opAcceptsTypes = g0 === -2 && g1 === -2 // only evens for now isTransform0 && isTransform1
                 break
             case `sandwich`:
-                opAcceptsTypes = isObject1 && isTransform0
+                opAcceptsTypes = isTransform0 && isObject1
                 break
             case `dqTo`:
                 opAcceptsTypes = isObject0 && isObject1 && !isNull0 && !isNull1
@@ -117,7 +117,7 @@ function initSnapping(distanceOnlyDqVizes) {
 
             let psv = potentialSnapsVizes[lowestUnused]
             psv.affecters[0] = snappables[i]
-            psv.affecters[1] = snappables[j]
+            psv.affecters[1] = j === -1 ? null : snappables[j]
             psv.affecters[2] = k
             updateFromAffecters(psv)
             if (!psv.mv.isZero()) {
@@ -145,8 +145,7 @@ function initSnapping(distanceOnlyDqVizes) {
 
             for (let k = 0, kl = operators.length; k < kl; k++) {
                 
-                //because it is only had by dqs...
-                let isSingleArgumentOp = operators[k] === `userPow` || mv0[operators[k]].length === 1
+                let isSingleArgumentOp = mv0[operators[k]] === undefined ? false : mv0[operators[k]].length === 1
                 if (isSingleArgumentOp) {
 
                     let outputType = getType(operators[k], mv0.constructor)
@@ -251,7 +250,7 @@ function initSnapping(distanceOnlyDqVizes) {
             }
         }
 
-        let opName = opIndex === -1 ? `` : operators[opIndex] 
+        let opName = opIndex === -1 ? `` : operators[opIndex] //could be -1 because it's just an mv you made
         switch (opName) {
 
             //higher advantage = more likely
@@ -271,7 +270,9 @@ function initSnapping(distanceOnlyDqVizes) {
                 break
 
             case `sandwich`:
-                l1Norm = compareBlades()
+                let g = toBeSnapped.grade()
+                let isTransform = g === -2
+                l1Norm = isTransform ? compareDqs() : compareBlades()
                 advantage = 5.
                 break
 

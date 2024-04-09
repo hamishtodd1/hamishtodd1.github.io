@@ -1,6 +1,8 @@
 /*
     Can do "if" statements with with thingYouMayNotWant * (translationDist > 0 ? 1 : 0)
 
+    Extend display! speaker notes!
+
     Need to have mul working! So you can have parenting!
         That means: bring their arrows over
 
@@ -16,6 +18,7 @@
         5. Grab the jaw. Make it the composition of the head movmeent and the "open with button" movement
 
     FoC demo:
+        Get rid of "VR not connected"
         Put the eye ON the thing damn you!
         Show a creature with eyeballs that track, a bird flapping its wings, maybe a snake
         Show from your pov making one of them

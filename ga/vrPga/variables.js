@@ -6,7 +6,7 @@ const randomPt = new Fl().point(0.2448657087518873, 0.07640275431752674, 0.36020
 const notchSpacing = .1 //a decimeter. Very natural, fight me!
 const RIGHT = 0
 const LEFT = 1
-const passThroughMode = false
+const passThroughMode = true
 
 let spectatorMode = null
 let vrSession = null
@@ -46,14 +46,17 @@ const operators = [
     //2-argument
     `mul`,
     `dqTo`,
-    `joinPt`,
+    `joinPt`, //could have "plus" sign for join
     `sandwich`,
     `projectOn`,
-    `userPow`,
-    // `velocityUnder`, `userPow`, `add`
+
+    //requires specific types!
+    `userPow`, 
+    // `velocityUnder`, `add`
 
     //1-argument
-    // `copyTo`, `inverse`, `negate`, `userLogarithm`, `getDist`, `invariantDecomposition`
+    // `copyTo`, `reverse`, `negate`, `userLogarithm`, `getDist`, `invariantDecomposition`
+    //`hasDistance` ("if" statement! Returns 0 if it is)
     
 	//distances, angles
 	//direction-headed-in, eg derivitive, eg commutator

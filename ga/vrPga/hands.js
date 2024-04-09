@@ -244,7 +244,7 @@ function initHands(buttonDqVizes) {
         // vrRight.addEventListener('squeezestart', () => { onGrabButtonDown    ( RIGHT ) } ) //log(`6`) })
         // vrRight.addEventListener('squeezeend',   () => { onGrabButtonUp      ( RIGHT ) } ) //log(`7`) })
 
-        socket.on('reload', window.location.reload )
+        socket.on('refresh', window.location.reload )
 
         onEnterVrFirstTime = (session) => {
 
@@ -256,14 +256,12 @@ function initHands(buttonDqVizes) {
                 () => {}, //dunno how to get this to fire!
                 (focusHand) => {
                     if(!focusHand) {
-                        socket.send(`reload`)
+                        socket.send(`refresh`)
                         vrSession.end()
                         window.location.reload()
                     }
-                    else {
-                        debuggerTrigger = true
-                    }
-                    log(debuggerTrigger)
+                    else
+                        advanceSpreadsheet()
                 },
                 onPaintButtonDown, //face button 2
                 onSnapButtonDown,  //face button 1

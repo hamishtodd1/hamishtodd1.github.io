@@ -1,4 +1,13 @@
 /*
+    Functions in spreadsheets:
+        Your goal is to make it so you can write foo(x,y)
+        You have an extra spreadsheet column, you give the column the name foo
+        You just have the arguments override the first lines of foo
+        And it gives back the last line of foo
+        When foo is called in a cell and you select that cell
+            a copy of foo is made and brought over
+            it sits next to that cell
+
     Maybe the spreadsheet somehow summarizes plane and point as 0.8*plane+0.6*point
         and then when you have those on their own you see the reality
 
@@ -14,18 +23,27 @@ function initTestSpreadsheet() {
     comfortableLookPos(fl0, 0.).pointToGibbsVec(ss.position)
     // ss.makeExtraCell(`A ∧ B * · ∨`)
     // ss.makeExtraCell(`⟨C⟩ |C| A/B √`)
+    
+    // `plane`,
+    // `rotation`,
+    // `A1*A2`,
+    // ` `,
+    // `point`,
+    // `point`,
+    // `√ (A5 / A6)`,
+    
     let unadvancedCells = [
-        `point`, //fish initial position
-        `transform`, //fish transform
-        `A2 applyTo A1`, //fish current position
-        ` `,
-        `point`,      //eye position
-        `direction`,  //eye direction
-        `A5 join A6`, //L1. Dual of duals?
-        `A5 join A3`, //L2
-        `A7 transformTo A8`, //eye transform / eye
-        ` `,
-        `rotoreflection`
+        // `point`, //fish initial position
+        // `transform`, //fish transform
+        // `A2 applyTo A1`, //fish current position
+        // ` `,
+        // `point`,      //eye position
+        // `direction`,  //eye direction
+        // `A5 join A6`, //L1. Dual of duals?
+        // `A5 join A3`, //L2
+        // `A7 transformTo A8`, //eye transform / eye
+        // ` `,
+        // `rotoreflection`
     ]
     unadvancedCells.forEach(cell => ss.makeExtraCell(cell))
 
@@ -43,20 +61,16 @@ function initTestSpreadsheet() {
         `0.8*plane + 0.6*point`
     ]
     // advancedCells.forEach(cell => ss.makeExtraCell(cell))
-    document.addEventListener('keydown', e => {
-        if(e.key === '=') {
-            socket.emit("toggle advancedness")
-        }
-    })
+    
     let advancedness = 0
     ss.visible = false
-    socket.on("toggle advancedness", () => {
+    advanceSpreadsheet = () => {
 
         advancedness = (advancedness + 1) % 3
         if (advancedness === 0)
             ++advancedness
-        
-        if(advancedness === 0)
+
+        if (advancedness === 0)
             ss.visible = false
         else {
             ss.visible = true
@@ -66,5 +80,5 @@ function initTestSpreadsheet() {
                 ss.cells[i].setText(newContents)
             })
         }
-    })
+    }
 }

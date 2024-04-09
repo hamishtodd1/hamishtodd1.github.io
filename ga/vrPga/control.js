@@ -167,7 +167,7 @@ function initControl(potentialSnapDqVizes, potentialSnapFlVizes) {
         handDqOnGrabs[focusHand].copy(hands[focusHand].dq)
         grabbee.visible = true
         grabbees[focusHand] = grabbee
-        makeUnaffected(grabbee)
+        // makeUnaffected(grabbee)
 
         if (grabbee.lockedGrade !== 1)
             grabbee.dontUpdateMarkupPos = true
