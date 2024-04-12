@@ -66,7 +66,8 @@ function initSnapping(distanceOnlyDqVizes) {
                 opAcceptsTypes = g0 === -2 && g1 === -2 // only evens for now isTransform0 && isTransform1
                 break
             case `sandwich`:
-                opAcceptsTypes = isTransform0 && isObject1
+                opAcceptsTypes = isTransform0// && isObject1
+                //just translating a rotation, no?
                 break
             case `dqTo`:
                 opAcceptsTypes = isObject0 && isObject1 && !isNull0 && !isNull1
@@ -144,11 +145,13 @@ function initSnapping(distanceOnlyDqVizes) {
                 return
 
             for (let k = 0, kl = operators.length; k < kl; k++) {
+
+                let op = operators[k]
                 
-                let isSingleArgumentOp = mv0[operators[k]] === undefined ? false : mv0[operators[k]].length === 1
+                let isSingleArgumentOp = mv0[op] === undefined ? false : mv0[op].length === 1
                 if (isSingleArgumentOp) {
 
-                    let outputType = getType(operators[k], mv0.constructor)
+                    let outputType = getType(op, mv0.constructor)
                     if (outputType !== toBeSnapped.mv.constructor)
                         continue
 
@@ -161,8 +164,9 @@ function initSnapping(distanceOnlyDqVizes) {
                     let mv1 = snappables[j].mv
 
                     let ineligible1 =
-                        (distanceOnlyDqVizes.indexOf(snappables[j]) !== -1 && operators[k] !== `userPow`) ||
-                        (snappables[j] === toBeSnapped && !(operators[k] === `sandwich` && sn.constructor === DqViz )) ||
+                        (distanceOnlyDqVizes.indexOf(snappables[j]) !== -1 && op !== `userPow`) ||
+                        (snappables[j] === toBeSnapped && !(op === `sandwich` && sn.constructor === DqViz )) ||
+                        (op === `sandwich` && snappables[j] === toBeSnapped) || //one day maybe
                         mv1.isZero() ||
                         snappables[j].visible === false ||
                         aDependsOnB(snappables[j], toBeSnapped) ||  //maybe one day
@@ -173,7 +177,7 @@ function initSnapping(distanceOnlyDqVizes) {
                     if (ineligible1)
                         continue
 
-                    // if (operators[k] === `sandwich`)
+                    // if (op === `sandwich`)
                     //     debugger
 
                     addPotentialSnap(i, j, k)
@@ -211,7 +215,9 @@ function initSnapping(distanceOnlyDqVizes) {
     
     rate = (opIndex, potentialSnap, toBeSnapped) => {
 
-        if (potentialSnap.isZero())
+        let psMv = potentialSnap.mv
+
+        if (psMv.isZero())
             return false
 
         let l1Norm = Infinity
@@ -221,15 +227,15 @@ function initSnapping(distanceOnlyDqVizes) {
         //fucking mess
         function compareBlades() {
 
-            let g = potentialSnap.grade()
+            let g = psMv.grade()
             let toBeSnappedGradeG = toBeSnapped.mv.selectGrade(g, toBeSnapped.mv.constructor === Dq ? tbsnDq : tbsnFl)
             if (toBeSnappedGradeG.isZero())
                 return Infinity
             //gotta make it NOT a screw axis
             toBeSnappedGradeG.normalize()
 
-            let potentialSnapComparable = potentialSnap.constructor === Dq ? pscDq : pscFl
-            potentialSnapComparable.copy(potentialSnap)
+            let potentialSnapComparable = psMv.constructor === Dq ? pscDq : pscFl
+            potentialSnapComparable.copy(psMv)
             potentialSnapComparable.normalize()
             if (g === 3 && potentialSnapComparable[7] !== toBeSnappedGradeG[7])
                 potentialSnapComparable.multiplyScalar(-1., potentialSnapComparable)
@@ -239,7 +245,7 @@ function initSnapping(distanceOnlyDqVizes) {
 
         function compareDqs() {
             toBeSnapped.mv.logarithm(toSnapLogNormalized)
-            potentialSnap.logarithm(potentialSnapLogNormalized)
+            psMv.logarithm(potentialSnapLogNormalized)
             if (toSnapLogNormalized.isZero() || potentialSnapLogNormalized.isZero())
                 return Infinity
             else {
@@ -250,10 +256,10 @@ function initSnapping(distanceOnlyDqVizes) {
             }
         }
 
-        let opName = opIndex === -1 ? `` : operators[opIndex] //could be -1 because it's just an mv you made
+        let opName = opIndex === -1 ? `` : operators[opIndex] //could be -1 because it's just an mv you
         switch (opName) {
 
-            //higher advantage = more likely
+            //higher advantage = make it more likely
             case `userPow`:
                 l1Norm = compareDqs()
                 advantage = 10.
@@ -270,15 +276,22 @@ function initSnapping(distanceOnlyDqVizes) {
                 break
 
             case `sandwich`:
-                let g = toBeSnapped.grade()
-                let isTransform = g === -2
-                l1Norm = isTransform ? compareDqs() : compareBlades()
+                l1Norm = compareBlades()
+
                 advantage = 5.
+
                 break
 
             case `mul`:
                 l1Norm = compareDqs()
                 advantage = 8.
+
+                //"parenting"
+                if (toBeSnapped.sclptable !== null && 
+                    potentialSnap.affecters[0].sclptable !== null &&
+                    toBeSnapped.sclptable.lastViz !== null && toBeSnapped.sclptable.lastViz === potentialSnap.affecters[1])
+                    advantage = 9999.
+
                 break
 
             case `dqTo`:
@@ -287,7 +300,7 @@ function initSnapping(distanceOnlyDqVizes) {
                 break
 
             default: //this includes -1, because sometimes you snap to something not defined by behaviour
-                l1Norm = potentialSnap.l1NormTo(toBeSnapped.mv)
+                l1Norm = psMv.l1NormTo(toBeSnapped.mv)
                 advantage = 2.
         }
 
@@ -300,13 +313,16 @@ function initSnapping(distanceOnlyDqVizes) {
     let variantsFl = [new Fl(), new Fl(), new Fl(), new Fl()]
     handleSnaps = (potentialSnaps, toBeSnapped, numPotentialSnaps, fuckYouPsvs) => {
 
-        if(fuckYouPsvs.length > 0)
-            debugger
+        // if(frameCount % 10 === 0)
+        //     log(frameCount)
+
+        // if(frameCount > 900)
+        //     debugger
 
         for (let i = 0; i < numPotentialSnaps; ++i) {
             let ps = potentialSnaps[i]
             if (i < numPotentialSnaps && fuckYouPsvs.indexOf(ps) === -1)
-                ps.snapRating = rate( ps.affecters[2], ps.mv, toBeSnapped )
+                ps.snapRating = rate( ps.affecters[2], ps, toBeSnapped )
             else
                 ps.snapRating = Infinity
         }

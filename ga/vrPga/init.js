@@ -1,5 +1,5 @@
 /*
-    Can do "if" statements with with thingYouMayNotWant * (translationDist > 0 ? 1 : 0)
+    Can do "if" statements with with thingYouMayNotWant * (translationDist == 0 ? 1 : 0)
 
     Extend display! speaker notes!
 
@@ -19,7 +19,6 @@
 
     FoC demo:
         Get rid of "VR not connected"
-        Put the eye ON the thing damn you!
         Show a creature with eyeballs that track, a bird flapping its wings, maybe a snake
         Show from your pov making one of them
         Make a puppet of maggie? “pizza’s almost here guys”

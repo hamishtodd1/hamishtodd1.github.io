@@ -16,6 +16,7 @@ const snappables = []
 const vizes = []
 const obj3dsWithOnBeforeRenders = []
 const grabbees = [null, null]
+const sclptables = []
 
 //spreadsheet copypastes
     const spreadsheets = []

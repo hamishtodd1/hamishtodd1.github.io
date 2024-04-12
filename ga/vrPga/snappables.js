@@ -1,3 +1,16 @@
+pairAndPotentiallyCreateSnappableSclptable = (snappableIndex, sclptableIndex) => {
+
+    if (snappables[snappableIndex] === undefined) {
+        snappables[snappableIndex] = new DqViz(0x000000, true, true) //If you see solid black, it's this
+        snappables[snappableIndex].visible = false
+    }
+    if(sclptables[sclptableIndex] === undefined)
+        sclptables[sclptableIndex] = new Sclptable(snappables[snappableIndex])
+
+    snappables[snappableIndex].sclptable = sclptables[sclptableIndex]
+    sclptables[sclptableIndex].viz = snappables[snappableIndex]
+}
+
 function initStack() {
     let stackLength = 6
     let stack = Array(stackLength).fill(null)
@@ -39,10 +52,8 @@ function updateFromAffecters(output) {
     if (res.isZero())
         debugger
     res.normalize() //sell-out!
-    socket.emit("snappable", {
-        dqCoefficientsArray: output.mv,
-        i: snappables.indexOf(output)
-    })
+    
+    emitPotentialSclptableSnappable(output)
 }
 
 function copySnappable(from, to) {

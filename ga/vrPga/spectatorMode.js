@@ -7,47 +7,32 @@ function initPotentialSpectatorReception() {
 
     let spectatorCameraNear = 1.6
 
-    socket.on(`disposeSnappable`, msg=>{
+    emitPotentialSclptableSnappable = (snappable) => {
+        if (snappable.sclptable !== null) {
+            socket.emit(`snappable`, {
+                snappableIndex: snappables.indexOf(snappable),
+                sclptableIndex: sclptables.indexOf(snappable.sclptable),
+                dqCoefficientsArray: snappable.dq,
+            })
+        }
+    }
 
+    socket.on(`disposeSnappable`, msg => {
         snappables[msg.i].dispose()
-
     })
     
-    socket.on("sclptable", msg => {
-        turnOnSpectatorMode()
-
-        if (snappables[msg.i] === undefined) {
-            snappables[msg.i] = new DqViz(0xFF0000, true, true) //TODO bug this thing must be showing up
-            snappables[msg.i].visible = false
-        }
-        let sn = snappables[msg.i]
-        if (sn.sclptable === null || sn.sclptable === undefined)
-            sn.sclptable = new Sclptable(sn)
-
-        let cs = sn.sclptable.children[msg.childIndex]
-        cs.vAttr.needsUpdate = true
-        cs.vAttr.updateRange.offset = 0
-        cs.vAttr.updateRange.count = 0
-        cs.geometry.drawRange.count = 0
-        cs.lowestUnusedCube = 0
-
-        let arr = msg.arr.split(`,`)
-        for (let i = 0, il = parseInt(msg.count); i < il; ++i)
-            cs.fillCubePositionIfEmpty(v1.set( arr[i * 3 + 0], arr[i * 3 + 1], arr[i * 3 + 2] ))
-    })
-
     let backedUpMsgs = []
-    socket.on( "snappable", msg => {
+    socket.on( `snappable`, msg => {
         backedUpMsgs.push(msg)
     })
     handleDqMsgs = () => {
         
         backedUpMsgs.forEach((msg) => {
-            if (snappables[msg.i] === undefined)
-                snappables[msg.i] = new DqViz(0xFF0000, true, true)
+
+            pairAndPotentiallyCreateSnappableSclptable(msg.snappableIndex, msg.sclptableIndex)
 
             for (let j = 0; j < 8; ++j)
-                snappables[msg.i].dq[j] = msg.dqCoefficientsArray[j]
+                snappables[msg.snappableIndex].mv[j] = msg.dqCoefficientsArray[j]
             
         })
         
@@ -84,7 +69,7 @@ function initPotentialSpectatorReception() {
         let spectatorCamera = null
         let camBox = new THREE.Mesh(new THREE.PlaneGeometry(.2, .1, .1), new THREE.MeshBasicMaterial({ color: 0x00FF00 }))
         
-        socket.on("spectatorCamera", msg => {
+        socket.on(`spectatorCamera`, msg => {
 
             if (spectatorCamera === null)
                 spectatorCamera = defaultCamera()
@@ -107,6 +92,8 @@ function initPotentialSpectatorReception() {
 
             addStage(spectatorCamera, false)
         })
+
+        socket.emit(`cameraWanted`)
     }
     
     makeSpectatorCamera = () => {
@@ -131,7 +118,7 @@ function initPotentialSpectatorReception() {
         // })
 
         function emitCamera() {
-            socket.emit("spectatorCamera", {
+            socket.emit(`spectatorCamera`, {
                 position: camera.position,
                 rotation: camera.rotation,
                 fov: camera.fov,
@@ -143,23 +130,28 @@ function initPotentialSpectatorReception() {
         let leftQuat  = new THREE.Quaternion().setFromAxisAngle(v1.set(0., 1., 0.),  angle)
         let rightQuat = new THREE.Quaternion().setFromAxisAngle(v1.set(0., 1., 0.), -angle)
         document.addEventListener('keydown', event => {
-            if(event.key === `ArrowLeft`) {
+            if( event.key === `ArrowLeft`) {
                 camera.position.applyQuaternion(leftQuat)
                 camera.rotation.y += angle
             }
-            else if (event.key === `ArrowRight`) {
+            else if ( event.key === `ArrowRight`) {
                 camera.position.applyQuaternion(rightQuat)
                 camera.rotation.y += -angle
             }
-            else if(event.key === `ArrowUp`) {
+            else if( event.key === `ArrowUp`) {
                 camera.position.y -= 1./32.
             }
-            else if(event.key === `ArrowDown`) {
+            else if( event.key === `ArrowDown`) {
                 camera.position.y += 1./32.
             }
             emitCamera()
         })
         emitCamera()
+
+        socket.on(`cameraWanted`, () => {
+            //could refresh whole window...
+            emitCamera()
+        })
     }
 
     //feel free to rewrite

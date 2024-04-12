@@ -33,34 +33,34 @@ function initTestSpreadsheet() {
     // `√ (A5 / A6)`,
     
     let unadvancedCells = [
-        // `point`, //fish initial position
-        // `transform`, //fish transform
-        // `A2 applyTo A1`, //fish current position
-        // ` `,
-        // `point`,      //eye position
-        // `direction`,  //eye direction
-        // `A5 join A6`, //L1. Dual of duals?
-        // `A5 join A3`, //L2
-        // `A7 transformTo A8`, //eye transform / eye
-        // ` `,
-        // `rotoreflection`
+        `point`,      //eye position
+        `direction`,  //eye direction
+        `point`,      //fish initial position
+        `A1 join A2`, //L1
+        `A1 join A3`, //L2
+        `A4 transform_to A5`, //eye transform / eye
+        `transform`, //fish transform
+        `A3 transformed_by A7`, //fish current position
     ]
     unadvancedCells.forEach(cell => ss.makeExtraCell(cell))
 
     let advancedCells = [
-        `e123, 3e013, e023`,
+        `1.9e013, 1.1e023, e123`,
+        `e012`, 
+        `3.6e012, 2.1e023, e123`,
+        `A1 V A2`, //Dual of duals?
+        `A1 V A3`,
+        `√ (A4 / A5)`,
         `0.8, 0.6e12`,
-        `A2 * A1 * ~A2`,
-        ` `,
-        `e123, e012, e023`,
-        `e023`, 
-        `A5 V A6`,
-        `A5 V A3`,
-        `√ (A7 / A8)`,
-        ` `,
-        `0.8*plane + 0.6*point`
+        `A7 * A3 / A7`,
     ]
     // advancedCells.forEach(cell => ss.makeExtraCell(cell))
+
+    addRotationToSpreadsheetMaybe = () => {
+        if(!ss.visible || ss.cells.length > unadvancedCells.length)
+            return
+        ss.makeExtraCell(`rotation`)
+    }
     
     let advancedness = 0
     ss.visible = false

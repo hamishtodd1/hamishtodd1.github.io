@@ -129,6 +129,8 @@ function initControl(potentialSnapDqVizes, potentialSnapFlVizes) {
 
         let grabbee = paintees[focusHand] || paintees[otherHand] || highlightees[focusHand]
 
+        // log("yo")
+
         if (grabbee !== null && grabbees[otherHand] === grabbee ) {
 
             if (grabbees[otherHand].sclptable !== null) 
@@ -144,9 +146,24 @@ function initControl(potentialSnapDqVizes, potentialSnapFlVizes) {
         if (grabbee === null )
             grabbee = new DqViz(null, false)
 
+        //we are doing this thing for sclptables...
+        if (grabbee.affecters[0] !== null && grabbee.sclptable !== null ) {
+
+            let sclptable = grabbee.sclptable
+            grabbee.sclptable = null
+            sclptable.lastViz = grabbee
+            
+            grabbee = new DqViz(null, false)
+            pairAndPotentiallyCreateSnappableSclptable(snappables.indexOf(grabbee), sclptables.indexOf(sclptable))
+        }
+
         //grabbee is now what it should be! Now a case of doing stuff
 
-        if (grabbee !== null && grabbee === grabbees[otherHand]) {
+        // if(grabbee.sclptable !== null) {
+
+        // }
+        // else 
+        if (grabbee === grabbees[otherHand]) {
 
             grabbee.lockedGrade = -1
 
@@ -167,7 +184,7 @@ function initControl(potentialSnapDqVizes, potentialSnapFlVizes) {
         handDqOnGrabs[focusHand].copy(hands[focusHand].dq)
         grabbee.visible = true
         grabbees[focusHand] = grabbee
-        // makeUnaffected(grabbee)
+        makeUnaffected(grabbee)
 
         if (grabbee.lockedGrade !== 1)
             grabbee.dontUpdateMarkupPos = true
@@ -241,12 +258,7 @@ function initControl(potentialSnapDqVizes, potentialSnapFlVizes) {
                     if(snapMode)
                         handleSnaps(potentialSnapDqVizes, grabbee, numPotentialSnaps, fuckYouPsvs)
 
-                    if (grabbee.sclptable) {
-                        socket.emit("snappable", {
-                            dqCoefficientsArray: grabbee.dq,
-                            i: snappables.indexOf(grabbee)
-                        })
-                    }
+                    emitPotentialSclptableSnappable(grabbee)
                 }
             }
         }
@@ -368,6 +380,8 @@ function initControl(potentialSnapDqVizes, potentialSnapFlVizes) {
 
         output.dontUpdateMarkupPos = false
         putOnStack(output)
+
+        addRotationToSpreadsheetMaybe()
         
         if (output.constructor === FlViz && output.affecters[0] === null) {
             

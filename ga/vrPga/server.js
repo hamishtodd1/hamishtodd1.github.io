@@ -54,38 +54,24 @@ io.on('connection', socket => {
 
     sockets.push(socket)
 
-	socket.emit("serverConnected")
+	socket.emit(`serverConnected`)
 
-	socket.on("snappable", (msg) => {
-        sockets.forEach(s=>{
-            if(s === socket)
-                return
+    let things = [
+        `snappable`,
+        `sclptable`,
+        `spectatorCamera`,
+        `refresh`,
+        `cameraWanted`
+    ]
+    things.forEach(thing => {
+        let theThing = thing
+        socket.on(theThing, msg => {
+            sockets.forEach(s => {
+                if (s === socket)
+                    return
 
-            s.emit("snappable",msg)
-        })
-    })
-    socket.on("sclptable", (msg) => {
-        sockets.forEach(s => {
-            if (s === socket)
-                return
-
-            s.emit("sclptable", msg)
-        })
-    })
-    socket.on("spectatorCamera", (msg) => {
-        sockets.forEach(s => {
-            if (s === socket)
-                return
-
-            s.emit("spectatorCamera", msg)
-        })
-    })
-    socket.on("refresh", (msg) => {
-        sockets.forEach(s => {
-            if (s === socket)
-                return
-
-            s.emit("refresh", msg)
+                s.emit(theThing, msg)
+            })
         })
     })
 })

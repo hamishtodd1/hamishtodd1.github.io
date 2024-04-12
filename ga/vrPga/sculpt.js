@@ -72,6 +72,7 @@ function initSclptables()
             super()
             scene.add(this)
             this.matrixAutoUpdate = false
+            sclptables.push(this)
 
             this.boundingBox = new THREE.Box3()
             this.boxHelper = new THREE.BoxHelper()
@@ -84,8 +85,10 @@ function initSclptables()
                 this.add(cs)
             })
 
-            this.dqViz = dqViz
-            this.dqViz.sclptable = this
+            this.lastViz = null //hacky?
+
+            this.viz = dqViz
+            this.viz.sclptable = this
             //well, it makes sense to have the thing be at the tip of an arrow
 
             this.com = new Fl() //NOT NORMALIZED AND NO REASON TO CHANGE THAT!
@@ -93,8 +96,8 @@ function initSclptables()
             obj3dsWithOnBeforeRenders.push(this)
 
             this.onBeforeRender = () => {
-                this.dqViz.dq.toMat4(this.matrix)
-                // this.dqViz.dq.log()
+                this.viz.dq.toMat4(this.matrix)
+                // this.viz.dq.log()
                 //apparently this is being changed on the spectator side, so what the FUCK is going on?
                 this.boxHelper.matrix.copy(this.matrix)
             }
@@ -102,7 +105,7 @@ function initSclptables()
 
         dispose() {
             
-            this.dqViz.dispose()
+            this.viz.dispose()
             
             scene.remove(this)
             scene.remove(this.boxHelper)
@@ -136,7 +139,7 @@ function initSclptables()
         }
 
         getWorldCom(target) {
-            return this.dqViz.dq.sandwich(this.com, target)
+            return this.viz.dq.sandwich(this.com, target)
         }
 
         brushStrokeWouldBeConnected(pos) {
@@ -291,7 +294,25 @@ function initSclptables()
             currentColor = (currentColor + numCols + joystickVec.x) % numCols
         }
     }
-    
+
+    socket.on("sclptable", msg => {
+
+        turnOnSpectatorMode()
+
+        pairAndPotentiallyCreateSnappableSclptable(msg.snappableIndex, msg.sclptableIndex)
+        
+        let cs = sclptables[msg.sclptableIndex].children[msg.childIndex]
+        cs.vAttr.needsUpdate = true
+        cs.vAttr.updateRange.offset = 0
+        cs.vAttr.updateRange.count = 0
+        cs.geometry.drawRange.count = 0
+        cs.lowestUnusedCube = 0
+
+        let arr = msg.arr.split(`,`)
+        for (let i = 0, il = parseInt(msg.count); i < il; ++i)
+            cs.fillCubePositionIfEmpty(v1.set(arr[i * 3 + 0], arr[i * 3 + 1], arr[i * 3 + 2]))
+    })
+
     class ColoredSection extends THREE.Points {
 
         constructor(mat) {
@@ -309,9 +330,9 @@ function initSclptables()
         }
 
         emitSelf() {
-            log(this.parent.dqViz, snappables.indexOf(this.parent.dqViz))
             socket.emit("sclptable", {
-                i: snappables.indexOf(this.parent.dqViz),
+                snappableIndex: snappables.indexOf(this.parent.viz),
+                sclptableIndex: sclptables.indexOf(this.parent),
                 childIndex: this.parent.children.indexOf(this),
                 arr: this.vAttr.array.toString(), //bad to have it sent as a string, buffer would be better
                 count: this.vAttr.count,

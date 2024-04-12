@@ -70,6 +70,8 @@ function initVrButton() {
             function showWebXRNotFound() {
                 disableButton();
                 button.textContent = 'VR NOT CONNECTED';
+                document.body.removeChild(documentElement)
+                turnOnSpectatorMode()
             }
 
             function showVRNotAllowed(exception) {
@@ -134,5 +136,6 @@ function initVrButton() {
     VRButton.xrSessionIsGranted = false;
     VRButton.registerSessionGrantedListener();
 
-    document.body.appendChild(VRButton.createButton(renderer))
+    let documentElement = VRButton.createButton(renderer)
+    document.body.appendChild(documentElement)
 }
