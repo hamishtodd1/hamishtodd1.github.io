@@ -8,9 +8,7 @@ function initBasises() {
     let nullUna = new Unavec()
     let bv = new Unavec()
     let projectivePointFl = new Fl()
-    let originIndexSigned = _epm.cast(sb0).lowestNonzeroSigned()
 
-    let basisFls = [e021, e013, e032, e123]
     let zyxw = `zyxw`
 
     class Basis {
@@ -49,6 +47,8 @@ function initBasises() {
                 basis.length === 4 ? new Hexavec() :
                 console.error("weird basis length")
             origin.meet(_epm, tw0).cast(this.pss)
+
+            // this.translationAxes
 
             if(basis.length === 3)
             {
@@ -109,7 +109,6 @@ function initBasises() {
                     `\n     targetBiv[i] = targetBiv[i] + dqEga[`+ (i + 1) +`] * basisPlucker`+i+`[i];`
                 }
                 extra0 += `\n}`
-                log(extra0)
                 this.prefix += extra0
                 
                 this.scalorBivToFlatPoint = (scalorBiv, targetFl) => {
@@ -133,7 +132,6 @@ function initBasises() {
                         `\n        targetFl.`+zyxw[i]+` += basisFlatPoints`+zyxw[i].toUpperCase()+`[j] * scalorBiv[j];\n`
                 }
                 extra1 += `\n}`
-                log(extra1)
                 this.prefix += extra1
 
                 this.prefix += defaultBasisPrefix
@@ -146,8 +144,33 @@ function initBasises() {
                     `\n    return ret;` +
                 `\n}\n`
                 this.prefix += extra2
+
+                for(let i = 0; i < 3; ++i) {
+
+                }
+
+                // `void gibbsVecToPp( in vec3 v, out float[20] pp) {
+                //     //well it's e123 + x*e012 + y*e023 + z*e012 or whatever
+                // }`
+
                 // log(extra2)
             }
+        }
+
+        gibbsVecToZrs(v,target) {
+
+            _ep.sub(_em, tw0)
+
+
+            //inner with pss
+            //then
+
+            // targetFl.zero()
+            // for (let i = 0; i < 4; ++i) {
+            //     for (let j = 0; j < numBivecCoefs; ++j)
+            //         targetFl[4 + i] += basisFlatPoints[i][j] * scalorBiv[j] //
+            // }
+            // return targetFl
         }
 
         scalorBivToGibbsVec(scalorBiv, gibbsVec) {
@@ -155,23 +178,11 @@ function initBasises() {
             return projectivePointFl.pointToGibbsVec(gibbsVec)
         }
 
-        // scalorBivToFl(scalorBiv, targetFl) {
-
-        //     targetFl.zero()
-            
-        //     targetFl[7] = scalorBiv.getAtSignedIndex( originIndexSigned )
-            
-        //     for (let i = 0, il = this.idealIndicesA.length; i < il; ++i ) {
-        //         targetFl[6-i] = .5 * (
-        //             scalorBiv.getAtSignedIndex( this.idealIndicesA[i] ) +
-        //             scalorBiv.getAtSignedIndex( this.idealIndicesB[i] ) )
-        //     }
-        //     //can't do signed index in glsl, so next thing to do is probably remove that shite.
-
-        //     return targetFl
-        // }
-
         ppToGibbsVecs( pp, target1, target2 ) {
+            if(pp.constructor === Tw) {
+                debugger
+                //Gotta cast first!
+            }
             //geometric interpretation: we go from a n-reflection to scalor that preserves the n-reflection axis
             pp.inner( this.pss, projectorBiv )        // n-2-vec | n-vec = 2-vec eg in 3D CGA, 3-vec | 5-vec
             this.projectorBivToGibbsVecs( projectorBiv, target1, target2 )
@@ -296,20 +307,9 @@ float projectorBivToGibbsVecs( in float[BIV_LEN] projectorBiv, out vec3 target1,
     basis12     = new Basis([_e1, _e2])           //2D  CGA  / PGA
     basis1t     = new Basis([_e1, _et])           //1+1 CSTA / STAP
     basis123    = new Basis([_e1, _e2, _e3])      //3D  CGA  / PGA
-    basis12t    = new Basis([_e1, _e2, _et])      //2+1 CSTA / STAP
+    basis1t2    = new Basis([_e1, _et, _e2])      //2+1 CSTA / STAP
+    basis12t    = new Basis([_e1, _e2, _et])
     basis123t   = new Basis([_e1, _e2, _e3, _et]) //3+1 CSTA / PGA
-    
-
-
-    basis123.pointFlToTriv = (fl, target) => {
-        target.zero()
-        target.addScaled( _e123,  fl[7], target)
-        target.addScaled( _e012, -fl[4], target)
-        target.addScaled( _e013,  fl[5], target)
-        target.addScaled( _e023, -fl[6], target)
-
-        return target
-    }
 
     // debugger
     // basis123.dqToBiv(e03, new Bivec())

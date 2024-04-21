@@ -32,7 +32,7 @@ function initGeneralVectors() {
             let egaInvolved = this.constructor === Fl ||   this.constructor === Dq
                             target.constructor === Fl || target.constructor === Dq
             if (egaInvolved) {
-                console.error("do something different because e0")    
+                console.error("You have to do something different here because e0")    
             }
 
             let thisIndexGrades = this.constructor.indexGrades

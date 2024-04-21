@@ -29,14 +29,13 @@ function initDebugDisplay() {
     let rayDq = new Dq()
     let rayBiv = new Bivec()
     let renderedObj = _ep.addScaled( _em, -0.7, tw0 ).cast( new Unavec() ) //slightly smaller than unit sphere
-    let basis = basis12t
+    let basis = basis123
     let pp = new Trivec()
 
     // log(basis123.dqToBiv)
 
     let pretendCamPos = new Fl()
     pretendCamPos.point(1.,1.,-1.,1.)
-
 
     update22 = () => {
 

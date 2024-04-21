@@ -1,4 +1,12 @@
 /*
+    Need a thing at the bottom saying a transformation
+    Need a way to enter what transformation you want
+    Need a cow or w/e shown having undergone that transformation
+
+
+    A wall covered in hyperboloids. Nice thing is you can see the places where ones that don't meet meet
+
+
     A more modest thing:
 
     A modest and realistic thing for Hiley is:
@@ -37,8 +45,13 @@ async function init() {
     initPluckerVizes()
     
     initBasises()
+    
     // initDebugDisplay()
-    initShader()
+    initPosSqShader()
+    // initNegSqShader()
+    // initNusExperiment()
+
+    init32ish22()
 
     window.addEventListener('resize', () => {
 
@@ -65,10 +78,11 @@ async function init() {
         updateCameraMvs()
         updateHandMvs()
         buttonWhileDowns()
-
-        blankFunction()
-
         // update22()
+
+        update32ish22()
+
+        debugUpdates.forEach(func=>func())
 
         obj3dsWithOnBeforeRenders.forEach( obj3d => obj3d.onBeforeRender() )
 

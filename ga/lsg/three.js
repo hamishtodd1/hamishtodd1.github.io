@@ -13823,6 +13823,7 @@
 			extraVec1: { value: new Vector4() },
 			extraVec2: { value: new Vector4() },
 			extraVec3: { value: new Vector4() },
+            floats: { value: new Float32Array(NUM_FLOATS_PHONG2)}
 		},
 
 		common: {
@@ -26957,6 +26958,9 @@
 			uniforms.extraVec1.value.copy(material.extraVec1)
 			uniforms.extraVec2.value.copy(material.extraVec2)
 			uniforms.extraVec3.value.copy(material.extraVec3)
+            for (let i = 0; i < NUM_FLOATS_PHONG2; ++i) {
+                uniforms.floats.value[i] = material.floats[i]
+            }
 		}
 
 		function refreshUniformsToon( uniforms, material ) {
@@ -38771,6 +38775,7 @@
 			this.extraVec1 = new Vector4();
 			this.extraVec2 = new Vector4();
 			this.extraVec3 = new Vector4();
+            this.floats = new Float32Array(NUM_FLOATS_PHONG2);
 
 			this.map = null;
 

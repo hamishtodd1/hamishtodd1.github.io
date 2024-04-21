@@ -29,7 +29,6 @@ function init42() {
         }
 
         sandwich(b,target) {
-
             return this.mul(b, tw1Local).mulReverse( this, target )
         }
 
@@ -113,6 +112,49 @@ function init42() {
     }
     window.Tw = Tw
 
+    let B = new Float32Array(6)
+    staExp = (tw, target) => {
+
+        target.zero()
+
+        if(tw.isZero()) {
+            target[0] = 1.
+            return target
+        }
+
+        B[0] = tw[7]
+        B[1] = tw[8]
+        B[2] = tw[11]
+        B[3] = tw[12]
+        B[4] = tw[15]
+        B[5] = tw[18]
+        
+        // B*B = S + T*e1234
+        var S = -B[0] * B[0] - B[1] * B[1] + B[2] * B[2] - B[3] * B[3] + B[4] * B[4] + B[5] * B[5]
+        var T = 2 * (B[0] * B[5] - B[1] * B[4] + B[2] * B[3])
+        // ||B*B||
+        var norm = Math.sqrt(S * S + T * T)
+        // P_+ = xB + y*e1234*B
+        var [x, y] = [0.5 * (1. + S / norm), -0.5 * T / norm];
+        var [lp, lm] = [Math.sqrt(0.5 * S + 0.5 * norm), Math.sqrt(-0.5 * S + 0.5 * norm)]
+        var [cp, sp] = [Math.cosh(lp), lp == 0. ? 1 : Math.sinh(lp) / lp]
+        var [cm, sm] = [Math.cos( lm), lm == 0. ? 1 : Math.sin( lm) / lm]
+        var [cmsp, cpsm] = [cm * sp, cp * sm]
+        var [alpha, beta] = [(cmsp - cpsm) * x + cpsm, (cmsp - cpsm) * y]
+        // Combine the two Euler's formulas together.
+
+        target[ 0] = cp * cm
+        target[ 7] = (B[0] * alpha + B[5] * beta)
+        target[ 8] = (B[1] * alpha - B[4] * beta)
+        target[11] = (B[2] * alpha - B[3] * beta)
+        target[12] = (B[3] * alpha + B[2] * beta)
+        target[15] = (B[4] * alpha + B[1] * beta)
+        target[18] = (B[5] * alpha - B[0] * beta)
+        target[44] = sp * sm * T / 2.
+
+        return target
+    }
+
     Tw.indexGrades = [
         0,
         1,1,1,1,1,1,
@@ -173,12 +215,16 @@ function init42() {
     _epm = _ep.meet(_em, new Tw()) //scaling preserving the origin
     _e1p = _e1.meet(_ep, new Tw())
     _e1m = _e1.meet(_em, new Tw())
+    _e2m = _e2.meet(_em, new Tw())
+    _e3m = _e3.meet(_em, new Tw())
     _etp = _et.meet(_ep, new Tw())
     _etm = _et.meet(_em, new Tw())
     _e1t = _e1.meet(_et, new Tw())
     _e2t = _e2.meet(_et, new Tw())
+    _e3t = _e3.meet(_et, new Tw())
 
     _e123 = _e12.meet(_e3, new Tw())
+    _e12p = _e12.meet(_ep, new Tw())
     _e012 = _e0.meet(_e12, new Tw())
     _e023 = _e0.meet(_e23, new Tw())
     _e013 = _e0.meet(_e13, new Tw())
@@ -187,6 +233,7 @@ function init42() {
     _e0123 = _e01.meet(_e23, new Tw())
 
     oneTw = new Tw().fromFloatAndIndex(1., 0)
+    zeroTw = new Tw()
 
     tw0 = new Tw()
     tw1 = new Tw()
