@@ -20,5 +20,5 @@ var inVr = false
 
 let debugUpdates = []
 
-let limitsLower = new THREE.Vector3().set(-2.2,-1.3, 0.)
-let limitsUpper = new THREE.Vector3().set( 2.2, 1.3, .1)
+let limitsLower = new THREE.Vector3().set(-3.2,-2.2, 0.)
+let limitsUpper = new THREE.Vector3().set( 3.2, 2.2, .1)

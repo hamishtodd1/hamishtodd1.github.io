@@ -28,8 +28,8 @@ function initDebugDisplay() {
 
     let rayDq = new Dq()
     let rayBiv = new Bivec()
-    let renderedObj = _ep.addScaled( _em, -0.7, tw0 ).cast( new Unavec() ) //slightly smaller than unit sphere
-    let basis = basis123
+    let renderedObj = _et.cast(new Unavec())//_ep.addScaled( _em, -0.7, tw0 ).cast( new Unavec() ) //slightly smaller than unit sphere
+    let basis = basis1t2
     let pp = new Trivec()
 
     // log(basis123.dqToBiv)
@@ -37,11 +37,11 @@ function initDebugDisplay() {
     let pretendCamPos = new Fl()
     pretendCamPos.point(1.,1.,-1.,1.)
 
-    update22 = () => {
+    updateDebugDisplay = () => {
 
         geo.attributes.position.needsUpdate = true
 
-        let angle = frameCount * .01
+        // let angle = frameCount * .01
         // _ep.multiplyScalar(Math.cos(angle), tw0).addScaled(_e1, Math.sin(angle), tw1).cast(renderedObj)
 
         for(let i = 0; i < numPixels; ++i) {
@@ -50,14 +50,10 @@ function initDebugDisplay() {
             let pixelWorldPos = fl0.pointFromGibbsVec(pixelWorldPosVec)
             camera.mvs.pos.joinPt(pixelWorldPos, rayDq)
 
-            //debugging
-            // rayDq.copy(e12)
-            // let rayDependingOnCamPos = e12.multiplyScalar(camera.position.x, dq0).addScaled(e23, -camera.position.z, dq0)
-            // let scale = 1. / Math.sqrt(sq(camera.position.x) + sq(camera.position.z))
-            // e31.addScaled(rayDependingOnCamPos, scale, rayDq)
-            // debugPluckers[0].dq.copy(rayDq)
+            rayDq.copy(e13)
+            rayDq.negate()
             
-            // debugger
+            debugger
             basis.dqToBiv( rayDq, rayBiv )
             renderedObj.meet( rayBiv, pp )
             basis.ppToGibbsVecs( pp, v1, v2 )

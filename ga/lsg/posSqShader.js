@@ -1,4 +1,6 @@
 /*
+    Need to make it so you can see e1! And check et and e1+et
+
     Move mouse around, can make 1-vectors
     e1 et ep em
     Make a series of 4
@@ -18,8 +20,8 @@
 
 function initPosSqShader() {
 
-    let mat = new THREE.MeshPhong2Material({transparent: true, opacity: 1./*.55*/})
-    mat.injections = [
+    lsgMat = new THREE.MeshPhong2Material({transparent: true, opacity: 1./*.55*/})
+    lsgMat.injections = [
         {
             type: `vertex`,
             precedes: ``,
@@ -45,31 +47,33 @@ function initPosSqShader() {
 
                 in vec4 vPos;
                 bool validAndInBox(in vec3 v) {
-                    vec3 limitsLower = vec3(floats[0],floats[1],floats[2]);
-                    vec3 limitsUpper = vec3(floats[3],floats[4],floats[5]);
+
                     return v != vec3(999.,999.,999.) &&
-                           all(lessThan(v, limitsUpper )) &&
-                           all(greaterThan(v, limitsLower ));
+                           all(lessThan(v, extraVec2.xyz )) &&
+                           all(greaterThan(v, extraVec1.xyz ));
                 }
 
-                vec3 intersectUnavec(in float[BIV_LEN] ray123, in float[6] renderedObj) {
+                float lengthSq(in vec3 v) {
+                    return dot(v,v);
+                }
+
+                float intersectUnavec(in float[BIV_LEN] rayBiv, in float[6] renderedObj, out vec3 target) {
 
                     float[20] pp;
-                    unaMeetBivec( renderedObj, ray123, pp ); //unavec meets bivec to get trivec
+                    unaMeetBivec( renderedObj, rayBiv, pp ); //unavec meets bivec to get trivec
                     vec3 gibbsVec1, gibbsVec2;
-                    ppToGibbsVecs( pp, gibbsVec1, gibbsVec2 );
+                    float ret = ppToGibbsVecs( pp, gibbsVec1, gibbsVec2 );
 
-                    vec3 betterGibbsVec = vec3(999.,999.,999.);
                     bool valid1 = validAndInBox(gibbsVec1);
                     bool valid2 = validAndInBox(gibbsVec2);
                     vec3 closer = distance(gibbsVec1, cameraPosition) < distance(gibbsVec2,cameraPosition) ? gibbsVec1 : gibbsVec2;
-                    betterGibbsVec =
+                    target =
                         valid1 && valid2  ? closer :
                         valid1 && !valid2 ? gibbsVec1 :
                         !valid1 && valid2 ? gibbsVec2 :
                         vec3(999.,999.,999.);
                     
-                    return betterGibbsVec;
+                    return ret;
                 }
             `
         },
@@ -82,19 +86,41 @@ function initPosSqShader() {
                 
                 float[8] rayDq;
                 joinPt( cameraPosition, vPos, rayDq );
-                float[BIV_LEN] ray123;
-                dqToBiv( rayDq, ray123 );
+                // rayDq[0] = 0.; rayDq[1] = 0.; rayDq[2] = 0.; rayDq[3] = 0.; rayDq[4] = 0.; rayDq[5] = 1.; rayDq[6] = 0.; rayDq[7] = 0.;
+                float[BIV_LEN] rayBiv;
+                dqToBiv( rayDq, rayBiv );
 
-                float[6] renderedObj;
-                renderedObj[0] = extraVec1[0]; renderedObj[1] = extraVec1[1]; renderedObj[2] = extraVec1[2];
-                renderedObj[3] = extraVec1[3]; renderedObj[4] = extraVec2[0]; renderedObj[5] = extraVec2[1];
+                //You were trying to figure out why tf et isn't visible
 
-                vec3 betterGibbsVec = intersectUnavec(ray123, renderedObj);
+                // float[6] renderedObj;
+                // for(int j = 0; j < 6; ++j)
+                //     renderedObj[j] = floats[j];
+                // vec3 betterGibbsVec = intersectUnavec( rayBiv, renderedObj );
+                
+                // if( betterGibbsVec == vec3(0.,0.,0.) )
+                //     diffuseColor = vec4( 1.,0.,0.,1. );
+                // else
+                //     diffuseColor = vec4( 0.,0.,1.,1. );
 
-                vec3 unnormalized = cross(dFdx(betterGibbsVec), dFdy(betterGibbsVec));
+                vec3 bestGibbsVec = vec3(999.,999.,999.);
+                float ret = -1.;
+                for(int i = 0; i < 4; ++i) {
+                    float[6] renderedObj;
+                    for(int j = 0; j < 6; ++j)
+                        renderedObj[j] = floats[i*6+j];
+
+                    vec3 betterGibbsVec;
+                    ret = intersectUnavec(rayBiv, renderedObj, betterGibbsVec);
+                    if( betterGibbsVec != vec3(999.,999.,999.) && 
+                        lengthSq(betterGibbsVec - cameraPosition) < lengthSq(bestGibbsVec-cameraPosition) )
+                        bestGibbsVec = betterGibbsVec;
+                }
+                // diffuseColor = vec4( ret,1.-ret,0.,1. );
+
+                vec3 unnormalized = cross(dFdx(bestGibbsVec), dFdy(bestGibbsVec));
                 normal = normalize(unnormalized);
                 
-                if( betterGibbsVec == vec3(999.,999.,999.) || unnormalized == vec3(0.) )
+                if( bestGibbsVec == vec3(999.,999.,999.) || unnormalized == vec3(0.) )
                     diffuseColor = vec4( 0.,0.,0.,0. );
                 else
                     diffuseColor = vec4( 1.,.5,0., diffuseColor.a );
@@ -104,7 +130,7 @@ function initPosSqShader() {
     ]
     
     //glued to face
-    let mesh = new THREE.Mesh(new THREE.PlaneGeometry(.5,.5), mat)
+    let mesh = new THREE.Mesh(new THREE.PlaneGeometry(.5,.5), lsgMat)
     mesh.position.z = -camera.near * 2.
     scene.add(camera)
     camera.add(mesh)
@@ -116,7 +142,7 @@ function initPosSqShader() {
         //     limitsUpper.x
         // )
 
-        // var mesh = new THREE.Mesh(boxGeo,mat)
+        // var mesh = new THREE.Mesh(boxGeo,lsgMat)
         // scene.add(mesh)
 
         // const wireframeGeo = new THREE.WireframeGeometry(boxGeo);
@@ -140,30 +166,9 @@ function initPosSqShader() {
         // scene.add(eye)
     }
 
-    let renderedObj = new Unavec()
     mesh.onBeforeRender = () => {
 
-        //bog standard conformal transformation around a circle
-        let angle = frameCount * .004
-        _ep.addScaled(_em, -.8, tw1).cast(renderedObj)
-        // tw1.multiplyScalar(Math.cos(angle), tw0).addScaled(_e2, Math.sin(angle), tw1).cast(renderedObj)
-
-        //twistor?
-        // oneTw.addScaled(_e1t, 0., tw0)
-        // tw0.sandwich(_e1, tw1).cast(renderedObj)
-        // _e2.cast(renderedObj)
-        // renderedObj.log()
-
-        //glooping hyperboloids
-        // let t = 0.4//.5 + .5*Math.sin(.001-frameCount*.00001)
-        // tw0.zero()
-        // tw0.addScaled(_ep, 1.-t, tw0)
-        // tw0.addScaled(_em, -t, tw0)
-        // tw0.cast(renderedObj)
-
-        mat.extraVec1.set(renderedObj[0], renderedObj[1], renderedObj[2], renderedObj[3]) //e1
-        mat.extraVec2.set(renderedObj[4], renderedObj[5], 0., 0.)
-        limitsLower.toArray(mat.floats, 0)
-        limitsUpper.toArray(mat.floats, 3)
+        lsgMat.extraVec1.copy(limitsLower)
+        lsgMat.extraVec2.copy(limitsUpper)
     }
 }

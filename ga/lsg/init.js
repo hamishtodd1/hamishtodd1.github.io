@@ -1,6 +1,4 @@
 /*
-    Need a thing at the bottom saying a transformation
-    Need a way to enter what transformation you want
     Need a cow or w/e shown having undergone that transformation
 
 
@@ -47,10 +45,11 @@ async function init() {
     initBasises()
     
     // initDebugDisplay()
-    initPosSqShader()
+    
     // initNegSqShader()
     // initNusExperiment()
-
+    
+    initPosSqShader()
     init32ish22()
 
     window.addEventListener('resize', () => {
@@ -78,7 +77,8 @@ async function init() {
         updateCameraMvs()
         updateHandMvs()
         buttonWhileDowns()
-        // update22()
+        
+        // updateDebugDisplay()
 
         update32ish22()
 

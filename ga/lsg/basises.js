@@ -202,6 +202,7 @@ function initBasises() {
             projectorBiv.innerE0( equidistantUna )
             if(equidistantUna.e0Multiple()) {
                 // projectorBiv lies on e0, eg projectorBiv ^ e0 = 0
+                // if(frameCount === )
 
                 target2.copy(outOfSightVec3)
                 sb0.copy(projectorBiv)    
@@ -248,6 +249,7 @@ float bivInnerSelfScalar(in float[BIV_LEN] biv) {
 }
 
 bool e0Multiple(in float[6] una) {
+    // return una[3] != 0. && abs(una[3] - una[4]) < .01 && una[0] == 0. && una[1] == 0. && una[2] == 0. && una[5] == 0.;
     return una[3] != 0. && una[3] == una[4] && una[0] == 0. && una[1] == 0. && una[2] == 0. && una[5] == 0.;
 }
 
@@ -274,7 +276,7 @@ float projectorBivToGibbsVecs( in float[BIV_LEN] projectorBiv, out vec3 target1,
 
     float ret = 0.;
 
-    bivMultiplyScalar( projectorBiv, 1. / sqrt(bivSq), projectorBiv );
+    bivMultiplyScalar( projectorBiv, -1. / sqrt(bivSq), projectorBiv );
     bivInnerE0(  projectorBiv, equidistantUna );
     if(e0Multiple(equidistantUna)) {
         // projectorBiv lies on e0, eg projectorBiv ^ e0 = 0
@@ -294,7 +296,7 @@ float projectorBivToGibbsVecs( in float[BIV_LEN] projectorBiv, out vec3 target1,
         unaMeetE0(nullUna, sb0);
     }
 
-    target1 = scalorBivToGibbsVec(sb0 );
+    target1 = scalorBivToGibbsVec( sb0 );
 
     return ret;
 }
