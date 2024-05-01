@@ -52,6 +52,7 @@ function initDebugDisplay() {
 
     //It's definitely inner-with pt-at-inf, not scalorbivs, because you WANT to use your e123/e12t part of your basis
     
+    //just here because git
 
     updateDebugDisplay = () => {
 
