@@ -42,15 +42,11 @@ async function init() {
     init42()
     initPluckerVizes()
     
-    initBasises()
     
-    // initDebugDisplay()
+    initDebugDisplay()
     
-    // initNegSqShader()
-    // initNusExperiment()
-    
-    initPosSqShader()
-    init32ish22()
+    // initBasises()
+    // initPosSqShader()
 
     window.addEventListener('resize', () => {
 
@@ -78,9 +74,7 @@ async function init() {
         updateHandMvs()
         buttonWhileDowns()
         
-        // updateDebugDisplay()
-
-        update32ish22()
+        updateDebugDisplay()
 
         debugUpdates.forEach(func=>func())
 

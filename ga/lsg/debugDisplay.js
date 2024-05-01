@@ -37,6 +37,22 @@ function initDebugDisplay() {
     let pretendCamPos = new Fl()
     pretendCamPos.point(1.,1.,-1.,1.)
 
+    let basis1VecsTws = [
+        _e1,
+        _e2,
+        _e3,
+    ]
+    function mrh(gibbsVec) {
+        target.zero()
+        target.addScaled(basis1VecsTws[0], gibbsVec.x, target)
+        target.addScaled(basis1VecsTws[1], gibbsVec.y, target)
+        target.addScaled(basis1VecsTws[2], gibbsVec.z, target)
+        return target
+    }
+
+    //It's definitely inner-with pt-at-inf, not scalorbivs, because you WANT to use your e123/e12t part of your basis
+    
+
     updateDebugDisplay = () => {
 
         geo.attributes.position.needsUpdate = true
@@ -48,13 +64,21 @@ function initDebugDisplay() {
 
             let pixelWorldPosVec = pointsObj3d.localToWorld(v1.fromArray(startCoords, i * 3)) 
             let pixelWorldPos = fl0.pointFromGibbsVec(pixelWorldPosVec)
-            camera.mvs.pos.joinPt(pixelWorldPos, rayDq)
+            // camera.mvs.pos.joinPt(pixelWorldPos, rayDq)
 
-            rayDq.copy(e13)
-            rayDq.negate()
+            v3.subVectors(pixelWorldPosVec, camera.position)
+            let rayDirectionPlane = mrh(v3, tw0)
+            rayDirectionPlane.inner()
+
+
+            // rayDq.copy(e13)
+            // rayDq.negate()
             
+            // basis.dqToBiv( rayDq, rayBiv )
             debugger
-            basis.dqToBiv( rayDq, rayBiv )
+
+
+
             renderedObj.meet( rayBiv, pp )
             basis.ppToGibbsVecs( pp, v1, v2 )
 
