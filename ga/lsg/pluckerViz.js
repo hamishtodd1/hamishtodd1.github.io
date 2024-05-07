@@ -69,7 +69,7 @@ function initPluckerVizes() {
                         translationPart.selectGrade(2, dq0)
                         let fakeLineAtInfinity = dq0.fakeThingAtInfinity(dq1)
                         // e31.dqTo(fakeLineAtInfinity, this.trnAxisMesh.dq)
-                        camera.mvs.pos.projectOn(fakeLineAtInfinity, fl0).pointToGibbsVec(this.trnAxisMesh.position)
+                        camera.mvs.pos.projectOn(fakeLineAtInfinity, fl0).pointToVec3(this.trnAxisMesh.position)
                         let fakeAtOrigin = fakeLineAtInfinity.projectOn(e123, dq0)
                         e31.dqTo(fakeAtOrigin, dq2).toQuaternion(this.trnAxisMesh.quaternion)
                         

@@ -52,7 +52,7 @@ vec4 sandwichDqPoint(in float[8] a, in vec4 b) {
     sandwichDqFl(a, asFl, asFl);
     return flToPoint(asFl);
 }
-vec3 sandwichDqGibbsVec(in float[8] a, in vec3 b) {
+vec3 sandwichDqVec3(in float[8] a, in vec3 b) {
     vec4 ret4 = sandwichDqPoint(a, vec4(b,1.));
     return ret4.xyz / ret4.w;
 }

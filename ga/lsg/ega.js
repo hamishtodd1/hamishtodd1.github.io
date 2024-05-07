@@ -73,7 +73,7 @@ function initEgaWithoutDeclarations() {
             return this
         }
 
-        pointFromGibbsVec(v) {
+        pointFromVec3(v) {
 
             this.point(v.x, v.y, v.z, 1.)
             return this
@@ -85,7 +85,7 @@ function initEgaWithoutDeclarations() {
             return this
         }
 
-        pointToGibbsVec(target) {
+        pointToVec3(target) {
 
             if (target === undefined)
                 target = new THREE.Vector3()
@@ -101,7 +101,7 @@ function initEgaWithoutDeclarations() {
             return target
         }
 
-        directionToGibbsVec(target) {
+        directionToVec3(target) {
 
             if (target === undefined)
                 target = new THREE.Vector3()
@@ -166,7 +166,7 @@ function initEgaWithoutDeclarations() {
             let ret = 0.
             for (let i = 0; i < numSamples; ++i) {
                 let part = this.pow(i / (numSamples - 1), newDq)
-                part.sandwichFl(startPt, newFl).pointToGibbsVec(v1)
+                part.sandwichFl(startPt, newFl).pointToVec3(v1)
 
                 if (i > 0)
                     ret += v1.distanceTo(v2)

@@ -60,7 +60,7 @@ async function initHands() {
                 raycaster.setFromCamera(mouse2d, camera)
 
                 //would prefer to do this ourselves, using camera GA
-                mouseOrigin.pointFromGibbsVec(raycaster.ray.origin)
+                mouseOrigin.pointFromVec3(raycaster.ray.origin)
                 mouseDirection.pointFromNormal(raycaster.ray.direction)
                 mouseOrigin.joinPt(mouseDirection, rayToMouse)
             }

@@ -231,6 +231,7 @@ function init42() {
     _e031 = _e0.meet(_e31, new Tw())
 
     _e0123 = _e01.meet(_e23, new Tw())
+    _eo = _ep.sub(_em, new Tw())
 
     oneTw = new Tw().fromFloatAndIndex(1., 0)
     zeroTw = new Tw()
@@ -253,6 +254,14 @@ function init42() {
     uv4 = new Unavec()
     uv5 = new Unavec()
     uv6 = new Unavec()
+
+    bv0 = new Bivec()
+    bv1 = new Bivec()
+    bv2 = new Bivec()
+
+    tv0 = new Trivec()
+    tv1 = new Trivec()
+    tv2 = new Trivec()
 
     function setBasisNames(Constructor) {
         Constructor.basisNames = Array(Constructor.indexGrades.length)

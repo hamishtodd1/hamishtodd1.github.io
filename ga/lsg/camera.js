@@ -41,7 +41,7 @@ function initCamera() {
     frameQuatVertical.sandwich(  e2, frustumUntransformed.top )
 
     updateCameraMvs = () => {
-        camera.mvs.pos.pointFromGibbsVec(   camera.position )
+        camera.mvs.pos.pointFromVec3(   camera.position )
         camera.mvs.quat.fromQuaternion( camera.quaternion )
         camera.mvs.dq.fromPosQuat(   camera.position, camera.quaternion )
 

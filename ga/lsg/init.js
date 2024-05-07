@@ -1,4 +1,10 @@
 /*
+    Should say:
+        what the current versor is
+        whether it is hyperbolic/elliptic/euclidean/parabolic
+        What the current basis is
+
+
     Need a cow or w/e shown having undergone that transformation
 
 
@@ -64,6 +70,9 @@ async function init() {
     container.appendChild(renderer.domElement)
 
     document.body.appendChild(VRButton.createButton(renderer))    
+
+    camera.position.set(0.,0.,4.)
+    camera.lookAt(0.,0.,0.)
 
     function render() {
         let clockDelta = clock.getDelta()

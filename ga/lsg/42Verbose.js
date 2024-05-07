@@ -334,6 +334,34 @@ class Trivec extends GeneralVector {
         super(20)
     }
 
+    innerSelfScalar() {
+        return this[11]*this[11]+this[12]*this[12]+this[13]*this[13]+this[14]*this[14]+this[16]*this[16]+this[17]*this[17]+this[2]*this[2]+this[3]*this[3]+this[5]*this[5]+this[6]*this[6]+this[7]*this[7]+this[8]*this[8]-this[0]*this[0]-this[10]*this[10]-this[15]*this[15]-this[18]*this[18]-this[19]*this[19]-this[1]*this[1]-this[4]*this[4]-this[9]*this[9];
+    }
+
+    getReverse(target) {
+        target[0] = -this[0];
+        target[1] = -this[1];
+        target[2] = -this[2];
+        target[3] = -this[3];
+        target[4] = -this[4];
+        target[5] = -this[5];
+        target[6] = -this[6];
+        target[7] = -this[7];
+        target[8] = -this[8];
+        target[9] = -this[9];
+        target[10] = -this[10];
+        target[11] = -this[11];
+        target[12] = -this[12];
+        target[13] = -this[13];
+        target[14] = -this[14];
+        target[15] = -this[15];
+        target[16] = -this[16];
+        target[17] = -this[17];
+        target[18] = -this[18];
+        target[19] = -this[19];
+        return target;
+    }
+
     inner(b, target) {
         if (b.constructor === Pentavec && target.constructor === Bivec) {
             target[ 0] = this[16] * b[ 0] + this[17] * b[ 1] - this[18] * b[ 2] - this[19] * b[ 3];
@@ -351,6 +379,31 @@ class Trivec extends GeneralVector {
             target[12] = this[12] * b[ 5] + this[ 3] * b[ 3] + this[ 6] * b[ 4] - this[ 0] * b[ 0];
             target[13] = -this[ 0] * b[ 1] - this[11] * b[ 5] - this[ 2] * b[ 3] - this[ 5] * b[ 4];
             target[14] = -this[ 0] * b[ 2] - this[10] * b[ 5] - this[ 1] * b[ 3] - this[ 4] * b[ 4];
+        }
+        else if(b.constructor === Bivec && target.constructor === Pentavec) {
+            target[0] = this[0] * b[12] + this[11] * b[2] + this[16] * b[0] + this[2] * b[9] + this[4] * b[7] + this[7] * b[5] - this[10] * b[3] - this[13] * b[1] - this[1] * b[10] - this[5] * b[6];
+            target[1] = this[0] * b[13] + this[12] * b[2] + this[17] * b[0] + this[3] * b[9] + this[4] * b[8] + this[8] * b[5] - this[10] * b[4] - this[14] * b[1] - this[1] * b[11] - this[6] * b[6];
+            target[2] = this[0] * b[14] + this[12] * b[3] + this[18] * b[0] + this[3] * b[10] + this[5] * b[8] + this[9] * b[5] - this[11] * b[4] - this[15] * b[1] - this[2] * b[11] - this[6] * b[7];
+            target[3] = this[14] * b[3] + this[19] * b[0] + this[1] * b[14] + this[3] * b[12] + this[7] * b[8] + this[9] * b[6] - this[13] * b[4] - this[15] * b[2] - this[2] * b[13] - this[8] * b[7];
+            target[4] = this[17] * b[3] + this[19] * b[1] + this[4] * b[14] + this[6] * b[12] + this[7] * b[11] + this[9] * b[9] - this[16] * b[4] - this[18] * b[2] - this[5] * b[13] - this[8] * b[10];
+            target[5] = this[10] * b[14] + this[12] * b[12] + this[13] * b[11] + this[15] * b[9] + this[17] * b[7] + this[19] * b[5] - this[11] * b[13] - this[14] * b[10] - this[16] * b[8] - this[18] * b[6];
+        }
+        else if(b.constructor === Unavec && target.constructor === Quadvec) {
+            target[0] = this[0] * b[3] + this[4] * b[1] - this[10] * b[0] - this[1] * b[2];
+            target[1] = this[0] * b[4] + this[5] * b[1] - this[11] * b[0] - this[2] * b[2];
+            target[2] = this[0] * b[5] + this[6] * b[1] - this[12] * b[0] - this[3] * b[2];
+            target[3] = this[1] * b[4] + this[7] * b[1] - this[13] * b[0] - this[2] * b[3];
+            target[4] = this[1] * b[5] + this[8] * b[1] - this[14] * b[0] - this[3] * b[3];
+            target[5] = this[2] * b[5] + this[9] * b[1] - this[15] * b[0] - this[3] * b[4];
+            target[6] = this[4] * b[4] + this[7] * b[2] - this[16] * b[0] - this[5] * b[3];
+            target[7] = this[4] * b[5] + this[8] * b[2] - this[17] * b[0] - this[6] * b[3];
+            target[8] = this[5] * b[5] + this[9] * b[2] - this[18] * b[0] - this[6] * b[4];
+            target[9] = this[7] * b[5] + this[9] * b[3] - this[19] * b[0] - this[8] * b[4];
+            target[10] = this[10] * b[4] + this[13] * b[2] - this[11] * b[3] - this[16] * b[1];
+            target[11] = this[10] * b[5] + this[14] * b[2] - this[12] * b[3] - this[17] * b[1];
+            target[12] = this[11] * b[5] + this[15] * b[2] - this[12] * b[4] - this[18] * b[1];
+            target[13] = this[13] * b[5] + this[15] * b[3] - this[14] * b[4] - this[19] * b[1];
+            target[14] = this[16] * b[5] + this[18] * b[3] - this[17] * b[4] - this[19] * b[2];
         }
         else
             console.error("not implemented")

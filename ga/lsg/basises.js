@@ -136,11 +136,11 @@ function initBasises() {
 
                 this.prefix += defaultBasisPrefix
 
-                let extra2 = `\nfloat ppToGibbsVecs( in float[20] pp, out vec3 target1, out vec3 target2 ) {`+
+                let extra2 = `\nfloat ppToVec3s( in float[20] pp, out vec3 target1, out vec3 target2 ) {`+
                     `\n    float projectorBiv[BIV_LEN];`+
                     vecToGlslStr(`pss`, this.pss) +
                     `\n    triInnerPent( pp, pss, projectorBiv );`+
-                    `\n    float ret = projectorBivToGibbsVecs( projectorBiv, target1, target2 );`+
+                    `\n    float ret = projectorBivToVec3s( projectorBiv, target1, target2 );`+
                     `\n    return ret;` +
                 `\n}\n`
                 this.prefix += extra2
@@ -149,7 +149,7 @@ function initBasises() {
 
                 }
 
-                // `void gibbsVecToPp( in vec3 v, out float[20] pp) {
+                // `void vec3ToPp( in vec3 v, out float[20] pp) {
                 //     //well it's e123 + x*e012 + y*e023 + z*e012 or whatever
                 // }`
 
@@ -157,7 +157,7 @@ function initBasises() {
             }
         }
 
-        gibbsVecToZrs(v,target) {
+        vec3ToZrs(v,target) {
 
             _ep.sub(_em, tw0)
 
@@ -173,22 +173,22 @@ function initBasises() {
             // return targetFl
         }
 
-        scalorBivToGibbsVec(scalorBiv, gibbsVec) {
+        scalorBivToVec3(scalorBiv, vec3) {
             this.scalorBivToFlatPoint(scalorBiv, projectivePointFl)
-            return projectivePointFl.pointToGibbsVec(gibbsVec)
+            return projectivePointFl.pointToVec3(vec3)
         }
 
-        ppToGibbsVecs( pp, target1, target2 ) {
+        ppToVec3s( pp, target1, target2 ) {
             if(pp.constructor === Tw) {
                 debugger
                 //Gotta cast first!
             }
             //geometric interpretation: we go from a n-reflection to scalor that preserves the n-reflection axis
             pp.inner( this.pss, projectorBiv )        // n-2-vec | n-vec = 2-vec eg in 3D CGA, 3-vec | 5-vec
-            this.projectorBivToGibbsVecs( projectorBiv, target1, target2 )
+            this.projectorBivToVec3s( projectorBiv, target1, target2 )
         }
 
-        projectorBivToGibbsVecs(projectorBiv, target1, target2 ) {
+        projectorBivToVec3s(projectorBiv, target1, target2 ) {
 
             let bivSq = projectorBiv.innerSelfScalar()
             if (0. >= bivSq) {
@@ -210,11 +210,11 @@ function initBasises() {
             else {
                 projectorBiv.inner( equidistantUna, bv )
                 equidistantUna.add( bv, nullUna ).meetE0(sb0)
-                this.scalorBivToGibbsVec(sb0, target2 )
+                this.scalorBivToVec3(sb0, target2 )
                 equidistantUna.sub( bv, nullUna ).meetE0(sb0)
             }
 
-            this.scalorBivToGibbsVec(sb0, target1 )
+            this.scalorBivToVec3(sb0, target1 )
 
             // if (Math.abs(1. - projectorBiv.innerSelfScalar()) > .1) {
             //     console.error("projectorBiv norm is: " + projectorBiv.innerSelfScalar())
@@ -253,13 +253,13 @@ bool e0Multiple(in float[6] una) {
     return una[3] != 0. && una[3] == una[4] && una[0] == 0. && una[1] == 0. && una[2] == 0. && una[5] == 0.;
 }
 
-vec3 scalorBivToGibbsVec( in float[BIV_LEN] scalorBiv ) {
+vec3 scalorBivToVec3( in float[BIV_LEN] scalorBiv ) {
     vec4 ret4;
     scalorBivToFlatPoint( scalorBiv, ret4 );
     return ret4.xyz / ret4.w;
 }
 
-float projectorBivToGibbsVecs( in float[BIV_LEN] projectorBiv, out vec3 target1, out vec3 target2 ) {
+float projectorBivToVec3s( in float[BIV_LEN] projectorBiv, out vec3 target1, out vec3 target2 ) {
 
     float[6] equidistantUna;
     float[6] nullUna;
@@ -291,12 +291,12 @@ float projectorBivToGibbsVecs( in float[BIV_LEN] projectorBiv, out vec3 target1,
         bivInnerUna(projectorBiv, equidistantUna, bv);
         addUnas(equidistantUna, bv, nullUna);
         unaMeetE0(nullUna, sb0);
-        target2 = scalorBivToGibbsVec(sb0 );
+        target2 = scalorBivToVec3(sb0 );
         subUnas(equidistantUna, bv, nullUna);
         unaMeetE0(nullUna, sb0);
     }
 
-    target1 = scalorBivToGibbsVec( sb0 );
+    target1 = scalorBivToVec3( sb0 );
 
     return ret;
 }
@@ -324,14 +324,14 @@ float projectorBivToGibbsVecs( in float[BIV_LEN] projectorBiv, out vec3 target1,
     // fl0.log()
     // log(fl0)
 
-    // let meetPoint = fl0.pointFromGibbsVec(v1.set(0.,0.,-1.))
+    // let meetPoint = fl0.pointFromVec3(v1.set(0.,0.,-1.))
     // basis123.pointFlToTriv(meetPoint, tw0)
     // let tri = tw0.cast(new Trivec())
-    // basis123.ppToGibbsVecs(tri, v2, v3)
+    // basis123.ppToVec3s(tri, v2, v3)
     // log(v1, v2, v3)
     
     // dq0[0] = 0.
-    // projectorBivToGibbsVecs()
+    // projectorBivToVec3s()
     // dq0.cast()
     // basis123.dqToBiv( dq0, tw0 )
     // tw0

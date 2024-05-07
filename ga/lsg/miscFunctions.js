@@ -33,8 +33,8 @@ class LineSegment extends THREE.Line {
 	}
 
 	set(p1, p2) {
-		p1.pointToGibbsVec(v1)
-		p2.pointToGibbsVec(v2)
+		p1.pointToVec3(v1)
+		p2.pointToVec3(v2)
 		v1.toArray(this.geometry.attributes.position.array, 0)
 		v2.toArray(this.geometry.attributes.position.array, 3)
 

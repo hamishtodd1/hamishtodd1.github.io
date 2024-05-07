@@ -61,16 +61,16 @@ function initPosSqShader() {
 
                     float[20] pp;
                     unaMeetBivec( renderedObj, rayBiv, pp ); //unavec meets bivec to get trivec
-                    vec3 gibbsVec1, gibbsVec2;
-                    float ret = ppToGibbsVecs( pp, gibbsVec1, gibbsVec2 );
+                    vec3 vec31, vec32;
+                    float ret = ppToVec3s( pp, vec31, vec32 );
 
-                    bool valid1 = validAndInBox(gibbsVec1);
-                    bool valid2 = validAndInBox(gibbsVec2);
-                    vec3 closer = distance(gibbsVec1, cameraPosition) < distance(gibbsVec2,cameraPosition) ? gibbsVec1 : gibbsVec2;
+                    bool valid1 = validAndInBox(vec31);
+                    bool valid2 = validAndInBox(vec32);
+                    vec3 closer = distance(vec31, cameraPosition) < distance(vec32,cameraPosition) ? vec31 : vec32;
                     target =
                         valid1 && valid2  ? closer :
-                        valid1 && !valid2 ? gibbsVec1 :
-                        !valid1 && valid2 ? gibbsVec2 :
+                        valid1 && !valid2 ? vec31 :
+                        !valid1 && valid2 ? vec32 :
                         vec3(999.,999.,999.);
                     
                     return ret;
@@ -95,32 +95,32 @@ function initPosSqShader() {
                 // float[6] renderedObj;
                 // for(int j = 0; j < 6; ++j)
                 //     renderedObj[j] = floats[j];
-                // vec3 betterGibbsVec = intersectUnavec( rayBiv, renderedObj );
+                // vec3 betterVec3 = intersectUnavec( rayBiv, renderedObj );
                 
-                // if( betterGibbsVec == vec3(0.,0.,0.) )
+                // if( betterVec3 == vec3(0.,0.,0.) )
                 //     diffuseColor = vec4( 1.,0.,0.,1. );
                 // else
                 //     diffuseColor = vec4( 0.,0.,1.,1. );
 
-                vec3 bestGibbsVec = vec3(999.,999.,999.);
+                vec3 bestVec3 = vec3(999.,999.,999.);
                 float ret = -1.;
                 for(int i = 0; i < 4; ++i) {
                     float[6] renderedObj;
                     for(int j = 0; j < 6; ++j)
                         renderedObj[j] = floats[i*6+j];
 
-                    vec3 betterGibbsVec;
-                    ret = intersectUnavec(rayBiv, renderedObj, betterGibbsVec);
-                    if( betterGibbsVec != vec3(999.,999.,999.) && 
-                        lengthSq(betterGibbsVec - cameraPosition) < lengthSq(bestGibbsVec-cameraPosition) )
-                        bestGibbsVec = betterGibbsVec;
+                    vec3 betterVec3;
+                    ret = intersectUnavec(rayBiv, renderedObj, betterVec3);
+                    if( betterVec3 != vec3(999.,999.,999.) && 
+                        lengthSq(betterVec3 - cameraPosition) < lengthSq(bestVec3-cameraPosition) )
+                        bestVec3 = betterVec3;
                 }
                 // diffuseColor = vec4( ret,1.-ret,0.,1. );
 
-                vec3 unnormalized = cross(dFdx(bestGibbsVec), dFdy(bestGibbsVec));
+                vec3 unnormalized = cross(dFdx(bestVec3), dFdy(bestVec3));
                 normal = normalize(unnormalized);
                 
-                if( bestGibbsVec == vec3(999.,999.,999.) || unnormalized == vec3(0.) )
+                if( bestVec3 == vec3(999.,999.,999.) || unnormalized == vec3(0.) )
                     diffuseColor = vec4( 0.,0.,0.,0. );
                 else
                     diffuseColor = vec4( 1.,.5,0., diffuseColor.a );
