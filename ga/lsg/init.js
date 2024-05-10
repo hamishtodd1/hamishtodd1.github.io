@@ -4,6 +4,10 @@
         whether it is hyperbolic/elliptic/euclidean/parabolic
         What the current basis is
 
+    Pre-program the versors for the music
+    In one hand: the thing. It gets transformed using your hand transform, no biggie
+    In other hand: Spray can. Colours change on a loop. Old points get removed, new points get added
+
 
     Need a cow or w/e shown having undergone that transformation
 
@@ -48,11 +52,10 @@ async function init() {
     init42()
     initPluckerVizes()
     
-    
     initDebugDisplay()
     
     // initBasises()
-    // initPosSqShader()
+    initPosSqShader()
 
     window.addEventListener('resize', () => {
 
@@ -71,8 +74,8 @@ async function init() {
 
     document.body.appendChild(VRButton.createButton(renderer))    
 
-    camera.position.set(0.,0.,4.)
-    camera.lookAt(0.,0.,0.)
+    // camera.position.set(0.,0.,4.)
+    // camera.lookAt(0.,0.,0.)
 
     function render() {
         let clockDelta = clock.getDelta()
@@ -83,7 +86,7 @@ async function init() {
         updateHandMvs()
         buttonWhileDowns()
         
-        updateDebugDisplay()
+        updateDisplay()
 
         debugUpdates.forEach(func=>func())
 

@@ -22,8 +22,6 @@ function initDebugDisplay() {
     geo.setAttribute('position', new THREE.Float32BufferAttribute( startCoords, 3 ))
     const mat = new THREE.PointsMaterial({ color: 0xFF0000, size: .1 })
     let pointsObj3d = new THREE.Points(geo, mat)
-    camera.add(pointsObj3d)
-    scene.add(camera)
     let coords = geo.attributes.position.array
 
     let pretendCamPos = new Fl()
@@ -36,10 +34,8 @@ function initDebugDisplay() {
     let basisDops = [
         new Trivec(), new Trivec(), new Trivec()
     ]
-    let NUM_TRIVEC_COEFS = tv0.length
-    //make sure these are normalized
-    function vec3ToDop(vec3, dop) {
-        for (let i = 0; i < NUM_TRIVEC_COEFS; ++i) {
+    vec3ToDop = (vec3, dop) => {
+        for (let i = 0; i < TRI_LEN; ++i) {
             dop[i] = 
                 vec3.x * basisDops[0][i] +
                 vec3.y * basisDops[1][i] +
@@ -47,11 +43,9 @@ function initDebugDisplay() {
         }
         return dop
     }
-    function dopToVec3(dop, vec3) {
+    dopToVec3 = (dop, vec3) => {
         vec3.set(0.,0.,0.)
-        //not entirely sure about this
-        for (let i = 0; i < NUM_TRIVEC_COEFS; ++i) {
-            //posssssibly *.5 is the wrong sort of thing here
+        for (let i = 0; i < TRI_LEN; ++i) {
             vec3.x += dop[i] * basisDops[0][i] * .5
             vec3.y += dop[i] * basisDops[1][i] * .5
             vec3.z += dop[i] * basisDops[2][i] * .5
@@ -59,37 +53,52 @@ function initDebugDisplay() {
         return vec3
     }
 
+    //constant
     let epm = _epm.cast(new Bivec())
-    let originPp = new Trivec()
-    let pss = new Pentavec()
-    let truePtAtInf = new Quadvec()
-
     let _eo = new Tw()
     _ep.sub(_em, _eo)
     let e0Una = new Unavec()
     _e0.cast(e0Una)
     
-    let cameraPosZrs = new Unavec()
+    //fed in
     let renderedUna = new Unavec()
-    let cameraRayDirDop = new Trivec()
+    let originPp = new Trivec()
+    let pss = new Pentavec()
+    let truePtAtInf = new Quadvec()
+    let cameraPosZrs = new Unavec()
+    
     let cameraRayDirVec3 = new THREE.Vector3()
+    let cameraRayDirDop = new Trivec()
     let cameraRayBiv = new Bivec()
     
+    let pp = new Trivec()
     let projectorBiv = new Bivec()
-    let zrs = new Unavec()
+    let zrSphere = new Unavec()
     let tangentPlane = new Unavec()
+    let zrCircle = new Bivec()
     let dop0 = new Trivec()
     let unnormalizedPos = new Trivec()
-    let posVec3s = [new THREE.Vector3(), new THREE.Vector3()]
+    let posVec3 = new THREE.Vector3()
+    let bireflection = new Bireflection()
+    bireflection.log()
     //and normals but whatever
 
-    updateDebugDisplay = () => {
+    let equidistantUna = new Unavec();
+    let visibles = [true,true];
+    let diffs = [new THREE.Vector3(), new THREE.Vector3()]
 
-        geo.attributes.position.needsUpdate = true
+    let cgaBasis = [
+        _e1.cast(new Unavec),
+        _e2.cast(new Unavec),
+        _e3.cast(new Unavec),
+    ]
 
-        // let angle = frameCount * .01
-        //.multiplyScalar(Math.cos(angle), tw0).addScaled(_e1, Math.sin(angle), tw1).cast(renderedObj)
-        _ep.cast(renderedUna)
+    function updateVarious() {
+        
+        _e3.cast(renderedUna)
+        // let angle = frameCount * .003
+        // let transform = oneTw.multiplyScalar(Math.cos(angle), tw0).addScaled(_e1p, Math.sin(angle), tw1)
+        // transform.sandwich(_ep, tw0).cast(renderedUna)
 
         _e1.cast(basis1VecsUnas[0])
         _e2.cast(basis1VecsUnas[1])
@@ -98,10 +107,10 @@ function initDebugDisplay() {
         originPp.inner(epm, pss)
         originPp.inner(e0Una, truePtAtInf)
 
-        for(let i = 0; i < 3; ++i)
-            basis1VecsUnas[i].inner(truePtAtInf, basisDops[i] )
+        for (let i = 0; i < 3; ++i)
+            basis1VecsUnas[i].inner(truePtAtInf, basisDops[i])
 
-        vec3ToDop( camera.position, tv0 ).cast(tw1)
+        vec3ToDop(camera.position, tv0).cast(tw1)
         // tv0.multiplyScalar(.5,tv0).sub(originPp, tv1)
         // tv0.mulReverse(originPp, tv2)
 
@@ -109,53 +118,128 @@ function initDebugDisplay() {
         tw1.multiplyScalar(.5, tw1).add(tw0, tw2)
         cameraPosTranslation = tw2.mulReverse(tw0, tw3)
         cameraPosTranslation.sandwich(_eo, tw4).cast(cameraPosZrs)
+    }
+
+    function updateDebugDisplay() {
+
+        geo.attributes.position.needsUpdate = true
+
+        updateVarious()
 
         for(let i = 0; i < numPixels; ++i) {
 
             let pixelWorldPosVec = pointsObj3d.localToWorld(v1.fromArray(startCoords, i * 3))
             cameraRayDirVec3.subVectors(pixelWorldPosVec, camera.position)
             // cameraRayDirVec3.set(0.,0.,-1.)
+
+            // debugger
             
-            vec3ToDop(cameraRayDirVec3, cameraRayDirDop )
+            vec3ToDop( cameraRayDirVec3, cameraRayDirDop )
             cameraPosZrs.inner(cameraRayDirDop, cameraRayBiv)
             
-            cameraRayBiv.meet(renderedUna, tv0).inner(pss, projectorBiv)
+            cameraRayBiv.meet(renderedUna, pp)
+            pp.inner(pss, projectorBiv)
             let bivSq = projectorBiv.innerSelfScalar()
-            projectorBiv.multiplyScalar(1. / Math.sqrt(bivSq), projectorBiv)
             
-            for(let i = 0; i < 2; ++i) {
-                if(i)
-                    projectorBiv.multiplyScalar(-1., projectorBiv)
-            
-                cameraPosZrs.inner(projectorBiv, zrs)
-                zrs.add(cameraPosZrs, zrs)
+            projectorBiv.multiplyScalar(.5 / Math.sqrt(bivSq), projectorBiv)
 
-                zrs.meet(renderedUna, bv0).innerE0(tangentPlane)
+            // pp.inner(truePtAtInf, equidistantUna)
+
+            // if(frameCount === 1 && i%20 === 0)
+            //     log(cameraRayDirVec3,cameraRayBiv)
+
+            bireflection[0] = .5
+            for(let i = 0; i < 2; ++i) {
+
+                for(let j = 0; j < BIV_LEN; ++j)
+                    bireflection[j + 1] = i == 1 ? projectorBiv[j] : -projectorBiv[j];
+                bireflection.sandwich(cameraPosZrs, zrSphere)
+
+                // debugger
+                // projectorBiv.inner( equidistantUna, zrSphere)
+                // for (let j = 0; j < UNA_LEN; ++j)
+                //     zrSphere[j] = equidistantUna[j] + zrSphere[j]
+
+                zrSphere.meet(renderedUna, zrCircle)
+                zrCircle.innerE0(tangentPlane)
 
                 tangentPlane.meet(cameraRayBiv, unnormalizedPos)
                 let upSq = unnormalizedPos.innerSelfScalar()
                 unnormalizedPos.multiplyScalar( 1. / Math.sqrt(Math.abs(upSq)), tv0).sub(originPp, dop0)
-                dopToVec3(dop0, posVec3s[i])
+                dopToVec3(dop0, posVec3)
 
                 //normal part
                 // tangentPlane.inner(quadvecAtInfinity, dop0)
                 // dopToVec3(dop0, normal)
+
+                let eps = .001;
+                let isE0Multiple = zrSphere[3] != 0. && (zrSphere[3] - zrSphere[4]) < eps && Math.abs(zrSphere[0]) < eps && Math.abs(zrSphere[1]) < eps && Math.abs(zrSphere[2]) < eps && Math.abs(zrSphere[5]) < eps;
+
+                diffs[i].subVectors( posVec3, camera.position )
+                visibles[i] = diffs[i].dot(cameraRayDirVec3) > 0. && !isE0Multiple;
             }
 
-            let posDop0 = v1.subVectors(posVec3s[0], camera.position)
-            let posDop1 = v2.subVectors(posVec3s[1], camera.position)
-            let inFront0 = cameraRayDirVec3.dot(posDop0) > 0.
-            let inFront1 = cameraRayDirVec3.dot(posDop1) > 0.
-            let oneToUse = 
-                inFront0 && inFront1 ? 
-                    (posDop0.lengthSq() < posDop1.lengthSq() ? posVec3s[0] : posVec3s[1]) :
-                inFront0 ? posVec3s[0] :
-                inFront1 ? posVec3s[1] :
-                outOfSightVec3
-            if(bivSq <= 0.)
+            let oneToUse =
+                visibles[0] && !visibles[1] ? diffs[0] :
+                visibles[1] && !visibles[0] ? diffs[1] :
+                diffs[0].dot(diffs[0]) < diffs[1].dot(diffs[1]) ? diffs[0] : diffs[1]
+            oneToUse.add(camera.position)
+
+            if ((visibles[0] && visibles[1]) )
+                log("yo")
+
+            if ((!visibles[0] && !visibles[1]) || bivSq <= 0.)
                 oneToUse = outOfSightVec3
 
             pointsObj3d.worldToLocal(oneToUse).toArray( coords, i*3 )
         }
+    }
+
+    function updateLsgMat() {
+
+        updateVarious()
+
+        let start = 0
+        for (let i = 0; i < UNA_LEN; ++i)
+            lsgMat.floats[i] = renderedUna[i]
+        start += UNA_LEN
+        for (let i = 0; i < TRI_LEN; ++i)
+            lsgMat.floats[start + i] = originPp[i]
+        start += TRI_LEN
+        for (let i = 0; i < PENT_LEN; ++i)
+            lsgMat.floats[start + i] = pss[i]
+        start += PENT_LEN
+        for (let i = 0; i < QUAD_LEN; ++i)
+            lsgMat.floats[start + i] = truePtAtInf[i]
+        start += QUAD_LEN
+        for (let i = 0; i < UNA_LEN; ++i)
+            lsgMat.floats[start + i] = cameraPosZrs[i]
+        start += UNA_LEN
+        for (let i = 0; i < TRI_LEN; ++i)
+            lsgMat.floats[start + i] = basisDops[0][i]
+        start += TRI_LEN
+        for (let i = 0; i < TRI_LEN; ++i)
+            lsgMat.floats[start + i] = basisDops[1][i]
+        start += TRI_LEN
+        for (let i = 0; i < TRI_LEN; ++i)
+            lsgMat.floats[start + i] = basisDops[2][i]
+        start += TRI_LEN
+
+        if(frameCount === 1)
+            truePtAtInf.log()
+
+        lsgMat.extraVec1.copy(limitsLower)
+        lsgMat.extraVec2.copy(limitsUpper)
+    }
+
+    // camera.add(pointsObj3d)
+
+    scene.add(camera)
+    updateDisplay = () => {
+
+        if(pointsObj3d.parent === camera)
+            updateDebugDisplay()
+        
+        updateLsgMat()
     }
 }

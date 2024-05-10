@@ -1,45 +1,155 @@
-let verbose42Glsl = `
-#define BIV_LEN 15
+const UNA_LEN = 6
+const BIV_LEN = 15
+const TRI_LEN = 20
+const QUAD_LEN = 15
+const PENT_LEN = 6
 
-void triInnerPent( in float[20] tri, in float[6] pent, out float[BIV_LEN] target ) {
-    target[ 0] =  tri[16] * pent[ 0] + tri[17] * pent[ 1] - tri[18] * pent[ 2] - tri[19] * pent[ 3];
-    target[ 1] =  tri[15] * pent[ 2] - tri[13] * pent[ 0] - tri[14] * pent[ 1] - tri[19] * pent[ 4];
-    target[ 2] =  tri[11] * pent[ 0] + tri[12] * pent[ 1] + tri[15] * pent[ 3] + tri[18] * pent[ 4];
-    target[ 3] =  tri[10] * pent[ 0] + tri[12] * pent[ 2] + tri[14] * pent[ 3] + tri[17] * pent[ 4];
-    target[ 4] =  tri[10] * pent[ 1] - tri[11] * pent[ 2] - tri[13] * pent[ 3] - tri[16] * pent[ 4];
-    target[ 5] =  tri[ 7] * pent[ 0] + tri[ 8] * pent[ 1] - tri[19] * pent[ 5] - tri[ 9] * pent[ 2];
-    target[ 6] =  tri[18] * pent[ 5] - tri[ 5] * pent[ 0] - tri[ 6] * pent[ 1] - tri[ 9] * pent[ 3];
-    target[ 7] =  tri[17] * pent[ 5] - tri[ 4] * pent[ 0] - tri[ 6] * pent[ 2] - tri[ 8] * pent[ 3];
-    target[ 8] =  tri[ 5] * pent[ 2] + tri[ 7] * pent[ 3] - tri[16] * pent[ 5] - tri[ 4] * pent[ 1];
-    target[ 9] =  tri[ 2] * pent[ 0] + tri[ 3] * pent[ 1] - tri[15] * pent[ 5] - tri[ 9] * pent[ 4];
-    target[10] =  tri[ 1] * pent[ 0] + tri[ 3] * pent[ 2] - tri[14] * pent[ 5] - tri[ 8] * pent[ 4];
-    target[11] =  tri[13] * pent[ 5] + tri[ 1] * pent[ 1] + tri[ 7] * pent[ 4] - tri[ 2] * pent[ 2];
-    target[12] =  tri[12] * pent[ 5] + tri[ 3] * pent[ 3] + tri[ 6] * pent[ 4] - tri[ 0] * pent[ 0];
-    target[13] = -tri[ 0] * pent[ 1] - tri[11] * pent[ 5] - tri[ 2] * pent[ 3] - tri[ 5] * pent[ 4];
-    target[14] = -tri[ 0] * pent[ 2] - tri[10] * pent[ 5] - tri[ 1] * pent[ 3] - tri[ 4] * pent[ 4];
+let verbose42Glsl = `
+#define UNA_LEN 6
+#define BIV_LEN 15
+#define TRI_LEN 20
+#define QUAD_LEN 15
+#define PENT_LEN 6
+#define BIR_LEN 16
+
+float bivInnerSelfScalar(in float[BIV_LEN] a) {
+    return a[10]*a[10]+a[11]*a[11]+a[12]*a[12]+a[13]*a[13]+a[3]*a[3]+a[4]*a[4]+a[7]*a[7]+a[8]*a[8]-a[0]*a[0]-a[14]*a[14]-a[1]*a[1]-a[2]*a[2]-a[5]*a[5]-a[6]*a[6]-a[9]*a[9];
 }
 
-void unaMeetBivec(in float[6] una, in float[BIV_LEN] biv, out float[20] target) {
-    target[ 0] = una[ 0] * biv[ 5] + una[ 2] * biv[ 0] - una[ 1] * biv[ 1];
-    target[ 1] = una[ 0] * biv[ 6] + una[ 3] * biv[ 0] - una[ 1] * biv[ 2];
-    target[ 2] = una[ 0] * biv[ 7] + una[ 4] * biv[ 0] - una[ 1] * biv[ 3];
-    target[ 3] = una[ 0] * biv[ 8] + una[ 5] * biv[ 0] - una[ 1] * biv[ 4];
-    target[ 4] = una[ 0] * biv[ 9] + una[ 3] * biv[ 1] - una[ 2] * biv[ 2];
-    target[ 5] = una[ 0] * biv[10] + una[ 4] * biv[ 1] - una[ 2] * biv[ 3];
-    target[ 6] = una[ 0] * biv[11] + una[ 5] * biv[ 1] - una[ 2] * biv[ 4];
-    target[ 7] = una[ 0] * biv[12] + una[ 4] * biv[ 2] - una[ 3] * biv[ 3];
-    target[ 8] = una[ 0] * biv[13] + una[ 5] * biv[ 2] - una[ 3] * biv[ 4];
-    target[ 9] = una[ 0] * biv[14] + una[ 5] * biv[ 3] - una[ 4] * biv[ 4];
-    target[10] = una[ 1] * biv[ 9] + una[ 3] * biv[ 5] - una[ 2] * biv[ 6];
-    target[11] = una[ 1] * biv[10] + una[ 4] * biv[ 5] - una[ 2] * biv[ 7];
-    target[12] = una[ 1] * biv[11] + una[ 5] * biv[ 5] - una[ 2] * biv[ 8];
-    target[13] = una[ 1] * biv[12] + una[ 4] * biv[ 6] - una[ 3] * biv[ 7];
-    target[14] = una[ 1] * biv[13] + una[ 5] * biv[ 6] - una[ 3] * biv[ 8];
-    target[15] = una[ 1] * biv[14] + una[ 5] * biv[ 7] - una[ 4] * biv[ 8];
-    target[16] = una[ 2] * biv[12] + una[ 4] * biv[ 9] - una[ 3] * biv[10];
-    target[17] = una[ 2] * biv[13] + una[ 5] * biv[ 9] - una[ 3] * biv[11];
-    target[18] = una[ 2] * biv[14] + una[ 5] * biv[10] - una[ 4] * biv[11];
-    target[19] = una[ 3] * biv[14] + una[ 5] * biv[12] - una[ 4] * biv[13];
+float trivInnerSelfScalar(in float[TRI_LEN] a) {
+    return a[11]*a[11]+a[12]*a[12]+a[13]*a[13]+a[14]*a[14]+a[16]*a[16]+a[17]*a[17]+a[2]*a[2]+a[3]*a[3]+a[5]*a[5]+a[6]*a[6]+a[7]*a[7]+a[8]*a[8]-a[0]*a[0]-a[10]*a[10]-a[15]*a[15]-a[18]*a[18]-a[19]*a[19]-a[1]*a[1]-a[4]*a[4]-a[9]*a[9];
+}
+
+void triInnerQuad( in float[TRI_LEN] a, in float[QUAD_LEN] b, out float[UNA_LEN] target ) {
+    target[0] = a[10] * b[0] + a[15] * b[5] + a[18] * b[8] + a[19] * b[9] - a[11] * b[1] - a[12] * b[2] - a[13] * b[3] - a[14] * b[4] - a[16] * b[6] - a[17] * b[7];
+    target[1] = a[18] * b[12] + a[19] * b[13] + a[5] * b[1] + a[6] * b[2] + a[7] * b[3] + a[8] * b[4] - a[16] * b[10] - a[17] * b[11] - a[4] * b[0] - a[9] * b[5];
+    target[2] = a[13] * b[10] + a[14] * b[11] + a[19] * b[14] + a[1] * b[0] + a[7] * b[6] + a[8] * b[7] - a[15] * b[12] - a[2] * b[1] - a[3] * b[2] - a[9] * b[8];
+    target[3] = -a[0] * b[0] - a[11] * b[10] - a[12] * b[11] - a[15] * b[13] - a[18] * b[14] - a[2] * b[3] - a[3] * b[4] - a[5] * b[6] - a[6] * b[7] - a[9] * b[9];
+    target[4] = -a[0] * b[1] - a[10] * b[10] - a[12] * b[12] - a[14] * b[13] - a[17] * b[14] - a[1] * b[3] - a[3] * b[5] - a[4] * b[6] - a[6] * b[8] - a[8] * b[9];
+    target[5] = a[11] * b[12] + a[13] * b[13] + a[16] * b[14] + a[2] * b[5] + a[5] * b[8] + a[7] * b[9] - a[0] * b[2] - a[10] * b[11] - a[1] * b[4] - a[4] * b[7];
+}
+
+void unaInnerTri( in float[UNA_LEN] a, in float[TRI_LEN] b, out float[BIV_LEN] target ) {
+    target[ 0] = a[ 2] * b[ 0] + a[ 3] * b[ 1] - a[ 4] * b[ 2] - a[ 5] * b[ 3];
+    target[ 1] = a[ 3] * b[ 4] - a[ 1] * b[ 0] - a[ 4] * b[ 5] - a[ 5] * b[ 6];
+    target[ 2] = -a[ 1] * b[ 1] - a[ 2] * b[ 4] - a[ 4] * b[ 7] - a[ 5] * b[ 8];
+    target[ 3] = -a[ 1] * b[ 2] - a[ 2] * b[ 5] - a[ 3] * b[ 7] - a[ 5] * b[ 9];
+    target[ 4] = a[ 4] * b[ 9] - a[ 1] * b[ 3] - a[ 2] * b[ 6] - a[ 3] * b[ 8];
+    target[ 5] = a[ 0] * b[ 0] + a[ 3] * b[10] - a[ 4] * b[11] - a[ 5] * b[12];
+    target[ 6] = a[ 0] * b[ 1] - a[ 2] * b[10] - a[ 4] * b[13] - a[ 5] * b[14];
+    target[ 7] = a[ 0] * b[ 2] - a[ 2] * b[11] - a[ 3] * b[13] - a[ 5] * b[15];
+    target[ 8] = a[ 0] * b[ 3] + a[ 4] * b[15] - a[ 2] * b[12] - a[ 3] * b[14];
+    target[ 9] = a[ 0] * b[ 4] + a[ 1] * b[10] - a[ 4] * b[16] - a[ 5] * b[17];
+    target[10] = a[ 0] * b[ 5] + a[ 1] * b[11] - a[ 3] * b[16] - a[ 5] * b[18];
+    target[11] = a[ 0] * b[ 6] + a[ 1] * b[12] + a[ 4] * b[18] - a[ 3] * b[17];
+    target[12] = a[ 0] * b[ 7] + a[ 1] * b[13] + a[ 2] * b[16] - a[ 5] * b[19];
+    target[13] = a[ 0] * b[ 8] + a[ 1] * b[14] + a[ 2] * b[17] + a[ 4] * b[19];
+    target[14] = a[ 0] * b[ 9] + a[ 1] * b[15] + a[ 2] * b[18] + a[ 3] * b[19];
+}
+
+void bivMeetUna( in float[BIV_LEN] a, in float[UNA_LEN] b, out float[TRI_LEN] target ) {
+    target[0]=a[0]*b[2]+a[5]*b[0]-a[1]*b[1];
+    target[1]=a[0]*b[3]+a[6]*b[0]-a[2]*b[1];
+    target[2]=a[0]*b[4]+a[7]*b[0]-a[3]*b[1];
+    target[3]=a[0]*b[5]+a[8]*b[0]-a[4]*b[1];
+    target[4]=a[1]*b[3]+a[9]*b[0]-a[2]*b[2];
+    target[5]=a[10]*b[0]+a[1]*b[4]-a[3]*b[2];
+    target[6]=a[11]*b[0]+a[1]*b[5]-a[4]*b[2];
+    target[7]=a[12]*b[0]+a[2]*b[4]-a[3]*b[3];
+    target[8]=a[13]*b[0]+a[2]*b[5]-a[4]*b[3];
+    target[9]=a[14]*b[0]+a[3]*b[5]-a[4]*b[4];
+    target[10]=a[5]*b[3]+a[9]*b[1]-a[6]*b[2];
+    target[11]=a[10]*b[1]+a[5]*b[4]-a[7]*b[2];
+    target[12]=a[11]*b[1]+a[5]*b[5]-a[8]*b[2];
+    target[13]=a[12]*b[1]+a[6]*b[4]-a[7]*b[3];
+    target[14]=a[13]*b[1]+a[6]*b[5]-a[8]*b[3];
+    target[15]=a[14]*b[1]+a[7]*b[5]-a[8]*b[4];
+    target[16]=a[12]*b[2]+a[9]*b[4]-a[10]*b[3];
+    target[17]=a[13]*b[2]+a[9]*b[5]-a[11]*b[3];
+    target[18]=a[10]*b[5]+a[14]*b[2]-a[11]*b[4];
+    target[19]=a[12]*b[5]+a[14]*b[3]-a[13]*b[4];
+}
+
+void unaMeetUna( in float[UNA_LEN] a, in float[UNA_LEN] b, out float[BIV_LEN] target ) {
+    target[0]=a[0]*b[1]-a[1]*b[0];
+    target[1]=a[0]*b[2]-a[2]*b[0];
+    target[2]=a[0]*b[3]-a[3]*b[0];
+    target[3]=a[0]*b[4]-a[4]*b[0];
+    target[4]=a[0]*b[5]-a[5]*b[0];
+    target[5]=a[1]*b[2]-a[2]*b[1];
+    target[6]=a[1]*b[3]-a[3]*b[1];
+    target[7]=a[1]*b[4]-a[4]*b[1];
+    target[8]=a[1]*b[5]-a[5]*b[1];
+    target[9]=a[2]*b[3]-a[3]*b[2];
+    target[10]=a[2]*b[4]-a[4]*b[2];
+    target[11]=a[2]*b[5]-a[5]*b[2];
+    target[12]=a[3]*b[4]-a[4]*b[3];
+    target[13]=a[3]*b[5]-a[5]*b[3];
+    target[14]=a[4]*b[5]-a[5]*b[4];
+}
+
+void unaInnerQuad( in float[UNA_LEN] a, in float[QUAD_LEN] b, out float[TRI_LEN] target ) {
+    target[0]=a[4]*b[1]+a[5]*b[2]-a[3]*b[0];
+    target[1]=a[2]*b[0]+a[4]*b[3]+a[5]*b[4];
+    target[2]=a[2]*b[1]+a[3]*b[3]+a[5]*b[5];
+    target[3]=a[2]*b[2]+a[3]*b[4]-a[4]*b[5];
+    target[4]=a[4]*b[6]+a[5]*b[7]-a[1]*b[0];
+    target[5]=a[3]*b[6]+a[5]*b[8]-a[1]*b[1];
+    target[6]=a[3]*b[7]-a[1]*b[2]-a[4]*b[8];
+    target[7]=a[5]*b[9]-a[1]*b[3]-a[2]*b[6];
+    target[8]=-a[1]*b[4]-a[2]*b[7]-a[4]*b[9];
+    target[9]=-a[1]*b[5]-a[2]*b[8]-a[3]*b[9];
+    target[10]=a[0]*b[0]+a[4]*b[10]+a[5]*b[11];
+    target[11]=a[0]*b[1]+a[3]*b[10]+a[5]*b[12];
+    target[12]=a[0]*b[2]+a[3]*b[11]-a[4]*b[12];
+    target[13]=a[0]*b[3]+a[5]*b[13]-a[2]*b[10];
+    target[14]=a[0]*b[4]-a[2]*b[11]-a[4]*b[13];
+    target[15]=a[0]*b[5]-a[2]*b[12]-a[3]*b[13];
+    target[16]=a[0]*b[6]+a[1]*b[10]+a[5]*b[14];
+    target[17]=a[0]*b[7]+a[1]*b[11]-a[4]*b[14];
+    target[18]=a[0]*b[8]+a[1]*b[12]-a[3]*b[14];
+    target[19]=a[0]*b[9]+a[1]*b[13]+a[2]*b[14];
+}
+
+void triInnerPent( in float[20] a, in float[6] b, out float[BIV_LEN] target ) {
+    target[ 0] =  a[16] * b[ 0] + a[17] * b[ 1] - a[18] * b[ 2] - a[19] * b[ 3];
+    target[ 1] =  a[15] * b[ 2] - a[13] * b[ 0] - a[14] * b[ 1] - a[19] * b[ 4];
+    target[ 2] =  a[11] * b[ 0] + a[12] * b[ 1] + a[15] * b[ 3] + a[18] * b[ 4];
+    target[ 3] =  a[10] * b[ 0] + a[12] * b[ 2] + a[14] * b[ 3] + a[17] * b[ 4];
+    target[ 4] =  a[10] * b[ 1] - a[11] * b[ 2] - a[13] * b[ 3] - a[16] * b[ 4];
+    target[ 5] =  a[ 7] * b[ 0] + a[ 8] * b[ 1] - a[19] * b[ 5] - a[ 9] * b[ 2];
+    target[ 6] =  a[18] * b[ 5] - a[ 5] * b[ 0] - a[ 6] * b[ 1] - a[ 9] * b[ 3];
+    target[ 7] =  a[17] * b[ 5] - a[ 4] * b[ 0] - a[ 6] * b[ 2] - a[ 8] * b[ 3];
+    target[ 8] =  a[ 5] * b[ 2] + a[ 7] * b[ 3] - a[16] * b[ 5] - a[ 4] * b[ 1];
+    target[ 9] =  a[ 2] * b[ 0] + a[ 3] * b[ 1] - a[15] * b[ 5] - a[ 9] * b[ 4];
+    target[10] =  a[ 1] * b[ 0] + a[ 3] * b[ 2] - a[14] * b[ 5] - a[ 8] * b[ 4];
+    target[11] =  a[13] * b[ 5] + a[ 1] * b[ 1] + a[ 7] * b[ 4] - a[ 2] * b[ 2];
+    target[12] =  a[12] * b[ 5] + a[ 3] * b[ 3] + a[ 6] * b[ 4] - a[ 0] * b[ 0];
+    target[13] = -a[ 0] * b[ 1] - a[11] * b[ 5] - a[ 2] * b[ 3] - a[ 5] * b[ 4];
+    target[14] = -a[ 0] * b[ 2] - a[10] * b[ 5] - a[ 1] * b[ 3] - a[ 4] * b[ 4];
+}
+
+void unaMeetBiv(in float[6] a, in float[BIV_LEN] b, out float[20] target) {
+    target[ 0] = a[ 0] * b[ 5] + a[ 2] * b[ 0] - a[ 1] * b[ 1];
+    target[ 1] = a[ 0] * b[ 6] + a[ 3] * b[ 0] - a[ 1] * b[ 2];
+    target[ 2] = a[ 0] * b[ 7] + a[ 4] * b[ 0] - a[ 1] * b[ 3];
+    target[ 3] = a[ 0] * b[ 8] + a[ 5] * b[ 0] - a[ 1] * b[ 4];
+    target[ 4] = a[ 0] * b[ 9] + a[ 3] * b[ 1] - a[ 2] * b[ 2];
+    target[ 5] = a[ 0] * b[10] + a[ 4] * b[ 1] - a[ 2] * b[ 3];
+    target[ 6] = a[ 0] * b[11] + a[ 5] * b[ 1] - a[ 2] * b[ 4];
+    target[ 7] = a[ 0] * b[12] + a[ 4] * b[ 2] - a[ 3] * b[ 3];
+    target[ 8] = a[ 0] * b[13] + a[ 5] * b[ 2] - a[ 3] * b[ 4];
+    target[ 9] = a[ 0] * b[14] + a[ 5] * b[ 3] - a[ 4] * b[ 4];
+    target[10] = a[ 1] * b[ 9] + a[ 3] * b[ 5] - a[ 2] * b[ 6];
+    target[11] = a[ 1] * b[10] + a[ 4] * b[ 5] - a[ 2] * b[ 7];
+    target[12] = a[ 1] * b[11] + a[ 5] * b[ 5] - a[ 2] * b[ 8];
+    target[13] = a[ 1] * b[12] + a[ 4] * b[ 6] - a[ 3] * b[ 7];
+    target[14] = a[ 1] * b[13] + a[ 5] * b[ 6] - a[ 3] * b[ 8];
+    target[15] = a[ 1] * b[14] + a[ 5] * b[ 7] - a[ 4] * b[ 8];
+    target[16] = a[ 2] * b[12] + a[ 4] * b[ 9] - a[ 3] * b[10];
+    target[17] = a[ 2] * b[13] + a[ 5] * b[ 9] - a[ 3] * b[11];
+    target[18] = a[ 2] * b[14] + a[ 5] * b[10] - a[ 4] * b[11];
+    target[19] = a[ 3] * b[14] + a[ 5] * b[12] - a[ 4] * b[13];
 }
 
 void bivInnerUna( in float[BIV_LEN] biv, in float[6] b, out float[6] target ) {
@@ -77,7 +187,138 @@ void unaMeetE0(in float[6] una, out float[BIV_LEN] target) {
     target[12] = una[3] - una[4];
     target[13] = -una[5];
     target[14] = -una[5];
-}`
+}
+
+void bireflectionSandwichUna(in float[BIR_LEN] a, in float[UNA_LEN] b, out float[UNA_LEN] target) {
+
+    float trireflection[26];
+
+    trireflection[0] = a[0] * b[0] + a[1] * b[1] + a[2] * b[2] + a[3] * b[3] - a[4] * b[4] - a[5] * b[5];
+    trireflection[1] = a[0] * b[1] + a[6] * b[2] + a[7] * b[3] - a[1] * b[0] - a[8] * b[4] - a[9] * b[5];
+    trireflection[2] = a[0] * b[2] + a[10] * b[3] - a[11] * b[4] - a[12] * b[5] - a[2] * b[0] - a[6] * b[1];
+    trireflection[3] = a[0] * b[3] - a[10] * b[2] - a[13] * b[4] - a[14] * b[5] - a[3] * b[0] - a[7] * b[1];
+    trireflection[4] = a[0] * b[4] - a[11] * b[2] - a[13] * b[3] - a[15] * b[5] - a[4] * b[0] - a[8] * b[1];
+    trireflection[5] = a[0] * b[5] + a[15] * b[4] - a[12] * b[2] - a[14] * b[3] - a[5] * b[0] - a[9] * b[1];
+    trireflection[6] = a[1] * b[2] + a[6] * b[0] - a[2] * b[1];
+    trireflection[7] = a[1] * b[3] + a[7] * b[0] - a[3] * b[1];
+    trireflection[8] = a[1] * b[4] + a[8] * b[0] - a[4] * b[1];
+    trireflection[9] = a[1] * b[5] + a[9] * b[0] - a[5] * b[1];
+    trireflection[10] = a[10] * b[0] + a[2] * b[3] - a[3] * b[2];
+    trireflection[11] = a[11] * b[0] + a[2] * b[4] - a[4] * b[2];
+    trireflection[12] = a[12] * b[0] + a[2] * b[5] - a[5] * b[2];
+    trireflection[13] = a[13] * b[0] + a[3] * b[4] - a[4] * b[3];
+    trireflection[14] = a[14] * b[0] + a[3] * b[5] - a[5] * b[3];
+    trireflection[15] = a[15] * b[0] + a[4] * b[5] - a[5] * b[4];
+    trireflection[16] = a[10] * b[1] + a[6] * b[3] - a[7] * b[2];
+    trireflection[17] = a[11] * b[1] + a[6] * b[4] - a[8] * b[2];
+    trireflection[18] = a[12] * b[1] + a[6] * b[5] - a[9] * b[2];
+    trireflection[19] = a[13] * b[1] + a[7] * b[4] - a[8] * b[3];
+    trireflection[20] = a[14] * b[1] + a[7] * b[5] - a[9] * b[3];
+    trireflection[21] = a[15] * b[1] + a[8] * b[5] - a[9] * b[4];
+    trireflection[22] = a[10] * b[4] + a[13] * b[2] - a[11] * b[3];
+    trireflection[23] = a[10] * b[5] + a[14] * b[2] - a[12] * b[3];
+    trireflection[24] = a[11] * b[5] + a[15] * b[2] - a[12] * b[4];
+    trireflection[25] = a[13] * b[5] + a[15] * b[3] - a[14] * b[4];
+
+    float[BIR_LEN] thisReverseForBsu;
+    thisReverseForBsu[0] = a[0];
+    thisReverseForBsu[1] = -a[1];
+    thisReverseForBsu[2] = -a[2];
+    thisReverseForBsu[3] = -a[3];
+    thisReverseForBsu[4] = -a[4];
+    thisReverseForBsu[5] = -a[5];
+    thisReverseForBsu[6] = -a[6];
+    thisReverseForBsu[7] = -a[7];
+    thisReverseForBsu[8] = -a[8];
+    thisReverseForBsu[9] = -a[9];
+    thisReverseForBsu[10] = -a[10];
+    thisReverseForBsu[11] = -a[11];
+    thisReverseForBsu[12] = -a[12];
+    thisReverseForBsu[13] = -a[13];
+    thisReverseForBsu[14] = -a[14];
+    thisReverseForBsu[15] = -a[15];
+
+    target[0] = trireflection[0] * thisReverseForBsu[0] + trireflection[11] * thisReverseForBsu[11] + trireflection[12] * thisReverseForBsu[12] + trireflection[13] * thisReverseForBsu[13] + trireflection[14] * thisReverseForBsu[14] + trireflection[4] * thisReverseForBsu[4] + trireflection[5] * thisReverseForBsu[5] + trireflection[8] * thisReverseForBsu[8] + trireflection[9] * thisReverseForBsu[9] - trireflection[10] * thisReverseForBsu[10] - trireflection[15] * thisReverseForBsu[15] - trireflection[1] * thisReverseForBsu[1] - trireflection[2] * thisReverseForBsu[2] - trireflection[3] * thisReverseForBsu[3] - trireflection[6] * thisReverseForBsu[6] - trireflection[7] * thisReverseForBsu[7];
+    target[1] = trireflection[0] * thisReverseForBsu[1] + trireflection[17] * thisReverseForBsu[11] + trireflection[18] * thisReverseForBsu[12] + trireflection[19] * thisReverseForBsu[13] + trireflection[1] * thisReverseForBsu[0] + trireflection[20] * thisReverseForBsu[14] + trireflection[4] * thisReverseForBsu[8] + trireflection[5] * thisReverseForBsu[9] + trireflection[6] * thisReverseForBsu[2] + trireflection[7] * thisReverseForBsu[3] - trireflection[16] * thisReverseForBsu[10] - trireflection[21] * thisReverseForBsu[15] - trireflection[2] * thisReverseForBsu[6] - trireflection[3] * thisReverseForBsu[7] - trireflection[8] * thisReverseForBsu[4] - trireflection[9] * thisReverseForBsu[5];
+    target[2] = trireflection[0] * thisReverseForBsu[2] + trireflection[10] * thisReverseForBsu[3] + trireflection[16] * thisReverseForBsu[7] + trireflection[1] * thisReverseForBsu[6] + trireflection[22] * thisReverseForBsu[13] + trireflection[23] * thisReverseForBsu[14] + trireflection[2] * thisReverseForBsu[0] + trireflection[4] * thisReverseForBsu[11] + trireflection[5] * thisReverseForBsu[12] - trireflection[11] * thisReverseForBsu[4] - trireflection[12] * thisReverseForBsu[5] - trireflection[17] * thisReverseForBsu[8] - trireflection[18] * thisReverseForBsu[9] - trireflection[24] * thisReverseForBsu[15] - trireflection[3] * thisReverseForBsu[10] - trireflection[6] * thisReverseForBsu[1];
+    target[3] = trireflection[0] * thisReverseForBsu[3] + trireflection[1] * thisReverseForBsu[7] + trireflection[2] * thisReverseForBsu[10] + trireflection[3] * thisReverseForBsu[0] + trireflection[4] * thisReverseForBsu[13] + trireflection[5] * thisReverseForBsu[14] - trireflection[10] * thisReverseForBsu[2] - trireflection[13] * thisReverseForBsu[4] - trireflection[14] * thisReverseForBsu[5] - trireflection[16] * thisReverseForBsu[6] - trireflection[19] * thisReverseForBsu[8] - trireflection[20] * thisReverseForBsu[9] - trireflection[22] * thisReverseForBsu[11] - trireflection[23] * thisReverseForBsu[12] - trireflection[25] * thisReverseForBsu[15] - trireflection[7] * thisReverseForBsu[1];
+    target[4] = trireflection[0] * thisReverseForBsu[4] + trireflection[1] * thisReverseForBsu[8] + trireflection[2] * thisReverseForBsu[11] + trireflection[3] * thisReverseForBsu[13] + trireflection[4] * thisReverseForBsu[0] + trireflection[5] * thisReverseForBsu[15] - trireflection[11] * thisReverseForBsu[2] - trireflection[13] * thisReverseForBsu[3] - trireflection[15] * thisReverseForBsu[5] - trireflection[17] * thisReverseForBsu[6] - trireflection[19] * thisReverseForBsu[7] - trireflection[21] * thisReverseForBsu[9] - trireflection[22] * thisReverseForBsu[10] - trireflection[24] * thisReverseForBsu[12] - trireflection[25] * thisReverseForBsu[14] - trireflection[8] * thisReverseForBsu[1];
+    target[5] = trireflection[0] * thisReverseForBsu[5] + trireflection[15] * thisReverseForBsu[4] + trireflection[1] * thisReverseForBsu[9] + trireflection[21] * thisReverseForBsu[8] + trireflection[24] * thisReverseForBsu[11] + trireflection[25] * thisReverseForBsu[13] + trireflection[2] * thisReverseForBsu[12] + trireflection[3] * thisReverseForBsu[14] + trireflection[5] * thisReverseForBsu[0] - trireflection[12] * thisReverseForBsu[2] - trireflection[14] * thisReverseForBsu[3] - trireflection[18] * thisReverseForBsu[6] - trireflection[20] * thisReverseForBsu[7] - trireflection[23] * thisReverseForBsu[10] - trireflection[4] * thisReverseForBsu[15] - trireflection[9] * thisReverseForBsu[1];
+}
+`
+
+class Bireflection extends GeneralVector {
+    constructor() {
+        super(16)
+    }
+
+    sandwich(b, target) {
+        if(b.constructor === Unavec && target.constructor === Unavec) {
+
+            trireflection[0] = this[0] * b[0] + this[1] * b[1] + this[2] * b[2] + this[3] * b[3] - this[4] * b[4] - this[5] * b[5];
+            trireflection[1] = this[0] * b[1] + this[6] * b[2] + this[7] * b[3] - this[1] * b[0] - this[8] * b[4] - this[9] * b[5];
+            trireflection[2] = this[0] * b[2] + this[10] * b[3] - this[11] * b[4] - this[12] * b[5] - this[2] * b[0] - this[6] * b[1];
+            trireflection[3] = this[0] * b[3] - this[10] * b[2] - this[13] * b[4] - this[14] * b[5] - this[3] * b[0] - this[7] * b[1];
+            trireflection[4] = this[0] * b[4] - this[11] * b[2] - this[13] * b[3] - this[15] * b[5] - this[4] * b[0] - this[8] * b[1];
+            trireflection[5] = this[0] * b[5] + this[15] * b[4] - this[12] * b[2] - this[14] * b[3] - this[5] * b[0] - this[9] * b[1];
+            trireflection[6] = this[1] * b[2] + this[6] * b[0] - this[2] * b[1];
+            trireflection[7] = this[1] * b[3] + this[7] * b[0] - this[3] * b[1];
+            trireflection[8] = this[1] * b[4] + this[8] * b[0] - this[4] * b[1];
+            trireflection[9] = this[1] * b[5] + this[9] * b[0] - this[5] * b[1];
+            trireflection[10] = this[10] * b[0] + this[2] * b[3] - this[3] * b[2];
+            trireflection[11] = this[11] * b[0] + this[2] * b[4] - this[4] * b[2];
+            trireflection[12] = this[12] * b[0] + this[2] * b[5] - this[5] * b[2];
+            trireflection[13] = this[13] * b[0] + this[3] * b[4] - this[4] * b[3];
+            trireflection[14] = this[14] * b[0] + this[3] * b[5] - this[5] * b[3];
+            trireflection[15] = this[15] * b[0] + this[4] * b[5] - this[5] * b[4];
+            trireflection[16] = this[10] * b[1] + this[6] * b[3] - this[7] * b[2];
+            trireflection[17] = this[11] * b[1] + this[6] * b[4] - this[8] * b[2];
+            trireflection[18] = this[12] * b[1] + this[6] * b[5] - this[9] * b[2];
+            trireflection[19] = this[13] * b[1] + this[7] * b[4] - this[8] * b[3];
+            trireflection[20] = this[14] * b[1] + this[7] * b[5] - this[9] * b[3];
+            trireflection[21] = this[15] * b[1] + this[8] * b[5] - this[9] * b[4];
+            trireflection[22] = this[10] * b[4] + this[13] * b[2] - this[11] * b[3];
+            trireflection[23] = this[10] * b[5] + this[14] * b[2] - this[12] * b[3];
+            trireflection[24] = this[11] * b[5] + this[15] * b[2] - this[12] * b[4];
+            trireflection[25] = this[13] * b[5] + this[15] * b[3] - this[14] * b[4];
+
+            thisReverseForBsu[0] = this[0];
+            thisReverseForBsu[1] = -this[1];
+            thisReverseForBsu[2] = -this[2];
+            thisReverseForBsu[3] = -this[3];
+            thisReverseForBsu[4] = -this[4];
+            thisReverseForBsu[5] = -this[5];
+            thisReverseForBsu[6] = -this[6];
+            thisReverseForBsu[7] = -this[7];
+            thisReverseForBsu[8] = -this[8];
+            thisReverseForBsu[9] = -this[9];
+            thisReverseForBsu[10] = -this[10];
+            thisReverseForBsu[11] = -this[11];
+            thisReverseForBsu[12] = -this[12];
+            thisReverseForBsu[13] = -this[13];
+            thisReverseForBsu[14] = -this[14];
+            thisReverseForBsu[15] = -this[15];
+
+            target[0] = trireflection[0] * thisReverseForBsu[0] + trireflection[11] * thisReverseForBsu[11] + trireflection[12] * thisReverseForBsu[12] + trireflection[13] * thisReverseForBsu[13] + trireflection[14] * thisReverseForBsu[14] + trireflection[4] * thisReverseForBsu[4] + trireflection[5] * thisReverseForBsu[5] + trireflection[8] * thisReverseForBsu[8] + trireflection[9] * thisReverseForBsu[9] - trireflection[10] * thisReverseForBsu[10] - trireflection[15] * thisReverseForBsu[15] - trireflection[1] * thisReverseForBsu[1] - trireflection[2] * thisReverseForBsu[2] - trireflection[3] * thisReverseForBsu[3] - trireflection[6] * thisReverseForBsu[6] - trireflection[7] * thisReverseForBsu[7];
+            target[1] = trireflection[0] * thisReverseForBsu[1] + trireflection[17] * thisReverseForBsu[11] + trireflection[18] * thisReverseForBsu[12] + trireflection[19] * thisReverseForBsu[13] + trireflection[1] * thisReverseForBsu[0] + trireflection[20] * thisReverseForBsu[14] + trireflection[4] * thisReverseForBsu[8] + trireflection[5] * thisReverseForBsu[9] + trireflection[6] * thisReverseForBsu[2] + trireflection[7] * thisReverseForBsu[3] - trireflection[16] * thisReverseForBsu[10] - trireflection[21] * thisReverseForBsu[15] - trireflection[2] * thisReverseForBsu[6] - trireflection[3] * thisReverseForBsu[7] - trireflection[8] * thisReverseForBsu[4] - trireflection[9] * thisReverseForBsu[5];
+            target[2] = trireflection[0] * thisReverseForBsu[2] + trireflection[10] * thisReverseForBsu[3] + trireflection[16] * thisReverseForBsu[7] + trireflection[1] * thisReverseForBsu[6] + trireflection[22] * thisReverseForBsu[13] + trireflection[23] * thisReverseForBsu[14] + trireflection[2] * thisReverseForBsu[0] + trireflection[4] * thisReverseForBsu[11] + trireflection[5] * thisReverseForBsu[12] - trireflection[11] * thisReverseForBsu[4] - trireflection[12] * thisReverseForBsu[5] - trireflection[17] * thisReverseForBsu[8] - trireflection[18] * thisReverseForBsu[9] - trireflection[24] * thisReverseForBsu[15] - trireflection[3] * thisReverseForBsu[10] - trireflection[6] * thisReverseForBsu[1];
+            target[3] = trireflection[0] * thisReverseForBsu[3] + trireflection[1] * thisReverseForBsu[7] + trireflection[2] * thisReverseForBsu[10] + trireflection[3] * thisReverseForBsu[0] + trireflection[4] * thisReverseForBsu[13] + trireflection[5] * thisReverseForBsu[14] - trireflection[10] * thisReverseForBsu[2] - trireflection[13] * thisReverseForBsu[4] - trireflection[14] * thisReverseForBsu[5] - trireflection[16] * thisReverseForBsu[6] - trireflection[19] * thisReverseForBsu[8] - trireflection[20] * thisReverseForBsu[9] - trireflection[22] * thisReverseForBsu[11] - trireflection[23] * thisReverseForBsu[12] - trireflection[25] * thisReverseForBsu[15] - trireflection[7] * thisReverseForBsu[1];
+            target[4] = trireflection[0] * thisReverseForBsu[4] + trireflection[1] * thisReverseForBsu[8] + trireflection[2] * thisReverseForBsu[11] + trireflection[3] * thisReverseForBsu[13] + trireflection[4] * thisReverseForBsu[0] + trireflection[5] * thisReverseForBsu[15] - trireflection[11] * thisReverseForBsu[2] - trireflection[13] * thisReverseForBsu[3] - trireflection[15] * thisReverseForBsu[5] - trireflection[17] * thisReverseForBsu[6] - trireflection[19] * thisReverseForBsu[7] - trireflection[21] * thisReverseForBsu[9] - trireflection[22] * thisReverseForBsu[10] - trireflection[24] * thisReverseForBsu[12] - trireflection[25] * thisReverseForBsu[14] - trireflection[8] * thisReverseForBsu[1];
+            target[5] = trireflection[0] * thisReverseForBsu[5] + trireflection[15] * thisReverseForBsu[4] + trireflection[1] * thisReverseForBsu[9] + trireflection[21] * thisReverseForBsu[8] + trireflection[24] * thisReverseForBsu[11] + trireflection[25] * thisReverseForBsu[13] + trireflection[2] * thisReverseForBsu[12] + trireflection[3] * thisReverseForBsu[14] + trireflection[5] * thisReverseForBsu[0] - trireflection[12] * thisReverseForBsu[2] - trireflection[14] * thisReverseForBsu[3] - trireflection[18] * thisReverseForBsu[6] - trireflection[20] * thisReverseForBsu[7] - trireflection[23] * thisReverseForBsu[10] - trireflection[4] * thisReverseForBsu[15] - trireflection[9] * thisReverseForBsu[1];
+            
+        }
+        else
+            console.error("not implemented")
+
+        return target
+    }
+}
+Bireflection.indexGrades = [
+    0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+]
+let trireflection = new Float32Array(32)
+let thisReverseForBsu = new Bireflection()
+
 
 //1D CGA bivector! And other things
 class Unavec extends GeneralVector {
@@ -379,6 +620,14 @@ class Trivec extends GeneralVector {
             target[12] = this[12] * b[ 5] + this[ 3] * b[ 3] + this[ 6] * b[ 4] - this[ 0] * b[ 0];
             target[13] = -this[ 0] * b[ 1] - this[11] * b[ 5] - this[ 2] * b[ 3] - this[ 5] * b[ 4];
             target[14] = -this[ 0] * b[ 2] - this[10] * b[ 5] - this[ 1] * b[ 3] - this[ 4] * b[ 4];
+        }
+        else if (b.constructor === Quadvec && target.constructor === Unavec) {
+            target[0] = this[10] * b[0] + this[15] * b[5] + this[18] * b[8] + this[19] * b[9] - this[11] * b[1] - this[12] * b[2] - this[13] * b[3] - this[14] * b[4] - this[16] * b[6] - this[17] * b[7];
+            target[1] = this[18] * b[12] + this[19] * b[13] + this[5] * b[1] + this[6] * b[2] + this[7] * b[3] + this[8] * b[4] - this[16] * b[10] - this[17] * b[11] - this[4] * b[0] - this[9] * b[5];
+            target[2] = this[13] * b[10] + this[14] * b[11] + this[19] * b[14] + this[1] * b[0] + this[7] * b[6] + this[8] * b[7] - this[15] * b[12] - this[2] * b[1] - this[3] * b[2] - this[9] * b[8];
+            target[3] = -this[0] * b[0] - this[11] * b[10] - this[12] * b[11] - this[15] * b[13] - this[18] * b[14] - this[2] * b[3] - this[3] * b[4] - this[5] * b[6] - this[6] * b[7] - this[9] * b[9];
+            target[4] = -this[0] * b[1] - this[10] * b[10] - this[12] * b[12] - this[14] * b[13] - this[17] * b[14] - this[1] * b[3] - this[3] * b[5] - this[4] * b[6] - this[6] * b[8] - this[8] * b[9];
+            target[5] = this[11] * b[12] + this[13] * b[13] + this[16] * b[14] + this[2] * b[5] + this[5] * b[8] + this[7] * b[9] - this[0] * b[2] - this[10] * b[11] - this[1] * b[4] - this[4] * b[7];
         }
         else if(b.constructor === Bivec && target.constructor === Pentavec) {
             target[0] = this[0] * b[12] + this[11] * b[2] + this[16] * b[0] + this[2] * b[9] + this[4] * b[7] + this[7] * b[5] - this[10] * b[3] - this[13] * b[1] - this[1] * b[10] - this[5] * b[6];

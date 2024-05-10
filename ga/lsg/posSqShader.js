@@ -1,21 +1,5 @@
 /*
-    Need to make it so you can see e1! And check et and e1+et
-
-    Move mouse around, can make 1-vectors
-    e1 et ep em
-    Make a series of 4
-
-
-    Goal is to render ePlus, properly. Can transform into a hyperboloid
-    Send in pss
-    With pixel, create ray... wedge with 1-vector
-
-    Pretty likely that point pairs are a separate pass, I mean they're only in one place
-
-    A thing that MIGHT work is to use your norms-ratio approach to get a "distance"
-    Yes it's a bizarre distance and it's in minkowski space. It MIGHT work.
-
-    Hey, could even work for Todd Ell
+    
  */
 
 function initPosSqShader() {
@@ -26,54 +10,43 @@ function initPosSqShader() {
             type: `vertex`,
             precedes: ``,
             str: `
-                out vec4 vPos;
+                out vec3 cameraRayDirVec3;
             \n`
         },
         {
             type: `vertex`,
             precedes: `	#include <project_vertex>`,
             str: `
-                vPos = modelMatrix * vec4(transformed,1.);
+                vec4 vPos4 = modelMatrix * vec4(transformed,1.);
+                cameraRayDirVec3 = vPos4.xyz / vPos4.w - cameraPosition;
             `,
         },
         {
             type: `fragment`,
             precedes: ``,
-            str: egaVerboseGlsl + egaGlsl + basis1t2.prefix + `
+            str: verbose42Glsl + `
                 uniform vec4 extraVec1;
                 uniform vec4 extraVec2;
                 uniform vec4 extraVec3;
                 uniform float floats[`+ NUM_FLOATS_PHONG2 +`];
 
-                in vec4 vPos;
-                bool validAndInBox(in vec3 v) {
+                in vec3 cameraRayDirVec3;
 
-                    return v != vec3(999.,999.,999.) &&
-                           all(lessThan(v, extraVec2.xyz )) &&
-                           all(greaterThan(v, extraVec1.xyz ));
+                void vec3ToDop( in vec3 v, out float[TRI_LEN] dop, in float[TRI_LEN] basisDops0, in float[TRI_LEN] basisDops1, in float[TRI_LEN] basisDops2) {
+                    for (int i = 0; i < TRI_LEN; ++i) {
+                        dop[i] = 
+                            v.x * basisDops0[i] +
+                            v.y * basisDops1[i] +
+                            v.z * basisDops2[i];
+                    }
                 }
-
-                float lengthSq(in vec3 v) {
-                    return dot(v,v);
-                }
-
-                float intersectUnavec(in float[BIV_LEN] rayBiv, in float[6] renderedObj, out vec3 target) {
-
-                    float[20] pp;
-                    unaMeetBivec( renderedObj, rayBiv, pp ); //unavec meets bivec to get trivec
-                    vec3 vec31, vec32;
-                    float ret = ppToVec3s( pp, vec31, vec32 );
-
-                    bool valid1 = validAndInBox(vec31);
-                    bool valid2 = validAndInBox(vec32);
-                    vec3 closer = distance(vec31, cameraPosition) < distance(vec32,cameraPosition) ? vec31 : vec32;
-                    target =
-                        valid1 && valid2  ? closer :
-                        valid1 && !valid2 ? vec31 :
-                        !valid1 && valid2 ? vec32 :
-                        vec3(999.,999.,999.);
-                    
-                    return ret;
+                void dopToVec3( float[TRI_LEN] dop, out vec3 v, in float[TRI_LEN] basisDops0, in float[TRI_LEN] basisDops1, in float[TRI_LEN] basisDops2) {
+                    v = vec3(0.,0.,0.);
+                    for (int i = 0; i < TRI_LEN; ++i) {
+                        v.x += dop[i] * basisDops0[i] * .5;
+                        v.y += dop[i] * basisDops1[i] * .5;
+                        v.z += dop[i] * basisDops2[i] * .5;
+                    }
                 }
             `
         },
@@ -81,94 +54,146 @@ function initPosSqShader() {
             type: `fragment`,
             precedes: `	#include <normal_fragment_maps>`,
             str: `
-                // if(length(vPos) < 1.11)
-                //     gl_FragColor.r = 0.;
+
+                diffuseColor = vec4( 1.,0.,0.,1. );
+
+                // these you get fed in
+                float[UNA_LEN] renderedUna;
+                float[TRI_LEN] originPp;
+                float[PENT_LEN] pss;
+                float[QUAD_LEN] truePtAtInf;
+                float[UNA_LEN] cameraPosZrs;
+                float[TRI_LEN] basisDops0;
+                float[TRI_LEN] basisDops1;
+                float[TRI_LEN] basisDops2;
                 
-                float[8] rayDq;
-                joinPt( cameraPosition, vPos, rayDq );
-                // rayDq[0] = 0.; rayDq[1] = 0.; rayDq[2] = 0.; rayDq[3] = 0.; rayDq[4] = 0.; rayDq[5] = 1.; rayDq[6] = 0.; rayDq[7] = 0.;
-                float[BIV_LEN] rayBiv;
-                dqToBiv( rayDq, rayBiv );
-
-                //You were trying to figure out why tf et isn't visible
-
-                // float[6] renderedObj;
-                // for(int j = 0; j < 6; ++j)
-                //     renderedObj[j] = floats[j];
-                // vec3 betterVec3 = intersectUnavec( rayBiv, renderedObj );
+                int start = 0;
+                for(int i = 0; i < UNA_LEN; ++i)
+                    renderedUna[i] = floats[i];
+                start += UNA_LEN;
+                for(int i = 0; i < TRI_LEN; ++i)
+                    originPp[i] = floats[start + i];
+                start += TRI_LEN;
+                for(int i = 0; i < PENT_LEN; ++i)
+                    pss[i] = floats[start + i];
+                start += PENT_LEN;
+                for(int i = 0; i < QUAD_LEN; ++i)
+                    truePtAtInf[i] = floats[start + i];
+                start += QUAD_LEN;
+                for(int i = 0; i < UNA_LEN; ++i)
+                    cameraPosZrs[i] = floats[start + i];
+                start += UNA_LEN;
+                for (int i = 0; i < TRI_LEN; ++i)
+                    basisDops0[i] = floats[start + i];
+                start += TRI_LEN;
+                for (int i = 0; i < TRI_LEN; ++i)
+                    basisDops1[i] = floats[start + i];
+                start += TRI_LEN;
+                for (int i = 0; i < TRI_LEN; ++i)
+                    basisDops2[i] = floats[start + i];
                 
-                // if( betterVec3 == vec3(0.,0.,0.) )
-                //     diffuseColor = vec4( 1.,0.,0.,1. );
-                // else
-                //     diffuseColor = vec4( 0.,0.,1.,1. );
+                float[TRI_LEN] cameraRayDirDop;
+                float[BIV_LEN] cameraRayBiv;
 
-                vec3 bestVec3 = vec3(999.,999.,999.);
-                float ret = -1.;
-                for(int i = 0; i < 4; ++i) {
-                    float[6] renderedObj;
-                    for(int j = 0; j < 6; ++j)
-                        renderedObj[j] = floats[i*6+j];
+                float[BIV_LEN] projectorBiv;
+                float[UNA_LEN] tangentPlane;
+                float[UNA_LEN] zrSphere;
+                float[BIV_LEN] zrCircle;
+                float[TRI_LEN] dop0;
+                float[TRI_LEN] unnormalizedPos;
+                float[TRI_LEN] pp;
+                float[UNA_LEN] equidistantUna;
+                float[BIR_LEN] bireflection;
 
-                    vec3 betterVec3;
-                    ret = intersectUnavec(rayBiv, renderedObj, betterVec3);
-                    if( betterVec3 != vec3(999.,999.,999.) && 
-                        lengthSq(betterVec3 - cameraPosition) < lengthSq(bestVec3-cameraPosition) )
-                        bestVec3 = betterVec3;
+                vec3 normalVec3s[2];
+                bool visibles[2];
+                vec3 diffs[2];
+
+                normal = vec3(0.,0.,1.);
+                // vec3 mrh = vec3(0.,0.,-1.);
+                
+                vec3ToDop( cameraRayDirVec3, cameraRayDirDop, basisDops0, basisDops1, basisDops2 );
+                unaInnerTri( cameraPosZrs, cameraRayDirDop, cameraRayBiv ); //raybiv seems fine
+
+                bivMeetUna( cameraRayBiv, renderedUna, pp );
+                triInnerPent( pp, pss, projectorBiv );
+                float bivSq = bivInnerSelfScalar(projectorBiv);
+
+                float factor = .5 / sqrt(bivSq);
+                for(int i = 0; i < BIV_LEN; ++i)
+                    projectorBiv[i] *= factor;
+
+                // triInnerQuad(pp, truePtAtInf, equidistantUna);
+
+                vec3 outOfSightVec3 = vec3(999.,999.,999.);
+                bireflection[0] = .5;
+                for(int i = 0; i < 2; ++i) {
+
+                    for(int j = 0; j < BIV_LEN; ++j)
+                        bireflection[j + 1] = i==1? projectorBiv[j] : -projectorBiv[j];
+                    bireflectionSandwichUna( bireflection, cameraPosZrs, zrSphere);
+
+                    unaMeetUna(zrSphere, renderedUna, zrCircle);
+                    bivInnerE0(zrCircle, tangentPlane);
+
+                    //position
+                    vec3 posVec3;
+                    // unaInnerQuad(zrSphere, truePtAtInf, unnormalizedPos);
+                    unaMeetBiv(tangentPlane, cameraRayBiv, unnormalizedPos);
+                    float factor = 1. / sqrt(abs(trivInnerSelfScalar(unnormalizedPos)));
+                    for(int j = 0; j < TRI_LEN; ++j)
+                        dop0[j] = unnormalizedPos[j] * factor - originPp[j];
+                    dopToVec3(dop0, posVec3, basisDops0, basisDops1, basisDops2);
+
+                    //normal
+                    // unaInnerQuad(tangentPlane, truePtAtInf, dop0);
+                    // dopToVec3(dop0, normalVec3s[i], basisDops0, basisDops1, basisDops2);
+                    normalVec3s[i] = vec3(tangentPlane[0], tangentPlane[1], tangentPlane[2]);
+
+                    float eps = .001;
+                    bool isE0Multiple = zrSphere[3] != 0. && abs(zrSphere[3] - zrSphere[4])<eps && abs(zrSphere[0]) < eps && abs(zrSphere[1]) < eps && abs(zrSphere[2]) < eps && abs(zrSphere[5]) < eps;
+
+                    diffs[i] = posVec3 - cameraPosition;
+                    visibles[i] = 
+                        dot( cameraRayDirVec3, diffs[i] ) > 0. && 
+                        !isE0Multiple &&
+                        all(greaterThan(posVec3,extraVec1.xyz)) &&
+                        all(   lessThan(posVec3,extraVec2.xyz));
+
+                    // if(i==0)
+                    //     diffuseColor.g = isE0Multiple ? 1. : 0.;
+                    // else
+                    //     diffuseColor.b = isE0Multiple ? 1. : 0.;
                 }
-                // diffuseColor = vec4( ret,1.-ret,0.,1. );
 
-                vec3 unnormalized = cross(dFdx(bestVec3), dFdy(bestVec3));
-                normal = normalize(unnormalized);
-                
-                if( bestVec3 == vec3(999.,999.,999.) || unnormalized == vec3(0.) )
-                    diffuseColor = vec4( 0.,0.,0.,0. );
-                else
-                    diffuseColor = vec4( 1.,.5,0., diffuseColor.a );
+                int oneToUse = 
+                    visibles[0] && !visibles[1] ? 0 :
+                    visibles[1] && !visibles[0]  ? 1 :
+                    dot( diffs[0], diffs[0] ) < dot( diffs[1], diffs[1] ) ? 0:1;
+
+                if( (!visibles[0] && !visibles[1]) || bivSq <= 0.)
+                    diffuseColor.a = 0.;
+
+                // if( visibles[0] && !visibles[1])
+                //     diffuseColor.rgb = vec3(1.,0.,0.);
+                // if(!visibles[0] && visibles[1])
+                //     diffuseColor.rgb = vec3(0.,1.,0.);
+                // if( visibles[0] && visibles[1])
+                //     diffuseColor.rgb = vec3(0.,0.,1.);
+
+                normal = normalize(normalVec3s[oneToUse]);
+                // diffuseColor.rgb = normal;
+
+
+                // vec3 mrh; dopToVec3(cameraRayDirDop, mrh, basisDops0, basisDops1, basisDops2);
 
             \n`
         },
     ]
-    
+
     //glued to face
     let mesh = new THREE.Mesh(new THREE.PlaneGeometry(.5,.5), lsgMat)
     mesh.position.z = -camera.near * 2.
     scene.add(camera)
     camera.add(mesh)
-
-    {
-        // let boxGeo = new THREE.BoxGeometry(
-        //     limitsUpper.x - limitsLower.x,
-        //     limitsUpper.y - limitsLower.y,
-        //     limitsUpper.x
-        // )
-
-        // var mesh = new THREE.Mesh(boxGeo,lsgMat)
-        // scene.add(mesh)
-
-        // const wireframeGeo = new THREE.WireframeGeometry(boxGeo);
-        // const wireframeCube = new THREE.LineSegments(wireframeGeo, new THREE.LineBasicMaterial({color:0x333333}));
-        // mesh.add(wireframeCube);
-        // let backs = new THREE.Mesh(boxGeo, new THREE.MeshPhongMaterial({ color: 0xCCCCCC, side: THREE.BackSide }))
-        // mesh.add(backs)
-    }
-
-    {
-        // let eyeMat = new THREE.MeshBasicMaterial()
-        // new THREE.TextureLoader().load(`data/eyeTexture.png`, (texture) => {
-        //     eyeMat.map = texture
-        //     eyeMat.needsUpdate = true
-        // }, () => { }, (err) => { log(err) })
-        // let eyeGeo = new THREE.SphereGeometry(.08)
-        // eyeGeo.rotateX(TAU / 4.)
-        // let eye = new THREE.Mesh(eyeGeo, eyeMat)
-        // eye.rotation.y = TAU * .5
-        // eye.position.z = -.3
-        // scene.add(eye)
-    }
-
-    mesh.onBeforeRender = () => {
-
-        lsgMat.extraVec1.copy(limitsLower)
-        lsgMat.extraVec2.copy(limitsUpper)
-    }
 }

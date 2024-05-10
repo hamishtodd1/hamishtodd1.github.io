@@ -283,4 +283,5 @@ function init42() {
     setBasisNames(Quadvec)
     setBasisNames(Pentavec)
     setBasisNames(Hexavec)
+    setBasisNames(Bireflection)
 }
