@@ -21,7 +21,7 @@ function initMouse() {
         let overlaySpaceSpacing = spacing * overlayConversion
         let overlaySpaceDwDimension = dwDimension * overlayConversion
 
-        let btn = new THREE.Mesh(new THREE.PlaneGeometry(1., 1.), new THREE.MeshBasicMaterial({ color: 0x00FF00 }))
+        let btn = new THREE.Mesh(new THREE.PlaneGeometry(1., 1.), new THREE.MeshBasicMaterial({ color: 0xFFFFFF }))
         btn.scale.set(.05, .05, 1.)
         overlayScene.add(btn)
         btn.position.x = -1. + overlaySpaceSpacing + overlaySpaceDwDimension * .5 + dw.horizontalIndex * (overlaySpaceDwDimension + overlaySpaceSpacing)

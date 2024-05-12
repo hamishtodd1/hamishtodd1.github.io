@@ -170,7 +170,7 @@ function initColumn0d() {
     let conformal = new Dw(0, 2)
     conformal.camera.position.set(0.,0.,0.)
     conformal.camera.lookAt(1.,1.,0.)
-    let floor = new THREE.Mesh(gridPointsGeo, new THREE.MeshBasicMaterial({ color: 0xFF0000 }))
+    let floor = new THREE.Mesh(gridPointsGeo, new THREE.MeshBasicMaterial({ color: 0xFF8000 }))
     floor.position.set(2., 2., 0.)
     conformal.scene.add(floor)
 
@@ -182,7 +182,7 @@ function initColumn0d() {
             gridLines.instanceMatrix.needsUpdate = true
 
             let currentHyperbolaVal = sq(mv0[5]) - sq(mv0[4])
-            v1.set(mv0[5], mv0[4], 0.).multiplyScalar(-2. / currentHyperbolaVal)
+            v1.set(mv0[5], mv0[4], 0.).multiplyScalar(2. / v1.y)//.multiplyScalar(-2. / currentHyperbolaVal)
             m1.identity()
             m1.setPosition(v1)
             gridPoints.setMatrixAt(i, m1)

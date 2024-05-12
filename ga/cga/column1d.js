@@ -143,10 +143,10 @@ function initColumn1d() {
 
     let gridMvs = []
     {
-        let numHorizontals = 7
+        let numHorizontals = 4
         for (let i = 0; i < numHorizontals; ++i) {
             let zeroToOne = i / (numHorizontals - 1)
-            let ourTranslation = mv0.copy(spineMv).naieveAxisToRotor((zeroToOne - .5) * 2.)
+            let ourTranslation = mv0.copy(spineMv).naieveAxisToRotor((zeroToOne - .5) * .4)
             gridMvs[i] = new Mv()
             ourTranslation.sandwich(e1, gridMvs[i])
         }
@@ -213,12 +213,12 @@ function initColumn1d() {
     {
         // in this context, the x and y directions (ultra ideal points) are ePlusMinus and e1Minus
 
-        let parabolicAxisMv = AxisAndBall()
-        parabolicAxisMv.copy(spineMv)
-        let hyperbolixAxisMv = AxisAndBall()
-        hyperbolixAxisMv.copy(ePlusMinus)
-        let zollyAxisMv = AxisAndBall()
-        zollyAxisMv.copy(e1Plus).addScaled(e1Minus, -1.)
+        // let parabolicAxisMv = AxisAndBall()
+        // parabolicAxisMv.copy(spineMv)
+        // let hyperbolixAxisMv = AxisAndBall()
+        // hyperbolixAxisMv.copy(ePlusMinus)
+        // let zollyAxisMv = AxisAndBall()
+        // zollyAxisMv.copy(e1Plus).addScaled(e1Minus, -1.)
         //-1, -1
 
         var hyperbolicOrigin = e1Plus
@@ -239,20 +239,20 @@ function initColumn1d() {
         }
 
         let eye = createEye()
-        ambient.scene.add(eye)
+        // ambient.scene.add(eye)
         
         var freeAxes = []
-        for(let i = 0; i < 2; ++i)
-            freeAxes[i] = AxisAndBall()
-        freeAxes[0].copy(e1Plus).addScaled(e1Minus, 1.).addScaled(ePlusMinus,3.6)
-        freeAxes[0].normalize().multiplyScalar(2.)
-        freeAxes[1].copy(e1Plus)
+        // for(let i = 0; i < 2; ++i)
+        //     freeAxes[i] = AxisAndBall()
+        // freeAxes[0].copy(e1Plus).addScaled(e1Minus, 1.).addScaled(ePlusMinus,3.6)
+        // freeAxes[0].normalize().multiplyScalar(2.)
+        // freeAxes[1].copy(e1Plus)
         // freeAxis.copy(e1Minus)
 
-        let mulAxis = AxisAndBall()
-        updateFunctions.push(()=>{
-            mul(freeAxes[0], freeAxes[1], mulAxis)
-        })
+        // let mulAxis = AxisAndBall()
+        // updateFunctions.push(()=>{
+        //     mul(freeAxes[0], freeAxes[1], mulAxis)
+        // })
 
         var freeAxis = freeAxes[0]
         function setFreeAxis(x,y) {

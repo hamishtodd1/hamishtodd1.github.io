@@ -51,7 +51,7 @@
 
 function initColumn2d() {
     let ambient = new Dw(2, 0)
-    let sign = text("? 4D :( ?", false)
+    let sign = text("4D", false)
     sign.scale.multiplyScalar(2.)
     ambient.scene.add(sign)
 
@@ -142,7 +142,7 @@ function initColumn2d() {
         hyperbolic.camera.updateProjectionMatrix()
 
         let planesGeo = new THREE.CircleGeometry(1.,30)
-        let planesMat = new THREE.MeshPhongMaterial({ color: 0xFF0000, side:THREE.DoubleSide })
+        let planesMat = new THREE.MeshPhongMaterial({ color: 0xff0000, side:THREE.DoubleSide })
         var gridPlanes = new THREE.InstancedMesh(planesGeo, planesMat, gridCount)
 
         //in this space, the y plane is ePlus
@@ -315,14 +315,23 @@ function initColumn2d() {
     let pss = mul(e12, ePlusMinus)
 
     {
-        let floorGeo = new THREE.CircleGeometry(9999.)
+        let floorGeo = new THREE.CircleGeometry(9999.,32)
         floorGeo.rotateX(TAU / 4.)
         let floorPlane = new THREE.Mesh(floorGeo, new THREE.MeshBasicMaterial({ color: 0xFF8000, side: THREE.DoubleSide }))
         floorPlane.position.y = -1.01
         hyperbolic.scene.add(floorPlane)
+        conformal.scene.add(floorPlane)
+
+        //e0
+        let e0Viz = new THREE.Mesh(floorGeo, new THREE.MeshBasicMaterial({ color: 0xFF00FF, side: THREE.DoubleSide }))
+        e0Viz.position.y = 1.01
+        e0Viz.scale.multiplyScalar(.00007)
+        hyperbolic.scene.add(e0Viz)
 
         conformal.camera.position.set(0., 1., 0.)
         conformal.camera.lookAt(0., -1., 0.)
+
+        // conformal.scene.add()
 
         let dragPoint = null
         //maybe
