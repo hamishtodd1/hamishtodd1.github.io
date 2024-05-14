@@ -186,7 +186,7 @@ function initFlVizes(transparentOpacity) {
                             box0.copy(pointGeo.boundingBox)
                             this.idealPointMesh.updateMatrixWorld()
                             box0.applyMatrix4(this.idealPointMesh.matrixWorld)
-                            box0.expandByScalar(1.85)
+                            box0.expandByScalar(2.3)
                             this.boundingBox.union(box0)
                         }
                     }

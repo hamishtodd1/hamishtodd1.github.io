@@ -103,7 +103,7 @@ function initPotentialSpectatorReception() {
         comfortableHandPos(fl0).pointToGibbsVec(v1)
         camera.position.x = 0.
         camera.position.z = -2.4 //2.4m, pretty likely irl tbf
-        camera.position.y = v1.y + 6./32.
+        camera.position.y = 1.2814//v1.y + 6./32. //seated
         camera.rotation.set(0., Math.PI,0.)
 
         camera.updateMatrixWorld()
@@ -208,18 +208,20 @@ function initPotentialSpectatorReception() {
             curtainRight.material.needsUpdate = true
         })
 
-        textureLoader.load('data/stageBackground.png', (texture) => {
-            const mat = new THREE.MeshBasicMaterial({
-                transparent: true,
-                map: texture,
-                side: THREE.DoubleSide
+        if (spectatorMode) {
+            textureLoader.load('data/stageBackground.png', (texture) => {
+                const mat = new THREE.MeshBasicMaterial({
+                    transparent: true,
+                    map: texture,
+                    side: THREE.DoubleSide
+                })
+                const bg = new THREE.Mesh(new THREE.PlaneGeometry(1., 1.), mat)
+                bg.scale.x = generalWidth
+                bg.scale.multiplyScalar(9.3)
+                stage.add(bg)
+                bg.position.z -= 40.
             })
-            const bg = new THREE.Mesh(new THREE.PlaneGeometry(1., 1.), mat)
-            bg.scale.x = generalWidth
-            bg.scale.multiplyScalar(9.3)
-            stage.add(bg)
-            bg.position.z -= 40.
-        })
+        }
 
         {
             let floor = new THREE.Mesh(

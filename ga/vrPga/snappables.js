@@ -1,6 +1,7 @@
 pairAndPotentiallyCreateSnappableSclptable = (snappableIndex, sclptableIndex) => {
 
-    if (snappables[snappableIndex] === undefined) {
+    //TODO this is specific to spectatorMode
+    if (snappables[snappableIndex] === undefined || snappables[snappableIndex] === null) {
         snappables[snappableIndex] = new DqViz(0x000000, true, true) //If you see solid black, it's this
         snappables[snappableIndex].visible = false
     }

@@ -42,6 +42,8 @@
 
 function initDqVizes(transparentOpacity) {
 
+    initScalars()
+
     let dqCol = 0x00FFFF
     let colFactor = 0.
     let colFactorIncrease = 1./sq(Math.sqrt(5.) / 2. + .5)
@@ -97,6 +99,8 @@ function initDqVizes(transparentOpacity) {
             this.rotAxisMesh = new THREE.Mesh(rotAxisGeo, axisMat)
             this.rotAxisMesh.visible = false
             this.add(this.rotAxisMesh)
+
+            this.
 
             this.circuitVisible = false //TODO get rid of this
 
@@ -237,67 +241,6 @@ function initDqVizes(transparentOpacity) {
     }
     window.DqViz = DqViz
 
-    let scalarBgMat = new THREE.MeshBasicMaterial({ color: 0xCCCCCC })
-    class ChangeableText extends THREE.Group {
-
-        constructor() {
-
-            super()
-            
-            this.canvas = document.createElement("canvas")
-            this.material = new THREE.MeshBasicMaterial({ 
-                map: new THREE.CanvasTexture(this.canvas), 
-                transparent: true
-            })
-
-            let font = "Arial"
-            let padding = 43
-            let textSize = 85
-            this.canvas.height = textSize + padding
-            this.canvas.width = 200. //more an estimate of the required resolution
-
-            let currentText = ""
-            this.setText = function (text) {
-                if (currentText === text)
-                    return
-
-                let context = this.canvas.getContext("2d")
-
-                context.font = "bold " + textSize + "px " + font
-                context.textAlign = "center"
-                context.textBaseline = "middle"
-
-                context.clearRect(
-                    0, 0,
-                    this.canvas.width,
-                    this.canvas.height)
-                context.fillStyle = "#000000"
-                context.fillText(text, this.canvas.width / 2., this.canvas.height / 2. + 8) //8 is eyeballed. These are numbers
-
-                let textWidth = context.measureText(text).width + padding
-                bg.scale.x = bg.scale.y * textWidth / this.canvas.height
-
-                this.material.map.needsUpdate = true
-
-                currentText = text
-            }
-
-            let bg = new THREE.Mesh(unchangingUnitSquareGeometry, scalarBgMat)
-            bg.position.z = -.01
-            this.add(bg)
-            let sign = new THREE.Mesh(unchangingUnitSquareGeometry, this.material);
-            sign.scale.x = this.canvas.width / this.canvas.height
-            this.add(sign)
-        }
-
-        dispose() {
-            this.remove(this.children[0])
-            this.remove(this.children[0])
-            this.material.map.dispose()
-            this.material.dispose()
-        }
-    }
-
     debugDqVizes = [
         new DqViz(0xFFFF00, true, true), new DqViz(0xFFFF00, true, true)
     ]
@@ -306,4 +249,6 @@ function initDqVizes(transparentOpacity) {
         ddqv.dq.zero()
         ddqv.markupPos.pointFromGibbsVec(outOfSightVec3)
     })
+
+    
 }

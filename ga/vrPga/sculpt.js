@@ -153,6 +153,8 @@ function initSclptables()
 
             if(currentColor === 11) {
 
+                return
+
                 let eraserWidth = numWide * 2
                 let start = -(eraserWidth - 1) / 2.
                 let ml = this.children.length

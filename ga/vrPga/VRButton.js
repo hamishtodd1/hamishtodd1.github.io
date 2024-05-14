@@ -71,7 +71,7 @@ function initVrButton() {
                 disableButton();
                 button.textContent = 'VR NOT CONNECTED';
                 document.body.removeChild(documentElement)
-                turnOnSpectatorMode()
+                // turnOnSpectatorMode()
             }
 
             function showVRNotAllowed(exception) {

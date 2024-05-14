@@ -6,16 +6,9 @@
     Need to have mul working! So you can have parenting!
         That means: bring their arrows over
 
-    Moving things into place
-    Crocodile
-        Jaw must rotate around a line that its head carries around
-        Soooo it's like the head is carrying a transform around with it
-        1. Make the head
-        2. Make the jaw, in place
-        3. Make the "open" transform, next to the jaw
-        4. Make the "open with button" transform, also next to the jaw
-        5. Move the head
-        5. Grab the jaw. Make it the composition of the head movmeent and the "open with button" movement
+    New TODO
+        interpolate frames on spectator side
+        Scalars
 
     FoC demo:
         Get rid of "VR not connected"
@@ -189,7 +182,11 @@ async function init() {
     initVrButton()
     // initMeasurer()
 
+    // initLevels()
+
     // turnOnSpectatorMode()
+
+    
 
     function render() {
         let clockDelta = clock.getDelta()
