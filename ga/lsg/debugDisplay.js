@@ -83,7 +83,6 @@ function initDebugDisplay() {
     bireflection.log()
     //and normals but whatever
 
-    let equidistantUna = new Unavec();
     let visibles = [true,true];
     let diffs = [new THREE.Vector3(), new THREE.Vector3()]
 
@@ -92,17 +91,27 @@ function initDebugDisplay() {
         _e2.cast(new Unavec),
         _e3.cast(new Unavec),
     ]
+    let csta21Basis = [
+        _e1.cast(new Unavec),
+        _et.cast(new Unavec),
+        _e3.cast(new Unavec),
+    ]
 
     function updateVarious() {
         
-        _e3.cast(renderedUna)
-        // let angle = frameCount * .003
+        let angle = frameCount * .02
+        
+        // _e1.add(_et, _e12)
+        _ep.cast(renderedUna)
         // let transform = oneTw.multiplyScalar(Math.cos(angle), tw0).addScaled(_e1p, Math.sin(angle), tw1)
         // transform.sandwich(_ep, tw0).cast(renderedUna)
 
-        _e1.cast(basis1VecsUnas[0])
-        _e2.cast(basis1VecsUnas[1])
-        _e3.cast(basis1VecsUnas[2])
+        let cstaNess = 1.//0.//.5 + .17 * Math.cos(angle)
+        basis1VecsUnas.forEach((b,i)=>{
+            b.copy(cgaBasis[i])
+            b.lerpSelf(csta21Basis[i], cstaNess)
+        })
+
         basis1VecsUnas[0].meet(basis1VecsUnas[1], bv0).meet(basis1VecsUnas[2], originPp)
         originPp.inner(epm, pss)
         originPp.inner(e0Una, truePtAtInf)
@@ -124,15 +133,15 @@ function initDebugDisplay() {
 
         geo.attributes.position.needsUpdate = true
 
+        debugger
         updateVarious()
 
         for(let i = 0; i < numPixels; ++i) {
 
             let pixelWorldPosVec = pointsObj3d.localToWorld(v1.fromArray(startCoords, i * 3))
             cameraRayDirVec3.subVectors(pixelWorldPosVec, camera.position)
-            // cameraRayDirVec3.set(0.,0.,-1.)
+            cameraRayDirVec3.set(0.,0.,-1.)
 
-            // debugger
             
             vec3ToDop( cameraRayDirVec3, cameraRayDirDop )
             cameraPosZrs.inner(cameraRayDirDop, cameraRayBiv)
@@ -184,9 +193,6 @@ function initDebugDisplay() {
                 visibles[1] && !visibles[0] ? diffs[1] :
                 diffs[0].dot(diffs[0]) < diffs[1].dot(diffs[1]) ? diffs[0] : diffs[1]
             oneToUse.add(camera.position)
-
-            if ((visibles[0] && visibles[1]) )
-                log("yo")
 
             if ((!visibles[0] && !visibles[1]) || bivSq <= 0.)
                 oneToUse = outOfSightVec3

@@ -55,7 +55,8 @@ function initPosSqShader() {
             precedes: `	#include <normal_fragment_maps>`,
             str: `
 
-                diffuseColor = vec4( 1.,0.,0.,1. );
+                diffuseColor = vec4( 0.3,0.3,0.3,1. );
+                // normal = vec3(0.,0.,1.);
 
                 // these you get fed in
                 float[UNA_LEN] renderedUna;
@@ -102,15 +103,11 @@ function initPosSqShader() {
                 float[TRI_LEN] dop0;
                 float[TRI_LEN] unnormalizedPos;
                 float[TRI_LEN] pp;
-                float[UNA_LEN] equidistantUna;
                 float[BIR_LEN] bireflection;
 
                 vec3 normalVec3s[2];
                 bool visibles[2];
                 vec3 diffs[2];
-
-                normal = vec3(0.,0.,1.);
-                // vec3 mrh = vec3(0.,0.,-1.);
                 
                 vec3ToDop( cameraRayDirVec3, cameraRayDirDop, basisDops0, basisDops1, basisDops2 );
                 unaInnerTri( cameraPosZrs, cameraRayDirDop, cameraRayBiv ); //raybiv seems fine
@@ -123,8 +120,6 @@ function initPosSqShader() {
                 for(int i = 0; i < BIV_LEN; ++i)
                     projectorBiv[i] *= factor;
 
-                // triInnerQuad(pp, truePtAtInf, equidistantUna);
-
                 vec3 outOfSightVec3 = vec3(999.,999.,999.);
                 bireflection[0] = .5;
                 for(int i = 0; i < 2; ++i) {
@@ -136,34 +131,33 @@ function initPosSqShader() {
                     unaMeetUna(zrSphere, renderedUna, zrCircle);
                     bivInnerE0(zrCircle, tangentPlane);
 
+                    //IT IS A HACK THAT YOU HAVE MINUS SIGNS IN THE TANGENTPLANE AND THINGY
+
                     //position
                     vec3 posVec3;
-                    // unaInnerQuad(zrSphere, truePtAtInf, unnormalizedPos);
-                    unaMeetBiv(tangentPlane, cameraRayBiv, unnormalizedPos);
-                    float factor = 1. / sqrt(abs(trivInnerSelfScalar(unnormalizedPos)));
+                    unaInnerQuad(zrSphere, truePtAtInf, unnormalizedPos);
+                    // unaMeetBiv(tangentPlane, cameraRayBiv, unnormalizedPos);
+                    float factor = -1. / sqrt(abs(trivInnerSelfScalar(unnormalizedPos)));
+
+                    // factor *= triInnerTri(unnormalizedPos, originPp) < 0. ? 1. : -1.;
                     for(int j = 0; j < TRI_LEN; ++j)
                         dop0[j] = unnormalizedPos[j] * factor - originPp[j];
                     dopToVec3(dop0, posVec3, basisDops0, basisDops1, basisDops2);
 
                     //normal
-                    // unaInnerQuad(tangentPlane, truePtAtInf, dop0);
-                    // dopToVec3(dop0, normalVec3s[i], basisDops0, basisDops1, basisDops2);
-                    normalVec3s[i] = vec3(tangentPlane[0], tangentPlane[1], tangentPlane[2]);
+                    unaInnerQuad(tangentPlane, truePtAtInf, dop0); //obviously the truePtAtInf is another basis element...
+                    dopToVec3(dop0, normalVec3s[i], basisDops0, basisDops1, basisDops2);
+                    normalVec3s[i] *= -1.;
 
                     float eps = .001;
                     bool isE0Multiple = zrSphere[3] != 0. && abs(zrSphere[3] - zrSphere[4])<eps && abs(zrSphere[0]) < eps && abs(zrSphere[1]) < eps && abs(zrSphere[2]) < eps && abs(zrSphere[5]) < eps;
 
                     diffs[i] = posVec3 - cameraPosition;
                     visibles[i] = 
-                        dot( cameraRayDirVec3, diffs[i] ) > 0. && 
-                        !isE0Multiple &&
-                        all(greaterThan(posVec3,extraVec1.xyz)) &&
-                        all(   lessThan(posVec3,extraVec2.xyz));
-
-                    // if(i==0)
-                    //     diffuseColor.g = isE0Multiple ? 1. : 0.;
-                    // else
-                    //     diffuseColor.b = isE0Multiple ? 1. : 0.;
+                        dot( cameraRayDirVec3, diffs[i] ) > 0. 
+                        && !isE0Multiple
+                        && all(greaterThan(posVec3,extraVec1.xyz))
+                        && all(   lessThan(posVec3,extraVec2.xyz));
                 }
 
                 int oneToUse = 
@@ -174,18 +168,11 @@ function initPosSqShader() {
                 if( (!visibles[0] && !visibles[1]) || bivSq <= 0.)
                     diffuseColor.a = 0.;
 
-                // if( visibles[0] && !visibles[1])
-                //     diffuseColor.rgb = vec3(1.,0.,0.);
-                // if(!visibles[0] && visibles[1])
-                //     diffuseColor.rgb = vec3(0.,1.,0.);
-                // if( visibles[0] && visibles[1])
-                //     diffuseColor.rgb = vec3(0.,0.,1.);
+                // diffuseColor.g = visibles[0] ? 1. : 0.;
+                // diffuseColor.b = visibles[1] ? 1. : 0.;
 
                 normal = normalize(normalVec3s[oneToUse]);
                 // diffuseColor.rgb = normal;
-
-
-                // vec3 mrh; dopToVec3(cameraRayDirDop, mrh, basisDops0, basisDops1, basisDops2);
 
             \n`
         },

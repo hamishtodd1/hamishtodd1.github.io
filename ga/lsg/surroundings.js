@@ -19,9 +19,9 @@ function initSurroundings() {
     })
     const floor = new THREE.Mesh(floorGeometry, floorMaterial)
     floor.rotation.x = - Math.PI / 2
-    floor.position.y = -2.5
+    floor.position.y = limitsLower.y
     floor.receiveShadow = true
-    scene.add(floor)
+    // scene.add(floor)
 
     {
         scene.background = new THREE.Color(0x8F8F8F)
@@ -63,7 +63,7 @@ function initSurroundings() {
     scene.add(new THREE.HemisphereLight(0x808080, 0x606060))
 
     const light = new THREE.DirectionalLight(0xffffff)
-    light.position.set(-.5, 2., 2.)
+    light.position.set(-1.2, 2., 2.)
     light.lookAt(0.,1.6,0.)
     light.castShadow = true
     light.shadow.camera.top = 2

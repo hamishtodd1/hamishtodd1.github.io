@@ -1,4 +1,13 @@
 /*
+    Problems:
+        When you look at the hyperboloid diagonally, it goes weird
+        When your basis is light like, it goes weird
+            Possibly solved by not bothering with
+        No points or curves right now
+            Points is in principle easy to solve, just stick a sphere at that point
+            Curves is still possible. Project the origin onto the curve, get transform taking you up and down it, use that
+            Both of these suffer from the problem that they will be occluded by the hyperboloids
+
     Should say:
         what the current versor is
         whether it is hyperbolic/elliptic/euclidean/parabolic
