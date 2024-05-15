@@ -1,7 +1,7 @@
 /*
  */
 
-function initSnapping(distanceOnlyDqVizes) {
+function initSnapping(scalarOnlyDqVizes) {
 
     const tolerance = .15// .06 for users
     let toSnapLogNormalized = new Dq()
@@ -135,7 +135,7 @@ function initSnapping(distanceOnlyDqVizes) {
             let mv0 = sn.mv
 
             let ineligible0 =
-                distanceOnlyDqVizes.indexOf(sn) !== -1 ||
+                scalarOnlyDqVizes.indexOf(sn) !== -1 ||
                 sn === toBeSnapped ||
                 mv0.isZero() ||
                 sn.visible === false ||
@@ -164,7 +164,7 @@ function initSnapping(distanceOnlyDqVizes) {
                     let mv1 = snappables[j].mv
 
                     let ineligible1 =
-                        (distanceOnlyDqVizes.indexOf(snappables[j]) !== -1 && op !== `userPow`) ||
+                        (scalarOnlyDqVizes.indexOf(snappables[j]) !== -1 && op !== `userPow`) ||
                         (snappables[j] === toBeSnapped && !(op === `sandwich` && sn.constructor === DqViz )) ||
                         (op === `sandwich` && snappables[j] === toBeSnapped) || //one day maybe
                         mv1.isZero() ||

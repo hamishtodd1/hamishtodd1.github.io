@@ -40,10 +40,21 @@ function initHands(buttonDqVizes) {
 
     let analogueButtonValues = [0., 0.]
     debugUpdates.push(() => {
-        buttonDqVizes[ LEFT].dq.translator(0., .11 * analogueButtonValues[ LEFT], 0.)
-        getIndicatedHandPosition( LEFT, buttonDqVizes[ LEFT].markupPos)
-        buttonDqVizes[RIGHT].dq.translator(0., .11 * analogueButtonValues[RIGHT], 0.)
-        getIndicatedHandPosition(RIGHT, buttonDqVizes[RIGHT].markupPos)
+        for(let hand = 0; hand < 2; ++hand) {
+            buttonDqVizes[ hand].dq.zero()
+            buttonDqVizes[ hand].dq[0] = .1 * analogueButtonValues[ hand]
+
+            buttonDqVizes[hand].scalar.matrix.makeBasis(
+                v1.set(.1, 0., 0.),
+                v3.set(0., .1, 0.),
+                v2.set(0., 0., -buttonDqVizes[hand].dq[0] ), //NOT GREAT THAT YOU HAVE A MINUS SIGN!
+            )
+
+            getIndicatedHandPosition(hand, fl0).pointToGibbsVec(v1)
+            v1.x -= .05
+            v1.y -= .05
+            buttonDqVizes[hand].scalar.matrix.setPosition(v1)
+        }
     })
 
     ///////////
@@ -56,6 +67,7 @@ function initHands(buttonDqVizes) {
                 updatePaletteFromDiscreteStick(discreteSticksOld[focusHand], focusHand)
         }
 
+        let on = false
         function onMouseButtonDown(event) {
             if (event.button === 0)
                 onGrabButtonDown(focusHand)

@@ -316,7 +316,6 @@ function initControl(potentialSnapDqVizes, potentialSnapFlVizes) {
                 return
             
             snappable.boxHelper.visible = false
-            snappable.circuitVisible = false //fuck that for now
 
             highlightees.forEach((highlightee,hand) => {
 

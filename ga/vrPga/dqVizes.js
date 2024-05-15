@@ -82,7 +82,7 @@ function initDqVizes(transparentOpacity) {
                 null, null, -1
             ]
         
-            this.dq = new Dq() //better to say mv really, disambiguate from dqMeshes
+            this.dq = new Dq().zero() //better to say mv really, disambiguate from dqMeshes
             this.mv = this.dq
 
             if(!color) {
@@ -100,18 +100,13 @@ function initDqVizes(transparentOpacity) {
             this.rotAxisMesh.visible = false
             this.add(this.rotAxisMesh)
 
-            this.
-
-            this.circuitVisible = false //TODO get rid of this
-
             this.trnAxisMesh = new THREE.Mesh(trnAxisGeo, axisMat)
             this.trnAxisMesh.visible = false
             this.add(this.trnAxisMesh)
 
-            this.scalarSign = new ChangeableText()
-            this.scalarSign.scale.multiplyScalar(.4)
-            this.scalarSign.visible = false
-            this.add(this.scalarSign)
+            this.scalar = new ScalarViz(color)
+            this.add(this.scalar)
+            this.scalar.visible = false
 
             this.arrow = new Arrow(color, axisMat)
             this.arrow.visible = false
@@ -135,19 +130,12 @@ function initDqVizes(transparentOpacity) {
                 this.dq.selectGrade(2, bivPart)
                 
                 if (bivPart.isZero()) {
-                    this.rotAxisMesh.visible = this.trnAxisMesh.visible = this.arrow.visible = false
+                    this.rotAxisMesh.visible = this.trnAxisMesh.visible = this.arrow.visible = this.scalar.visible = false
                     
-                    // this.scalarSign.visible = true
-                    // if (this.dq[0] === 1.)
-                    //     this.scalarSign.visible = false
-                    // else {
-                    //     this.markupPos.pointToGibbsVec(this.scalarSign.position)
-                    //     this.scalarSign.lookAt(camera.position)
-                        
-                    //     this.scalarSign.setText(this.dq[0])
-                    //     this.scalarSign.visible = true
-                    // }
-
+                    if(this.dq[0] !== 0.) {
+                        this.scalar.visible = true
+                    }
+                    
                     return
                 }
 
@@ -249,6 +237,4 @@ function initDqVizes(transparentOpacity) {
         ddqv.dq.zero()
         ddqv.markupPos.pointFromGibbsVec(outOfSightVec3)
     })
-
-    
 }

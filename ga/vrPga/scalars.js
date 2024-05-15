@@ -18,29 +18,45 @@ function initScalars() {
     //     v1.y += .15
     //     v1.toArray(tetGeo.attributes.position.array, (face * 3 + faceCorner) * 3)
     // }
-    let volumeRepresentation = new THREE.Group()
-    let opaque = new THREE.Mesh(new THREE.BoxGeometry(1., 1., 1.), new THREE.MeshPhongMaterial({
-        color: 0x00FF00, 
-        side:THREE.BackSide}))
-    let transparent = new THREE.Mesh(opaque.geometry.clone(), new THREE.MeshPhongMaterial({ 
-        color: 0x00FF00, 
-        transparent: true,
-        opacity: .3,
-        side: THREE.FrontSide }))
-    transparent.geometry.scale(1.01, 1.01, 1.01)
-    opaque.geometry.translate(0.5, 0.5, 0.5)
-    transparent.geometry.translate(1.01/2., 1.01/2., 1.01/2.)
-    volumeRepresentation.add(opaque,transparent)
-    volumeRepresentation.matrixAutoUpdate = false
+    let opaqueGeo = new THREE.BoxGeometry(1., 1., 1.)
+    let transparentGeo = opaqueGeo.clone()
+    transparentGeo.scale(1.01, 1.01, 1.01)
+    opaqueGeo.translate(0.5, 0.5, 0.5)
+    transparentGeo.translate(1.01 / 2., 1.01 / 2., 1.01 / 2.)
+    
     let edgeVecs = [
         new THREE.Vector3(1., 1., 0.),
         new THREE.Vector3(0., 1., 0.),
         new THREE.Vector3(0., 0., 1.)
     ]
-    volumeRepresentation.matrix.makeBasis( edgeVecs[0], edgeVecs[1], edgeVecs[2] )
-    // comfortableLookPos(fl0).pointToGibbsVec(v1)
-    volumeRepresentation.matrix.setPosition(0.,0.,-2.)
 
+    class ScalarViz extends THREE.Group {
+        constructor(color) {
+            super()
+            let opaque = new THREE.Mesh(opaqueGeo, new THREE.MeshPhongMaterial({
+                color: color,
+                side: THREE.BackSide
+            }))
+            let transparent = new THREE.Mesh(transparentGeo, new THREE.MeshPhongMaterial({
+                color: color,
+                transparent: true,
+                opacity: .3,
+                side: THREE.FrontSide
+            }))
+            this.add(opaque, transparent)
+            this.matrixAutoUpdate = false
+            this.matrix.makeBasis(edgeVecs[0], edgeVecs[1], edgeVecs[2])
+            this.matrix.setPosition(0., 0., -2.)
+
+            //idea is to have this at the center of the thing
+            //Worry about it later because it should NOT be added to the parallelipiped
+            // this.sign = new ChangeableText()
+            // this.sign.scale.multiplyScalar(.4)
+            // this.add(this.sign) //NO!!!!
+        }
+    }
+    window.ScalarViz = ScalarViz
+    
     let scalarBgMat = new THREE.MeshBasicMaterial({ color: 0xCCCCCC })
     class ChangeableText extends THREE.Group {
 

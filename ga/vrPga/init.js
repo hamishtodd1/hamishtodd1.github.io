@@ -141,7 +141,7 @@ async function init() {
         // timeDqViz.dq.translator(0., len, 0.)
         // comfortableHandPos(timeDqViz.markupPos, 1.5)
     }
-    let distanceOnlyDqVizes = [
+    let scalarOnlyDqVizes = [
         buttonDqVizes[0], buttonDqVizes[1], 
         // timeDqViz
     ]
@@ -150,7 +150,7 @@ async function init() {
     
     initSclptables()
     
-    initSnapping(distanceOnlyDqVizes)
+    initSnapping(scalarOnlyDqVizes)
     initPotentialSpectatorReception()
     initStack()
 
@@ -186,7 +186,7 @@ async function init() {
 
     // turnOnSpectatorMode()
 
-    
+    // let mrh = new DqViz(null, false)
 
     function render() {
         let clockDelta = clock.getDelta()
