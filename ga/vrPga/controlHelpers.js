@@ -230,7 +230,7 @@ function initControlHelpers() {
         }
 
         const rightFl = new Fl()
-        handleOddGestures = (doubleGrabbee) => {
+        handleTwoHandGestures = (doubleGrabbee) => {
 
             //the right hand is the left hand preceded (that is, algebraically followed...) by a reflection in e1
             //so this is the transform that would reflect the right hand then get it to where left hand is

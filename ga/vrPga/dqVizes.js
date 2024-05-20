@@ -138,9 +138,9 @@ function initDqVizes(transparentOpacity) {
                     
                     return
                 }
+                this.scalar.visible = false
 
                 this.arrow.visible = true
-                this.scalarSign.visible = false
 
                 this.dq.invariantDecomposition(rotationPart, translationPart)
 

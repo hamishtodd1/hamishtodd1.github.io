@@ -182,7 +182,7 @@ async function init() {
     initVrButton()
     // initMeasurer()
 
-    // initLevels()
+    initLevels()
 
     // turnOnSpectatorMode()
 
@@ -216,6 +216,8 @@ async function init() {
 
             updateMarkupPoses()
             updatePaletteAnimation()
+
+            updateLevel()
         }
         
         obj3dsWithOnBeforeRenders.forEach(obj3d => obj3d.onBeforeRender())

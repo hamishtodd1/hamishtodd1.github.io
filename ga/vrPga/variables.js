@@ -47,12 +47,12 @@ const operators = [
     //2-argument
     `mul`,
     `dqTo`,
-    `joinPt`, //could have "plus" sign for join
+    `joinPt`, //could have "plus" sign for join, or "union"
     `sandwich`,
     `projectOn`,
 
     //requires specific types!
-    `userPow`, 
+    // `userPow`, 
     // `velocityUnder`, `add`
 
     //1-argument

@@ -1,4 +1,8 @@
 /*
+    Soooo since you're manipulating a scalar with two hands
+        there is no longer "the grabbed thing"
+
+
     When selecting, to make it less annoying,
         could prioritize based on the bb volume
 
@@ -143,8 +147,10 @@ function initControl(potentialSnapDqVizes, potentialSnapFlVizes) {
             }
         }
 
-        if (grabbee === null )
+        if (grabbee === null ) {
             grabbee = new DqViz(null, false)
+            grabbee.dq.copy(oneDq)
+        }
 
         //we are doing this thing for sclptables...
         if (grabbee.affecters[0] !== null && grabbee.sclptable !== null ) {
@@ -154,6 +160,7 @@ function initControl(potentialSnapDqVizes, potentialSnapFlVizes) {
             sclptable.lastViz = grabbee
             
             grabbee = new DqViz(null, false)
+            grabbee.dq.copy(oneDq)
             pairAndPotentiallyCreateSnappableSclptable(snappables.indexOf(grabbee), sclptables.indexOf(sclptable))
         }
 
@@ -167,7 +174,7 @@ function initControl(potentialSnapDqVizes, potentialSnapFlVizes) {
 
             grabbee.lockedGrade = -1
 
-            handleOddGestures(grabbee)
+            handleTwoHandGestures(grabbee)
             v1.addVectors(hands[0].position, hands[1].position).multiplyScalar(.5)
             grabbee.settleDiskPosition(fl0.pointFromGibbsVec(v1))
         }
@@ -216,7 +223,7 @@ function initControl(potentialSnapDqVizes, potentialSnapFlVizes) {
         
         if (grabbees[0] !== null && grabbees[0] === grabbees[1]) {
 
-            handleOddGestures(grabbees[0] )
+            handleTwoHandGestures(grabbees[0] )
 
             if(snapMode)
                 handleSnaps(potentialSnapFlVizes, grabbees[0], numPotentialSnaps, fuckYouPsvs)
@@ -380,8 +387,6 @@ function initControl(potentialSnapDqVizes, potentialSnapFlVizes) {
         output.dontUpdateMarkupPos = false
         putOnStack(output)
 
-        addRotationToSpreadsheetMaybe()
-        
         if (output.constructor === FlViz && output.affecters[0] === null) {
             
             roundFlToTypes(output, true)
