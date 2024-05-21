@@ -182,7 +182,7 @@ async function init() {
     initVrButton()
     // initMeasurer()
 
-    initLevels()
+    initLevelSetup()
 
     // turnOnSpectatorMode()
 
