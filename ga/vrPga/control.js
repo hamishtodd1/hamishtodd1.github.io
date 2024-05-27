@@ -404,6 +404,9 @@ function initControl(potentialSnapDqVizes, potentialSnapFlVizes) {
 
     onPaintButtonDown = (focusHand) => {
 
+        if (gameMode)
+            return
+
         let otherHand = 1 - focusHand
 
         //if you're holding something in the hand that you pressed the button for, well, that would make no sense
@@ -429,8 +432,10 @@ function initControl(potentialSnapDqVizes, potentialSnapFlVizes) {
 
             let potentialPaintee = grabbees[otherHand] || paintees[otherHand] || highlightees[focusHand]
 
-            if (potentialPaintee === null || potentialPaintee.constructor === FlViz)
+            if (potentialPaintee === null || potentialPaintee.constructor === FlViz) {
                 potentialPaintee = new DqViz()
+                potentialPaintee.mv.copy(oneDq)
+            }
 
             if (potentialPaintee.sclptable === null)
                 potentialPaintee.sclptable = new Sclptable(potentialPaintee)
@@ -440,6 +445,9 @@ function initControl(potentialSnapDqVizes, potentialSnapFlVizes) {
     }
 
     onPaintButtonUp = (focusHand) => {
+
+        if (gameMode)
+            return
 
         if (paintees[focusHand] !== null) {
             // toggleButtonsVisibility()

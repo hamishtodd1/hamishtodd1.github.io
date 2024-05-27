@@ -132,9 +132,8 @@ function initDqVizes(transparentOpacity) {
                 if (bivPart.isZero()) {
                     this.rotAxisMesh.visible = this.trnAxisMesh.visible = this.arrow.visible = this.scalar.visible = false
                     
-                    if(this.dq[0] !== 0.) {
-                        this.scalar.visible = true
-                    }
+                    if(this.dq[0] !== 0.)
+                        this.scalar.visible = false//true
                     
                     return
                 }

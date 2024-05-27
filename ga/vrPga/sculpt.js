@@ -12,6 +12,12 @@
 
 function initSclptables()
 {
+    if (gameMode) {
+        updatePaletteAnimation = () => { }
+        hidePalette = () => { }
+        return
+    }
+
     const VOXEL_WIDTH = .003
     const maxVoxels = 30000 //eyeballed
     const numWide = 3 // this isn't affected by currentSize yet
@@ -362,7 +368,7 @@ function initSclptables()
 
                     --this.lowestUnusedCube
                     --this.geometry.drawRange.count
-                    this.parent.com.sub(fl0.pointFromGibbsVec(unrounded), this.parent.com)
+                    this.parent.com.sub(fl0.pointFromGibbsVec(p), this.parent.com)
                     
                     return
                 }
@@ -402,15 +408,15 @@ function initSclptables()
             let potentialNewDrawRange = this.lowestUnusedCube
             this.geometry.drawRange.count = Math.max(this.geometry.drawRange.count, potentialNewDrawRange)
 
-            this.parent.com.add(fl0.pointFromGibbsVec(unrounded), this.parent.com)
+            this.parent.com.add(fl0.pointFromGibbsVec(p), this.parent.com)
 
             let bb = this.parent.boundingBox
-            bb.min.x = Math.min( bb.min.x, unrounded.x - 1.5 * VOXEL_WIDTH )
-            bb.min.y = Math.min( bb.min.y, unrounded.y - 1.5 * VOXEL_WIDTH )
-            bb.min.z = Math.min( bb.min.z, unrounded.z - 1.5 * VOXEL_WIDTH )
-            bb.max.x = Math.max( bb.max.x, unrounded.x + 1.5 * VOXEL_WIDTH )
-            bb.max.y = Math.max( bb.max.y, unrounded.y + 1.5 * VOXEL_WIDTH )
-            bb.max.z = Math.max( bb.max.z, unrounded.z + 1.5 * VOXEL_WIDTH )
+            bb.min.x = Math.min( bb.min.x, p.x - 1.5 * VOXEL_WIDTH )
+            bb.min.y = Math.min( bb.min.y, p.y - 1.5 * VOXEL_WIDTH )
+            bb.min.z = Math.min( bb.min.z, p.z - 1.5 * VOXEL_WIDTH )
+            bb.max.x = Math.max( bb.max.x, p.x + 1.5 * VOXEL_WIDTH )
+            bb.max.y = Math.max( bb.max.y, p.y + 1.5 * VOXEL_WIDTH )
+            bb.max.z = Math.max( bb.max.z, p.z + 1.5 * VOXEL_WIDTH )
         }
     }
 }

@@ -5,6 +5,13 @@
 
 function initPotentialSpectatorReception() {
 
+    if(gameMode) {
+        emitPotentialSclptableSnappable = () => { }
+        turnOnPresenterMode = () => { }
+        turnOnSpectatorMode = () => { }
+        return
+    }
+
     let spectatorCameraNear = 1.6
 
     emitPotentialSclptableSnappable = (snappable) => {

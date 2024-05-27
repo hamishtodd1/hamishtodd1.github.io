@@ -15,11 +15,33 @@ function initLevelSetup() {
     let victorySigns = []
     for (let i = 0; i < 4; ++i) {
         let victorySign = text("Level complete!", false, `#000000`)
-        victorySign.position.z -= 3.
+        victorySign.position.z -= 5.
         victorySign.position.applyAxisAngle(yUnit, i * Math.PI / 2.)
         scene.add(victorySign)
         victorySigns.push(victorySign)
     }
+
+    //3D model
+    // let promise = new Promise(resolve => {
+
+    //     const objLoader = new THREE.OBJLoader()
+
+    //     function onGeoLoad(object) {
+
+    //         new THREE.TextureLoader().load('data/TALTS.jpg', (tex) => {
+    //             let mat = new THREE.MeshBasicMaterial({ map: tex, side: THREE.DoubleSide })
+    //             object.children.forEach(child => {
+    //                 child.material = mat
+    //             })
+
+    //             scene.add(object)
+    //             object.scale.multiplyScalar(.05)
+    //             comfortableLookPos(fl0).pointToGibbsVec(object.position)
+    //         })
+    //     }
+
+    //     objLoader.load('data/TAL16OBJ.obj', onGeoLoad)
+    // })
 
     let levels = []
     let signZ = -2.

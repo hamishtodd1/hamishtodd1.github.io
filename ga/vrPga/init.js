@@ -160,9 +160,9 @@ async function init() {
     initMarkupPos(potentialSnapDqVizes, potentialSnapFlVizes)
     initControl(potentialSnapDqVizes, potentialSnapFlVizes)
 
-    initSpreadsheet()
-    initSpreadsheetHelpers()
-    initTestSpreadsheet()
+    // initSpreadsheet()
+    // initSpreadsheetHelpers()
+    // initTestSpreadsheet()
 
     window.addEventListener('resize', () => {
 
@@ -182,7 +182,10 @@ async function init() {
     initVrButton()
     // initMeasurer()
 
-    initLevelSetup()
+    if (gameMode)
+        initLevelSetup()
+
+    initSaving(scalarOnlyDqVizes)
 
     // turnOnSpectatorMode()
 
@@ -216,9 +219,10 @@ async function init() {
 
             updateMarkupPoses()
             updatePaletteAnimation()
-
-            updateLevel()
         }
+
+        if (gameMode)
+            updateLevel()
         
         obj3dsWithOnBeforeRenders.forEach(obj3d => obj3d.onBeforeRender())
 

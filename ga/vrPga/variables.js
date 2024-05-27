@@ -6,7 +6,8 @@ const randomPt = new Fl().point(0.2448657087518873, 0.07640275431752674, 0.36020
 const notchSpacing = .1 //a decimeter. Very natural, fight me!
 const RIGHT = 0
 const LEFT = 1
-const passThroughMode = true
+const passThroughMode = false
+const gameMode = false
 
 let spectatorMode = null
 let vrSession = null
