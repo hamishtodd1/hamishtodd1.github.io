@@ -9,6 +9,17 @@ function initEgaWithoutDeclarations() {
 
         constructor() {
             super(8)
+            this.gunn = false
+        }
+
+        move(x,y,z) {
+            if(x !== undefined)
+                this[6] += x * this[7]
+            if(y !== undefined)
+                this[5] += y * this[7]
+            if(z !== undefined)
+            this[4] += z * this[7]
+            return this
         }
 
         getPointInDirectionByDistance(dir, dist, target) {
@@ -177,10 +188,18 @@ function initEgaWithoutDeclarations() {
         constructor() {
             super(8)
             this[0] = 1.
+            this.gunn = false
         }
 
-        fromPointsToPoints(q, p) {
+        //don't forget, horrid minus signs
+        translationLogToGibbsVec(target) {
+            if (target === undefined)
+                target = new THREE.Vector3()
 
+            target.x = this[1]
+            target.y = this[2]
+            target.z = this[3]
+            return target
         }
 
         userPow(amountDq, target) {
@@ -353,6 +372,9 @@ function initEgaWithoutDeclarations() {
             if (target === undefined)
                 target = new Dq()
 
+            if(this.isZero())
+                return target.copy(oneDq)
+
             let l = (this[4] * this[4] + this[5] * this[5] + this[6] * this[6])
             if (l === 0.)
                 return target.set(1., this[1], this[2], this[3], 0, 0, 0, 0)
@@ -408,6 +430,10 @@ function initEgaWithoutDeclarations() {
             return this[0] * this[0] + this[4] * this[4] + this[5] * this[5] + this[6] * this[6]
         }
 
+        iNormSq() {
+            return this.getDual(newDq).eNormSq()
+        }
+
         //an example that doesn't decompose very nicely is -0.25878000259399414, 0.20370851457118988, 0.2851245403289795, 0.8831866979598999, 0.13258354365825653, 0.09167366474866867, -0.9523919820785522, 0.19621264934539795
         getNormalization(target) {
 
@@ -418,7 +444,7 @@ function initEgaWithoutDeclarations() {
             let eNormSq = thisThisReverse[0]
 
             if(eNormSq === 0.) {
-                let iNormSq = this.getDual(newDq).eNormSq()
+                let iNormSq = this.iNormSq()
                 if (iNormSq !== 0.) //it's a translation axis
                     return this.multiplyScalar(1. / Math.sqrt(iNormSq), target)
                 else {

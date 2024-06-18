@@ -1,8 +1,9 @@
 /*
     Debugging:
         Connect with mirco usb
-        "adb devices" to hopefully see the thing
-        If there's an old one sitting there saying "disconnected" clear it out with "adb disconnect"
+        "adb devices" to hopefully see the thing.
+            If not there, try unplugging and plugging in
+            If there's an old one sitting there saying "disconnected" clear it out with "adb disconnect"
         "adb tcpip 5555"
         "adb shell ip route" - the ip address of the headset is the second one
         "adb connect [ip address]:5555" though maybe it works without ip address?

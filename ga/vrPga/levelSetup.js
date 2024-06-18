@@ -1,5 +1,8 @@
 
 function initLevelSetup() {
+
+    let currentLevelUpdate = () => { }
+
     let levelSelectGroup = new THREE.Group()
     {
         scene.add(levelSelectGroup)
@@ -54,6 +57,8 @@ function initLevelSetup() {
             else
                 this.winCondition = () => false
 
+            this.init = parameters.init || null
+
             let self = this
             self.signs = []
             if (parameters.signNames !== undefined) {
@@ -80,6 +85,8 @@ function initLevelSetup() {
 
     function switchLevel(increment) {
 
+        //also, get rid of shit!
+
         currentLevel += increment
         if (currentLevel > levels.length)
             currentLevel = levels.length
@@ -101,6 +108,11 @@ function initLevelSetup() {
                 scene.add(sign)
             })
         }
+
+        if(level.init !== null)
+            currentLevelUpdate = level.init()
+        else
+            currentLevelUpdate = () => {}
 
         //remove everything user has made
     }
@@ -188,15 +200,15 @@ function initLevelSetup() {
                 })
             }
         }
+
+        currentLevelUpdate()
     }
 
     document.addEventListener("keydown", event => {
-        if (event.key == "]") {
+        if (event.key == "]")
             switchLevel(1)
-        }
-        if (event.key == "[") {
+        if (event.key == "[")
             switchLevel(-1)
-        }
     })
 
     let currentLevel = -1

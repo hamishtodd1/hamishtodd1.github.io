@@ -170,11 +170,6 @@ void zeroOut(out float[8] a) {
         a[i] = 0.;
 }
 
-void dqPow(in float[8] myDq, in float exponent, out float[8] ret) {
-    float[8] retLog; dqLog( myDq, retLog );
-    multiplyScalar( retLog, exponent, retLog );
-    float[8] along; dqExp( retLog, ret );
-}
 
 
 `

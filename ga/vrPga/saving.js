@@ -1,5 +1,5 @@
 function initSaving(builtInVizes) {
-    
+
     save = ()=> {
         let arr = []
         snappables.forEach((sn, snIndex) => {
@@ -38,7 +38,8 @@ function initSaving(builtInVizes) {
                     }
                     else {
                         s.csCounts[csIndex] = cs.geometry.drawRange.count
-                        s.cses[csIndex] = cs.geometry.attributes.position.array.toString()
+                        let posArr = cs.geometry.attributes.position.array
+                        s.cses[csIndex] = posArr.slice(0, 3 * cs.geometry.drawRange.count).toString()
                     }
                 })
                 log(sn.sclptable.boundingBox)
@@ -52,7 +53,6 @@ function initSaving(builtInVizes) {
 
         let parsed = JSON.parse(saveStr)
         parsed.forEach((snObj, snIndex) => {
-
             
             if( snObj === null ) {
                 if( snappables[snIndex] !== null )
@@ -83,20 +83,9 @@ function initSaving(builtInVizes) {
                         let cs = sn.sclptable.children[csIndex]
                         cs.geometry.drawRange.count = snObj.csCounts[csIndex]
                         if( snObj.csCounts[csIndex] !== 0) {
-                            sn.sclptable.boundingBox.makeEmpty()
-
                             let arr = csArrStr.split(`,`)
-                            // for (let i = 0, il = snObj.csCounts[csIndex]; i < il; ++i) {
-                            //     let c3 = cs.lowestUnusedCube * 3
-                            //     cs.vAttr.array[c3 + 0] = rounded[0]
-                            //     cs.vAttr.array[c3 + 1] = rounded[1]
-                            //     cs.vAttr.array[c3 + 2] = rounded[2]
-                            // }
-                            // debugger
                             for (let i = 0, il = snObj.csCounts[csIndex]; i < il; ++i)
                                 cs.fillCubePositionIfEmpty(v1.set(parseFloat(arr[i * 3 + 0]), parseFloat(arr[i * 3 + 1]), parseFloat(arr[i * 3 + 2])))
-
-                            // debugger
                         }
                     })
                     log(sn.sclptable.boundingBox)

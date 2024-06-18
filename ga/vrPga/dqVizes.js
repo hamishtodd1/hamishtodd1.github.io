@@ -198,7 +198,7 @@ function initDqVizes(transparentOpacity) {
             this.rotAxisMesh.material.dispose()
             this.boxHelper.dispose()
             
-            this.scalarSign.dispose()
+            // this.scalarSign.dispose()
         }
 
         setColor(newColor) {
@@ -223,7 +223,9 @@ function initDqVizes(transparentOpacity) {
         //just to make it so they don't z-fight
         setAxisRadius(factor) {
             this.rotAxisMesh.scale.x = factor
+            this.rotAxisMesh.scale.z = factor
             this.trnAxisMesh.scale.x = factor
+            this.trnAxisMesh.scale.z = factor
         }
     }
     window.DqViz = DqViz

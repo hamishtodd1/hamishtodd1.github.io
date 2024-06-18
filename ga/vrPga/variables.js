@@ -7,7 +7,7 @@ const notchSpacing = .1 //a decimeter. Very natural, fight me!
 const RIGHT = 0
 const LEFT = 1
 const passThroughMode = false
-const gameMode = false
+const gameMode = true
 
 let spectatorMode = null
 let vrSession = null
@@ -31,7 +31,6 @@ const sclptables = []
     const PLANE = 1
     const ROTOR = 2
     const POINT = 3
-    const CONFORMAL_POINT = 4
     const MESH = 5
     const ROTOREFLECTION = 6
     const TRANSFLECTION = 7

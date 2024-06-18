@@ -26,13 +26,6 @@ function initMultivectorWithoutDeclarations() {
             return thisReverse.mulDq(thisThisReverseInverse, target)
         }
 
-        adhocNormSq() {
-            let adHocNormSq = this.eNormSq()
-            if (adHocNormSq === 0.)
-                adHocNormSq = this.iNormSq()
-            return adHocNormSq
-        }
-
         velocityUnder(rotor, target) {
             if (target === undefined)
                 target = new this.constructor()

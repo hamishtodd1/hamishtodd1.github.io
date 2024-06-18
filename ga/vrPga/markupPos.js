@@ -12,7 +12,6 @@ function initMarkupPos( potentialSnapDqVizes, potentialSnapFlVizes ) {
         switch (op) {
 
             case `dqTo`:
-                // UNTESTED
 
                 if (viz.affecters[0].lockedGrade === 3) {
                     viz.markupPos.copy(viz.affecters[0].markupPos)

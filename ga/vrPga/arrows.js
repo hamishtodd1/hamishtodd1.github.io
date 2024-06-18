@@ -232,15 +232,22 @@ function initArrows() {
                 
                 //out vector at base
                 nonNegaArrowStart.momentumLineFromRotor(this.material.dq, spineLineAtNominalStart)
-                let randomPlaneContainingLine = spineLineAtNominalStart.joinPt(randomPt, fl1)
-                let outDqAtStartLog = randomPlaneContainingLine.meet(e0, dq0).normalize()
-                this.material.extraVec2.set(
-                    outDqAtStartLog[1],
-                    outDqAtStartLog[2],
-                    outDqAtStartLog[3]).multiplyScalar(arrowRadius)
+                if (spineLineAtNominalStart.isZero()) {
+                    this.cup.scale.setScalar(.001)
+                    this.material.extraVec2.set(0.,0.,0.)
+                }
+                else {
+                    let randomPlaneContainingLine = spineLineAtNominalStart.joinPt(randomPt, fl1)
+                    let outDqAtStartLog = randomPlaneContainingLine.meet(e0, dq0).normalize()
+                    
+                    this.material.extraVec2.set(
+                        outDqAtStartLog[1],
+                        outDqAtStartLog[2],
+                        outDqAtStartLog[3]).multiplyScalar(arrowRadius)
 
-                e13.dqTo(spineLineAtNominalStart,dq1).toQuaternion(this.cup.quaternion)
-                startPoint.pointToGibbsVec(this.cup.position)
+                    e13.dqTo(spineLineAtNominalStart, dq1).toQuaternion(this.cup.quaternion)
+                    startPoint.pointToGibbsVec(this.cup.position)
+                }
             }
 
             v1.subVectors(boundingBox.max, boundingBox.min)

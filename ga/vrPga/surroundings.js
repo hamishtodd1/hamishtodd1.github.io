@@ -64,7 +64,7 @@ function initSurroundings() {
             exponent: { type: "f", value: 0.6 }
         };
 
-        var skyGeo = new THREE.SphereGeometry(99., 5);
+        var skyGeo = new THREE.SphereGeometry(90., 5);
         var skyMat = new THREE.ShaderMaterial({
             vertexShader,
             fragmentShader,

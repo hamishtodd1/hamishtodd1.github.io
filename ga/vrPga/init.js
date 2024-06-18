@@ -1,36 +1,20 @@
 /*
     Can do "if" statements with with thingYouMayNotWant * (translationDist == 0 ? 1 : 0)
 
-    Extend display! speaker notes!
-
-    Need to have mul working! So you can have parenting!
-        That means: bring their arrows over
-
     New TODO
+        When something snaps from a rotation to a translation, the axis should semi-smoothly change
         interpolate frames on spectator side
         Scalars
 
-    FoC demo:
-        Get rid of "VR not connected"
-        Show a creature with eyeballs that track, a bird flapping its wings, maybe a snake
-        Show from your pov making one of them
-        Make a puppet of maggie? “pizza’s almost here guys”
-        Make the silly old Ram
+    Puppet ideas
+        Bird flapping its wings
+        Snake
+        Ram
             Hand controls head
             Body always in a certain plane
                 Its transform is the rejection from the plane of the head's transform? Uh maybe
-            Trigger button controls boolean, for mouth
-            Hold it by the head
-            Body follows
             Legs pump when moved, eg the instantaneous movement is known
-    TODO for Lauren demo on saturday:
-        Translation from point to point didn't go very well
-        Just have the disk pos be extra state
-        Practice!
-            Load test. Make sure you can do exactly what you want to do
-        Redo personal website
-            put non-working ga stuff in "archive"
-    Jon demo:
+        disk position is NOT markupPos
         Spreadsheet
             Auto-adds vizes
             Auto-adds affectations
@@ -39,17 +23,16 @@
                 point-point for a translation is the most likely so it's ok that it's a bit weird
             userPow goes in as exp(L*distance(T))
         For rotoreflections/transflections, definitely need the pointy extension of your plane to the axis point
-        Levels. Just 4 or so
         Gauges. Some kind of animation system for this triggered by creating mvs.
-        Eyeballs on vizes
         SFX
             Grade selection is a "snap"
+        Undo
+    Beyond:
+        Eyeballs on vizes
         Judges that rate your animations
             One changes their opinion with every level
             One always likes less code.
             One likes dynamism or something, just "seeing more stuff happen"
-        Undo
-    Beyond:
         Bare hands https://github.com/mrdoob/three.js/blob/master/examples/webxr_vr_handinput_cubes.html
             Thumb touching index finger is trigger; touching middle is paint
             Palm is covered in colors, touch them to set that hand to using that color
@@ -149,6 +132,7 @@ async function init() {
     initHands(buttonDqVizes)
     
     initSclptables()
+
     
     initSnapping(scalarOnlyDqVizes)
     initPotentialSpectatorReception()
@@ -182,8 +166,12 @@ async function init() {
     initVrButton()
     // initMeasurer()
 
+    // initExperiment()
+
     if (gameMode)
         initLevelSetup()
+
+    // initField()
 
     initSaving(scalarOnlyDqVizes)
 
@@ -196,9 +184,8 @@ async function init() {
         frameDelta = clockDelta < .1 ? clockDelta : .1 //clamped because debugger pauses create weirdness
         ++frameCount
 
-        if (spectatorMode) {
+        if (spectatorMode)
             handleDqMsgs()
-        }
         else {
 
             updateCameraMvs()
@@ -223,6 +210,8 @@ async function init() {
 
         if (gameMode)
             updateLevel()
+
+        // updateExperiment()
         
         obj3dsWithOnBeforeRenders.forEach(obj3d => obj3d.onBeforeRender())
 
