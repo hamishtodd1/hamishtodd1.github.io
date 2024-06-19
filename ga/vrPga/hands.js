@@ -81,8 +81,10 @@ function initHands(buttonDqVizes) {
                 onPaintButtonUp(focusHand)
         }
 
-        let snapMode = true
         function nonVrKeyDowns(event) { //forget about holding, just use toggles, too much hassle
+
+            if(event.repeat)
+                return
 
             if (event.key === ` `)
                 focusHand = 1-focusHand
@@ -92,17 +94,13 @@ function initHands(buttonDqVizes) {
             //mouse fast forward and rewind
             //IF THIS ISN'T WORKING CHECK SCRIPT, MAY NEED TO CHANGE WINDOW NAME
             if (event.key === "5" ) {
-                if(!snapMode)
-                    onSnapButtonDown()
-                else
-                    onSnapButtonUp()
-                snapMode = !snapMode
+                onSnapToggleButton()
             }
 
             keyToDiscreteStick(event.key, discreteSticks[focusHand])
         }
 
-        document.addEventListener(`keydown`, nonVrKeyDowns)
+        document.addEventListener(`keydown`, nonVrKeyDowns )
         document.addEventListener("mousedown", onMouseButtonDown)
         document.addEventListener("mouseup", onMouseButtonUp)
     }

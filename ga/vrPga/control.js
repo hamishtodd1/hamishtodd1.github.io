@@ -81,6 +81,12 @@ function initControl(potentialSnapDqVizes, potentialSnapFlVizes) {
 
             fuckYouPsvs.length = 0
         }
+        onSnapToggleButton = () => {
+            if(!snapMode)
+                onSnapButtonDown()
+            else
+                turnOffSnapMode()
+        }
         onSnapButtonUp = () => {
             turnOffSnapMode()
         }
@@ -95,6 +101,7 @@ function initControl(potentialSnapDqVizes, potentialSnapFlVizes) {
             //pt turning invisible somewhere here
             let potentialSnapsVizes = toBeSnapped.constructor === DqViz ? potentialSnapDqVizes : potentialSnapFlVizes
             numPotentialSnaps = generatePotentialSnaps(potentialSnapsVizes, toBeSnapped)
+            // debugger
             // logPotentialSnaps(potentialSnapsVizes, numPotentialSnaps)
         }
     }
@@ -373,13 +380,17 @@ function initControl(potentialSnapDqVizes, potentialSnapFlVizes) {
         if(output === null)
             return
 
+        
         if (grabbees[0] !== null && grabbees[0] === grabbees[1])
             grabbees[1 - focusHand] = null
         grabbees[focusHand] = null
-
+        
         if (snapMode) {
+            log(output.markupPos)
             let psvs = output.constructor === DqViz ? potentialSnapDqVizes : potentialSnapFlVizes
             output = snapIfAcceptable(output, psvs)
+
+            log(output.markupPos)
 
             turnOffSnapMode()
         }

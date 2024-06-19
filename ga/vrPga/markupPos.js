@@ -114,7 +114,10 @@ function initMarkupPos( potentialSnapDqVizes, potentialSnapFlVizes ) {
         return point
     }
 
+    let mrh = new Fl()
     updateMarkupPoses = () => {
+
+        // return
 
         /*To take into account:
             You could be holding the thing/have just let go of the thing
@@ -135,6 +138,7 @@ function initMarkupPos( potentialSnapDqVizes, potentialSnapFlVizes ) {
             heldDq.markupPos.sub(ptOnAxis, fl1)
             ptOnAxis.movePointInDirectionByDistance(fl1, comfortableAxisDist, viz.markupPos)
         }
+
 
         vizes.forEach((viz, vizIndex) => {
             if (viz === null)
@@ -165,6 +169,7 @@ function initMarkupPos( potentialSnapDqVizes, potentialSnapFlVizes ) {
             }
         })
 
+
         //done after all the others because you need to override changes
         potentialSnapDqVizes.forEach(viz => {
 
@@ -182,6 +187,7 @@ function initMarkupPos( potentialSnapDqVizes, potentialSnapFlVizes ) {
                 makeMoreLikeHeldDq(viz)
             }
         })
+
 
         vizes.forEach(viz => {
             if (viz === null || !viz.visible)
@@ -202,15 +208,20 @@ function initMarkupPos( potentialSnapDqVizes, potentialSnapFlVizes ) {
                     viz.setAxisRadius(.95)
                 }
 
+                //would like to have this or something like it!
                 if (operators[viz.affecters[2]] === `mul` &&
                     viz.affecters[0].constructor === DqViz &&
                     viz.affecters[1].constructor === DqViz) {
 
-                    viz.affecters[1].markupPos.copy(viz.markupPos)
-                    viz.affecters[1].getArrowTip(viz.affecters[0].markupPos)
+                    viz.affecters[0].markupPos.getNormalization(fl0).add(
+                        viz.affecters[1].markupPos.getNormalization(fl1),
+                        viz.markupPos )
+                    // viz.affecters[1].markupPos.copy(viz.markupPos)
+                    // viz.affecters[1].getArrowTip(viz.affecters[0].markupPos)
                 }
             }
         })
+
     }
 
 

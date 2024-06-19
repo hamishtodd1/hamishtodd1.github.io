@@ -15,7 +15,6 @@ function initSclptables()
     if (gameMode) {
         updatePaletteAnimation = () => { }
         hidePalette = () => { }
-        return
     }
 
     const VOXEL_WIDTH = .003
