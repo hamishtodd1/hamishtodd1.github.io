@@ -283,11 +283,12 @@ function initControlHelpers() {
 
             if (!snapMode)
             {
+                getIndicatedHandPosition(handIndex, handPosition)
                 //if you rotate your hand only a little, that's a translation
                 if(rotationPart.dq.equals(oneDq))
                     evenGrabbee.markupPos.dqTo(handPosition, evenGrabbee.dq) //TODO isn't that just the translation part?
                 else {
-                    let dist = rotationPart.dq.selectGrade(2, dq0).distanceToPt(getIndicatedHandPosition(handIndex, handPosition))
+                    let dist = rotationPart.dq.selectGrade(2, dq0).distanceToPt(handPosition)
                     if (dist > .35 && evenGrabbee.sclptable === null)
                         evenGrabbee.markupPos.dqTo(handPosition, evenGrabbee.dq)
                 }

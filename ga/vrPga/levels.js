@@ -22,6 +22,7 @@ Make it so you can save your doodles!
     Exp is needed, and that means scalars
 
     Doodle!
+    Flying machine where you make a small motion with a hand and it's a big motion with a wing
     Kid on a swing
     Bicycle chain
     A tornado swaying from side to side while turning

@@ -57,21 +57,24 @@ io.on('connection', socket => {
 
 	socket.emit(`serverConnected`)
 
-    let things = [
+    let messageNames = [
         `snappable`,
         `sclptable`,
         `spectatorCamera`,
         `refresh`,
-        `cameraWanted`
+        `cameraWanted`,
+        `saveAll`,
+        `getFromVr`,
+        `saveFromVr`,
     ]
-    things.forEach(thing => {
-        let theThing = thing
-        socket.on(theThing, msg => {
+    messageNames.forEach(messageName => {
+        let theMessageName = messageName
+        socket.on(theMessageName, msg => {
             sockets.forEach(s => {
                 if (s === socket)
                     return
 
-                s.emit(theThing, msg)
+                s.emit(theMessageName, msg)
             })
         })
     })

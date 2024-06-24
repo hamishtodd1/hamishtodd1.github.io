@@ -60,10 +60,15 @@ function initSaving(builtInVizes) {
 
         return JSON.stringify(arr)
     }
+    socket.on(`saveAll`, msg => {
+        socket.emit(`saveAll`, JSON.stringify(arr))
+    })
+
+    getFromVr = () => socket.emit(`getFromVr`)
+    socket.on(`getFromVr`, () => socket.emit(`saveFromVr`, saveAll()))
+    socket.on(`saveFromVr`, msg => log(msg))
 
     loadMultiple = (arrStr)=>{
-
-        debugger
 
         let startIndex = snappables.length
 

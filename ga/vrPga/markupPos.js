@@ -114,7 +114,6 @@ function initMarkupPos( potentialSnapDqVizes, potentialSnapFlVizes ) {
         return point
     }
 
-    let mrh = new Fl()
     updateMarkupPoses = () => {
 
         // return
