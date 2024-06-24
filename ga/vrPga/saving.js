@@ -69,10 +69,11 @@ function initSaving(builtInVizes) {
     socket.on(`saveFromVr`, msg => log(msg))
 
     loadMultiple = (arrStr)=>{
-
+        
         let startIndex = snappables.length
-
+        
         let parsed = JSON.parse(arrStr)
+        log(parsed)
         parsed.forEach((savable, index) => {
             loadSavable(savable, startIndex)
         })

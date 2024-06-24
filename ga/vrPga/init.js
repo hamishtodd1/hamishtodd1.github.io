@@ -109,6 +109,10 @@ async function init() {
 
     initDqMeshes()
 
+    socket.on('refresh', () => {
+        window.location.reload()
+    })
+
     initArrows()
     let transparentOpacity = .45
     initDqVizes( transparentOpacity )
@@ -128,6 +132,8 @@ async function init() {
         buttonDqVizes[0], buttonDqVizes[1], 
         // timeDqViz
     ]
+    let builtInVizes = scalarOnlyDqVizes
+    //you've got "builtIns" but you've also got this "backgroundSnappable" property
 
     initHands(buttonDqVizes)
     
@@ -168,12 +174,14 @@ async function init() {
 
     // initExperiment()
 
+    initSaving(builtInVizes)
+
     if (gameMode)
-        initLevelSetup()
+        initLevelSetup(builtInVizes)
 
     // initField()
 
-    initSaving(scalarOnlyDqVizes)
+    
 
     // turnOnSpectatorMode()
 

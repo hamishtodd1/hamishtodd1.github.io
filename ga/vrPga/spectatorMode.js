@@ -12,6 +12,24 @@ function initPotentialSpectatorReception() {
         return
     }
 
+    socket.on("sclptable", msg => {
+
+        turnOnSpectatorMode()
+
+        pairAndPotentiallyCreateSnappableSclptable(msg.snappableIndex, msg.sclptableIndex)
+
+        let cs = sclptables[msg.sclptableIndex].children[msg.childIndex]
+        cs.vAttr.needsUpdate = true
+        cs.vAttr.updateRange.offset = 0
+        cs.vAttr.updateRange.count = 0
+        cs.geometry.drawRange.count = 0
+        cs.lowestUnusedCube = 0
+
+        let arr = msg.arr.split(`,`)
+        for (let i = 0, il = parseInt(msg.count); i < il; ++i)
+            cs.fillCubePositionIfEmpty(v1.set(arr[i * 3 + 0], arr[i * 3 + 1], arr[i * 3 + 2]))
+    })
+
     let spectatorCameraNear = 1.6
 
     emitPotentialSclptableSnappable = (snappable) => {

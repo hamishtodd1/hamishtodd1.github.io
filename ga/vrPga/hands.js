@@ -254,10 +254,6 @@ function initHands(buttonDqVizes) {
         // vrRight.addEventListener('squeezestart', () => { onGrabButtonDown    ( RIGHT ) } ) //log(`6`) })
         // vrRight.addEventListener('squeezeend',   () => { onGrabButtonUp      ( RIGHT ) } ) //log(`7`) })
 
-        socket.on('refresh', ()=>{
-            window.location.reload()
-        } )
-
         onEnterVrFirstTime = (session) => {
 
             vrSession = session

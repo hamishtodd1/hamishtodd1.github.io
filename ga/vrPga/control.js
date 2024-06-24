@@ -415,7 +415,7 @@ function initControl(potentialSnapDqVizes, potentialSnapFlVizes) {
 
     onPaintButtonDown = (focusHand) => {
 
-        if (gameMode)
+        if (gameMode && !designMode)
             return
 
         let otherHand = 1 - focusHand
@@ -457,7 +457,7 @@ function initControl(potentialSnapDqVizes, potentialSnapFlVizes) {
 
     onPaintButtonUp = (focusHand) => {
 
-        if (gameMode)
+        if (gameMode && !designMode)
             return
 
         if (paintees[focusHand] !== null) {

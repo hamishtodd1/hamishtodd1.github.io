@@ -2,7 +2,6 @@
 function initLevelSetup() {
 
     let currentLevelUpdate = () => { }
-    let currentLevelDestroy = () => { }
 
     let levelSelectGroup = new THREE.Group()
     {
@@ -86,7 +85,6 @@ function initLevelSetup() {
 
     function switchLevel(increment) {
 
-        currentLevelDestroy()
         snappables.forEach(s => {
             if( !s.backgroundSnappable )
                 s.dispose()
@@ -115,11 +113,10 @@ function initLevelSetup() {
         }
 
         if(level.init !== null) {
-            [currentLevelUpdate, currentLevelDestroy] = level.init()
+            currentLevelUpdate = level.init()
         }
         else {
             currentLevelUpdate = () => {}
-            currentLevelDestroy = () => {}
         }
 
         //remove everything user has made
