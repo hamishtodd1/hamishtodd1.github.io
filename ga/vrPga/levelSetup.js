@@ -8,7 +8,7 @@ function initLevelSetup() {
         scene.add(levelSelectGroup)
         levelSelectGroup.scale.multiplyScalar(.03)
 
-        let title = text("level select", false, `#000000`)
+        let title = text("select challenge", false, `#000000`)
         title.position.y += 1.1
         levelSelectGroup.add(title)
     }
@@ -83,11 +83,16 @@ function initLevelSetup() {
     }
     window.Level = Level
 
-    function switchLevel(increment) {
+    switchLevel = (increment) => {
 
+        vizes.forEach(v=>{
+            log(v,v.backgroundSnappable)
+        })
+        //user's
         snappables.forEach(s => {
-            if( !s.backgroundSnappable )
+            if( !s.backgroundSnappable ) {
                 s.dispose()
+            }
         })
 
         currentLevel += increment
@@ -208,13 +213,6 @@ function initLevelSetup() {
 
         currentLevelUpdate()
     }
-
-    document.addEventListener("keydown", event => {
-        if (event.key == "]")
-            switchLevel(1)
-        if (event.key == "[")
-            switchLevel(-1)
-    })
 
     let currentLevel = -1
     initLevels()

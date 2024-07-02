@@ -19,7 +19,7 @@ function initControlHelpers() {
         // })
 
         // var flViz0 = new FlViz(null, false, true)
-        // flViz0.lockedGrade = 3
+        // flViz0.lockedType = 3
         // comfortableLookPos(flViz0.fl, 0., -.2)
 
         // {
@@ -238,9 +238,9 @@ function initControlHelpers() {
             //...the transform that would get the place where the right hand is to that
             rightFl.mulReverse(hands[RIGHT].dq, doubleGrabbee.fl)
 
-            if (doubleGrabbee.lockedGrade === 1)
+            if (doubleGrabbee.lockedType === 1)
                 doubleGrabbee.fl.zeroGrade(3)
-            else if (doubleGrabbee.lockedGrade === 3)
+            else if (doubleGrabbee.lockedType === 3)
                 doubleGrabbee.fl.zeroGrade(1)
             else
                 roundFlToTypes(doubleGrabbee, false)
@@ -251,27 +251,18 @@ function initControlHelpers() {
     }
 
     {
-        class Decomposition {
-            constructor() {
-                this.rotationPart = new DqViz(0x00FFFF, true, true)
-                this.translationPart = new DqViz(0x00FFFF, true, true)
-                this.translationPart.setAxisRadius(.95)
-                this.rotationPart.setAxisRadius(.95)
-            }
-        }
-        let decompositions = [new Decomposition(), new Decomposition()]
+        let decomposition = [new Decomposition(.4), new Decomposition(.4)]
 
         hideDqDecompositionVizes = (hand) => {
-            decompositions[hand].rotationPart.visible = false
-            decompositions[hand].translationPart.visible = false
+            decomposition[hand].setVisibility(false) //or just inline
         }
         
         let handPosition = new Fl()
         roundEvenGesture = (handIndex, snapMode) => {
 
             let evenGrabbee = grabbees[handIndex]
-            let rotationPart = decompositions[handIndex].rotationPart
-            let translationPart = decompositions[handIndex].translationPart
+            let rotationPart = decomposition[handIndex].a
+            let translationPart = decomposition[handIndex].b
 
             evenGrabbee.dq.invariantDecomposition(rotationPart.dq, translationPart.dq)
 

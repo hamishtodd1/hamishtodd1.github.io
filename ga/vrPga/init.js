@@ -81,7 +81,7 @@
         IRL, you can ONLY change things by moving something
             Well, sort of. There's switches, and speaking. Both technically are movement. But, movement is irrelevant
         Training wheels
-            dqTo, userPow, lockedGrades, joinPt (except maybe PGA is typed so lockedGrades is fundamental...)
+            dqTo, userPow, lockedTypes, joinPt (except maybe PGA is typed so lockedTypes is fundamental...)
         Instead of
             Sqrt, grade selection, scalars/norms/normalization        
 
@@ -132,7 +132,6 @@ async function init() {
         buttonDqVizes[0], buttonDqVizes[1], 
         // timeDqViz
     ]
-    let builtInVizes = scalarOnlyDqVizes
     //you've got "builtIns" but you've also got this "backgroundSnappable" property
 
     initHands(buttonDqVizes)
@@ -174,10 +173,10 @@ async function init() {
 
     // initExperiment()
 
-    initSaving(builtInVizes)
+    initSaving()
 
     if (gameMode)
-        initLevelSetup(builtInVizes)
+        initLevelSetup()
 
     // initField()
 
@@ -213,6 +212,7 @@ async function init() {
             //then broadcast
 
             updateMarkupPoses()
+            updateSnapDecomposition()
             updatePaletteAnimation()
         }
 

@@ -1,14 +1,15 @@
 const TAU = Math.PI * 2.
 
 const eps = .0001 //not been tweaked for anything yet, so feel free to change
-const translucentOpacity = .65
 const randomPt = new Fl().point(0.2448657087518873, 0.07640275431752674, 0.360207610338215, 0.)
 const notchSpacing = .1 //a decimeter. Very natural, fight me!
 const RIGHT = 0
 const LEFT = 1
 const passThroughMode = false
 const gameMode = true
-const designMode = !gameMode ? false :  true
+const designMode = false//!gameMode ? false :  true
+
+const axesInvisible = true
 
 let spectatorMode = null
 let vrSession = null
@@ -47,10 +48,10 @@ let debuggerTrigger = false
 const operators = [
     //2-argument
     `mul`,
-    `dqTo`,
-    `joinPt`, //could have "plus" sign for join, or "union"
-    `sandwich`,
-    `projectOn`,
+    // `dqTo`,
+    // `joinPt`, //could have "plus" sign for join, or "union"
+    // `sandwich`,
+    // `projectOn`,
 
     //requires specific types!
     // `userPow`, 

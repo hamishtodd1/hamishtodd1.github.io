@@ -3,6 +3,43 @@
 
 function initSnapping(scalarOnlyDqVizes) {
 
+    {
+        var decomposition = new Decomposition(1.)
+        decomposition.a.dontUpdateMarkupPos = true
+        decomposition.b.dontUpdateMarkupPos = true
+        decomposition.currentAttachment = null
+        decomposition.a.dontUpdateMarkupPos = true
+        decomposition.b.dontUpdateMarkupPos = true
+        let mp0Desired = new Fl()
+        let mp1Desired = new Fl()
+
+        detachDecomposition = () => {
+            decomposition.currentAttachment = null
+        }
+        updateSnapDecomposition = () => {
+
+            let best = decomposition.currentAttachment
+
+            if (best === null) {
+                decomposition.setVisibility(false)
+                return
+            }
+
+            let affecters = best.affecters
+            decomposition.setVisibility(true)
+            decomposition.a.dq.copy(affecters[1].mv)
+            decomposition.b.dq.copy(affecters[0].mv)
+
+            //figure out the new markupPos
+            mp0Desired.copy(best.markupPos)
+            affecters[1].dq.sandwich(mp0Desired, mp1Desired)
+
+            decomposition.a.markupPos.lerpSelf(mp0Desired, .04)
+            decomposition.b.markupPos.lerpSelf(mp1Desired, .04)
+        }
+    }
+
+    const translucentOpacity = .45//.65
     const tolerance = .15// .06 for users
     let toSnapLogNormalized = new Dq()
     let potentialSnapLogNormalized = new Dq()
@@ -106,7 +143,6 @@ function initSnapping(scalarOnlyDqVizes) {
     }
 
     generatePotentialSnaps = (potentialSnapsVizes, toBeSnapped) => {
-
 
         let lowestUnused = 0
 
@@ -213,7 +249,7 @@ function initSnapping(scalarOnlyDqVizes) {
     let pscDq = new Dq()
     let pscFl = new Fl()
     
-    rate = (opIndex, potentialSnap, toBeSnapped) => {
+    function rate(opIndex, potentialSnap, toBeSnapped) {
 
         let psMv = potentialSnap.mv
 
@@ -377,14 +413,21 @@ function initSnapping(scalarOnlyDqVizes) {
                 best.affecters[0].setOpacity(flashingOpacity)
             if( best.affecters[1] !== null)
                 best.affecters[1].setOpacity(flashingOpacity)
+
+            let affecters = best.affecters
+            if (operators[affecters[2]] === "mul" && affecters[0].mv.constructor === Dq && affecters[1].mv.constructor === Dq) {
+
+                if(decomposition.currentAttachment !== best) {
+                    decomposition.currentAttachment = best
+
+                    decomposition.a.markupPos.copy(affecters[1].markupPos)
+                    decomposition.a.setColor(affecters[1].rotAxisMesh.material.color)
+                    decomposition.b.markupPos.copy(affecters[0].markupPos)
+                    decomposition.b.setColor(affecters[0].rotAxisMesh.material.color)
+                }
+            }
+            else
+                decomposition.currentAttachment = null
         }
-    }
-
-    getBestAcceptableSnap = ( potentialSnaps ) => {
-
-        if (Math.abs(potentialSnaps[0].snapRating) < tolerance)
-            return 0
-        else
-            return -1
     }
 }

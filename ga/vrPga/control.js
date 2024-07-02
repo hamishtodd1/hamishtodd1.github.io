@@ -80,6 +80,8 @@ function initControl(potentialSnapDqVizes, potentialSnapFlVizes) {
                 potentialSnapFlVizes[i].visible = false
 
             fuckYouPsvs.length = 0
+
+            detachDecomposition()
         }
         onSnapToggleButton = () => {
             if(!snapMode)
@@ -179,7 +181,7 @@ function initControl(potentialSnapDqVizes, potentialSnapFlVizes) {
         // else 
         if (grabbee === grabbees[otherHand]) {
 
-            grabbee.lockedGrade = -1
+            grabbee.lockedType = -1
 
             handleTwoHandGestures(grabbee)
             v1.addVectors(hands[0].position, hands[1].position).multiplyScalar(.5)
@@ -200,7 +202,7 @@ function initControl(potentialSnapDqVizes, potentialSnapFlVizes) {
         grabbees[focusHand] = grabbee
         makeUnaffected(grabbee)
 
-        if (grabbee.lockedGrade !== 1)
+        if (grabbee.lockedType !== 1)
             grabbee.dontUpdateMarkupPos = true
         else
             grabbee.dontUpdateMarkupPos = false //because we just like doing it for that one
@@ -252,9 +254,9 @@ function initControl(potentialSnapDqVizes, potentialSnapFlVizes) {
 
                     hands[focusHand].dq.mulReverse(handDqOnGrabs[focusHand], dq0)
                     dq0.sandwich(oddGrabbeeOnGrabs[focusHand],grabbee.fl)
-                    if (grabbee.lockedGrade === 1)
+                    if (grabbee.lockedType === 1)
                         grabbee.fl.zeroGrade(3)
-                    if (grabbee.lockedGrade === 3)
+                    if (grabbee.lockedType === 3)
                         grabbee.fl.zeroGrade(1)
 
                     if (snapMode)
@@ -265,7 +267,7 @@ function initControl(potentialSnapDqVizes, potentialSnapFlVizes) {
                     hands[focusHand].dq.mulReverse( handDqOnGrabs[focusHand], dq0 )
                     dq0.mul( evenGrabbeeOnGrabs[focusHand], grabbee.dq )
     
-                    roundEvenGesture(focusHand, snapMode)
+                    // roundEvenGesture(focusHand, snapMode)
 
                     // setMeasurer(grabbees[focusHand])
     
@@ -352,20 +354,22 @@ function initControl(potentialSnapDqVizes, potentialSnapFlVizes) {
                     snappable.boxHelper.material.color.copy(highlighteeIsAffecteeCol)
                 }
             })
-            grabbees.forEach((grabbee,hand) => {
 
-                if (grabbee === null)
-                    return
+            // box helper stuff for grabbees
+            // grabbees.forEach((grabbee,hand) => {
 
-                if (aDependsOnB(grabbee,snappable)) {
-                    snappable.boxHelper.visible = true
-                    snappable.boxHelper.material.color.copy(highlighteeIsAffectorCol)
-                }
-                else if (aDependsOnB(snappable,grabbee)) {
-                    snappable.boxHelper.visible = true
-                    snappable.boxHelper.material.color.copy(highlighteeIsAffecteeCol)
-                }
-            })
+            //     if (grabbee === null)
+            //         return
+
+            //     if (aDependsOnB(grabbee,snappable)) {
+            //         snappable.boxHelper.visible = true
+            //         snappable.boxHelper.material.color.copy(highlighteeIsAffectorCol)
+            //     }
+            //     else if (aDependsOnB(snappable,grabbee)) {
+            //         snappable.boxHelper.visible = true
+            //         snappable.boxHelper.material.color.copy(highlighteeIsAffecteeCol)
+            //     }
+            // })
 
             if (snappable.sclptable) {
                 snappable.sclptable.boxHelper.visible = snappable.boxHelper.visible
@@ -386,11 +390,8 @@ function initControl(potentialSnapDqVizes, potentialSnapFlVizes) {
         grabbees[focusHand] = null
         
         if (snapMode) {
-            log(output.markupPos)
             let psvs = output.constructor === DqViz ? potentialSnapDqVizes : potentialSnapFlVizes
             output = snapIfAcceptable(output, psvs)
-
-            log(output.markupPos)
 
             turnOffSnapMode()
         }
@@ -403,10 +404,10 @@ function initControl(potentialSnapDqVizes, potentialSnapFlVizes) {
             roundFlToTypes(output, true)
             let has1 = output.fl.hasGrade(1)
             let has3 = output.fl.hasGrade(3)
-            output.lockedGrade = has1 && !has3 ? 1 : 3 //nobody wants rotoreflections/transflections
+            output.lockedType = has1 && !has3 ? 1 : 3 //nobody wants rotoreflections/transflections
 
             //Bit hacky. For rotoreflections.
-            if (output.lockedGrade === 1) {
+            if (output.lockedType === 1) {
                 output.markupPos.pointFromGibbsVec(output.diskGroup.position)
                 output.settleDiskPosition(output.markupPos)
             }

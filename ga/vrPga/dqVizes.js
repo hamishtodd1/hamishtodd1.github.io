@@ -3,6 +3,8 @@
         A null bivector, hey man, that's still valid - it's a translation to infinity
         So, Just the beginning of the arrow, going off into the sky
 
+    Would be nice if it was a bit more likely to turn a basically-straight arrow into a straight arrow
+
     Possibly 180s should have no arrow at all
 
     Possibly should have points at infinity where the axes meet the sky
@@ -68,6 +70,9 @@ function initDqVizes(transparentOpacity) {
 
             this.sclptable = null
 
+            // this.lockedType = -1
+            //Translation stays translation?
+
             this.snapRating = -1
             
             this.boundingBox = new THREE.Box3()
@@ -112,7 +117,6 @@ function initDqVizes(transparentOpacity) {
             this.arrow.visible = false
             // this.arrow.castShadow = true //would be nice but it doesn't use the vertex shader
             this.markupPos = new Fl().copy(e123)
-            this.markupPosAttractor = new Fl().copy(e123)
             this.add(this.arrow)
 
             this.arrowBar = new THREE.Mesh(new THREE.CylinderGeometry(),axisMat)
@@ -181,6 +185,11 @@ function initDqVizes(transparentOpacity) {
                     }
                 }
 
+                if(axesInvisible) {
+                    this.rotAxisMesh.visible = false
+                    this.trnAxisMesh.visible = false
+                }
+
                 updateBoxHelper(this.boxHelper, this.boundingBox)
             }
         }
@@ -205,9 +214,9 @@ function initDqVizes(transparentOpacity) {
             if (newColor === undefined)
                 newColor = dqCol
 
-            this.arrow.material.color.setHex(newColor)
-            this.rotAxisMesh.material.color.setHex(newColor)
-            this.trnAxisMesh.material.color.setHex(newColor)
+            this.arrow.material.color.copy(newColor)
+            this.rotAxisMesh.material.color.copy(newColor)
+            // this.scalar.material.color.copy(newColor)
         }
 
         //it's a vec3 going in there
@@ -238,4 +247,24 @@ function initDqVizes(transparentOpacity) {
         ddqv.dq.zero()
         ddqv.markupPos.pointFromGibbsVec(outOfSightVec3)
     })
+}
+
+class Decomposition {
+    
+    constructor(opacity) {
+
+        this.a = new DqViz(0x00FFFF, true, true)
+        this.b = new DqViz(0x00FFFF, true, true)
+
+        this.b.setAxisRadius(.95)
+        this.a.setAxisRadius(.95)
+
+        this.a.setOpacity(opacity)
+        this.b.setOpacity(opacity)
+    }
+
+    setVisibility = (visibility) => {
+        this.a.visible = visibility
+        this.b.visible = visibility
+    }
 }

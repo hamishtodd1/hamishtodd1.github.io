@@ -13,10 +13,10 @@ function initMarkupPos( potentialSnapDqVizes, potentialSnapFlVizes ) {
 
             case `dqTo`:
 
-                if (viz.affecters[0].lockedGrade === 3) {
+                if (viz.affecters[0].lockedType === 3) {
                     viz.markupPos.copy(viz.affecters[0].markupPos)
                 }
-                else if (viz.affecters[0].lockedGrade === 1 && viz.affecters[1].lockedGrade === 1) {
+                else if (viz.affecters[0].lockedType === 1 && viz.affecters[1].lockedType === 1) {
 
                     let axis = viz.mv.selectGrade(2, dq0)
 
@@ -125,16 +125,16 @@ function initMarkupPos( potentialSnapDqVizes, potentialSnapFlVizes ) {
         // if(frameCount === 850)
         //     debugger
 
-        let heldDq = null
+        let heldDqViz = null
         if (grabbees[0] !== null && grabbees[0].constructor === DqViz)
-            heldDq = grabbees[0]
+            heldDqViz = grabbees[0]
         else if (grabbees[1] !== null && grabbees[1].constructor === DqViz)
-            heldDq = grabbees[1]
+            heldDqViz = grabbees[1]
 
         function makeMoreLikeHeldDq(viz) {
             viz.dq.invariantDecomposition(dq0, dq1)
-            let ptOnAxis = heldDq.markupPos.projectOn(dq0.selectGrade(2, dq1), fl0).normalizePoint()
-            heldDq.markupPos.sub(ptOnAxis, fl1)
+            let ptOnAxis = heldDqViz.markupPos.projectOn(dq0.selectGrade(2, dq1), fl0).normalizePoint()
+            heldDqViz.markupPos.sub(ptOnAxis, fl1)
             ptOnAxis.movePointInDirectionByDistance(fl1, comfortableAxisDist, viz.markupPos)
         }
 
@@ -144,28 +144,28 @@ function initMarkupPos( potentialSnapDqVizes, potentialSnapFlVizes ) {
                 return
 
             //a case that remains external is the decompositions of the hand position, that's simple
-            if (viz.dontUpdateMarkupPos || viz.visible === false)
-                return
+            // if (viz.dontUpdateMarkupPos || viz.visible === false)
+            //     return
 
-            if (viz.affecters[0] !== null)
-                setMarkupPosFromAffecters(viz)
-            if(viz.constructor === FlViz ) {
+            // if (viz.affecters[0] !== null)
+            //     setMarkupPosFromAffecters(viz)
+            // if(viz.constructor === FlViz ) {
 
-                if ( viz.lockedGrade === 3 )
-                    viz.markupPos.copy(viz.fl)
-                else if ( viz.lockedGrade === 1 ) {
-                    if( grabbees.indexOf(viz) !== -1 ) {
-                        let handHeldIn = hands[grabbees.indexOf(viz)]
-                        handHeldIn.laserDq.meet( viz.fl, viz.markupPos )
-                    }
-                }
-            }
-            else if (viz.constructor === DqViz) {
+            //     if ( viz.lockedType === 3 )
+            //         viz.markupPos.copy(viz.fl)
+            //     else if ( viz.lockedType === 1 ) {
+            //         if( grabbees.indexOf(viz) !== -1 ) {
+            //             let handHeldIn = hands[grabbees.indexOf(viz)]
+            //             handHeldIn.laserDq.meet( viz.fl, viz.markupPos )
+            //         }
+            //     }
+            // }
+            // else if (viz.constructor === DqViz) {
 
-                if (viz.sclptable !== null && viz.constructor === DqViz && grabbees.indexOf(viz) === -1) {
-                    viz.markupPos.lerp(viz.sclptable.com, .003, viz.markupPos)
-                }
-            }
+            //     if (viz.sclptable !== null && viz.constructor === DqViz && grabbees.indexOf(viz) === -1) {
+            //         viz.markupPos.lerp(viz.sclptable.com, .003, viz.markupPos)
+            //     }
+            // }
         })
 
 
@@ -183,43 +183,44 @@ function initMarkupPos( potentialSnapDqVizes, potentialSnapFlVizes ) {
                 viz.affecters[0].constructor === DqViz &&
                 viz.affecters[1].constructor === DqViz) {
 
-                makeMoreLikeHeldDq(viz)
+                // makeMoreLikeHeldDq(viz)
+                viz.markupPos.copy(heldDqViz.markupPos)
             }
         })
 
 
-        vizes.forEach(viz => {
-            if (viz === null || !viz.visible)
-                return
+        // vizes.forEach(viz => {
+        //     if (viz === null || !viz.visible)
+        //         return
 
-            //just lengths of the things
-            if(viz.constructor === DqViz) {
-                //to be doing this is to admit that you're using k-volumes
-                //people will want the length of this thing
-                if (operators[viz.affecters[2]] === `joinPt` && viz.affecters[0].fl[7] !== 0. && viz.affecters[1].fl[7] !== 0.) {
-                    let distBetween = viz.affecters[0].fl.distanceToPt(viz.affecters[1].fl)
-                    viz.rotAxisMesh.scale.y = Math.max(distBetween - .02, .02)
-                }
-                else
-                    viz.rotAxisMesh.scale.y = 3.5 * viz.boundingBox.getSize(v0).length()
+        //     //just lengths of the things
+        //     if(viz.constructor === DqViz) {
+        //         //to be doing this is to admit that you're using k-volumes
+        //         //people will want the length of this thing
+        //         if (operators[viz.affecters[2]] === `joinPt` && viz.affecters[0].fl[7] !== 0. && viz.affecters[1].fl[7] !== 0.) {
+        //             let distBetween = viz.affecters[0].fl.distanceToPt(viz.affecters[1].fl)
+        //             viz.rotAxisMesh.scale.y = Math.max(distBetween - .02, .02)
+        //         }
+        //         else
+        //             viz.rotAxisMesh.scale.y = 3.5 * viz.boundingBox.getSize(v0).length()
 
-                if (operators[viz.affecters[2]] === `userPow`) {
-                    viz.setAxisRadius(.95)
-                }
+        //         if (operators[viz.affecters[2]] === `userPow`) {
+        //             viz.setAxisRadius(.95)
+        //         }
 
-                //would like to have this or something like it!
-                if (operators[viz.affecters[2]] === `mul` &&
-                    viz.affecters[0].constructor === DqViz &&
-                    viz.affecters[1].constructor === DqViz) {
+        //         //would like to have this or something like it!
+        //         if (operators[viz.affecters[2]] === `mul` &&
+        //             viz.affecters[0].constructor === DqViz &&
+        //             viz.affecters[1].constructor === DqViz) {
 
-                    viz.affecters[0].markupPos.getNormalization(fl0).add(
-                        viz.affecters[1].markupPos.getNormalization(fl1),
-                        viz.markupPos )
-                    // viz.affecters[1].markupPos.copy(viz.markupPos)
-                    // viz.affecters[1].getArrowTip(viz.affecters[0].markupPos)
-                }
-            }
-        })
+        //             viz.affecters[0].markupPos.getNormalization(fl0).add(
+        //                 viz.affecters[1].markupPos.getNormalization(fl1),
+        //                 viz.markupPos )
+        //             // viz.affecters[1].markupPos.copy(viz.markupPos)
+        //             // viz.affecters[1].getArrowTip(viz.affecters[0].markupPos)
+        //         }
+        //     }
+        // })
 
     }
 

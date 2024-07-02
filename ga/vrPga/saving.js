@@ -1,12 +1,13 @@
 
 //bultInVizes had better be at the start!
-function initSaving(builtInVizes) {
-
-    let numBuiltIn = builtInVizes.length
-    if(numBuiltIn !== 2)
-        console.error("LOADING IS GONNA BREAK BECAUSE DIFFERENT NUMBER OF BUILT INS!")
+function initSaving() {
 
     function getSavable(index) {
+
+        let numBuiltIn = 0
+        for(let i = 0; i < snappables.length; ++i)
+            if(snappables[i].backgroundSnappable)
+                ++numBuiltIn
 
         let sn = snappables[index]
 
@@ -53,8 +54,9 @@ function initSaving(builtInVizes) {
 
     saveAll = ()=> {
         let arr = []
-        for(let i = builtInVizes.length; i < snappables.length; ++i)
-            arr.push(getSavable(i))
+        for(let i = 0; i < snappables.length; ++i)
+            if(!snappables[i].backgroundSnappable)
+                arr.push(getSavable(i))
 
         // log(arr)
 
@@ -73,7 +75,6 @@ function initSaving(builtInVizes) {
         let startIndex = snappables.length
         
         let parsed = JSON.parse(arrStr)
-        log(parsed)
         parsed.forEach((savable, index) => {
             loadSavable(savable, startIndex)
         })
@@ -93,7 +94,6 @@ function initSaving(builtInVizes) {
         sn.mv.fromArray(savable.values.split(`,`))
         sn.markupPos.fromArray(savable.markupPos.split(`,`))
 
-        log(savable)
         sn.affecters[0] = savable.affecterIndices[0] === -1 ? null : snappables[savable.affecterIndices[0]+startIndex]
         sn.affecters[1] = savable.affecterIndices[1] === -1 ? null : snappables[savable.affecterIndices[1]+startIndex]
         sn.affecters[2] = savable.affecterIndices[2]

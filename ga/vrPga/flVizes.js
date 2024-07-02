@@ -80,7 +80,7 @@ function initFlVizes(transparentOpacity) {
 
             //stateful crap
             this.snapRating = -1
-            this.lockedGrade = -1
+            this.lockedType = -1
 
             let pointMat = new THREE.MeshPhongMaterial({
                 color: (color || 0xFF0000),

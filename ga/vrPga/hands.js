@@ -208,6 +208,14 @@ function initHands(buttonDqVizes) {
         document.addEventListener('wheel', onMouseWheel)
     }
 
+    function onChangeLevelButton(event) {
+        if (event.key == "]")
+            switchLevel(1)
+        if (event.key == "[")
+            switchLevel(-1)
+    }
+    document.addEventListener("keydown", onChangeLevelButton)
+
     removeMouseEventListeners = () => {
         console.log(`Removing mouse event listeners`)
 
@@ -293,14 +301,23 @@ function initHands(buttonDqVizes) {
             putButtonLabelsOnVrControllers()
 
             getPalletteInput = () => {
+
                 let i = 0
                 for (const source of session.inputSources) {
                     if (!source.gamepad)
                         continue
 
                     // if there's a problem with which hand is which, it might be because both controllers weren't connected
-                    if (!discreteSticksOld[i].equals(discreteSticks[i]))
-                        updatePaletteFromDiscreteStick(discreteSticks[i], session.inputSources[i].handedness === `left` ? LEFT : RIGHT)
+                    if (!discreteSticksOld[i].equals(discreteSticks[i])) {
+                        if (gameMode && !designMode) {
+                            //we change level
+                            if(i===LEFT) //uh what? Surely wrong one
+                                switchLevel(-discreteSticks[i].y)
+                        }
+                        else {
+                            updatePaletteFromDiscreteStick(discreteSticks[i], session.inputSources[i].handedness === `left` ? LEFT : RIGHT)
+                        }
+                    }
 
                     ++i
                 }
@@ -383,7 +400,6 @@ function initHands(buttonDqVizes) {
                         ++i
                     }
                 }
-
             }
 
             scene.add(vrRight)
