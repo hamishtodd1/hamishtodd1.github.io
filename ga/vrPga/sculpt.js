@@ -12,11 +12,6 @@
 
 function initSclptables()
 {
-    if (gameMode && !designMode) {
-        updatePaletteAnimation = () => { }
-        hidePalette = () => { }
-    }
-
     const VOXEL_WIDTH = .003
     const maxVoxels = 30000 //eyeballed
     const numWide = 3 // this isn't affected by currentSize yet

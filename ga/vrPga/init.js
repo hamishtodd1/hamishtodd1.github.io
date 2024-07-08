@@ -132,7 +132,7 @@ async function init() {
         buttonDqVizes[0], buttonDqVizes[1], 
         // timeDqViz
     ]
-    //you've got "builtIns" but you've also got this "backgroundSnappable" property
+    //you've got "builtIns" but you've also got this "backgroundViz" property
 
     initHands(buttonDqVizes)
     

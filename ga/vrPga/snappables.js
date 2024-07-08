@@ -28,7 +28,7 @@ function initStack() {
         stack[0] = snappables.indexOf(s)
 
         // snappables.forEach((sn,i) => {
-        //     if(sn !== null && !sn.backgroundSnappable )
+        //     if(sn !== null && !sn.backgroundViz )
         //         sn.visible = stack.indexOf(i) !== -1
         // })
     }

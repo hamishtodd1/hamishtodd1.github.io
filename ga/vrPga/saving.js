@@ -6,7 +6,7 @@ function initSaving() {
 
         let numBuiltIn = 0
         for(let i = 0; i < snappables.length; ++i)
-            if(snappables[i].backgroundSnappable)
+            if(snappables[i].backgroundViz)
                 ++numBuiltIn
 
         let sn = snappables[index]
@@ -55,7 +55,7 @@ function initSaving() {
     saveAll = ()=> {
         let arr = []
         for(let i = 0; i < snappables.length; ++i)
-            if(!snappables[i].backgroundSnappable)
+            if(!snappables[i].backgroundViz)
                 arr.push(getSavable(i))
 
         // log(arr)
@@ -70,13 +70,15 @@ function initSaving() {
     socket.on(`getFromVr`, () => socket.emit(`saveFromVr`, saveAll()))
     socket.on(`saveFromVr`, msg => log(msg))
 
-    loadMultiple = (arrStr)=>{
+    loadMultiple = (arrStr, challengeSnappables)=>{
         
         let startIndex = snappables.length
         
         let parsed = JSON.parse(arrStr)
         parsed.forEach((savable, index) => {
-            loadSavable(savable, startIndex)
+            let sn = loadSavable(savable, startIndex)
+            if(challengeSnappables !== undefined)
+                challengeSnappables.push(sn)
         })
     }
 

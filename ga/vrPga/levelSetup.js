@@ -83,17 +83,18 @@ function initLevelSetup() {
     }
     window.Level = Level
 
+    let challengeSnappables = []
     switchLevel = (increment) => {
 
-        vizes.forEach(v=>{
-            log(v,v.backgroundSnappable)
-        })
         //user's
         snappables.forEach(s => {
-            if( !s.backgroundSnappable ) {
+            if( s !== null && !s.backgroundViz ) {
                 s.dispose()
             }
         })
+        //previous level's
+        while(challengeSnappables.length > 0)
+            challengeSnappables.pop().dispose()
 
         currentLevel += increment
         if (currentLevel > levels.length)
@@ -215,6 +216,6 @@ function initLevelSetup() {
     }
 
     let currentLevel = -1
-    initLevels()
+    initLevels(challengeSnappables)
     switchLevel(1)
 }

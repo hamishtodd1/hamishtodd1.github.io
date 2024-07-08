@@ -59,13 +59,13 @@ function initDqVizes(transparentOpacity) {
     let pointHalfWayAlongArrow = new Fl()
     class DqViz extends THREE.Group {
         
-        constructor(color, omitFromSnappables = false, backgroundSnappable = false) {
+        constructor(color, omitFromSnappables = false, backgroundViz = false) {
 
             super()
             vizes.push(this)
             // log(vizes.length-1, getWhereThisWasCalledFrom())
             this.dontUpdateMarkupPos = true
-            this.backgroundSnappable = backgroundSnappable
+            this.backgroundViz = backgroundViz
             scene.add(this)
 
             this.sclptable = null

@@ -6,7 +6,8 @@ const notchSpacing = .1 //a decimeter. Very natural, fight me!
 const RIGHT = 0
 const LEFT = 1
 const passThroughMode = false
-const gameMode = true
+
+let gameMode = true
 const designMode = false//!gameMode ? false :  true
 
 const axesInvisible = true

@@ -114,7 +114,7 @@ function initControlHelpers() {
             if(snappable === null)
                 return
 
-            if(snappable.backgroundSnappable)
+            if(snappable.backgroundViz)
                 return
 
             let distSq = Infinity
