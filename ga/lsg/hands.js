@@ -10,6 +10,8 @@ async function initHands() {
     hand2 = new DqMesh(standinHandGeo, new THREE.MeshPhongMaterial({ color: 0x0000FF }))
     scene.add(hand2)
     hand2.dq.translator(-1., 0., 0.)
+    hand1.visible = false
+    hand2.visible = false
 
     //Mouse stuff
     {

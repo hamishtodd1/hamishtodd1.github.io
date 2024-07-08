@@ -57,14 +57,14 @@ async function init() {
     //         painting = false
     // })
 
+    initFilaments()
+
     initCamera()
     initSurroundings()
 
     await initHands()
     initButtons()
 
-    initDraft()
-    
     window.addEventListener('resize', () => {
 
         camera.aspect = window.innerWidth / window.innerHeight
@@ -92,8 +92,8 @@ async function init() {
 
         blankFunction()
 
-        updateSteeringSpheres()
         // sim.update()
+        updateFilaments()
         
         buttonWhileDowns()
 

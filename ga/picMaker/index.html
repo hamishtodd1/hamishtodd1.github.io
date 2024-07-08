@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>Conformal</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+        }
+    </style>
+</head>
+
+<body>
+    
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://threejs.org/build/three.module.js",
+                "three/addons/": "./jsm/"
+            }
+        }
+    </script>
+    <script type="module" src="xrControllers.module.js"></script>
+
+    <script src="variables.js"></script>
+
+    <script src="Multivector.js"></script>
+    <script src="gaMeta.js"></script>
+    <script src="cga.js"></script>
+    <script src="cga.glsl"></script>
+    <script>
+        initCga()
+    </script>
+    <script src="ega.js"></script>
+    <script src="ega.glsl"></script>
+    <script src="cgaVizes.js"></script>
+    <script src="rotorVizes.js"></script>
+    
+    <script src="three.js"></script>
+    <script src="miscFunctions.js"></script>
+    <script src="OBJLoader.js"></script>
+    <script src="OrbitControls.js"></script>
+    <script src="threejsVariables.js"></script>
+    <script src="VRButton.js"></script>
+
+
+    <script src="rigging.js"></script>
+    <script src="painting.js"></script>
+    
+    <script src="buttons.js"></script>
+    
+    <script src="meshes.js"></script>
+
+    <script src="mouse.js"></script>
+    <script src="camera.js"></script>
+    <script src="drawing.js"></script>
+    
+    <script src="notation.js"></script>
+    <script src="text.js"></script>
+    <script src="surroundings.js"></script>
+
+    <script src="init.js"></script>
+
+    <!-- probably controller model related. Remove? -->
+    <script async src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"></script>
+    
+
+    <!-- <script type="importmap">
+        {
+            "imports": {
+            "three": "https://unpkg.com/three@v0.151.3/build/three.module.js",
+            "three/addons/": "https://unpkg.com/three@v0.151.3/examples/jsm/"
+            }
+        }
+        </script>
+    <script type="module">
+        import { XRControllerModelFactory } from 'three/addons/webxr/XRControllerModelFactory.js';
+        {
+            const controllerModelFactory = new XRControllerModelFactory()
+
+            let controllerGrip1 = renderer.xr.getControllerGrip(0)
+            controllerGrip1.add(controllerModelFactory.createControllerModel(controllerGrip1))
+            scene.add(controllerGrip1)
+
+            let controllerGrip2 = renderer.xr.getControllerGrip(1)
+            controllerGrip2.add(controllerModelFactory.createControllerModel(controllerGrip2))
+            scene.add(controllerGrip2)
+        }
+    </script> -->
+</body>
+
+</html>

@@ -1,13 +1,12 @@
 const spreadsheets = []
 const cellHeight = 0.11
+let allCellsVisible = false //false: meshes, selected cell, and selected cell's dependencies; true: everything visible
+const layerWidth = .001
+
 const meshVizes = []
 let userMeshesData = {}
 
-let allCellsVisible = false //false: meshes, selected cell, and selected cell's dependencies; true: everything visible
-
 let gotVr = false
-
-const layerWidth = .001
 
 //enum
 const NO_VIZ_TYPE = 0

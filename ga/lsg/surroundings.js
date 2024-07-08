@@ -1,6 +1,6 @@
 function initSurroundings() {
 
-    scene.background = new THREE.Color(0x8F8F8F)
+    scene.background = new THREE.Color(0x999999)
 
     // const urls = ['posx.jpg', 'negx.jpg', 'posy.jpg', 'negy.jpg', 'posz.jpg', 'negz.jpg'];
     // new THREE.CubeTextureLoader()
@@ -21,7 +21,7 @@ function initSurroundings() {
     floor.rotation.x = - Math.PI / 2
     floor.position.y = limitsLower.y
     floor.receiveShadow = true
-    // scene.add(floor)
+    scene.add(floor)
 
     {
         scene.background = new THREE.Color(0x8F8F8F)

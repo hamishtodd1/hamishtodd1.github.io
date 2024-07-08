@@ -14,7 +14,7 @@ async function initCga() {
     }
     let withoutDeclarations = replacementNews(replacementNews(funcString, `Rotor`), `Cga`)
 
-    var strToEval =
+    const strToEval =
         `(` +
         withoutDeclarations +
         declarations +
@@ -27,7 +27,7 @@ async function initEga() {
 
     //newEga is not a variable name. It is equivalent to `new Ega()`
     
-    var strToEval = `(()=>{`
+    let strToEval = `(()=>{`
     let declarations = ``
     let i = 0
     function newify(startStr) {

@@ -61,10 +61,14 @@ async function init() {
     init42()
     initPluckerVizes()
     
-    initDebugDisplay()
+    initGeneral()
     
     // initBasises()
     initPosSqShader()
+    
+    // initField()
+    // initSurface()
+    // initNegSq()
 
     window.addEventListener('resize', () => {
 
@@ -81,21 +85,46 @@ async function init() {
     renderer.xr.enabled = true
     container.appendChild(renderer.domElement)
 
-    document.body.appendChild(VRButton.createButton(renderer))    
+    // document.body.appendChild(VRButton.createButton(renderer))    
 
     // camera.position.set(0.,0.,4.)
     // camera.lookAt(0.,0.,0.)
 
+    {
+        const cone1Geo = new THREE.ConeGeometry(1., 1., 16, 1, true)
+        cone1Geo.translate(0.,0.5,0.)
+        const cone1 = new THREE.LineSegments(new THREE.WireframeGeometry(cone1Geo), new THREE.MeshBasicMaterial({ color: 0xffff00 }));
+        scene.add(cone1)
+        const cone2 = new THREE.LineSegments(new THREE.WireframeGeometry(cone1Geo), new THREE.MeshBasicMaterial({ color: 0xffff00 }));
+        cone2.rotation.x = TAU / 2.
+        scene.add(cone2)
+    }
+
+    let transform = new Tw()
+    
+    camera.position.multiplyScalar(.9)
     function render() {
         let clockDelta = clock.getDelta()
         frameDelta = clockDelta < .1 ? clockDelta : .1 //clamped because debugger pauses create weirdness
         ++frameCount
-
+        
         updateCameraMvs()
         updateHandMvs()
         buttonWhileDowns()
+
+        let angle = -2.2 + frameCount * .006
+        // log(angle)
+        oneTw.multiplyScalar( Math.cosh(-angle), tw0).addScaled(_etp, Math.sinh(-angle), transform)
+
+        updateGeneral(transform)
+        updateLsgMat()
         
-        updateDisplay()
+        // updateSurface()
+        // updateField(transform)
+
+        // updateDebugGrade1()
+
+        // updateNegSq()
 
         debugUpdates.forEach(func=>func())
 

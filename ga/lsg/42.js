@@ -198,7 +198,8 @@ function init42() {
     _ep = new Tw().fromFloatAndIndex(1., 4)
     _em = new Tw().fromFloatAndIndex(1., 5)
     _et = new Tw().fromFloatAndIndex(1., 6) //yeah, bit weird, but it is what it is
-    _e0 = _ep.add(_em,new Tw())
+    _e0 = _ep.add(_em, new Tw())
+    _eo = _ep.sub(_em, new Tw())
 
     _e1t = _e1.meet(_et, new Tw()) //boost preserving the origin
     _e10 = _e1.meet(_e0, new Tw()) //translation in space
@@ -229,9 +230,6 @@ function init42() {
     _e023 = _e0.meet(_e23, new Tw())
     _e013 = _e0.meet(_e13, new Tw())
     _e031 = _e0.meet(_e31, new Tw())
-
-    _e0123 = _e01.meet(_e23, new Tw())
-    _eo = _ep.sub(_em, new Tw())
 
     oneTw = new Tw().fromFloatAndIndex(1., 0)
     zeroTw = new Tw()
