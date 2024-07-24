@@ -1,26 +1,321 @@
+<!--
+
+	Lengthen kick out time
+	Fuck it, number on your hand
+	Bugs
+		Lots of text boxes have their background behind other things
+		ghost suspect with black square and loads of bests on them?????
+	
+	For sure you want a "just give your probabilities" controller
+	This can also let you purchase half-bets
+	And can make sure your probabilities add to one
+
+	You might also want what is probably a hedge fund
+	Eg you know that ONE of the "anti sexism policies" will lead to better mental health
+	But you don't know which, so you want your bets spread in a way that gives that
+
+
+
+	vibrate the white flash
+
+	Streamer mode
+		No ID
+		Only the original player can take pictures
+	Auto-refresh also puts in the game id
+	Going into debt
+	Starting with 0
+	Quite awful bug if you... hit the new suspect button twice at the start? On mobile?
+	Refund when suspect is deleted?
+		That's more for "unresolved" rather than "resolved in the negative"
+		Want to incentivize them to sell, and in a certain order, selling is part of the game
+		If you were to do this, it would be a case of tracking who still has some cash in there
+		and giving them the most you can give them
+	Could make it so ctrl+v puts a pasted image in the camera feed, useful for desktop
+		Even text could go in, could use drop down window
+	probably best not to scale up cash width because think about initial cash
+	
+	Lobbyist mode
+		With lobbyist mode, you also have a lot of bets more expensive than what the person gets for them. Then, a strategy: if you know someone is trying to manipulate the price of X to be >80p at 1pm, but the true price of X is 20p, you can:
+		-buy a load of bets on X at <80p
+		-wait until 12:59pm when the price is 81p
+		-sell a bet, price goes down to 79p
+		-watch the manipulator buy so price goes back to 81p
+		-sell again
+		-manipulator buys again
+		etc. Only problem is, you have to buy when 
+
+		Yes, key thing is that there should be unlimited bets, so that the manipulator is forced to make the price extraordinarily high so that when everyone sells it's still above the watermark
+
+		If you can figure out how much the manipulator gains from having the price be past the watermark, you can pump all that money out of them
+
+
+
+		No reason why it should be secret really. Say how much cash the manipulator gets, and who they are, and what suspect they're going for.
+
+		Easter egg: open console and set newGameButton.manipulatorMode = true before clicking it
+
+		-how much money they get
+		-how much extra money they start with
+		-When the suspect appears, a 25-second timer starts. If the suspect's bets are trading at 1:1 when it's done, the manipulator gets N dollars.
+
+		Alt
+			Manipulator  will get 1 googol dollars from the market price being above 1
+			So they're willing to lose .9999 = 1 googol dollars
+			To bet, if there are 10 bets
+	Another fun thing would be a bot mode where you see that wealth gets reallocated pretty quickly
+
+ -->
+
 <html>
+	<html>
 	<head>
-		<meta charset="utf-8">
-		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-		<style>
-			body {
-				margin: 0px;
-				overflow: hidden;
-			}
-		</style>
+		
+	<meta name="twitter:card" content="summary_large_image">
+	<meta name="twitter:creator" content="@hamish_todd">
+	<meta property="og:type" content="website">
+	<meta property="og:url" content="https://murdershebet.com">
+	
+	<meta name="title" content="Murder, She Bet" />
+	<meta itemprop="name" content="Murder, She Bet">
+	<meta name="twitter:title" content="Murder, She Bet">
+	<meta property="og:site_name" content="Murder, She Bet">
+	<meta property="og:title" content="Murder, She Bet">
+	
+	<meta itemprop="description"
+		content="A game about putting your money where you'd usually put your mouth">
+	<meta name="description"
+		content="A game about putting your money where you'd usually put your mouth" />
+	<meta name="twitter:description"
+		content="A game about putting your money where you'd usually put your mouth" />
+	<meta property="og:description"
+		content="A game about putting your money where you'd usually put your mouth" />
+	
+	<meta property="og:image" content="https://murdershebet.com/screenshot.jpg" />
+	<meta name="twitter:image" content="https://murdershebet.com/screenshot.jpg" />
+	<meta itemprop="image" content="https://murdershebet.com/screenshot.jpg">
+		
+		
+		
+	<meta
+		charset="utf-8"><meta
+		name="viewport" content="width=device-width, initial-scale=1">
+
+		<title>Murder, She Bet [BETA]</title>
+
+		<link href="generalStyle.css" rel="stylesheet" type="text/css">
 	</head>
+
 	<body>
-		<script src="lib/three.js"></script>
 
-		<script src="windowResizeSystem.js"></script>
-		<script src="miscFunctions.js"></script>
-		<script src="mouseControlSystem.js"></script>
-		<script src="text.js"></script>
+	<header>
+	<h1><center>Murder, She Bet</center></h1>
+	</header>
 
-		<script src="portraits.js"></script>
-		<script src="board.js"></script>
+	<br></br>
+
+	<div>
+		<p></p>
+		<center><button type="button" id="newGameButton">Start a new game!</button></center>
+		<p></p>
+		
+			<center>Or enter the ID of a game started by a friend:</center>
+			<center><textarea id="gameIdBox" name="gameIdBox" rows="1" cols="26"></textarea></center>
+			<center><button type="button" id="enterGameButton">Submit</button></center>
+		<p></p>
+	</div>
+
+	<br></br>
+	
+	<center>
+		<h3>Rules:</h3>
+	</center>
+	<ol>
+		<li>2-8 players will <b>sign into a game using the box above</b>, each on a different device</li>
+		<li>The players will watch a <b>murder mystery</b> TV show such as Poirot or Scooby Doo</li>
+		<li>The show must have multiple <b>suspects</b> who may turn out to be <b>guilty</b> at the end</li>
+		<li>Players will add suspects to the board, with their phone's camera</li>
+		<li>Players buy and sell <b>bets</b> on the suspects' guilt</li>
+		<li>When the credits roll, if a suspect is guilty, <b>their bets will be turned into money</b></li>
+		<li>Try to have as much money as possible at the end!</li>
+	</ol>
+	
+	<br></br>
+	
+	<center>
+		<h3>How to play, using a suggested <a href='https://www.youtube.com/watch?v=z-VuX2kcaCY'>practice murder mystery video</a>:</h3>
+	</center>
+	<center>
+		<iframe width="100%" height="51.1%" src="https://www.youtube.com/embed/wlERXS77fr0" frameborder="0"
+			allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+			allowfullscreen="false"></iframe>
+	</center>
+
+	<br></br>
+	
+	<center>
+		<h3>Advanced: Rule Clarifications and FAQ</h3>
+	</center>
+	<center>
+		<iframe width="100%" height="51.1%" src="https://www.youtube.com/embed/8IHBtfEX8iU" frameborder="0"
+			allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+			allowfullscreen="false"></iframe>
+	</center>
+
+	<br></br>
+	
+	<center><a href='https://github.com/hamishtodd1/msb/'>Github</a>
+	</center>
+	<center>This game is an adaptation by <a href='https://twitter.com/hamish_todd'>@hamish_todd</a> of a design/discovery
+		by <a href='http://overcomingbias.com/'>Robin Hanson</a></center>
+	<center>More information on the game and its philosophy can be found <a
+			href='https://github.com/hamishtodd1/msb/blob/main/README.md'>here</a>.</center>
+	
+
+	<body>
+		<script src="/socket.io/socket.io.js"></script>
+		
+		<script src="three.min.js"></script>
 
 		<script src="variables.js"></script>
-		<script src="init.js"></script>
+		<script src="miscFunctions.js"></script>
+
+		<script src="mouse.js"></script>
+
+		<script src="camera.js"></script>
+		<script src="cashBits.js"></script>
+		<script src="bets.js"></script>
+		<script src="suspects.js"></script>
+		<script src="board.js"></script>
+
+		<script src="sound.js"></script>
+
+		<script src="judgement.js"></script>
+
+		<script>
+			const module = { exports: {} }
+		</script>
+		<script src="shared.js"></script>
+
+		<script src="rectangle.js"></script>
+
+		<script src="windowResize.js"></script>
+
+		<script src="text.js"></script>
+
+		<script src="buttons.js"></script>
+
+		<script src="socketStuffAndPageInitialization.js"></script>
+
+		<script>
+			let initted = false
+			async function init(socket, gameId) {
+				if(initted)
+					return
+				initted = true
+
+				initRectangles()
+
+				renderer = new THREE.WebGLRenderer({ antialias: true });
+				renderer.setClearColor(bgColor)
+
+				initSuspectConfirmationWaitingSign()
+
+				initButtons()
+
+				let updateMouse = initMouse()
+				
+				await initBoard()
+
+				//could move this up to get rid of some initial movement
+				initWindowResize()
+
+				await initJudgement(gameId)
+
+				{
+					const connectionLostBox = Rectangle({
+						label: "Connection shaky...",
+						h: 2.,
+						getScaleFromLabel: true,
+						haveFrame: true,
+						z: 4.9
+					})
+					connectionLostBox.visible = false
+
+					socket.onclose = () => {
+						connectionLostBox.visible = true
+						if(reloadAttempted === false) {
+							location.reload()
+							reloadAttempted = true
+						}
+						//could check, from the server, if this is being called
+					}
+
+					//could zoom with camera?
+
+					//It keeps going to the
+
+					let timeSinceLastPongReception = 0.
+					socket.on("pongAA",()=>{
+						timeSinceLastPongReception = 0.
+					})
+					let reloadAttempted = false
+					updateFunctions.push(()=>{
+						let justAboutToPass2 = timeSinceLastPongReception < 2. &&
+							timeSinceLastPongReception + frameDelta >= 2.
+						if( justAboutToPass2 )
+							socket.emit("pingAA")
+
+                        connectionLostBox.visible = timeSinceLastPongReception > 10.5
+						// if(timeSinceLastPongReception > 10.5) {
+						// 	socket.close()
+						// 	connectionLostBox.visible = true
+						// }
+						// if (timeSinceLastPongReception > 13. && reloadAttempted === false) {
+						// 	location.reload()
+						// 	reloadAttempted = true
+						// }
+
+						timeSinceLastPongReception += frameDelta
+					})
+				}
+
+				socket.emit("ready for suspect portraits")
+
+				function loop() {
+					let clockDelta = clock.getDelta()
+					frameDelta = clockDelta < .1 ? clockDelta : .1 //clamped because debugger pauses create weirdness
+					// log(1./frameDelta)
+
+					mouse.updateFromAsync()
+
+					// let now = Date.now()
+					updateFunctions.forEach(uf => uf())
+					// log((Date.now()-now)/1000.)
+
+					++frameCount
+
+					renderer.render(scene, camera)
+					
+					setTimeout(() => {
+						requestAnimationFrame(loop)
+					}, 1000. / 60.);
+				}
+
+				roundOffRectangleCreation()
+
+				loop()
+			}
+		</script>
+
+		<!-- Global site tag (gtag.js) - Google Analytics -->
+		<script async src="https://www.googletagmanager.com/gtag/js?id=G-G8Q1WDCR2B"></script>
+		<script>
+			window.dataLayer = window.dataLayer || [];
+			function gtag() { dataLayer.push(arguments); }
+			gtag('js', new Date());
+
+			gtag('config', 'G-G8Q1WDCR2B');
+		</script>
+		
 	</body>
 </html>
