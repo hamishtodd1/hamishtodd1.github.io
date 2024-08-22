@@ -22,7 +22,6 @@ function initSurroundings() {
         texture.repeat.y = floorWidth / 4.
         texture.wrapS = THREE.RepeatWrapping
         texture.wrapT = THREE.RepeatWrapping
-        log(texture)
     })
 
     const floor = new THREE.Mesh(floorGeometry, floorMaterial)
@@ -57,7 +56,7 @@ function initSurroundings() {
             exponent: { type: "f", value: 0.6 }
         };
 
-        var skyGeo = new THREE.SphereGeometry(80., 5);
+        var skyGeo = new THREE.SphereGeometry(80., 50);
         var skyMat = new THREE.ShaderMaterial({
             vertexShader,
             fragmentShader,
@@ -74,10 +73,10 @@ function initSurroundings() {
     light.position.set(-1.2, 2., 2.)
     light.lookAt(0.,1.6,0.)
     light.castShadow = true
-    light.shadow.camera.top = 2
-    light.shadow.camera.bottom = - 2
-    light.shadow.camera.right = 2
-    light.shadow.camera.left = - 2
-    light.shadow.mapSize.set(4096, 4096)
+    light.shadow.camera.top = 10
+    light.shadow.camera.bottom = - 10
+    light.shadow.camera.right = 10
+    light.shadow.camera.left = - 10
+    light.shadow.mapSize.set(2048, 2048)
     scene.add(light)
 }

@@ -1,6 +1,6 @@
 function initCamera() {
 
-    camera.position.set(-.25, 0., 3.7).multiplyScalar(2.5)
+    camera.position.set(-3., 0., 3.7).multiplyScalar(2.5)
     // camera.position.set( 0., 1.6, 3.7)
     orbitControls = new OrbitControls(camera, container)
     orbitControls.target.set(0, 0., 0)

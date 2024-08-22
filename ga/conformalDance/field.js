@@ -1,3 +1,4 @@
+updateField = ()=> {}
 function initField() {
 
     function randomizeInSphere(v,radius) {
@@ -7,25 +8,39 @@ function initField() {
         v.multiplyScalar(radius)
     }
     
-    let numPoints = 900
-    let geo = new THREE.BufferGeometry()
+    let numPoints = 1000
     let startCoords = new Float32Array(3 * numPoints)
-    for(let i = 0; i < numPoints * 3; ++i) {
-
-        randomizeInSphere(v1, 5.)
-        v1.toArray(startCoords,i*3)
-
-        // startCoords[i] = 2.*(Math.random() * 2. - 1.)
+    for(let i = 0.; i < 10.; ++i)
+    for(let j = 0.; j < 10.; ++j)
+    for(let k = 0.; k < 10.; ++k) {
+        v1.set(i / 10., j / 10., k / 10.).subScalar(.5).multiplyScalar(6.)
+        let index = i*100+j*10+k
+        v1.toArray(startCoords, index*3)
     }
+    // for(let i = 0; i < numPoints * 3; ++i) {
+
+    //     randomizeInSphere(v1, 5.)
+    //     v1.toArray(startCoords,i*3)
+
+    //     // startCoords[i] = 2.*(Math.random() * 2. - 1.)
+    // }
     // for(let i = 0; i < numPoints; ++i) {
     //     let a = Math.random() * TAU
     //     v1.set(Math.cos(a), Math.sin(a),0.)
     //     v1.toArray(startCoords, i*3)
     // }
-    
-    geo.setAttribute('position', new THREE.Float32BufferAttribute( startCoords, 3 ))
-    let coords = geo.attributes.position.array
-    scene.add(new THREE.Points(geo, new THREE.PointsMaterial({ color: 0x71355B, size: .1 })))
+
+    let instanceMesh = new THREE.InstancedMesh(
+        new THREE.SphereGeometry(.06),
+        new THREE.MeshPhongMaterial({ color: 0x71355B }), numPoints);
+    instanceMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage); // will be updated every frame
+    instanceMesh.castShadow = true
+    scene.add(instanceMesh);
+
+    // let geo = new THREE.BufferGeometry()
+    // geo.setAttribute('position', new THREE.Float32BufferAttribute( startCoords, 3 ))
+    // let coords = geo.attributes.position.array
+    // scene.add(new THREE.Points(geo, new THREE.PointsMaterial({ color: 0x71355B, size: .1 })))
 
     let fullTransform = null
     let fullTransformEven = new Even()
@@ -78,9 +93,13 @@ function initField() {
             
             translationToVec3(finalTranslation,v2)
 
-            v2.toArray(coords, 3 * i)
+            // v2.toArray(coords, 3 * i)
+            m1.setPosition(v2)
+            instanceMesh.setMatrixAt(i, m1);
 
         }
-        geo.attributes.position.needsUpdate = true
+
+        instanceMesh.instanceMatrix.needsUpdate = true;
+        // geo.attributes.position.needsUpdate = true
     }
 }

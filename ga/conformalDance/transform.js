@@ -13,7 +13,15 @@ function initTransform() {
     camera.add(sign)
     scene.add(camera)
 
-    let thingies = [
+    class Thingy {
+        constructor(pieces) {
+            this.pieces = pieces
+            this.linearTime = false
+            this.bireflection = fals
+        }
+    }
+
+    let pieceses = [
         [
             // Rotate your hands
             new Odd().copy(_e3),
@@ -22,7 +30,7 @@ function initTransform() {
         [
             // Rotate around a circle
             new Odd().copy(_e3),
-            _e4.addScaled(_e3, .2, new Odd()),
+            _e4.multiplyScalar(-1.,odd0).addScaled(_e3, .2, odd0).multiplyScalar(-1., new Odd()),
         ],
         [
             // Parabolic
@@ -32,7 +40,7 @@ function initTransform() {
         [
             // Dipole
             new Odd().copy(_e3),
-            _e5.addScaled(_e3, .8, new Odd()),
+            _e5.addScaled(_e3, 1.8, odd0).addScaled( _e0, .99, new Odd()),
         ],
         [
             // Scale
@@ -72,8 +80,13 @@ function initTransform() {
             _e1.addScaled(_e0, 1.2,new Odd())
         ]
     ]
+    let thingies = pieceses.map(p=>new Thingy(p))
+    for(let i = 0; i < 5; ++i)
+        thingies[i].bireflection = true
 
-    thingToMoveThingies = new Even()
+    thingies[1].linearTime = true
+
+    let thingToMoveThingies = new Even()
     thingToMoveThingies.addScaled(_one, Math.cos(TAU / 8. / 2.), thingToMoveThingies)
     thingToMoveThingies.addScaled(_e24, Math.sin(TAU / 8. / 2.), thingToMoveThingies)
     // thingies[0].forEach(a=>{
@@ -83,16 +96,18 @@ function initTransform() {
     // })
 
     let weirdStudy = _one.addScaled(_e12.mul(_e34, even0), .2, new Even())
-    let framesPerThingy = 250
+    let secondsPerThingy = 2.
 
     updateAndGetTransform = () => {
 
-        let timeFactor = frameCount * .01
-        let oscillatingTimeFactor = Math.sin(frameCount * .025)
-        transform.zero()
+        // return _one
 
-            .addScaled(_one, 1., transform)
-            .addScaled(_e20, timeFactor, transform)
+        let timeFactor = frameCount * .0075
+        let oscillatingTimeFactor = Math.sin(frameCount * .030)
+        // transform.zero()
+
+        //     .addScaled(_one, 1., transform)
+        //     .addScaled(_e20, timeFactor, transform)
 
         // .addScaled(_one, Math.cos(timeFactor), transform)
         // .addScaled(_e24, Math.sin(timeFactor), transform)
@@ -100,29 +115,35 @@ function initTransform() {
         // .addScaled(_one, Math.cosh(Math.sin(timeFactor)), transform)
         // .addScaled(_e25, Math.sinh(Math.sin(timeFactor)), transform)
 
+        let time = clock.getElapsedTime()
+        let thingyIndex = Math.floor(time / secondsPerThingy) % thingies.length
+        thingyIndex = 1
+
+
         
-        let thingyIndex = Math.floor(frameCount / framesPerThingy) % thingies.length
-        thingyIndex = 2
         let thingy = thingies[thingyIndex]
-        transform = thingy.length % 2 ? transformOdd : transformEven
+        let pieces = thingy.pieces
+
+        transform = pieces.length % 2 ? transformOdd : transformEven
         incrementalEven.copy(_one)
         // debugger
-        for(let i = 0; i < thingy.length; ++i) {
+        for(let i = 0; i < pieces.length; ++i) {
             if(i%2) {
-                thingy[i].mul(incrementalOdd, incrementalEven)
-                if (i === thingy.length - 1)
+                pieces[i].mul(incrementalOdd, incrementalEven)
+                if (i === pieces.length - 1)
                     transform.copy(incrementalEven)
             }
             else {
-                thingy[i].mul(incrementalEven,incrementalOdd)
-                if(i === thingy.length-1)
+                pieces[i].mul(incrementalEven,incrementalOdd)
+                if(i === pieces.length-1)
                     transform.copy(incrementalOdd)
             }
         }
         
         if(transform === transformEven) {
+            // debugger
             transform.normalize()
-            transform.logarithm(even0).multiplyScalar(oscillatingTimeFactor, even0)
+            transform.logarithm(even0).multiplyScalar(thingy.linearTime ? timeFactor:oscillatingTimeFactor, even0)
             even0.exp(transform)
         }
         

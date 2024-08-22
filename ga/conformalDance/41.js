@@ -41,6 +41,17 @@ function init41() {
         }
 
         getNormalization(target) {
+
+            let theSquare = this.mul(this.reverse(localEven5), localEven6)
+            let isScalar = true
+            for (let i = 1; i < 16; ++i) {
+                if(theSquare[i] !== 0.)
+                    isScalar = false
+            }
+            if (isScalar && theSquare[0] !== 0. ) {
+                return this.multiplyScalar(1./theSquare[0],target)
+            }
+
             var S = this[0] * this[0] - this[10] * this[10] + this[11] * this[11] - this[12] * this[12] - this[13] * this[13] - this[14] * this[14] - this[15] * this[15] + this[1] * this[1]
                 + this[2] * this[2] + this[3] * this[3] - this[4] * this[4] + this[5] * this[5] + this[6] * this[6] - this[7] * this[7] + this[8] * this[8] - this[9] * this[9];
             var T1 = 2 * (this[0] * this[11] - this[10] * this[12] + this[13] * this[9] - this[14] * this[7] + this[15] * this[4] - this[1] * this[8] + this[2] * this[6] - this[3] * this[5]);
@@ -49,9 +60,11 @@ function init41() {
             var T4 = 2 * (this[0] * this[14] - this[10] * this[2] - this[11] * this[7] + this[12] * this[6] - this[13] * this[5] + this[15] * this[1] + this[3] * this[9] - this[4] * this[8]);
             var T5 = 2 * (this[0] * this[15] - this[10] * this[5] + this[11] * this[4] - this[12] * this[3] + this[13] * this[2] - this[14] * this[1] + this[6] * this[9] - this[7] * this[8]);
             var TT = -T1 * T1 + T2 * T2 + T3 * T3 + T4 * T4 + T5 * T5;
-            var N = ((S * S + TT) ** .5 + S) ** .5, N2 = N * N;
-            var ND = 2 ** .5 * N / (N2 * N2 + TT);
-            var C = N2 * ND, [D1, D2, D3, D4, D5] = [-T1 * ND, -T2 * ND, -T3 * ND, -T4 * ND, -T5 * ND];
+            var N = ((S * S + TT) ** .5 + S) ** .5
+            var N2 = N * N;
+            var ND = Math.SQRT2 * N / (N2 * N2 + TT);
+            var C = N2 * ND;
+            var [D1, D2, D3, D4, D5] = [-T1 * ND, -T2 * ND, -T3 * ND, -T4 * ND, -T5 * ND];
             return target.set(C * this[0] + D1 * this[11] - D2 * this[12] - D3 * this[13] - D4 * this[14] - D5 * this[15],
                 C * this[1] - D1 * this[8] + D2 * this[9] + D3 * this[10] - D4 * this[15] + D5 * this[14],
                 C * this[2] + D1 * this[6] - D2 * this[7] + D3 * this[15] + D4 * this[10] - D5 * this[13],
