@@ -1,0 +1,62 @@
+
+<html>
+<head>
+
+    <title>Twistor</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <link type="text/css" rel="stylesheet" href="main.css">
+    
+</head>
+
+<body>
+    <script src="/socket.io/socket.io.js"></script>
+
+    <script src="Multivector.js"></script>
+    <script src="gaMeta.js"></script>
+    <script src="dq.js"></script>
+    <script src="fl.js"></script>
+    <script src="ega.js"></script>
+    <script src="ega.glsl"></script>
+    
+    <script>
+        const NUM_FLOATS_PHONG2 = 113
+        //so threejs has Dq in it
+        // initMultivectorWithoutDeclarations()
+        initGeneralVectors()
+        initEga()
+    </script>
+    
+    <script src="VRButton.js"></script>
+    <script src="three.js"></script>
+    <script src="miscFunctions.js"></script>
+    <script src="OrbitControls.js"></script>
+    <script src="OBJLoader.js"></script>
+    <script src="threejsVariables.js"></script>
+    <script src="buttons.js"></script>
+    <script src="camera.js"></script>
+    <script src="text.js"></script>
+    <script src="surroundings.js"></script>
+
+    <script src="41.js"></script>
+
+    <script src="field.js"></script>
+    <script src="transform.js"></script>
+    <script src="variables.js"></script>
+    
+    <script src="hands.js"></script>
+
+    <script src="init.js"></script>
+
+    <script type="module">
+
+        import { XRControllerModelFactory } from '/xrController/XRControllerModelFactory.js';
+        window.XRControllerModelFactory = XRControllerModelFactory
+
+        init()
+            
+    </script>
+		
+	</body>
+
+</html>
