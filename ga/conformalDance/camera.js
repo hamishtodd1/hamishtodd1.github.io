@@ -1,6 +1,6 @@
 function initCamera() {
 
-    camera.position.set(-3., 0., 3.7).multiplyScalar(2.5)
+    camera.position.set(-3., 0.4, 3.7).multiplyScalar(2.5)
     // camera.position.set( 0., 1.6, 3.7)
     orbitControls = new OrbitControls(camera, container)
     orbitControls.target.set(0, 0., 0)
@@ -20,7 +20,7 @@ function initCamera() {
     camera.mvs = {
         pos: new Fl(),
         quat: new Dq(),
-        dq: new Dq(),
+        dq: new Dq()
     }
 
     let fovHorizontal = otherFov(camera.fov, camera.aspect, true)

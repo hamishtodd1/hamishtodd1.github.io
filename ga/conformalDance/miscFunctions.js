@@ -1,3 +1,11 @@
+//aliasing allowed
+function getSqrtQuaternion(q,target) {
+    target.normalize()
+    target.w += target.w < 0. ? -1. : 1.
+    target.normalize()
+    return target
+}
+
 function getWhereThisWasCalledFrom(depth) {
     let actualDepth = (depth || 0) + 3
     let splitIntoLines = Error().stack.split("\n")

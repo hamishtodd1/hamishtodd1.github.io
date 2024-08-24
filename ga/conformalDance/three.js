@@ -37686,17 +37686,17 @@
 
 				for ( let i = 0; i <= tubularSegments; i ++ ) {
 
-					const u = i / tubularSegments * arc;
+                    const u = i / tubularSegments * arc;
 					const v = j / radialSegments * Math.PI * 2;
-
+                    
 					// vertex
-
+                    
 					vertex.x = ( radius + tube * Math.cos( v ) ) * Math.cos( u );
 					vertex.y = ( radius + tube * Math.cos( v ) ) * Math.sin( u );
 					vertex.z = tube * Math.sin( v );
-
+                    
 					vertices.push( vertex.x, vertex.y, vertex.z );
-
+                    
 					// normal
 
 					center.x = radius * Math.cos( u );

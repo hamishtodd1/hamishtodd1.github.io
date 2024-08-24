@@ -36,8 +36,81 @@ function init41() {
             super(16)
         }
 
+        fromDq(dq) {
+            this[0] = dq[0]
+            this[1] = dq[4] //e12
+            this[5] = dq[6] //e23
+            this[2] = -dq[5] //e13
+            this[3] = -dq[1]; this[4] = -dq[1] //e10
+            this[6] = -dq[2]; this[7] = -dq[2] //e20
+            this[8] = -dq[3]; this[9] = -dq[3] //e30
+            this[11] = -dq[7]; this[12] = -dq[7] //e30
+            return this
+        }
+
+        toDq(dq) {
+            dq[0] = this[0]
+            dq[4] = this[1] //e12
+            dq[6] = this[5] //e23
+            dq[5] = -this[2] //e13
+            dq[1] = -.5 * (this[3] + this[4]) //e10
+            dq[2] = -.5 * (this[6] + this[7]) //e20
+            dq[3] = -.5 * (this[8] + this[9]) //e30
+            dq[7] = -.5 * (this[11] + this[12])
+            return this
+        }
+
+        toQuaternion(target) {
+            target.w =  this[0]
+            target.x = -this[5]
+            target.y =  this[2]
+            target.z = -this[1]
+            return target
+        }
+
+        translationToVector3(target) {
+            target.set(0., 0., 0.)
+            for (let i = 0; i < 16; ++i) {
+                target.x += this[i] * _e10[i] * .5
+                target.y += this[i] * _e20[i] * .5
+                target.z += this[i] * _e30[i] * .5
+            }
+            target.multiplyScalar(1. / this[0])
+            return target
+        }
+
+        mulReverse(b, target) {
+            return this.mul(b.reverse(b.constructor === Even ? localEven5 : localOdd5), target)
+        }
+
+        //aliasing allowed
+        pow(factor,target) {
+            this.getNormalization(localEven1)
+            localEven1.logarithm(localEven2).multiplyScalar(factor, localEven2)
+            return localEven2.exp(target)
+        }
+
         normalize() {
             return this.copy(this.getNormalization(localEven1))
+        }
+
+        pointPairToVector3s(targets) {
+
+            let projector = this.getNormalization(localEven7).multiplyScalar(.5, localEven8)
+            projector[0] = .5
+            let projectableUna = this.join(_e1234, localOdd8)
+            
+            for (let i = 0; i < 2; ++i) {
+                
+                let zrs = projector.mul(projectableUna, localOdd9)
+                if (zrs[3] === zrs[4])
+                    targets[i].set(999.,999.,999.)
+                else
+                    zrs.zrsToVector3(targets[i])
+
+                projector.reverse(projector)
+                //ohhh, better if they have two different colors
+            }
         }
 
         getNormalization(target) {
@@ -49,7 +122,7 @@ function init41() {
                     isScalar = false
             }
             if (isScalar && theSquare[0] !== 0. ) {
-                return this.multiplyScalar(1./theSquare[0],target)
+                return this.multiplyScalar(1. / Math.sqrt(Math.abs(theSquare[0])),target)
             }
 
             var S = this[0] * this[0] - this[10] * this[10] + this[11] * this[11] - this[12] * this[12] - this[13] * this[13] - this[14] * this[14] - this[15] * this[15] + this[1] * this[1]
@@ -179,14 +252,21 @@ function init41() {
     
         sandwich(b, target) {
             if (b.constructor === Even && target.constructor === Even) {
-                this.mul( b, localEven0)
-                localEven0.mul(this.reverse(localEven1), target)
+                this.mul( b, localEven0).mulReverse(this, target)
             }
             else if (b.constructor === Odd && target.constructor === Odd) {
-                this.mul( b, localOdd0)
-                localOdd0.mul(this.reverse(localEven1), target)
+                this.mul( b, localOdd0).mulReverse(this, target)
             }
     
+            return target
+        }
+
+        projectOn(b, target) {
+            if (b.constructor === Odd)
+                this.inner(b, localOdd0).mulReverse(b, target)
+            else if (b.constructor === Even)
+                this.inner(b, localEven0).mulReverse(b, target)
+
             return target
         }
     
@@ -250,18 +330,165 @@ function init41() {
     
             return target
         }
+
+        inner(b,target) {
+            if(b.constructor === Even && target.constructor === Even) {
+                target[0] = this[0] * b[0] + this[10] * b[10] + this[11] * b[11] + this[4] * b[4] + this[7] * b[7] + this[9] * b[9] - this[12] * b[12] - this[13] * b[13] - this[14] * b[14] - this[15] * b[15] - this[1] * b[1] - this[2] * b[2] - this[3] * b[3] - this[5] * b[5] - this[6] * b[6] - this[8] * b[8];
+                target[1] = this[0] * b[1] + this[10] * b[13] + this[12] * b[9] + this[13] * b[10] + this[1] * b[0] + this[9] * b[12] - this[11] * b[8] - this[8] * b[11];
+                target[2] = this[0] * b[2] + this[10] * b[14] + this[11] * b[6] + this[14] * b[10] + this[2] * b[0] + this[6] * b[11] - this[12] * b[7] - this[7] * b[12];
+                target[3] = this[0] * b[3] + this[3] * b[0] - this[11] * b[5] - this[13] * b[7] - this[14] * b[9] - this[5] * b[11] - this[7] * b[13] - this[9] * b[14];
+                target[4] = this[0] * b[4] + this[4] * b[0] - this[12] * b[5] - this[13] * b[6] - this[14] * b[8] - this[5] * b[12] - this[6] * b[13] - this[8] * b[14];
+                target[5] = this[0] * b[5] + this[10] * b[15] + this[12] * b[4] + this[15] * b[10] + this[4] * b[12] + this[5] * b[0] - this[11] * b[3] - this[3] * b[11];
+                target[6] = this[0] * b[6] + this[11] * b[2] + this[13] * b[4] + this[2] * b[11] + this[4] * b[13] + this[6] * b[0] - this[15] * b[9] - this[9] * b[15];
+                target[7] = this[0] * b[7] + this[12] * b[2] + this[13] * b[3] + this[2] * b[12] + this[3] * b[13] + this[7] * b[0] - this[15] * b[8] - this[8] * b[15];
+                target[8] = this[0] * b[8] + this[14] * b[4] + this[15] * b[7] + this[4] * b[14] + this[7] * b[15] + this[8] * b[0] - this[11] * b[1] - this[1] * b[11];
+                target[9] = this[0] * b[9] + this[14] * b[3] + this[15] * b[6] + this[3] * b[14] + this[6] * b[15] + this[9] * b[0] - this[12] * b[1] - this[1] * b[12];
+                target[10] = this[0] * b[10] + this[10] * b[0] - this[13] * b[1] - this[14] * b[2] - this[15] * b[5] - this[1] * b[13] - this[2] * b[14] - this[5] * b[15];
+                target[11] = this[0] * b[11] + this[11] * b[0];
+                target[12] = this[0] * b[12] + this[12] * b[0];
+                target[13] = this[0] * b[13] + this[13] * b[0];
+                target[14] = this[0] * b[14] + this[14] * b[0];
+                target[15] = this[0] * b[15] + this[15] * b[0];
+            }
+            else if (b.constructor === Odd && target.constructor === Odd) {
+                target[0] = this[0] * b[0] + this[10] * b[10] + this[12] * b[12] + this[13] * b[13] + this[14] * b[14] + this[1] * b[1] + this[2] * b[2] + this[3] * b[3] + this[7] * b[7] + this[9] * b[9] - this[11] * b[11] - this[15] * b[15] - this[4] * b[4] - this[5] * b[5] - this[6] * b[6] - this[8] * b[8];
+                target[1] = this[0] * b[1] + this[10] * b[13] + this[11] * b[8] + this[14] * b[15] + this[15] * b[14] + this[2] * b[5] + this[3] * b[6] + this[5] * b[2] + this[6] * b[3] + this[9] * b[12] - this[12] * b[9] - this[13] * b[10] - this[1] * b[0] - this[4] * b[7] - this[7] * b[4] - this[8] * b[11];
+                target[2] = this[0] * b[2] + this[10] * b[14] + this[12] * b[7] + this[3] * b[8] + this[6] * b[11] + this[8] * b[3] - this[11] * b[6] - this[13] * b[15] - this[14] * b[10] - this[15] * b[13] - this[1] * b[5] - this[2] * b[0] - this[4] * b[9] - this[5] * b[1] - this[7] * b[12] - this[9] * b[4];
+                target[3] = this[0] * b[3] + this[11] * b[5] + this[12] * b[15] + this[13] * b[7] + this[14] * b[9] + this[15] * b[12] - this[10] * b[4] - this[1] * b[6] - this[2] * b[8] - this[3] * b[0] - this[4] * b[10] - this[5] * b[11] - this[6] * b[1] - this[7] * b[13] - this[8] * b[2] - this[9] * b[14];
+                target[4] = this[0] * b[4] + this[11] * b[15] + this[12] * b[5] + this[13] * b[6] + this[14] * b[8] + this[15] * b[11] - this[10] * b[3] - this[1] * b[7] - this[2] * b[9] - this[3] * b[10] - this[4] * b[0] - this[5] * b[12] - this[6] * b[13] - this[7] * b[1] - this[8] * b[14] - this[9] * b[2];
+                target[5] = this[0] * b[5] + this[10] * b[15] + this[11] * b[3] - this[12] * b[4];
+                target[6] = this[0] * b[6] - this[11] * b[2] - this[13] * b[4] - this[9] * b[15];
+                target[7] = this[0] * b[7] - this[12] * b[2] - this[13] * b[3] - this[8] * b[15];
+                target[8] = this[0] * b[8] + this[11] * b[1] + this[7] * b[15] - this[14] * b[4];
+                target[9] = this[0] * b[9] + this[12] * b[1] + this[6] * b[15] - this[14] * b[3];
+                target[10] = this[0] * b[10] + this[13] * b[1] + this[14] * b[2] - this[5] * b[15];
+                target[11] = this[0] * b[11] - this[11] * b[0] - this[15] * b[4] - this[4] * b[15];
+                target[12] = this[0] * b[12] - this[12] * b[0] - this[15] * b[3] - this[3] * b[15];
+                target[13] = this[0] * b[13] + this[15] * b[2] + this[2] * b[15] - this[13] * b[0];
+                target[14] = this[0] * b[14] - this[14] * b[0] - this[15] * b[1] - this[1] * b[15];
+                target[15] = this[0] * b[15];
+            }
+            else
+                console.error("not implemented")
+
+            return target
+        }
+
+        meet(b, target) {
+            if(b.constructor === Even && target.constructor === Even) {
+                target[ 0] = this[0] * b[0];
+                target[ 1] = this[0] * b[1] + this[1] * b[0];
+                target[ 2] = this[0] * b[2] + this[2] * b[0];
+                target[ 3] = this[0] * b[3] + this[3] * b[0];
+                target[ 4] = this[0] * b[4] + this[4] * b[0];
+                target[ 5] = this[0] * b[5] + this[5] * b[0];
+                target[ 6] = this[0] * b[6] + this[6] * b[0];
+                target[ 7] = this[0] * b[7] + this[7] * b[0];
+                target[ 8] = this[0] * b[8] + this[8] * b[0];
+                target[ 9] = this[0] * b[9] + this[9] * b[0];
+                target[10] = this[0] * b[10] + this[10] * b[0];
+                target[11] = this[0] * b[11] + this[11] * b[0] + this[1] * b[8] + this[3] * b[5] + this[5] * b[3] + this[8] * b[1] - this[2] * b[6] - this[6] * b[2];
+                target[12] = this[0] * b[12] + this[12] * b[0] + this[1] * b[9] + this[4] * b[5] + this[5] * b[4] + this[9] * b[1] - this[2] * b[7] - this[7] * b[2];
+                target[13] = this[0] * b[13] + this[10] * b[1] + this[13] * b[0] + this[1] * b[10] + this[4] * b[6] + this[6] * b[4] - this[3] * b[7] - this[7] * b[3];
+                target[14] = this[0] * b[14] + this[10] * b[2] + this[14] * b[0] + this[2] * b[10] + this[4] * b[8] + this[8] * b[4] - this[3] * b[9] - this[9] * b[3];
+                target[15] = this[0] * b[15] + this[10] * b[5] + this[15] * b[0] + this[5] * b[10] + this[7] * b[8] + this[8] * b[7] - this[6] * b[9] - this[9] * b[6];
+            }
+            else if (b.constructor === Odd && target.constructor === Odd) {
+                target[0] = this[0] * b[0];
+                target[1] = this[0] * b[1];
+                target[2] = this[0] * b[2];
+                target[3] = this[0] * b[3];
+                target[4] = this[0] * b[4];
+                target[5] = this[0] * b[5] + this[1] * b[2] + this[5] * b[0] - this[2] * b[1];
+                target[6] = this[0] * b[6] + this[1] * b[3] + this[6] * b[0] - this[3] * b[1];
+                target[7] = this[0] * b[7] + this[1] * b[4] + this[7] * b[0] - this[4] * b[1];
+                target[8] = this[0] * b[8] + this[2] * b[3] + this[8] * b[0] - this[3] * b[2];
+                target[9] = this[0] * b[9] + this[2] * b[4] + this[9] * b[0] - this[4] * b[2];
+                target[10] = this[0] * b[10] + this[10] * b[0] + this[3] * b[4] - this[4] * b[3];
+                target[11] = this[0] * b[11] + this[5] * b[3] + this[8] * b[1] - this[6] * b[2];
+                target[12] = this[0] * b[12] + this[5] * b[4] + this[9] * b[1] - this[7] * b[2];
+                target[13] = this[0] * b[13] + this[10] * b[1] + this[6] * b[4] - this[7] * b[3];
+                target[14] = this[0] * b[14] + this[10] * b[2] + this[8] * b[4] - this[9] * b[3];
+                target[15] = this[0] * b[15] + this[10] * b[5] + this[11] * b[4] + this[13] * b[2] + this[15] * b[0] + this[1] * b[14] + this[3] * b[12] + this[5] * b[10] + this[7] * b[8] + this[8] * b[7] - this[12] * b[3] - this[14] * b[1] - this[2] * b[13] - this[4] * b[11] - this[6] * b[9] - this[9] * b[6];
+            }
+            else
+                console.error("not implemented")
+
+            return target
+        }
+
+        join(b,target) {
+            if (b.constructor === Even && target.constructor === Odd) {
+                target[0] = this[11] * b[4] + this[13] * b[2] + this[1] * b[14] + this[3] * b[12] - this[12] * b[3] - this[14] * b[1] - this[2] * b[13] - this[4] * b[11];
+                target[1] = this[11] * b[7] + this[13] * b[5] + this[1] * b[15] + this[6] * b[12] - this[12] * b[6] - this[15] * b[1] - this[5] * b[13] - this[7] * b[11];
+                target[2] = this[11] * b[9] + this[14] * b[5] + this[2] * b[15] + this[8] * b[12] - this[12] * b[8] - this[15] * b[2] - this[5] * b[14] - this[9] * b[11];
+                target[3] = this[11] * b[10] + this[14] * b[6] + this[3] * b[15] + this[8] * b[13] - this[10] * b[11] - this[13] * b[8] - this[15] * b[3] - this[6] * b[14];
+                target[4] = this[12] * b[10] + this[14] * b[7] + this[4] * b[15] + this[9] * b[13] - this[10] * b[12] - this[13] * b[9] - this[15] * b[4] - this[7] * b[14];
+                target[5] = this[11] * b[12] - this[12] * b[11];
+                target[6] = this[11] * b[13] - this[13] * b[11];
+                target[7] = this[12] * b[13] - this[13] * b[12];
+                target[8] = this[11] * b[14] - this[14] * b[11];
+                target[9] = this[12] * b[14] - this[14] * b[12];
+                target[10] = this[13] * b[14] - this[14] * b[13];
+                target[11] = this[11] * b[15] - this[15] * b[11];
+                target[12] = this[12] * b[15] - this[15] * b[12];
+                target[13] = this[13] * b[15] - this[15] * b[13];
+                target[14] = this[14] * b[15] - this[15] * b[14];
+                target[15] = 0.;
+            }
+            else
+                console.error("not implemented")
+            
+            return target
+        }
     }
     window.Even = Even
     Even.indexGrades = [
         0, 
-        2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 
-        4, 4, 4, 4, 4,
+        2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+        4, 4, 4, 4,
     ]
     Even.basisNames = ['', '12', '13', '14', '15', '23', '24', '25', '34', '35', '45', '1234', '1235', '1245', '1345', '2345']
     
     class Odd extends GeneralVector {
         constructor() {
             super(16)
+        }
+
+        fromFl(fl) {
+            this[0] = fl[1]
+            this[1] = fl[2]
+            this[2] = fl[3]
+            this[3] = fl[0]; this[4] = fl[0]
+
+            this[5] = fl[7]
+            this[6] = -fl[4]; this[7] = -fl[4] //e012
+            this[8] = fl[5]; this[9] = fl[5] //e013
+            this[11] = -fl[6]; this[12] = -fl[6] //e023
+            return this
+        }
+
+        pointPairToVector3s(targets) {
+            return this.mul(_e12345, localEven10).pointPairToVector3s(targets)
+        }
+
+        zrsToVector3(target) {
+            return this.inner(_e1230, localOdd3).flatPointToVector3(target)
+        }
+
+        flatPointToVector3(target) {
+            this.mulReverse(_e123, localEven0)
+            localEven0[0] *= 2.
+            return localEven0.translationToVector3(target)
+        }
+
+        mulReverse(b,target) {
+            return this.mul(b.reverse(b.constructor === Even?localEven5:localOdd5),target)
+        }
+
+        normalize() {
+            this.mul(this.reverse(localOdd0),localEven0)
+            return this.multiplyScalar(1./localEven0[0],this)
         }
     
         reverse(target) {
@@ -271,15 +498,22 @@ function init41() {
     
         sandwich(b, target) {
             if (b.constructor === Even && target.constructor === Even) {
-                this.mul( b, localOdd0)
-                localOdd0.mul(this.reverse(localOdd1), target)
+                this.mul( b, localOdd0).mulReverse(this, target)
             }
             else if (b.constructor === Odd && target.constructor === Odd) {
-                this.mul( b, localEven0)
-                localEven0.mul(this.reverse(localOdd1), target)
+                this.mul(b, localEven0).mulReverse(this, target)
                 target.multiplyScalar(-1., target)
             }
     
+            return target
+        }
+
+        projectOn(b, target) {
+            if (b.constructor === Even )
+                this.inner(b, localOdd0).mulReverse(b, target)
+            else if (b.constructor === Odd )
+                this.inner(b, localEven0).mulReverse(b, target)
+
             return target
         }
     
@@ -301,6 +535,31 @@ function init41() {
                 target[13] = this[0] * b[13] + this[13] * b[0] + this[15] * b[2] - this[2] * b[15];
                 target[14] = this[0] * b[14] + this[14] * b[0] + this[1] * b[15] - this[15] * b[1];
                 target[15] = this[15] * b[0];
+            }
+            else
+                console.error("not implemented")
+    
+            return target
+        }
+
+        meet(b, target) {
+            if (b.constructor === Even && target.constructor === Odd) {
+                target[0] = this[0] * b[0];
+                target[1] = this[1] * b[0];
+                target[2] = this[2] * b[0];
+                target[3] = this[3] * b[0];
+                target[4] = this[4] * b[0];
+                target[5] = this[0] * b[5] + this[2] * b[1] + this[5] * b[0] - this[1] * b[2];
+                target[6] = this[0] * b[6] + this[3] * b[1] + this[6] * b[0] - this[1] * b[3];
+                target[7] = this[0] * b[7] + this[4] * b[1] + this[7] * b[0] - this[1] * b[4];
+                target[8] = this[0] * b[8] + this[3] * b[2] + this[8] * b[0] - this[2] * b[3];
+                target[9] = this[0] * b[9] + this[4] * b[2] + this[9] * b[0] - this[2] * b[4];
+                target[10] = this[0] * b[10] + this[10] * b[0] + this[4] * b[3] - this[3] * b[4];
+                target[11] = this[11] * b[0] + this[1] * b[8] + this[3] * b[5] - this[2] * b[6];
+                target[12] = this[12] * b[0] + this[1] * b[9] + this[4] * b[5] - this[2] * b[7];
+                target[13] = this[13] * b[0] + this[1] * b[10] + this[4] * b[6] - this[3] * b[7];
+                target[14] = this[14] * b[0] + this[2] * b[10] + this[4] * b[8] - this[3] * b[9];
+                target[15] = this[0] * b[15] + this[10] * b[5] + this[12] * b[3] + this[14] * b[1] + this[15] * b[0] + this[2] * b[13] + this[4] * b[11] + this[5] * b[10] + this[7] * b[8] + this[8] * b[7] - this[11] * b[4] - this[13] * b[2] - this[1] * b[14] - this[3] * b[12] - this[6] * b[9] - this[9] * b[6];
             }
             else
                 console.error("not implemented")
@@ -372,19 +631,18 @@ function init41() {
     window.Odd = Odd
     Odd.indexGrades = [
         1, 1, 1, 1, 1,
-        3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
+        3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
         5,
     ]
     Odd.basisNames = ['1', '2', '3', '4', '5', '123', '124', '125', '134', '135', '145', '234', '235', '245', '345', '12345']
 
-    localOdd0 = new Odd(); localOdd1 = new Odd(); localOdd2 = new Odd(); localOdd3 = new Odd(); localOdd4 = new Odd(); localOdd5 = new Odd(); localOdd6 = new Odd();
-    localEven0 = new Even(); localEven1 = new Even(); localEven2 = new Even(); localEven3 = new Even(); localEven4 = new Even(); localEven5 = new Even(); localEven6 = new Even();
+    localOdd0 = new Odd(); localOdd1 = new Odd(); localOdd2 = new Odd(); localOdd3 = new Odd(); localOdd4 = new Odd(); localOdd5 = new Odd(); localOdd6 = new Odd(); localOdd7 = new Odd(); localOdd8 = new Odd(); localOdd9 = new Odd();
+    localEven0 = new Even(); localEven1 = new Even(); localEven2 = new Even(); localEven3 = new Even(); localEven4 = new Even(); localEven5 = new Even(); localEven6 = new Even(); localEven7 = new Even(); localEven8 = new Even(); localEven9 = new Even(); localEven10 = new Even();
 
     // could be e15, 1+e15, e234
 
     _one = new Even().fromFloatAndIndex(1., 0)
 
-    
     _e1 = new Odd().fromFloatAndIndex(1., 0)
     _e2 = new Odd().fromFloatAndIndex(1., 1)
     _e3 = new Odd().fromFloatAndIndex(1., 2)
@@ -415,8 +673,21 @@ function init41() {
     
     _e123 = _e1.mul(_e23,new Odd())
 
+    _e1234 = _e123.mul(_e4, new Even())
+    _e1230 = _e123.mul(_e0, new Even())
+
+    _e12345 = _e123.mul(_e45, new Odd())
+
     // debugger
     
     odd0 = new Odd(); odd1 = new Odd(); odd2 = new Odd(); odd3 = new Odd(); odd4 = new Odd(); odd5 = new Odd(); odd6 = new Odd();
     even0 = new Even(); even1 = new Even(); even2 = new Even(); even3 = new Even(); even4 = new Even(); even5 = new Even(); even6 = new Even();
+
+    vecToTranslation = (v, target) => {
+        target.copy(_one)
+            .addScaled(_e10, v.x * .5, target)
+            .addScaled(_e20, v.y * .5, target)
+            .addScaled(_e30, v.z * .5, target)
+        return target
+    }
 }

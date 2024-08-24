@@ -78,21 +78,22 @@ async function init() {
     // document.body.appendChild(VRButton.createButton(renderer))
 
     initTransform()    
-
     initField()
+    initInvariants()
 
     camera.position.multiplyScalar(.9)
     function render() {
         let clockDelta = clock.getDelta()
         frameDelta = clockDelta < .1 ? clockDelta : .1 //clamped because debugger pauses create weirdness
         ++frameCount
-
-        let transform = updateAndGetTransform()
-        updateField(transform)
         
         updateCameraMvs()
         updateHandMvs()
         buttonWhileDowns()
+
+        let transform = updateAndGetTransform()
+        updateField(transform)
+        updateInvariants(transform)
 
         debugUpdates.forEach(func=>func())
 

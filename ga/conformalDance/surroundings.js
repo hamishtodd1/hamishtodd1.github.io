@@ -73,10 +73,10 @@ function initSurroundings() {
     light.position.set(-1.2, 2., 2.)
     light.lookAt(0.,1.6,0.)
     light.castShadow = true
-    light.shadow.camera.top = 10
-    light.shadow.camera.bottom = - 10
-    light.shadow.camera.right = 10
-    light.shadow.camera.left = - 10
+    light.shadow.camera.top = 40
+    light.shadow.camera.bottom = - 40
+    light.shadow.camera.right = 40
+    light.shadow.camera.left = - 40
     light.shadow.mapSize.set(2048, 2048)
     scene.add(light)
 }

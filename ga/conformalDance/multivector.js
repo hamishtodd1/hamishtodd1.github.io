@@ -11,6 +11,12 @@ function initGeneralVectors() {
 
     class GeneralVector extends Float32Array {
 
+        randomize() {
+            for (let i = 0, il = this.length; i < il; ++i)
+                this[i] = Math.random() * 2. - 1.
+            return this
+        }
+
         lowestNonzeroSigned() {
             let i = this.lowestNonzero()
             let val = this.getAtSignedIndex(i)
