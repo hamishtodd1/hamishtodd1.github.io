@@ -1,12 +1,9 @@
-/*
-    
- */
-
 updateDisplay = () => {}
-function initPosSqShader() {
 
-    lsgMat = new THREE.MeshPhong2Material({transparent: true, opacity: 1./*.55*/})
-    lsgMat.injections = [
+function initGrade1Shader() {
+
+    mat = new THREE.MeshPhong2Material({transparent: true, opacity: 1./*.55*/})
+    mat.injections = [
         {
             type: `vertex`,
             precedes: ``,
@@ -25,7 +22,7 @@ function initPosSqShader() {
         {
             type: `fragment`,
             precedes: ``,
-            str: verbose42Glsl + `
+            str: cgaGlsl + `
                 uniform vec4 extraVec1;
                 uniform vec4 extraVec2;
                 uniform vec4 extraVec3;
@@ -33,21 +30,18 @@ function initPosSqShader() {
 
                 in vec3 cameraRayDirVec3;
 
-                void vec3ToDop( in vec3 v, out float[TRI_LEN] dop, in float[TRI_LEN] basisDops0, in float[TRI_LEN] basisDops1, in float[TRI_LEN] basisDops2) {
-                    for (int i = 0; i < TRI_LEN; ++i) {
-                        dop[i] = 
-                            v.x * basisDops0[i] +
-                            v.y * basisDops1[i] +
-                            v.z * basisDops2[i];
-                    }
+                void dopToVec3( in float odd[16], out vec3 v) {
+                    v.x = -.5 * (odd[11] + odd[12]);
+                    v.y =  .5 * (odd[8] + odd[9]);
+                    v.z = -.5 * (odd[6] + odd[7]);
                 }
-                void dopToVec3( float[TRI_LEN] dop, out vec3 v, in float[TRI_LEN] basisDops0, in float[TRI_LEN] basisDops1, in float[TRI_LEN] basisDops2) {
-                    v = vec3(0.,0.,0.);
-                    for (int i = 0; i < TRI_LEN; ++i) {
-                        v.x += dop[i] * basisDops0[i] * .5;
-                        v.y += dop[i] * basisDops1[i] * .5;
-                        v.z += dop[i] * basisDops2[i] * .5;
-                    }
+
+                void vec3ToDop( in vec3 v, out float odd[16]) {
+                    for(int i = 0; i < 16; ++i)
+                        odd[i] = 0.;
+                    odd[11] = -v.x; odd[12] = -v.x;
+                    odd[ 8] =  v.y; odd[ 9] =  v.y;
+                    odd[ 6] = -v.z; odd[ 7] = -v.z;
                 }
             `
         },
@@ -56,132 +50,114 @@ function initPosSqShader() {
             precedes: `	#include <normal_fragment_maps>`,
             str: `
 
-                diffuseColor = vec4( 0.3,0.3,0.3,.55 );
-                // normal = vec3(0.,0.,1.);
+                // diffuseColor = vec4( cameraRayDirVec3,.55 );
 
-                // these you get fed in
-                float[UNA_LEN] renderedUna;
-                float[TRI_LEN] originPp;
-                float[PENT_LEN] pss;
-                float[QUAD_LEN] truePtAtInf;
-                float[UNA_LEN] cameraPosZrs;
-                float[TRI_LEN] basisDops0;
-                float[TRI_LEN] basisDops1;
-                float[TRI_LEN] basisDops2;
-                
-                int start = 0;
-                for(int i = 0; i < UNA_LEN; ++i)
-                    renderedUna[i] = floats[i];
-                start += UNA_LEN;
-                for(int i = 0; i < TRI_LEN; ++i)
-                    originPp[i] = floats[start + i];
-                start += TRI_LEN;
-                for(int i = 0; i < PENT_LEN; ++i)
-                    pss[i] = floats[start + i];
-                start += PENT_LEN;
-                for(int i = 0; i < QUAD_LEN; ++i)
-                    truePtAtInf[i] = floats[start + i];
-                start += QUAD_LEN;
-                for(int i = 0; i < UNA_LEN; ++i)
-                    cameraPosZrs[i] = floats[start + i];
-                start += UNA_LEN;
-                for (int i = 0; i < TRI_LEN; ++i)
-                    basisDops0[i] = floats[start + i];
-                start += TRI_LEN;
-                for (int i = 0; i < TRI_LEN; ++i)
-                    basisDops1[i] = floats[start + i];
-                start += TRI_LEN;
-                for (int i = 0; i < TRI_LEN; ++i)
-                    basisDops2[i] = floats[start + i];
-                
-                float[TRI_LEN] cameraRayDirDop;
-                float[BIV_LEN] cameraRayBiv;
+                float cameraPosZrs[16];
+                float renderedUna[16];
+                for(int i = 0; i < 5; ++i) {
+                    cameraPosZrs[i] = floats[i];
+                    renderedUna[i] = floats[i+5];
+                }
 
-                float[BIV_LEN] projectorBiv;
-                float[UNA_LEN] tangentPlane;
-                float[UNA_LEN] zrSphere;
-                float[BIV_LEN] zrCircle;
-                float[TRI_LEN] dop0;
-                float[TRI_LEN] unnormalizedPos;
-                float[TRI_LEN] pp;
-                float[BIR_LEN] bireflection;
+                float e12345[16];
+                e12345[15] = 1.;
+                float e123[16];
+                e123[5] = 1.;
+                float e0[16];
+                e0[3] = 1.; e0[4] = 1.;
+                float e1230[16];
+                e1230[11] = 1.; e1230[12] = 1.;
 
-                vec3 normalVec3s[2];
-                bool visibilities[2];
-                vec3 diffs[2];
-                
-                vec3ToDop( cameraRayDirVec3, cameraRayDirDop, basisDops0, basisDops1, basisDops2 );
-                unaInnerTri( cameraPosZrs, cameraRayDirDop, cameraRayBiv );
+                float cameraRayDirDop[16]; vec3ToDop(cameraRayDirVec3, cameraRayDirDop);
+                float cameraRayBiv[16]; oddInnerOdd( cameraPosZrs, cameraRayDirDop, cameraRayBiv );
 
-                bivMeetUna( cameraRayBiv, renderedUna, pp );
-                triInnerPent( pp, pss, projectorBiv );
-                float bivSq = bivInnerSelfScalar(projectorBiv);
+                float pp[16]; evenMeetOdd( cameraRayBiv, renderedUna, pp );
+                float projector[16]; oddInnerOdd( pp, e12345, projector );
+                float bivSq = evenInnerSelf( projector );
+
+                float e1234[16]; e1234[11] = 1.;
+                float projectable[16];
+                evenRegressiveEven(projector,e1234,projectable);
 
                 float factor = .5 / sqrt(bivSq);
-                for(int i = 0; i < BIV_LEN; ++i)
-                    projectorBiv[i] *= factor;
+                for(int i = 0; i < 16; ++i)
+                    projector[i] *= factor;
+                projector[0] = .5;
 
                 vec3 outOfSightVec3 = vec3(999.,999.,999.);
-                bireflection[0] = .5;
-                for(int i = 0; i < 2; ++i) {
+                float bireflection[16]; bireflection[0] = .5;
+                float zrSphere[16];
+                float zrCircle[16];
+                float posDop[16];
+                float dop0[16];
+                vec3 diffs[2];
+                vec3 normalVec3s[2];
+                float tangentPlane[16];
+                bool visibilities[2];
+                vec3 posVec3s[2];
+                for(int i = 0; i < 2; ++i) { //TODO CHANGE BACK TO 2
 
-                    for(int j = 0; j < BIV_LEN; ++j)
-                        bireflection[j + 1] = i==1? projectorBiv[j] : -projectorBiv[j];
-                    bireflectionSandwichUna( bireflection, cameraPosZrs, zrSphere);
+                    oddMulEven( projectable, projector, zrSphere );
+                    for(int i = 1; i < 16; ++i)
+                        projector[i] *= -1.;
 
-                    unaMeetUna(zrSphere, renderedUna, zrCircle);
-                    bivInnerE0(zrCircle, tangentPlane);
+                    oddMeetOdd( zrSphere, renderedUna, zrCircle );
+                    evenInnerOdd( zrCircle, e0, tangentPlane );
 
                     //IT IS A HACK THAT YOU HAVE MINUS SIGNS IN THE TANGENTPLANE AND THINGY
 
                     //position
-                    vec3 posVec3;
-                    unaInnerQuad(zrSphere, truePtAtInf, unnormalizedPos);
-                    // unaMeetBiv(tangentPlane, cameraRayBiv, unnormalizedPos);
-                    float factor = -1. / sqrt(abs(trivInnerSelfScalar(unnormalizedPos)));
-
-                    // factor *= triInnerTri(unnormalizedPos, originPp) < 0. ? 1. : -1.;
-                    for(int j = 0; j < TRI_LEN; ++j)
-                        dop0[j] = unnormalizedPos[j] * factor - originPp[j];
-                    dopToVec3(dop0, posVec3, basisDops0, basisDops1, basisDops2);
+                    oddMeetEven(tangentPlane, cameraRayBiv, posDop);
+                    for( int j = 0; j < 16; ++j )
+                        posDop[i] /= posDop[5];
+                    posDop[5] = 0.;
+                    dopToVec3(posDop, posVec3s[i]);
 
                     //normal
-                    unaInnerQuad(tangentPlane, truePtAtInf, dop0); //obviously the truePtAtInf is another basis element...
-                    dopToVec3(dop0, normalVec3s[i], basisDops0, basisDops1, basisDops2);
-                    normalVec3s[i] *= -1.;
+                    normalVec3s[i] = vec3(tangentPlane[0],tangentPlane[1],tangentPlane[2]);
 
                     float eps = .001;
                     bool isE0Multiple = zrSphere[3] != 0. && abs(zrSphere[3] - zrSphere[4])<eps && abs(zrSphere[0]) < eps && abs(zrSphere[1]) < eps && abs(zrSphere[2]) < eps && abs(zrSphere[5]) < eps;
-
-                    diffs[i] = posVec3 - cameraPosition;
-                    visibilities[i] = 
-                        dot( cameraRayDirVec3, diffs[i] ) > 0. 
-                        && !isE0Multiple
-                        && all(greaterThan(posVec3,extraVec1.xyz))
-                        && all(   lessThan(posVec3,extraVec2.xyz));
+                    
+                    diffs[i] = posVec3s[i] - cameraPosition;
+                    visibilities[i] = dot( cameraRayDirVec3, diffs[i] ) > 0. && !isE0Multiple;
                 }
+
+                bool visible = bivSq > 0. && (visibilities[0] || visibilities[1]);
+                diffuseColor.a = visible ? 1.: 0.;
 
                 int oneToUse = 
                     visibilities[0] && !visibilities[1] ? 0 :
-                    visibilities[1] && !visibilities[0]  ? 1 :
+                    visibilities[1] && !visibilities[0] ? 1 :
                     dot( diffs[0], diffs[0] ) < dot( diffs[1], diffs[1] ) ? 0:1;
 
-                if( (!visibilities[0] && !visibilities[1]) || bivSq <= 0.)
-                    diffuseColor.a = 0.;
+                diffuseColor.rgb = vec3(0.,0.,0.);
+                diffuseColor.r = posVec3s[oneToUse].y;
+                normal = vec3(0.,1.,0.);
 
-                // diffuseColor.g = visibilities[0] ? 1. : 0.;
-                // diffuseColor.b = visibilities[1] ? 1. : 0.;
+                // diffuseColor = vec4(visibilities[0] ? 1.:0., visibilities[1] ? 1.:0.,0.,1.);
+                // diffuseColor.rgb = normalVec3s[oneToUse];
+                // diffuseColor.rgb = vec3(1.,0.,0.);
+                // diffuseColor.rgb = posVec3s[oneToUse];
+                // normal = vec3(posVec3s[oneToUse][0],posVec3s[oneToUse][1],posVec3s[oneToUse][2]);
 
-                normal = normalize(normalVec3s[oneToUse]);
-                // diffuseColor.rgb = normal;
+                // vec3 unnormalized = cross( dFdx(posVec3s[oneToUse]), dFdy(posVec3s[oneToUse]));
+                // normal = normalize(unnormalized);
+
+                // normal = normalize(normalVec3s[oneToUse]);
 
             \n`
         },
     ]
 
     //glued to face
-    let mesh = new THREE.Mesh(new THREE.PlaneGeometry(.5,.5), lsgMat)
+    let mesh = new THREE.Mesh(new THREE.PlaneGeometry(.5,.5), mat)
     mesh.position.z = -camera.near * 2.
     scene.add(camera)
     camera.add(mesh)
+
+    for (let i = 0; i < 5; ++i)
+        mat.floats[i+5] = _e4[i]
+
+    return mat
 }

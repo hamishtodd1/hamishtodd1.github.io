@@ -12,7 +12,7 @@ function initSurroundings() {
     //     })
 
     const floorMaterial = new THREE.MeshPhongMaterial()
-    const floorWidth = 500.
+    const floorWidth = 90.
     const floorGeometry = new THREE.CircleGeometry(floorWidth/2., 60)
     textureLoader.load('data/negy.jpg', (texture) => {
         floorMaterial.map = texture

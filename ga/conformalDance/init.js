@@ -77,9 +77,10 @@ async function init() {
 
     // document.body.appendChild(VRButton.createButton(renderer))
 
-    initTransform()    
-    initField()
-    initInvariants()
+    // initTransform()    
+    // initField()
+    // initInvariants()
+    let grade1Mat = initGrade1Shader()
 
     camera.position.multiplyScalar(.9)
     function render() {
@@ -91,10 +92,18 @@ async function init() {
         updateHandMvs()
         buttonWhileDowns()
 
-        let transform = updateAndGetTransform()
-        updateField(transform)
-        updateInvariants(transform)
+        // camera.position.set(0.,0.,1.)
+        camera.position.applyAxisAngle(yUnit, -.004)
+        camera.lookAt(0., 0., 0.)
+        
+        {
+            even0.translationFromVec3(camera.position).sandwich(_eo, odd0)
+            for (let i = 0; i < 5; ++i)
+                grade1Mat.floats[i] = odd0[i]
+        }
 
+        // update()
+        
         debugUpdates.forEach(func=>func())
 
         obj3dsWithOnBeforeRenders.forEach( obj3d => obj3d.onBeforeRender() )

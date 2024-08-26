@@ -36,47 +36,51 @@ function init41() {
             super(16)
         }
 
-        fromDq(dq) {
-            this[0] = dq[0]
-            this[1] = dq[4] //e12
-            this[5] = dq[6] //e23
-            this[2] = -dq[5] //e13
-            this[3] = -dq[1]; this[4] = -dq[1] //e10
-            this[6] = -dq[2]; this[7] = -dq[2] //e20
-            this[8] = -dq[3]; this[9] = -dq[3] //e30
-            this[11] = -dq[7]; this[12] = -dq[7] //e30
-            return this
+        decomposeBivector(targets) {
+
+            let square = this.mul(this, localEven13)
+            let inBrackets = square.studyConjugate(localEven14)
+            inBrackets.multiplyScalar(1. / square.studyNorm(), inBrackets)
+
+            inBrackets[0] += 1.
+            inBrackets.mul(this, targets[0])
+            targets[0].multiplyScalar(.5, targets[0])
+
+            inBrackets[0] -= 2.
+            inBrackets.mul(this, targets[0])
+            targets[0].multiplyScalar(.5, targets[0])
         }
 
-        toDq(dq) {
-            dq[0] = this[0]
-            dq[4] = this[1] //e12
-            dq[6] = this[5] //e23
-            dq[5] = -this[2] //e13
-            dq[1] = -.5 * (this[3] + this[4]) //e10
-            dq[2] = -.5 * (this[6] + this[7]) //e20
-            dq[3] = -.5 * (this[8] + this[9]) //e30
-            dq[7] = -.5 * (this[11] + this[12])
-            return this
-        }
-
-        toQuaternion(target) {
-            target.w =  this[0]
-            target.x = -this[5]
-            target.y =  this[2]
-            target.z = -this[1]
+        //aliasing allowed
+        studyConjugate(target) {
+            this.multiplyScalar(-1., target)
+            target[0] = -target[0]
             return target
         }
 
-        translationToVector3(target) {
+        studyNorm() {
+            this.selectGrade(4, localEven11)
+            let squaredQuadvecPart = localEven11.mul(localEven11, localEven12)[0]
+            return Math.sqrt(sq(this[0]) - squaredQuadvecPart)
+        }
+
+        translationToVec3(target) {
             target.set(0., 0., 0.)
             for (let i = 0; i < 16; ++i) {
-                target.x += this[i] * _e10[i] * .5
+                target.x += this[i] * _e10[i] * .5 //because of double cover AND because there are two in there!
                 target.y += this[i] * _e20[i] * .5
                 target.z += this[i] * _e30[i] * .5
             }
             target.multiplyScalar(1. / this[0])
             return target
+        }
+
+        translationFromVec3(v) {
+            this.copy(_one)
+                .addScaled(_e10, v.x * .5, this)
+                .addScaled(_e20, v.y * .5, this)
+                .addScaled(_e30, v.z * .5, this)
+            return this
         }
 
         mulReverse(b, target) {
@@ -86,6 +90,7 @@ function init41() {
         //aliasing allowed
         pow(factor,target) {
             this.getNormalization(localEven1)
+            // debugger
             localEven1.logarithm(localEven2).multiplyScalar(factor, localEven2)
             return localEven2.exp(target)
         }
@@ -94,7 +99,7 @@ function init41() {
             return this.copy(this.getNormalization(localEven1))
         }
 
-        pointPairToVector3s(targets) {
+        pointPairToVec3s(targets) {
 
             let projector = this.getNormalization(localEven7).multiplyScalar(.5, localEven8)
             projector[0] = .5
@@ -104,9 +109,9 @@ function init41() {
                 
                 let zrs = projector.mul(projectableUna, localOdd9)
                 if (zrs[3] === zrs[4])
-                    targets[i].set(999.,999.,999.)
+                    targets[i].copy(outOfSightVec3)
                 else
-                    zrs.zrsToVector3(targets[i])
+                    zrs.zrsToVec3(targets[i])
 
                 projector.reverse(projector)
                 //ohhh, better if they have two different colors
@@ -242,6 +247,38 @@ function init41() {
                 (B[9] * alpha - B[0] * beta3 + B[1] * beta2 - B[4] * beta1),
                 spsm * T5, spsm * T4, spsm * T3, spsm * T2, spsm * T1
             )
+        }
+
+        fromDq(dq) {
+            this[0] = dq[0]
+            this[1] = dq[4] //e12
+            this[5] = dq[6] //e23
+            this[2] = -dq[5] //e13
+            this[3] = -dq[1]; this[4] = -dq[1] //e10
+            this[6] = -dq[2]; this[7] = -dq[2] //e20
+            this[8] = -dq[3]; this[9] = -dq[3] //e30
+            this[11] = -dq[7]; this[12] = -dq[7] //e30
+            return this
+        }
+
+        toDq(dq) {
+            dq[0] = this[0]
+            dq[4] = this[1] //e12
+            dq[6] = this[5] //e23
+            dq[5] = -this[2] //e13
+            dq[1] = -.5 * (this[3] + this[4]) //e10
+            dq[2] = -.5 * (this[6] + this[7]) //e20
+            dq[3] = -.5 * (this[8] + this[9]) //e30
+            dq[7] = -.5 * (this[11] + this[12])
+            return this
+        }
+
+        toQuaternion(target) {
+            target.w = this[0]
+            target.x = -this[5]
+            target.y = this[2]
+            target.z = -this[1]
+            return target
         }
     
         reverse(target) {
@@ -468,18 +505,17 @@ function init41() {
             return this
         }
 
-        pointPairToVector3s(targets) {
-            return this.mul(_e12345, localEven10).pointPairToVector3s(targets)
+        pointPairToVec3s(targets) {
+            return this.mul(_e12345, localEven10).pointPairToVec3s(targets)
         }
 
-        zrsToVector3(target) {
-            return this.inner(_e1230, localOdd3).flatPointToVector3(target)
+        zrsToVec3(target) {
+            return this.inner(_e1230, localOdd3).flatPointToVec3(target)
         }
 
-        flatPointToVector3(target) {
+        flatPointToVec3(target) {
             this.mulReverse(_e123, localEven0)
-            localEven0[0] *= 2.
-            return localEven0.translationToVector3(target)
+            return localEven0.translationToVec3(target)
         }
 
         mulReverse(b,target) {
@@ -637,7 +673,7 @@ function init41() {
     Odd.basisNames = ['1', '2', '3', '4', '5', '123', '124', '125', '134', '135', '145', '234', '235', '245', '345', '12345']
 
     localOdd0 = new Odd(); localOdd1 = new Odd(); localOdd2 = new Odd(); localOdd3 = new Odd(); localOdd4 = new Odd(); localOdd5 = new Odd(); localOdd6 = new Odd(); localOdd7 = new Odd(); localOdd8 = new Odd(); localOdd9 = new Odd();
-    localEven0 = new Even(); localEven1 = new Even(); localEven2 = new Even(); localEven3 = new Even(); localEven4 = new Even(); localEven5 = new Even(); localEven6 = new Even(); localEven7 = new Even(); localEven8 = new Even(); localEven9 = new Even(); localEven10 = new Even();
+    localEven0 = new Even(); localEven1 = new Even(); localEven2 = new Even(); localEven3 = new Even(); localEven4 = new Even(); localEven5 = new Even(); localEven6 = new Even(); localEven7 = new Even(); localEven8 = new Even(); localEven9 = new Even(); localEven10 = new Even(); localEven11 = new Even(); localEven12 = new Even(); localEven13 = new Even(); localEven14 = new Even(); localEven15 = new Even();
 
     // could be e15, 1+e15, e234
 
@@ -671,7 +707,13 @@ function init41() {
     _e34 = _e3.mul(_e4, new Even())
     _e35 = _e3.mul(_e5, new Even())
     
-    _e123 = _e1.mul(_e23,new Odd())
+    _e123 = _e12.mul(_e3, new Odd())
+    _e124 = _e12.mul(_e4, new Odd())
+    _e125 = _e12.mul(_e5, new Odd())
+    _e234 = _e23.mul(_e4, new Odd())
+    _e235 = _e23.mul(_e5, new Odd())
+    _e134 = _e13.mul(_e4, new Odd())
+    _e135 = _e13.mul(_e5, new Odd())
 
     _e1234 = _e123.mul(_e4, new Even())
     _e1230 = _e123.mul(_e0, new Even())
@@ -682,12 +724,4 @@ function init41() {
     
     odd0 = new Odd(); odd1 = new Odd(); odd2 = new Odd(); odd3 = new Odd(); odd4 = new Odd(); odd5 = new Odd(); odd6 = new Odd();
     even0 = new Even(); even1 = new Even(); even2 = new Even(); even3 = new Even(); even4 = new Even(); even5 = new Even(); even6 = new Even();
-
-    vecToTranslation = (v, target) => {
-        target.copy(_one)
-            .addScaled(_e10, v.x * .5, target)
-            .addScaled(_e20, v.y * .5, target)
-            .addScaled(_e30, v.z * .5, target)
-        return target
-    }
 }
