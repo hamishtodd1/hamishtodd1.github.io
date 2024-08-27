@@ -67,9 +67,9 @@ function init41() {
         translationToVec3(target) {
             target.set(0., 0., 0.)
             for (let i = 0; i < 16; ++i) {
-                target.x += this[i] * _e10[i] * .5 //because of double cover AND because there are two in there!
-                target.y += this[i] * _e20[i] * .5
-                target.z += this[i] * _e30[i] * .5
+                target.x += this[i] * _e10[i] //purely because of double cover
+                target.y += this[i] * _e20[i] //yes, there are two nonzeroes in there. But, the inner product takes care of that weirdness
+                target.z += this[i] * _e30[i] //1+e10 would be basis "translation by 1"
             }
             target.multiplyScalar(1. / this[0])
             return target
@@ -173,10 +173,10 @@ function init41() {
             ]
             var Tsq = -T1 * T1 - T2 * T2 - T3 * T3 - T4 * T4 + T5 * T5;
             var norm = Math.sqrt(S * S - Tsq)
-            if (norm == 0 && S == 0)   // at most a single translation
+            if (norm == 0 && S == 0)   // at most this single translation
                 return target.set(0.,this[1], this[2], this[3], this[4], this[5], this[6], this[7], this[8], this[9], this[10],0.,0.,0.,0.,0.)
             var lambdap = 0.5 * S + 0.5 * norm;
-            // lm is always a rotation, lp can be boost, translation, rotation
+            // lm is always this rotation, lp can be boost, translation, rotation
             var [lp, lm] = [Math.sqrt(Math.abs(lambdap)), Math.sqrt(-0.5 * S + 0.5 * norm)]
             var theta2 = lm == 0 ? 0 : Math.atan2(lm, this[0]);
             var theta1 = lambdap < 0 ? Math.asin(lp / Math.cos(theta2)) : lambdap > 0 ? Math.atanh(lp / this[0]) : lp / this[0];
@@ -487,9 +487,22 @@ function init41() {
     ]
     Even.basisNames = ['', '12', '13', '14', '15', '23', '24', '25', '34', '35', '45', '1234', '1235', '1245', '1345', '2345']
     
+    let vectorPair = [new THREE.Vector3(), new THREE.Vector3()]
+
     class Odd extends GeneralVector {
         constructor() {
             super(16)
+        }
+
+        getSpherePositionVec3AndRadius(targetVec) {
+
+            let translationToCenter = this.inner( _e1230, localOdd11 ).mulReverse( _e123, localEven16 )
+            translationToCenter[0] *= 2.
+            translationToCenter.translationToVec3(targetVec)
+
+            let thisAtOrigin = translationToCenter.reverse(translationToCenter).sandwich(this, localOdd12)
+            thisAtOrigin.meet(_e12, localOdd10).pointPairToVec3s(vectorPair)
+            return .5 * vectorPair[0].distanceTo(vectorPair[1])
         }
 
         fromFl(fl) {
@@ -515,6 +528,7 @@ function init41() {
 
         flatPointToVec3(target) {
             this.mulReverse(_e123, localEven0)
+            localEven0[0] *= 2.
             return localEven0.translationToVec3(target)
         }
 
@@ -572,6 +586,24 @@ function init41() {
                 target[14] = this[0] * b[14] + this[14] * b[0] + this[1] * b[15] - this[15] * b[1];
                 target[15] = this[15] * b[0];
             }
+            else if (b.constructor === Odd && target.constructor === Even) {
+                target[0] = this[0] * b[0] + this[10] * b[10] + this[12] * b[12] + this[13] * b[13] + this[14] * b[14] + this[1] * b[1] + this[2] * b[2] + this[3] * b[3] + this[7] * b[7] + this[9] * b[9] - this[11] * b[11] - this[15] * b[15] - this[4] * b[4] - this[5] * b[5] - this[6] * b[6] - this[8] * b[8];
+                target[1] = this[14] * b[15] + this[15] * b[14] + this[2] * b[5] + this[3] * b[6] + this[5] * b[2] + this[6] * b[3] - this[4] * b[7] - this[7] * b[4];
+                target[2] = this[3] * b[8] + this[8] * b[3] - this[13] * b[15] - this[15] * b[13] - this[1] * b[5] - this[4] * b[9] - this[5] * b[1] - this[9] * b[4];
+                target[3] = this[12] * b[15] + this[15] * b[12] - this[10] * b[4] - this[1] * b[6] - this[2] * b[8] - this[4] * b[10] - this[6] * b[1] - this[8] * b[2];
+                target[4] = this[11] * b[15] + this[15] * b[11] - this[10] * b[3] - this[1] * b[7] - this[2] * b[9] - this[3] * b[10] - this[7] * b[1] - this[9] * b[2];
+                target[5] = this[0] * b[5] + this[10] * b[15] + this[11] * b[3] + this[15] * b[10] + this[3] * b[11] + this[5] * b[0] - this[12] * b[4] - this[4] * b[12];
+                target[6] = this[0] * b[6] + this[6] * b[0] - this[11] * b[2] - this[13] * b[4] - this[15] * b[9] - this[2] * b[11] - this[4] * b[13] - this[9] * b[15];
+                target[7] = this[0] * b[7] + this[7] * b[0] - this[12] * b[2] - this[13] * b[3] - this[15] * b[8] - this[2] * b[12] - this[3] * b[13] - this[8] * b[15];
+                target[8] = this[0] * b[8] + this[11] * b[1] + this[15] * b[7] + this[1] * b[11] + this[7] * b[15] + this[8] * b[0] - this[14] * b[4] - this[4] * b[14];
+                target[9] = this[0] * b[9] + this[12] * b[1] + this[15] * b[6] + this[1] * b[12] + this[6] * b[15] + this[9] * b[0] - this[14] * b[3] - this[3] * b[14];
+                target[10] = this[0] * b[10] + this[10] * b[0] + this[13] * b[1] + this[14] * b[2] + this[1] * b[13] + this[2] * b[14] - this[15] * b[5] - this[5] * b[15];
+                target[11] = -this[15] * b[4] - this[4] * b[15];
+                target[12] = -this[15] * b[3] - this[3] * b[15];
+                target[13] = this[15] * b[2] + this[2] * b[15];
+                target[14] = -this[15] * b[1] - this[1] * b[15];
+                target[15] = this[0] * b[15] + this[15] * b[0];    
+            }
             else
                 console.error("not implemented")
     
@@ -596,6 +628,24 @@ function init41() {
                 target[13] = this[13] * b[0] + this[1] * b[10] + this[4] * b[6] - this[3] * b[7];
                 target[14] = this[14] * b[0] + this[2] * b[10] + this[4] * b[8] - this[3] * b[9];
                 target[15] = this[0] * b[15] + this[10] * b[5] + this[12] * b[3] + this[14] * b[1] + this[15] * b[0] + this[2] * b[13] + this[4] * b[11] + this[5] * b[10] + this[7] * b[8] + this[8] * b[7] - this[11] * b[4] - this[13] * b[2] - this[1] * b[14] - this[3] * b[12] - this[6] * b[9] - this[9] * b[6];
+            }
+            else if (b.constructor === Odd && target.constructor === Even) {
+                target[0] = 0.0;
+                target[1] = this[0] * b[1] - this[1] * b[0];
+                target[2] = this[0] * b[2] - this[2] * b[0];
+                target[3] = this[0] * b[3] - this[3] * b[0];
+                target[4] = this[0] * b[4] - this[4] * b[0];
+                target[5] = this[1] * b[2] - this[2] * b[1];
+                target[6] = this[1] * b[3] - this[3] * b[1];
+                target[7] = this[1] * b[4] - this[4] * b[1];
+                target[8] = this[2] * b[3] - this[3] * b[2];
+                target[9] = this[2] * b[4] - this[4] * b[2];
+                target[10] = this[3] * b[4] - this[4] * b[3];
+                target[11] = this[0] * b[11] + this[2] * b[6] + this[5] * b[3] + this[8] * b[1] - this[11] * b[0] - this[1] * b[8] - this[3] * b[5] - this[6] * b[2];
+                target[12] = this[0] * b[12] + this[2] * b[7] + this[5] * b[4] + this[9] * b[1] - this[12] * b[0] - this[1] * b[9] - this[4] * b[5] - this[7] * b[2];
+                target[13] = this[0] * b[13] + this[10] * b[1] + this[3] * b[7] + this[6] * b[4] - this[13] * b[0] - this[1] * b[10] - this[4] * b[6] - this[7] * b[3];
+                target[14] = this[0] * b[14] + this[10] * b[2] + this[3] * b[9] + this[8] * b[4] - this[14] * b[0] - this[2] * b[10] - this[4] * b[8] - this[9] * b[3];
+                target[15] = this[11] * b[4] + this[13] * b[2] + this[1] * b[14] + this[3] * b[12] - this[12] * b[3] - this[14] * b[1] - this[2] * b[13] - this[4] * b[11];
             }
             else
                 console.error("not implemented")
@@ -672,8 +722,8 @@ function init41() {
     ]
     Odd.basisNames = ['1', '2', '3', '4', '5', '123', '124', '125', '134', '135', '145', '234', '235', '245', '345', '12345']
 
-    localOdd0 = new Odd(); localOdd1 = new Odd(); localOdd2 = new Odd(); localOdd3 = new Odd(); localOdd4 = new Odd(); localOdd5 = new Odd(); localOdd6 = new Odd(); localOdd7 = new Odd(); localOdd8 = new Odd(); localOdd9 = new Odd();
-    localEven0 = new Even(); localEven1 = new Even(); localEven2 = new Even(); localEven3 = new Even(); localEven4 = new Even(); localEven5 = new Even(); localEven6 = new Even(); localEven7 = new Even(); localEven8 = new Even(); localEven9 = new Even(); localEven10 = new Even(); localEven11 = new Even(); localEven12 = new Even(); localEven13 = new Even(); localEven14 = new Even(); localEven15 = new Even();
+    let localOdd0 = new Odd(); let localOdd1 = new Odd(); let localOdd2 = new Odd(); let localOdd3 = new Odd(); let localOdd4 = new Odd(); let localOdd5 = new Odd(); let localOdd6 = new Odd(); let localOdd7 = new Odd(); let localOdd8 = new Odd(); let localOdd9 = new Odd(); let localOdd10 = new Odd(); let localOdd11 = new Odd(); let localOdd12 = new Odd();
+    let localEven0 = new Even(); let localEven1 = new Even(); let localEven2 = new Even(); let localEven3 = new Even(); let localEven4 = new Even(); let localEven5 = new Even(); let localEven6 = new Even(); let localEven7 = new Even(); let localEven8 = new Even(); let localEven9 = new Even(); let localEven10 = new Even(); let localEven11 = new Even(); let localEven12 = new Even(); let localEven13 = new Even(); let localEven14 = new Even(); let localEven15 = new Even(); let localEven16 = new Even(); 
 
     // could be e15, 1+e15, e234
 

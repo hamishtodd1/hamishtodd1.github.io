@@ -1,5 +1,6 @@
 //aliasing allowed
 function getSqrtQuaternion(q,target) {
+    target.copy(q)
     target.normalize()
     target.w += target.w < 0. ? -1. : 1.
     target.normalize()

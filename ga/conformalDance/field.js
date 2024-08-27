@@ -77,6 +77,11 @@ function initField() {
     let fullTransformEven = new Even()
     let fullTransformOdd = new Odd()
 
+    // even1.translationFromVec3(v2.set(1., 0., 0.))
+    // even1.sandwich(_eo, odd0).inner(_e1230, odd2)
+    // debugger
+    // odd2.flatPointToVec3(v2)
+
     updateField = (transform) => {
 
         let isOdd = transform.constructor === Odd
@@ -85,8 +90,6 @@ function initField() {
 
         let startCoords = isOdd && loaded ? modelCoords : randomCoords
         for(let i = 0; i < numPoints; ++i) {
-
-            // debugger
 
             v1.fromArray(startCoords, 3 * i)
             if(isOdd) {

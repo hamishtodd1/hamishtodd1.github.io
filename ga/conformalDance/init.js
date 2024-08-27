@@ -73,11 +73,12 @@ async function init() {
     renderer.outputEncoding = THREE.sRGBEncoding
     renderer.shadowMap.enabled = true
     renderer.xr.enabled = true
+    renderer.localClippingEnabled = true;
     container.appendChild(renderer.domElement)
 
     // document.body.appendChild(VRButton.createButton(renderer))
 
-    // initTransform()    
+    // initTransform()
     // initField()
     // initInvariants()
     let grade1Mat = initGrade1Shader()
@@ -92,15 +93,15 @@ async function init() {
         updateHandMvs()
         buttonWhileDowns()
 
-        // camera.position.set(0.,0.,1.)
-        camera.position.applyAxisAngle(yUnit, -.004)
+        // camera.position.set(0.,1.,0.)
+        camera.position.applyAxisAngle(yUnit, 0.)//-.004)
         camera.lookAt(0., 0., 0.)
         
-        {
-            even0.translationFromVec3(camera.position).sandwich(_eo, odd0)
-            for (let i = 0; i < 5; ++i)
-                grade1Mat.floats[i] = odd0[i]
-        }
+        // {
+        //     even0.translationFromVec3(camera.position).sandwich(_eo, odd0)
+        //     for (let i = 0; i < 5; ++i)
+        //         grade1Mat.floats[i] = odd0[i]
+        // }
 
         // update()
         
