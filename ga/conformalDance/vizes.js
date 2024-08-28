@@ -3,6 +3,67 @@ function getMinorRadius(position) {
     return ret
 }
 
+class SphereViz extends THREE.Group {
+    constructor(color) {
+        super()
+
+        let frontMat = new THREE.MeshPhongMaterial({
+            color,
+            clippingPlanes,
+            clipShadows: true,
+            side: THREE.FrontSide,
+            transparent: true,
+            opacity: .75,
+        })
+        let backMat = new THREE.MeshPhongMaterial({
+            color: color * .8,
+            clippingPlanes,
+            clipShadows: true,
+            side: THREE.BackSide,
+            transparent: true,
+            opacity: .75,
+        })
+
+        this.sphereGroup = new THREE.Group()
+        this.sphereGroup.add(new THREE.Mesh(sGeo, frontMat), new THREE.Mesh(sGeo, backMat))
+        // this.sphereGroup.castShadow = true
+        this.add(this.sphereGroup)
+
+        this.planeGroup = new THREE.Group()
+        this.planeGroup.add(new THREE.Mesh(pGeo, frontMat), new THREE.Mesh(pGeo, backMat))
+        // this.planeGroup.castShadow = true
+        this.planeGroup.scale.setScalar(999.)
+        this.add(this.planeGroup)
+
+        this.setFromSphere(_e5)
+    }
+
+    setFromSphere(sphere) {
+
+        let isHyperIdeal = sphere.inner(sphere, even0) < 0.
+        let isPlane = sphere.meet(_e1230, odd0)[15] === 0.
+
+        if (isHyperIdeal) {
+            this.sphereGroup.visible = false
+            this.planeGroup.visible = false
+        }
+        else if (isPlane) {
+            this.sphereGroup.visible = false
+            this.planeGroup.visible = true
+
+            _e123.projectOn(sphere, odd0).flatPointToVec3(this.planeGroup.position)
+            sphere.mulReverse(_e3, even0).toQuaternion(this.planeGroup.quaternion)
+            getSqrtQuaternion(this.planeGroup.quaternion, this.planeGroup.quaternion)
+        }
+        else {
+            this.sphereGroup.visible = true
+            this.planeGroup.visible = false
+            let radius = sphere.getSpherePositionVec3AndRadius(this.sphereGroup.position)
+            this.sphereGroup.scale.setScalar(radius)
+        }
+    }
+}
+
 class SimpleBivViz extends THREE.Group {
     
     constructor() {

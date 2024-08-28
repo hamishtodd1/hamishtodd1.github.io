@@ -78,13 +78,13 @@ async function init() {
 
     // document.body.appendChild(VRButton.createButton(renderer))
 
-    // initTransform()
-    // initField()
-    // initInvariants()
-    let grade1Mat = initGrade1Shader()
+    initTransform()
+    initField()
+    initInvariants()
 
     camera.position.multiplyScalar(.9)
     function render() {
+        
         let clockDelta = clock.getDelta()
         frameDelta = clockDelta < .1 ? clockDelta : .1 //clamped because debugger pauses create weirdness
         ++frameCount
@@ -94,7 +94,7 @@ async function init() {
         buttonWhileDowns()
 
         // camera.position.set(0.,1.,0.)
-        camera.position.applyAxisAngle(yUnit, 0.)//-.004)
+        camera.position.applyAxisAngle(yUnit, -.004)
         camera.lookAt(0., 0., 0.)
         
         // {
@@ -103,7 +103,7 @@ async function init() {
         //         grade1Mat.floats[i] = odd0[i]
         // }
 
-        // update()
+        update()
         
         debugUpdates.forEach(func=>func())
 

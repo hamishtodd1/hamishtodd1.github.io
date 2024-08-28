@@ -26,7 +26,7 @@ function initSurroundings() {
 
     const floor = new THREE.Mesh(floorGeometry, floorMaterial)
     floor.rotation.x = - Math.PI / 2
-    floor.position.y = limitsLower.y
+    floor.position.y = -3.
     floor.receiveShadow = true
     scene.add(floor)
 
