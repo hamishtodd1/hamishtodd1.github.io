@@ -501,7 +501,7 @@ function init41() {
             translationToCenter.translationToVec3(targetVec)
 
             let thisAtOrigin = translationToCenter.reverse(translationToCenter).sandwich(this, localOdd12)
-            thisAtOrigin.meet(_e12, localOdd10).pointPairToVec3s(vectorPair)
+            thisAtOrigin.meet(_e23, localOdd10).pointPairToVec3s(vectorPair) //CHANGE BACK TO _e12! Maybe!
             return .5 * vectorPair[0].distanceTo(vectorPair[1])
         }
 
@@ -774,4 +774,11 @@ function init41() {
     
     odd0 = new Odd(); odd1 = new Odd(); odd2 = new Odd(); odd3 = new Odd(); odd4 = new Odd(); odd5 = new Odd(); odd6 = new Odd();
     even0 = new Even(); even1 = new Even(); even2 = new Even(); even3 = new Even(); even4 = new Even(); even5 = new Even(); even6 = new Even();
+
+    let randomLineThroughOrigin = new Even()
+    randomLineThroughOrigin.addScaled(_e12, Math.random() - .5, randomLineThroughOrigin)
+    randomLineThroughOrigin.addScaled(_e13, Math.random() - .5, randomLineThroughOrigin)
+    randomLineThroughOrigin.addScaled(_e23, Math.random() - .5, randomLineThroughOrigin)
+    randomLineThroughOrigin.normalize()
+    log(randomLineThroughOrigin)
 }

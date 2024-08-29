@@ -21,7 +21,7 @@ function initTransform() {
     camera.add(sign)
     scene.add(camera)
 
-    class Thingy {
+    class Section {
         constructor(name, pieces, linearTime = false, slowdown = 1.) {
             this.pieces = pieces
             this.linearTime = linearTime
@@ -30,29 +30,29 @@ function initTransform() {
         }
     }
 
-    let thingies = [
-        // new Thingy(
+    let sections = [
+        // new Section(
         //     `Reflect`,
         //     [
         //         // Clap your hands
         //         new Odd().copy(_e1),
         //     ]
         // ),
-        // new Thingy(
+        // new Section(
         //     `Reflect`,
         //     [
         //         // Clap your hands
         //         new Odd().copy(_e1),
         //     ]
         // ),
-        // new Thingy(
+        // new Section(
         //     `Reflect`,
         //     [
         //         // Clap your hands
         //         new Odd().copy(_e1),
         //     ]
         // ),
-        new Thingy(
+        new Section(
             `Rotate`,
             [
                 // Rotate your hands
@@ -61,7 +61,7 @@ function initTransform() {
             ],
             true
         ),
-        new Thingy(
+        new Section(
             `Toroidal Vortex`,
             [
                 // Rotate around a circle
@@ -71,7 +71,7 @@ function initTransform() {
             true,
             .2
         ),
-        new Thingy(
+        new Section(
             `Parabolic`,
             [
                 //5
@@ -80,7 +80,7 @@ function initTransform() {
                 _e3.addScaled(_eo, -0.45, new Odd()),
             ],
         ),
-        new Thingy(
+        new Section(
             `Hyperbolic translation`,
             [
                 // Dipole
@@ -88,7 +88,7 @@ function initTransform() {
                 _e3.addScaled(_e5, .3, odd0).addScaled( _e0, .8, new Odd()),
             ],
         ),
-        new Thingy(
+        new Section(
             `Scale`,
             [
                 // Scale
@@ -96,7 +96,7 @@ function initTransform() {
                 _e4.addScaled(_e5, .4, new Odd()),
             ],
         ),
-        new Thingy(
+        new Section(
             `Translate`,
             [
                 // Go for a walk that's translating
@@ -104,7 +104,7 @@ function initTransform() {
                 _e3.addScaled(_e0, 1.8, new Odd()),
             ],
         ),
-        new Thingy(
+        new Section(
             `Euclidean screw`,
             [
                 // Let's see you screw (euclidean)
@@ -115,7 +115,7 @@ function initTransform() {
             ],
             // true
         ),
-        new Thingy(
+        new Section(
             `Elliptic screw`,
             [
                 //10
@@ -126,7 +126,7 @@ function initTransform() {
                 _e1.addScaled(_e2, 1., new Odd()),
             ]
         ),
-        new Thingy(
+        new Section(
             `Parabolic screw`,
             [
                 new Odd().copy(_e3),
@@ -135,7 +135,7 @@ function initTransform() {
                 _e1.addScaled(_e2, 1., new Odd()),
             ]
         ),
-        new Thingy(
+        new Section(
             `Hyperbolic screw`,
             [
                 // Rotate your dipole
@@ -145,7 +145,7 @@ function initTransform() {
                 _e1.addScaled(_e2, 1., new Odd()),
             ]
         ),
-        new Thingy(
+        new Section(
             `Scale-rotation (similarity)`,
             [
                 new Odd().copy(_e4),
@@ -154,7 +154,7 @@ function initTransform() {
                 _e1.addScaled(_e2, 1., new Odd()),
             ]
         ),
-        new Thingy(
+        new Section(
             `Point reflection`,
             [
                 new Odd().copy(_e2),
@@ -162,7 +162,7 @@ function initTransform() {
                 new Odd().copy(_e1),
             ]
         ),
-        new Thingy(
+        new Section(
             `Rotoreflection`,
             [
                 _e3.addScaled(_e2, .3, new Odd()),
@@ -170,7 +170,7 @@ function initTransform() {
                 new Odd().copy(_e1),
             ]
         ),
-        new Thingy(
+        new Section(
             `Parabolic Transflection`,
             [
                 new Odd().copy(_e3),
@@ -178,7 +178,7 @@ function initTransform() {
                 new Odd().copy(_e1),
             ]
         ),
-        new Thingy(
+        new Section(
             `Hyperbolic transflection`,
             [
                 new Odd().copy(_e3),
@@ -186,13 +186,13 @@ function initTransform() {
                 new Odd().copy(_e1),
             ]
         ),
-        new Thingy(
+        new Section(
             `Sphere reflection`,
             [
                 _e4.addScaled(_e5, 0.7, new Odd()),
             ]
         ),
-        new Thingy(
+        new Section(
             `Scale-rotoreflection`,
             [
                 new Odd().copy(_e4),
@@ -202,21 +202,21 @@ function initTransform() {
                 new Odd().copy(_e1),
             ]
         ),
-        new Thingy(
+        new Section(
             `Reflect`,
             [
                 // Clap your hands
                 new Odd().copy(_e1),
             ]
         ),
-        new Thingy(
+        new Section(
             `Reflect`,
             [
                 // Clap your hands
                 new Odd().copy(_e1),
             ]
         ),
-        new Thingy(
+        new Section(
             `Reflect`,
             [
                 // Clap your hands
@@ -225,10 +225,73 @@ function initTransform() {
         ),
     ]
 
+    let updateSpheres = initSpheres()
+    // initInvariants()
+    // initField()
+
+    {
+        /**
+         * Three spheres, meeting at point pair
+                e4+e1, e4-e1, e4 translated in the e3 direction
+
+                One of them breaks off, translating further in e3, you get a boosting line
+
+                Spheres shrink to 0 radius, circle remains
+
+         */
+
+        let time = 0.
+        function windowLerp(start, end) {
+            start += 5.
+            end += 5.
+            let duration = end - start
+            return time < start ? 0. : time > end ? 1. : (time - start) / duration
+        }
+
+        let bViz = new SimpleBivViz()
+        scene.add(bViz)
+
+        let pieces = [new Odd(), new Odd(), new Odd()]
+        update = () => {
+
+            time = clock.getElapsedTime()
+
+            _e4.addScaled(_e1, 1., pieces[0]).normalize()
+            _e4.addScaled(_e1,-1., pieces[1]).normalize()
+
+            let translationDist = 1.5 + 1.3 * windowLerp(1., 2.)
+            even0.translationFromVec3(v1.set(0., 0., translationDist)).sandwich(_e4, pieces[2]).normalize()
+
+            let shrinkStart = 3.5
+            let shrinkEnd = 5.
+            let shrinkness = windowLerp(shrinkStart, shrinkEnd)
+            pieces.forEach(p => {
+                p.sandwich(_e0, odd0)
+                odd0.multiplyScalar(-1., odd0)
+                p.lerp(odd0, shrinkness, p)
+            })
+            updateSpheres(pieces)
+
+            pieces[2].mul(pieces[1].mul(pieces[0], even0), transformOdd)
+
+            // updateField(transformOdd)
+
+            transformOdd.mul(_e12345, even1).selectGrade(2,transformEven)
+
+            // debugger
+            
+            // updateVizes(pieces, transformEven)
+
+            bViz.update(transformEven)
+            bViz.visible = true
+        }
+        return
+    }
+
     // let circlePairOffsetter = new Even()
     // circlePairOffsetter.addScaled(_one, Math.cos(TAU / 8. / 2.), circlePairOffsetter)
     // circlePairOffsetter.addScaled(_e24, Math.sin(TAU / 8. / 2.), circlePairOffsetter)
-    // thingies[0].forEach(a=>{
+    // sections[0].forEach(a=>{
     //     debugger
     //     circlePairOffsetter.sandwich(a, odd0)
     //     a.copy(odd0)
@@ -245,9 +308,8 @@ function initTransform() {
         [new Odd(), new Odd(), new Odd(), new Odd(), new Odd()],
     ]
 
-    let updateSpheres = initSpheres()
+    
 
-    let thingyIndexOld = -1
     update = () => {
 
         // return _one
@@ -267,19 +329,16 @@ function initTransform() {
         // .addScaled(_one, Math.cosh(Math.sin(timeFactor)), transform)
         // .addScaled(_e25, Math.sinh(Math.sin(timeFactor)), transform)
 
-        let thingyIndex = (skipTo+Math.floor(time / secondsPerThingy)) % thingies.length
+        let thingyIndex = (skipTo+Math.floor(time / secondsPerThingy)) % sections.length
         thingyIndex = stickOn === -1 ? thingyIndex : stickOn
         log(thingyIndex)
-        let thingy = thingies[thingyIndex]
-        if (thingyIndexOld !== thingyIndex) {
-            thingyIndexOld = thingyIndex
-        }
+        let thingy = sections[thingyIndex]
 
         let timeThroughThingy = time - thingyIndex * secondsPerThingy
         //not that we're actually using the transition
         let factorThroughTransition = Math.max(0., timeThroughThingy - (secondsPerThingy - transitionTime)) / transitionTime
 
-        let transitionable = thingies[thingyIndex + 1] !== undefined && thingies[thingyIndex].pieces.length === thingies[thingyIndex + 1].pieces.length
+        let transitionable = sections[thingyIndex + 1] !== undefined && sections[thingyIndex].pieces.length === sections[thingyIndex + 1].pieces.length
 
         let pieces = null
         if ( !transitionable || factorThroughTransition === 0. )
@@ -287,7 +346,7 @@ function initTransform() {
         else {
             pieces = lerpedPieces[thingy.pieces.length]
             
-            let nextThingy = thingies[thingyIndex+1]
+            let nextThingy = sections[thingyIndex+1]
             for(let i = 0; i < 2; ++i)
                 thingy.pieces[i].lerp( nextThingy.pieces[i], factorThroughTransition,pieces[i] )
         }
@@ -314,10 +373,9 @@ function initTransform() {
         let power = thingy.slowdown * (thingy.linearTime ? timeFactor : oscillatingTimeFactor)
         if(transitionable) {
             let power0 = thingy.slowdown * (thingy.linearTime ? timeFactor : oscillatingTimeFactor)
-            let power1 = thingies[thingyIndex+1].slowdown * (thingies[thingyIndex+1].linearTime ? timeFactor : oscillatingTimeFactor)
+            let power1 = sections[thingyIndex+1].slowdown * (sections[thingyIndex+1].linearTime ? timeFactor : oscillatingTimeFactor)
             power = power0 * (1. - factorThroughTransition) + power1 * factorThroughTransition
         }
-
 
         if (pieces.length === 2) {
             transform.pow(power, transform)
@@ -346,7 +404,6 @@ function initTransform() {
         // circlePairOffsetter.sandwich( _e23, even0 )
         // even0.log()
         // even0.mul( weirdStudy.multiplyScalar(timeFactor,even2), even1 ).exp(transform)
-
         
     }
 }

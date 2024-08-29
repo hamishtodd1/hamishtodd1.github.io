@@ -16,8 +16,8 @@ function initSpheres() {
 
     let sGeo = new THREE.SphereGeometry(1.,64,32)
     let pGeo = new THREE.PlaneGeometry(1.,1.)
-    let h = 5.6
-    let w = 6.6
+    let h = 5.6 * 999.
+    let w = 6.6 * 999.
     let clippingPlanes = [
         new THREE.Plane(new THREE.Vector3( 0, 0, 1), w*.5),
         new THREE.Plane(new THREE.Vector3( 0, 0,-1), w*.5),
@@ -109,7 +109,7 @@ function initSpheres() {
     window.SphereViz = SphereViz
 
     let svs = [
-        new SphereViz( 0x440154),sf
+        new SphereViz( 0x440154),
         new SphereViz( 0x3b528b),
         new SphereViz( 0x21918c),
         new SphereViz( 0x5ec962),

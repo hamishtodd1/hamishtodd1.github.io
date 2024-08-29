@@ -79,8 +79,6 @@ async function init() {
     // document.body.appendChild(VRButton.createButton(renderer))
 
     initTransform()
-    initField()
-    initInvariants()
 
     camera.position.multiplyScalar(.9)
     function render() {
@@ -94,7 +92,7 @@ async function init() {
         buttonWhileDowns()
 
         // camera.position.set(0.,1.,0.)
-        camera.position.applyAxisAngle(yUnit, -.004)
+        // camera.position.applyAxisAngle(yUnit, -.004)
         camera.lookAt(0., 0., 0.)
         
         // {
