@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>FEP</title>
+    <style>
+        body {
+            overflow: hidden;
+        }
+
+        #rendererContainer {
+            position: absolute;
+            z-index: 0;
+        }
+
+        #textarea {
+            /* visibility: hidden; DO NOT DO THIS!!!! NEEDS TO BE VISIBLE AT FIRST!!!*/
+            position: absolute;
+            z-index: 1;
+
+            /* right: 90; */
+            width: calc(35%);
+            height: calc(60%);
+            left: 20px;
+            top: 50px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <textarea id="textarea" spellcheck="false"></textarea>
+    <div id="rendererContainer"></div>
+
+    <script src="variables.js"></script>
+    
+    <script src="three.js"></script>
+    <script src="miscFunctions.js"></script>
+    <!-- <script src="OBJLoader.js"></script> -->
+    <!-- <script src="OrbitControls.js"></script> -->
+    <script src="threejsVariables.js"></script>
+
+    <script src="graphAppearance.js"></script>
+
+    <script src="mouse.js"></script>
+
+    <script src="init.js"></script>
+    
+    <script>
+        init()
+    </script>
+</body>
+
+</html>
