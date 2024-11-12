@@ -1,13 +1,13 @@
 /*
-    For first presentation to Emmett
-        Making nodes
-        editing nodes
-        Visualizing distributions?
 
-    TODO
-        Instead of code, boxes could also have a picture of an equation in latex
-            represented as code under the hood
+    It is fairly justified to do the gaussian upper half plane thing
+        People need to know we are thinking about spaces where points are probability distributions
 
+    Could visualize "conditionally independent GIVEN"
+
+    If you STILL don't get bayesian mechanics, visualize the separate pieces of it
+
+    Instead of defining life, try to define death. When is a tree dead?
 
     Examples
         Optical illusions! Such fun
@@ -26,8 +26,30 @@
     The free energy defines a gradient locally, where to go
     but it changes as our beliefs change
     so it's lij a landscape, and the landscape changes form as you change your location
+
+    
+
+    Tools vs living things
+        Tools can:
+            reproduce - a person sees a tool you have and acquires their own
+            break and be healed
+            in danger of death - put on some shelf at the back of a cupboard
+            be very close to such death and be brought back 
+        ...but their existence is dependent on their being useful to you.
+            If their usefulness seems to decrease, they have very little ability to "adapt"
+                That is, to try to become useful again
+            But future toos may have that going on - to desperately seek usefulness
         
     notes
+        Weird: Symplectomorphism/transformation of the fisher-rao manifold (hopefully analogous...)
+            ...is not about moving ONE point but about moving ALL of them
+            So what does that correspond to "physically"/active-inference-ly?
+            Answer: some part of your body says to the other part "I don't know where you are, but you need to move a meter to the right"
+                I.e.: "I don't know what your understanding of the world is, but you need to change it in THIS way"
+        Going from AIs which have been told what you want (do well on THIS test set)
+            vs figuring out what you want
+            Young humans try to do this, to figure out what use they can be
+        "Avoid surprising exchanges with your environment"
         Want to literally see the terms in these equations change as the situation they model changes
         To exist is to be conditionally independent of your environment
         conditioned on the existence of this set of states (the sensory and the active States) the
@@ -38,10 +60,17 @@
         "To reproduce is to prove your model of the world is correct"c
  */
 
+
+
+
+
 async function init() {
 
     initMouse()
-    initGraph()
+
+    // initGraph()
+    // await initPosa3d()
+    initHyperbolic()
 
     window.addEventListener('resize', () => {
 
@@ -56,30 +85,12 @@ async function init() {
     renderer.outputEncoding = THREE.sRGBEncoding
     renderer.shadowMap.enabled = true
     renderer.xr.enabled = true
-    renderer.setClearColor(0x000000)
+    renderer.setClearColor(0x3d5b59)
     rendererContainer.appendChild(renderer.domElement)
 
-    camera.position.z += 2.
+    camera.position.z += 4.
 
-    // textarea.style.visibility = "hidden"
-    document.addEventListener('keydown', (event) => {
-        if (event.altKey && event.key === "Enter" ) {
-            if( textarea.style.visibility === "hidden")
-                textarea.style.visibility = ""
-            else {
-                textarea.style.visibility = "hidden"
-
-                try {
-                    eval(textarea.value);
-                } catch (e) {
-                    // +3 because `err` has the line number of the `eval` line plus two.
-                    log(e)
-                }
-            }
-        }
-    })
-
-    textarea.value = "log('hello');\n\nboogle;\n\nlet a = 3;"//"log('hello')"
+    updateDomainSizes()
 
     function render() {
 
@@ -87,7 +98,14 @@ async function init() {
         frameDelta = clockDelta < .1 ? clockDelta : .1 //clamped because debugger pauses create weirdness
         ++frameCount
 
-        updateGraph()
+        if(frameCount === 1) {
+            textarea.style.visibility = "hidden"
+            errorBox.style.visibility = "hidden"
+        }
+
+        // updateGraph()
+        // updatePosa()
+        updateHyperbolic()
 
         renderer.render(scene, camera)
     }

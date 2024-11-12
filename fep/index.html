@@ -3,6 +3,7 @@
 
 <head>
     <meta charset="utf-8">
+    <link type="text/css" rel="stylesheet" href="main.css">
     <title>FEP</title>
     <style>
         body {
@@ -20,26 +21,54 @@
             z-index: 1;
 
             /* right: 90; */
-            width: calc(35%);
             height: calc(60%);
             left: 20px;
             top: 50px;
+
+            width: calc(35%);
         }
+
+        #errorBox {
+            border: 3px solid #ad2121;
+
+            width: calc(35%);
+            height:calc(20%);
+            left: 20px;
+
+            position: absolute;
+            bottom: 20px;
+            z-index: 1;
+        }
+        
     </style>
 </head>
 
 <body>
 
     <textarea id="textarea" spellcheck="false"></textarea>
+    <div id="errorBox"></div>
+
     <div id="rendererContainer"></div>
 
     <script src="variables.js"></script>
+    <script src="miscFunctions.js"></script>
+
+    <script src="generalVectors.js"></script>
+    <script src="31.js"></script>
+    <script src="31.glsl"></script>
+
+    <script>
+        initGeneralVectors()
+        initGa(init31WithoutDeclarations)
+    </script>
     
     <script src="three.js"></script>
-    <script src="miscFunctions.js"></script>
     <!-- <script src="OBJLoader.js"></script> -->
     <!-- <script src="OrbitControls.js"></script> -->
     <script src="threejsVariables.js"></script>
+
+    <script src="posa.js"></script>
+    <script src="hyperbolic.js"></script>
 
     <script src="graphAppearance.js"></script>
 
