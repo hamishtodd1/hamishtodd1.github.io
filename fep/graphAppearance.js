@@ -175,7 +175,7 @@ function initGraph() {
 
 
     let heldArrow = null
-    renderer.domElement.addEventListener('mousedown', (event) => {
+    document.addEventListener('mousedown', (event) => {
         if(event.button === 0) {
             intersections.length = 0
             raycaster.intersectObjects(nodes, false, intersections)
@@ -191,7 +191,7 @@ function initGraph() {
     })
 
     let editingNode = null
-    renderer.domElement.addEventListener('mouseup', (event) => {
+    document.addEventListener('mouseup', (event) => {
         if (event.button === 0 && heldArrow !== null) {
             intersections.length = 0
             raycaster.intersectObjects(nodes, false, intersections)
@@ -216,7 +216,7 @@ function initGraph() {
         }
     })
 
-    renderer.domElement.addEventListener('mousewheel', (event) => {
+    document.addEventListener('mousewheel', (event) => {
         // raycaster.setFromCamera(mouse, camera)
         if(event.deltaY < 0.)
             camera.position.z *= 1.1

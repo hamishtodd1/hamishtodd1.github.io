@@ -11,14 +11,29 @@
 
 function init31WithoutDeclarations() {
 
+    let biv = new Float32Array(16)
+
     class Mv extends GeneralVector {
 
         constructor() {
             super(16)
         }
 
+        //may also be sign errors if it isn't PGA stuff, ya gotta divide!
+        projectOn(on, target) {
+            return this.inner(on,newMv).mulReverse(on,target)
+        }
+
+        flatPpToVec(v) {
+            let translator = this.mulReverse(_e12, newMv)
+            translator[0] *= 2.
+            return translator.translatorToVec(v)
+        }
+
         cheapSqrt(target) {
             this.cheapNormalize(target)
+            if(target[0] === -1.)
+                target.negate(target)
             target[0] += 1.
             return target.cheapNormalize(target)
         }
@@ -43,36 +58,41 @@ function init31WithoutDeclarations() {
         circlePosToVec(targetVec) {
             let translationToCenter = this.inner(_e120, newMv).mulReverse(_e12, newMv)
             translationToCenter[0] *= 2.
-            return translationToCenter.translatorToVec3(targetVec)
+            return translationToCenter.translatorToVec(targetVec)
 
             //wanna get radius? Learn the actual radius-to-dilation-norm function!
         }
 
-        translatorToVec3(target) {
+        translatorToVec(target) {
             target.z = 0.
             target.x = this[6] + this[7]
             target.y = this[8] + this[9]
-            target.multiplyScalar(1. / this[0])
+            target.multiplyScalar(1. / this[0], target)
             return target
         }
 
-        pointPairToVec3s(targets) {
+        pointPairToVecs(targets) {
 
-            let projector = this.getNormalization(newMv).multiplyScalar(.5, newMv)
-            projector[0] = .5
-            let projectableUna = this.inner(_em, newMv)
+            let mySq = this.sqScalar()
+            let toUse = mySq > 0. ? this : this.inner(_e12pm, newMv)
+
+            let projector = toUse.cheapNormalize(newMv)
+            projector[0] = 1.
+            projector.multiplyScalar(.5, projector)
+            let projectableUna = toUse.inner(_em, newMv)
 
             for (let i = 0; i < 2; ++i) {
 
-                let zrs = projector.mul(projectableUna, newMv)
-                if (zrs[3] === zrs[4])
+                let zrc = projector.mul(projectableUna, newMv)
+                if (zrc[3] === zrc[4])
                     targets[i].copy(outOfSightVec3)
                 else
-                    zrs.zrsToVec3(targets[i])
+                    zrc.circlePosToVec(targets[i])
 
-                projector.reverse(projector)
-                //ohhh, better if they have two different colors
+                projector.getReverse(projector)
             }
+
+            return targets
         }
 
         rigorousNormalize(target) {
@@ -105,27 +125,31 @@ function init31WithoutDeclarations() {
         }
 
         exp(target) {
+
+            for (let i = 0; i < 6; ++i)
+                biv[i] = this[i + 5];
+
             // B*B = S + T*e1234
-            var S = -this[0] * this[0] - this[1] * this[1] + this[2] * this[2] - this[3] * this[3] + this[4] * this[4] + this[5] * this[5]
-            var T = 2 * (this[0] * this[5] - this[1] * this[4] + this[2] * this[3])
+            var S = -biv[0] * biv[0] - biv[1] * biv[1] + biv[2] * biv[2] - biv[3] * biv[3] + biv[4] * biv[4] + biv[5] * biv[5]
+            var T = 2 * (biv[0] * biv[5] - biv[1] * biv[4] + biv[2] * biv[3])
             // ||B*B||
             var norm = Math.sqrt(S * S + T * T)
             if(norm === 0.) {
-                target.copy(this)
+                target.copy(biv)
                 target[0] = 1.
             }
             else {
                 // P_+ = xB + y*e1234*B
                 var [x, y] = [0.5 * (1 + S / norm), -0.5 * T / norm];
                 var [lp, lm] = [Math.sqrt(0.5 * S + 0.5 * norm), Math.sqrt(-0.5 * S + 0.5 * norm)]
-                var [cp, sp] = [cosh(lp), lp == 0 ? 1 : sinh(lp) / lp]
-                var [cm, sm] = [cos(lm), lm == 0 ? 1 : sin(lm) / lm]
+                var [cp, sp] = [Math.cosh(lp), lp == 0 ? 1 : Math.sinh(lp) / lp]
+                var [cm, sm] = [Math.cos(lm), lm == 0 ? 1 : Math.sin(lm) / lm]
                 var [cmsp, cpsm] = [cm * sp, cp * sm]
                 var [alpha, beta] = [(cmsp - cpsm) * x + cpsm, (cmsp - cpsm) * y]
                 // Combine the two Euler's formulas together.
                 target[0] = cp * cm
-                target[5] = (this[0] * alpha + this[5] * beta); target[6] = (this[1] * alpha - this[4] * beta); target[7] = (this[2] * alpha - this[3] * beta);
-                target[8] = (this[3] * alpha + this[2] * beta); target[9] = (this[4] * alpha + this[1] * beta); target[10] = (this[5] * alpha - this[0] * beta);
+                target[5] = (biv[0] * alpha + biv[5] * beta); target[6] = (biv[1] * alpha - biv[4] * beta); target[7] = (biv[2] * alpha - biv[3] * beta);
+                target[8] = (biv[3] * alpha + biv[2] * beta); target[9] = (biv[4] * alpha + biv[1] * beta); target[10] = (biv[5] * alpha - biv[0] * beta);
                 target[16] = sp * sm * T / 2
             }
             return target

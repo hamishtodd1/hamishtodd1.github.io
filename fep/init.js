@@ -107,6 +107,8 @@ async function init() {
         // updatePosa()
         updateHyperbolic()
 
+        obj3dsWithOnBeforeRenders.forEach(obj => obj.onBeforeRender())
+
         renderer.render(scene, camera)
     }
     renderer.setAnimationLoop(render)
