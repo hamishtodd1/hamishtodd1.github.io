@@ -1,5 +1,7 @@
 /*
 
+    Ball moving around in tet, takes on the color
+
     It is fairly justified to do the gaussian upper half plane thing
         People need to know we are thinking about spaces where points are probability distributions
 
@@ -41,6 +43,8 @@
             But future toos may have that going on - to desperately seek usefulness
         
     notes
+        "Look as if" you anticipated
+            eyes look for data that is unambiguous
         Weird: Symplectomorphism/transformation of the fisher-rao manifold (hopefully analogous...)
             ...is not about moving ONE point but about moving ALL of them
             So what does that correspond to "physically"/active-inference-ly?
@@ -68,9 +72,10 @@ async function init() {
 
     initMouse()
 
-    // initGraph()
-    // await initPosa3d()
-    initHyperbolic()
+    initGraph()
+    await initPosa3d()
+    // initHyperbolic()
+    // initWorldMaps()
 
     window.addEventListener('resize', () => {
 
@@ -82,10 +87,10 @@ async function init() {
 
     renderer.setPixelRatio(window.devicePixelRatio)
     renderer.setSize(window.innerWidth, window.innerHeight)
-    renderer.outputEncoding = THREE.sRGBEncoding
+    // renderer.outputEncoding = THREE.sRGBEncoding
     renderer.shadowMap.enabled = true
     renderer.xr.enabled = true
-    renderer.setClearColor(0x3d5b59)
+    renderer.setClearColor(0x405B59)
     rendererContainer.appendChild(renderer.domElement)
 
     camera.position.z += 4.
@@ -103,9 +108,10 @@ async function init() {
             errorBox.style.visibility = "hidden"
         }
 
-        // updateGraph()
-        // updatePosa()
-        updateHyperbolic()
+        // updateWorldMaps()
+        updateGraph()
+        updatePosa()
+        // updateHyperbolic()
 
         obj3dsWithOnBeforeRenders.forEach(obj => obj.onBeforeRender())
 

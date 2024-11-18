@@ -24,12 +24,24 @@ function initGraph() {
 
     let nodes = []
 
+    let l3 = new THREE.Line3()
+
+    let visibleSimplex = -1
+    simplices = []
+    simplices[0] = new THREE.Mesh(new THREE.PlaneGeometry(1.,.1))
+    simplices[0].visible = false
+    scene.add(simplices[0])
+
+    let mazePic = new THREE.Mesh(new THREE.PlaneGeometry(1.,1.), new THREE.MeshBasicMaterial({map: new THREE.TextureLoader().load('maze.png')}))
+    scene.add(mazePic)
+
     //Circles
     let defaultValue = `return 0.5;`
     let circles = []
+    let matHighlighted = new THREE.MeshBasicMaterial({ color: 0xb5e5cf })
+    let matSelected = new THREE.MeshBasicMaterial({ color: 0xFFFF00 })
     {
         var circleMat = new THREE.MeshBasicMaterial({ color: 0x564937 })
-        var circleMatHighlighted = new THREE.MeshBasicMaterial({ color: 0xb5e5cf })
         let geo = new THREE.SphereGeometry(.05)
 
         class CircularNode extends THREE.Mesh {
@@ -46,18 +58,19 @@ function initGraph() {
         }
         window.CircularNode = CircularNode
 
-        for(let i = 0; i < 3; i++) {
+        for(let i = 0; i < 5; i++) {
             let c = new CircularNode()
 
             do {
-                c.position.x = .8 * (Math.random()-.5)
-                c.position.y = .8 * (Math.random()-.5)
+                c.position.x = 1.9 * (Math.random()-.5) - 1.6
+                c.position.y = 2.9 * (Math.random()-.5)
             }
             while (circles.some(c2 => c2 !== c && c2.position.distanceTo(c.position) < .2))
         }
     }
 
     //Squares
+    if(0)
     {
         let geo = new THREE.PlaneGeometry(.1, .1)
         let mat = new THREE.MeshBasicMaterial({ color: 0xfcb5ac })
@@ -83,7 +96,7 @@ function initGraph() {
 
     let arrows = []
     {
-        let arrowMat = new THREE.MeshBasicMaterial({ color: 0xb99095 })
+        var matUnselected = new THREE.MeshBasicMaterial({ color: 0xb99095 })
 
         let headRadius = .03
         let headHeight = headRadius * 3.4
@@ -101,14 +114,16 @@ function initGraph() {
                 super()
                 arrows.push(this)
 
-                this.head = new THREE.Mesh(headGeo, arrowMat)
+                this.head = new THREE.Mesh(headGeo, matUnselected)
                 this.add(this.head)
                 
                 this.source = source || null
                 this.sink = sink || null
 
-                this.shaft = new THREE.Mesh(shaftGeo, arrowMat)
+                this.shaft = new THREE.Mesh(shaftGeo, matUnselected)
                 this.add(this.shaft)
+
+                this.selected = false
 
                 scene.add(this)
             }
@@ -137,7 +152,10 @@ function initGraph() {
     }
 
     let intersections = []
-    new Arrow(nodes[0],nodes[1])
+    new Arrow(nodes[0], nodes[1])
+    new Arrow(nodes[1], nodes[2])
+    new Arrow(nodes[0], nodes[3])
+    new Arrow(nodes[1], nodes[3])
     updateGraph = () => {
 
         // nodes[1].position.y = .3 * Math.sin(frameCount * .02)
@@ -170,22 +188,42 @@ function initGraph() {
 
         circles.forEach(c => c.material = circleMat)
         if (intersections[0] && circles.indexOf(intersections[0].object) !== -1)
-            intersections[0].object.material = circleMatHighlighted
+            intersections[0].object.material = matHighlighted
+
+        arrows.forEach(a=>{
+            l3.start.copy(a.source.position)
+            l3.end.copy(a.sink ? a.sink.position : mousePos)
+            let dist = l3.closestPointToPoint(mousePos, true, v1).distanceTo(mousePos)
+            if(dist < .1)
+                a.shaft.material = matHighlighted
+            else
+                a.shaft.material = a.selected ? matSelected : matUnselected
+        })
     }
 
 
     let heldArrow = null
     document.addEventListener('mousedown', (event) => {
         if(event.button === 0) {
-            intersections.length = 0
-            raycaster.intersectObjects(nodes, false, intersections)
-            if (intersections[0]) {
-                heldArrow = new Arrow()
-                heldArrow.source = intersections[0].object
-            }
-            else {
-                let newNode = new CircularNode()
-                newNode.position.copy(mousePos)
+            // intersections.length = 0
+            // raycaster.intersectObjects(nodes, false, intersections)
+            // if (intersections[0]) {
+            //     heldArrow = new Arrow()
+            //     heldArrow.source = intersections[0].object
+            // }
+            // else {
+            //     let newNode = new CircularNode()
+            //     newNode.position.copy(mousePos)
+            // }
+
+            if(arrows.some(a=>a.shaft.material === matHighlighted)) {
+                if(visibleSimplex !== -1)
+                    simplices[visibleSimplex].visible = false
+                simplices[++visibleSimplex].visible = true
+
+                let arrow = arrows.find(a=>a.shaft.material === matHighlighted)
+                if(arrow)
+                    arrow.selected = true
             }
         }
     })
@@ -223,6 +261,7 @@ function initGraph() {
         if (event.deltaY > 0.)
             camera.position.z *= (1./1.1)
     })
+
 
     evaluateWholeGraph = () => {
         let result = 1.

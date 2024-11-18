@@ -5,7 +5,10 @@
 function updateFlowViz() {}
 function updateDomainSizes() {}
 
+flowBiv = new Mv()
+flowBiv.zero()
 function initFlowViz() {
+
 
     let existenceDuration = 1.
 
@@ -38,8 +41,6 @@ function initFlowViz() {
     }
     updateGeometry()
 
-    var pointsBiv = new Mv()
-
     var bivMat4 = new THREE.Matrix4().set(0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.)
 
     var flowMat = new THREE.ShaderMaterial({
@@ -54,8 +55,8 @@ function initFlowViz() {
                 
                     float[16] asZrc; vecToZrc( position, asZrc );
                     
-                    float[16] biv = float[16](bivMat4[0][0], bivMat4[0][1], bivMat4[0][2], bivMat4[0][3], bivMat4[1][0], bivMat4[1][1], bivMat4[1][2], bivMat4[1][3], bivMat4[2][0], bivMat4[2][1], bivMat4[2][2], bivMat4[2][3], bivMat4[3][0], bivMat4[3][1], bivMat4[3][2], bivMat4[3][3] );
-                    float[16] bivMultiple; multiplyScalar( biv, position.z, bivMultiple );
+                    float[16] flowBiv = float[16](bivMat4[0][0], bivMat4[0][1], bivMat4[0][2], bivMat4[0][3], bivMat4[1][0], bivMat4[1][1], bivMat4[1][2], bivMat4[1][3], bivMat4[2][0], bivMat4[2][1], bivMat4[2][2], bivMat4[2][3], bivMat4[3][0], bivMat4[3][1], bivMat4[3][2], bivMat4[3][3] );
+                    float[16] bivMultiple; multiplyScalar( flowBiv, position.z, bivMultiple );
                     float[16] rotor; exp31(bivMultiple, rotor);
                     float[16] moved; sandwich(rotor, asZrc, moved);
 
@@ -71,19 +72,21 @@ function initFlowViz() {
                 }`
     });
 
-    var study = new Mv()
-    study[0] = .4
-    study[15] = 0.
-    _e1p.mul(study, pointsBiv)
-    // pointsBiv.copy(_e1m)
-    pointsBiv.log()
+    // var study = new Mv()
+    // study[0] = .4
+    // study[15] = 0.
+    // _e1p.mul(study, flowBiv)
+    // flowBiv.copy(_e1m)
 
-    bivMat4.fromArray(pointsBiv)
+    bivMat4.fromArray(flowBiv)
 
     // flowMat.needsUpdate = true
 
-    let mesh = new THREE.Points(geo, flowMat)
-    scene.add(mesh)
+    flowViz = new THREE.Points(geo, flowMat)
+    // flowViz.visible = false
+    scene.add(flowViz)
+    flowViz.position.y = -1.87
+    flowViz.position.z -= .01
 
     let start = new Mv()
     let end = new Mv()
@@ -107,10 +110,10 @@ function initFlowViz() {
         if (holding) {
             end.vecToZrc(mousePos)
             if (!start.equals(end)) {
-                let boostPp = start.wedge(end, mv0)
-                boostPp.cheapNormalize(boostPp)
-                mv0.mul(study, pointsBiv)
-                bivMat4.fromArray(pointsBiv)
+                // let boostPp = start.wedge(end, mv0)
+                // boostPp.cheapNormalize(boostPp)
+                // mv0.mul(study, flowBiv)
+                bivMat4.fromArray(flowBiv)
             }
         }
 

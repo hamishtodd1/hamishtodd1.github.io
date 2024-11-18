@@ -39,6 +39,7 @@ function init31WithoutDeclarations() {
         }
 
         cheapNormalize(target) {
+            //should be doable with sqScalar but the reverse is important
             let normSq = this.mulReverse(this, newMv)[0]
             return this.multiplyScalar(1. / Math.sqrt(Math.abs(normSq)), target)
         }
@@ -109,18 +110,25 @@ function init31WithoutDeclarations() {
         }
 
         logarithm(target) {
+
             // B*B = S + T*e1234
-            var S = this[0] * this[0] - this[7] * this[7] - 1;
-            var T = 2 * (this[0] * this[7])
-            var norm = sqrt(S * S + T * T)
+            var S = this[0] * this[0] - this[15] * this[15] - 1;
+            var T = 2 * (this[0] * this[15])
+            var norm = Math.sqrt(S * S + T * T)
             var [x, y] = [0.5 * (1 + S / norm), -0.5 * T / norm];
             // lp is always a boost, lm a rotation
             var [lp, lm] = [Math.sqrt(0.5 * S + 0.5 * norm), Math.sqrt(-0.5 * S + 0.5 * norm)]
-            var theta2 = lm == 0 ? 0 : atan2(lm, this[0]); var theta1 = atanh(lp / this[0]);
+            var theta2 = lm == 0 ? 0 : Math.atan2(lm, this[0]); var theta1 = Math.atanh(lp / this[0]);
             var [w1, w2] = [lp == 0 ? 0 : theta1 / lp, lm == 0 ? 0 : theta2 / lm]
-            var [A, B] = [(w1 - w2) * x + w2, w1 == 0 ? Math.atanh(-this[7] / lm) / lm : (w1 - w2) * y];
-            target[5] = this[1] * A + this[6] * B; target[6] = this[2] * A - this[5] * B; target[7] = this[3] * A - this[4] * B;
-            target[8] = this[4] * A + this[3] * B; target[9] = this[5] * A + this[2] * B; target[10] = this[6] * A - this[1] * B;
+            var [A, B] = [(w1 - w2) * x + w2, w1 == 0 ? Math.atanh(-this[15] / lm) / lm : (w1 - w2) * y];
+            target.zero()
+            target[ 5] = this[ 5] * A + this[10] * B
+            target[ 6] = this[ 6] * A - this[ 9] * B
+            target[ 7] = this[ 7] * A - this[ 8] * B
+            target[ 8] = this[ 8] * A + this[ 7] * B
+            target[ 9] = this[ 9] * A + this[ 6] * B
+            target[10] = this[10] * A - this[ 5] * B
+
             return target
         }
 
@@ -135,7 +143,7 @@ function init31WithoutDeclarations() {
             // ||B*B||
             var norm = Math.sqrt(S * S + T * T)
             if(norm === 0.) {
-                target.copy(biv)
+                target.copy(this)
                 target[0] = 1.
             }
             else {
@@ -251,6 +259,10 @@ function init31WithoutDeclarations() {
     _e10 = _e1.wedge(_e0, new Mv())
     _e20 = _e2.wedge(_e0, new Mv())
     _e120 = _e1.wedge(_e20, new Mv())
+    
+    _e1o = _e1.wedge(_eo, new Mv())
+    _e2o = _e2.wedge(_eo, new Mv())
+    _e12o = _e1.wedge(_e2o, new Mv())
 
     _e12p = _e12.wedge(_ep, new Mv())
     _e12m = _e12.wedge(_em, new Mv())

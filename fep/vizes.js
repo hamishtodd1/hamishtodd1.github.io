@@ -2,12 +2,16 @@ function initVizes() {
 
     let center = new Mv()
 
+    vizGroup = new THREE.Group()
+    vizGroup.position.y = -1.87
+    scene.add(vizGroup)
+
     let circlePoints = []
     for (let i = 0; i < 100; ++i) {
         let angle = i / 100 * Math.PI * 2.
         circlePoints.push(new THREE.Vector3(Math.cos(angle), Math.sin(angle), 0))
     }
-    let circleGeo = new THREE.BufferGeometry(1., 100).setFromPoints(circlePoints)
+    let circleGeo = new THREE.BufferGeometry(1., 500).setFromPoints(circlePoints)
     let lineGeo = new THREE.BufferGeometry(1., 100).setFromPoints([new THREE.Vector3(0., 999., 0.), new THREE.Vector3(0., -999., 0.)])
 
     let horizontalLine = new Mv() // guaranteed to always be e2 for the actual thing. Whatever.
@@ -33,12 +37,17 @@ function initVizes() {
 
             this.mv = new Mv()
 
-            scene.add(this)
+            vizGroup.add(this)
 
             obj3dsWithOnBeforeRenders.push(this)
         }
 
         onBeforeRender() {
+
+            if(this.mv.isZero()) {
+                this.circle.visible = false
+                this.line.visible = false
+            }
 
             // zero-bugs version
             // let screenBounds = [e1+e0, e1-e0...]
@@ -84,16 +93,20 @@ function initVizes() {
     window.CircleViz = CircleViz
 
     let ptGeo = new THREE.SphereGeometry(.04)
-    let pt1Mat = new THREE.MeshBasicMaterial({ color: 0x0000ff })
-    let pt2Mat = new THREE.MeshBasicMaterial({ color: 0x00ffff })
+    let myCol = new THREE.Color()
     class PtPairViz extends THREE.Object3D {
 
-        constructor(haveCircles = false) {
+        constructor(haveCircles = false, col) {
 
             super()
-            scene.add(this)
+            vizGroup.add(this)
 
             this.mv = new Mv()
+
+            if (col === undefined)
+                col = myCol.setRGB(Math.random(), Math.random(), Math.random()).getHex()
+            let pt1Mat = new THREE.MeshBasicMaterial({ color: col })
+            let pt2Mat = new THREE.MeshBasicMaterial({ color: col * 0.8 })
 
             this.pt1 = new THREE.Mesh(ptGeo, pt1Mat)
             this.pt2 = new THREE.Mesh(ptGeo, pt2Mat)

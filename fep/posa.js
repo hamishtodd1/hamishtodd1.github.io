@@ -60,7 +60,7 @@ async function initPosa() {
 
 async function initPosa3d() {
 
-    let boxGeo = new THREE.BoxGeometry(1., 1., 1.)
+    let geo = new THREE.TetrahedronGeometry(.5)
 
     let mat = new THREE.ShaderMaterial({
         blending: 0, //prevent default premultiplied alpha values
@@ -107,24 +107,27 @@ async function initPosa3d() {
             }`
     });
 
-    let box = new THREE.Mesh(boxGeo, mat)
-    scene.add(box)
-    box.scale.setScalar(1.9)
+    let viz = new THREE.Mesh(geo, mat)
+    scene.add(viz)
+    viz.visible = false
+    simplices.push(viz)
+    viz.scale.setScalar(1.9)
+    viz.position.x = 1.2
 
     updatePosa = ()=> {
-        box.rotation.y += .001
+        viz.rotation.y += .001
     }
 
-    const wireframeGeo = new THREE.WireframeGeometry(boxGeo);
+    const wireframeGeo = new THREE.WireframeGeometry(geo);
     // let geo = new THREE.BufferAttribute
     const wireframeCube = new THREE.LineSegments(wireframeGeo);
     wireframeCube.scale.setScalar(1.006)
     wireframeCube.position.setScalar(-0.5 * (wireframeCube.scale.x - 1.))
-    box.add(wireframeCube);
-    let backs = new THREE.Mesh(boxGeo, new THREE.MeshBasicMaterial({ color: 0x000000, side: THREE.BackSide }))
+    viz.add(wireframeCube);
+    let backs = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ color: 0x000000, side: THREE.BackSide }))
     // backs.scale.setScalar(1.003)
     // backs.position.setScalar(-0.5 * (backs.scale.x - 1.))
-    box.add(backs)
+    viz.add(backs)
 
-    return box
+    return viz
 }
