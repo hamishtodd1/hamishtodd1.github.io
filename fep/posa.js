@@ -112,10 +112,12 @@ async function initPosa3d() {
     viz.visible = false
     simplices.push(viz)
     viz.scale.setScalar(1.9)
-    viz.position.x = 1.2
+    viz.position.x = 1.8
+
+    
 
     updatePosa = ()=> {
-        viz.rotation.y += .001
+        viz.rotation.y += .003
     }
 
     const wireframeGeo = new THREE.WireframeGeometry(geo);

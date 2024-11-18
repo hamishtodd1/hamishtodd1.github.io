@@ -30,9 +30,11 @@ function initGraph() {
     simplices = []
     simplices[0] = new THREE.Mesh(new THREE.PlaneGeometry(1.,.1))
     simplices[0].visible = false
+    simplices[0].position.x = 1.6
     scene.add(simplices[0])
 
-    let mazePic = new THREE.Mesh(new THREE.PlaneGeometry(1.,1.), new THREE.MeshBasicMaterial({map: new THREE.TextureLoader().load('maze.png')}))
+    let mazePic = new THREE.Mesh(new THREE.PlaneGeometry(2., 2.), new THREE.MeshBasicMaterial({ transparent:true,map: new THREE.TextureLoader().load('https://hamishtodd1.github.io/fep/data/maze.png')}))
+    mazePic.position.x = -1.6
     scene.add(mazePic)
 
     //Circles
@@ -41,12 +43,17 @@ function initGraph() {
     let matHighlighted = new THREE.MeshBasicMaterial({ color: 0xb5e5cf })
     let matSelected = new THREE.MeshBasicMaterial({ color: 0xFFFF00 })
     {
-        var circleMat = new THREE.MeshBasicMaterial({ color: 0x564937 })
         let geo = new THREE.SphereGeometry(.05)
-
+        
+        let myCol = new THREE.Color()
         class CircularNode extends THREE.Mesh {
             constructor() {
-                super(geo, circleMat)
+
+                myCol.setHSL(Math.random(), 1., .5)
+                let defaultMat = new THREE.MeshBasicMaterial({ color: myCol })
+                super(geo, defaultMat)
+                this.defaultMat = defaultMat
+
                 circles.push(this)
                 scene.add(this)
                 nodes.push(this)
@@ -58,15 +65,15 @@ function initGraph() {
         }
         window.CircularNode = CircularNode
 
-        for(let i = 0; i < 5; i++) {
+        for(let i = 0; i < 4; i++) {
             let c = new CircularNode()
-
-            do {
-                c.position.x = 1.9 * (Math.random()-.5) - 1.6
-                c.position.y = 2.9 * (Math.random()-.5)
-            }
-            while (circles.some(c2 => c2 !== c && c2.position.distanceTo(c.position) < .2))
         }
+
+        circles[0].position.y += 1.2
+        circles[1].position.x += .8
+        circles[2].position.x += .8
+        circles[2].position.y += -1.2
+        circles[3].position.y += -1.2
     }
 
     //Squares
@@ -186,7 +193,7 @@ function initGraph() {
         intersections.length = 0
         raycaster.intersectObjects(nodes, false, intersections)
 
-        circles.forEach(c => c.material = circleMat)
+        circles.forEach(c => c.material = c.defaultMat)
         if (intersections[0] && circles.indexOf(intersections[0].object) !== -1)
             intersections[0].object.material = matHighlighted
 
