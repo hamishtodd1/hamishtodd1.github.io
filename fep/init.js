@@ -72,9 +72,9 @@ async function init() {
 
     initMouse()
 
-    initGraph()
-    await initPosa3d()
-    // initHyperbolic()
+    // initGraph()
+    // await initPosa3d()
+    initHyperbolic()
     // initWorldMaps()
 
     window.addEventListener('resize', () => {
@@ -109,9 +109,9 @@ async function init() {
         }
 
         // updateWorldMaps()
-        updateGraph()
-        updatePosa()
-        // updateHyperbolic()
+        // updateGraph()
+        // updatePosa()
+        updateHyperbolic()
 
         obj3dsWithOnBeforeRenders.forEach(obj => obj.onBeforeRender())
 

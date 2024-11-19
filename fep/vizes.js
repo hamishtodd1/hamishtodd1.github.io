@@ -1,6 +1,6 @@
 function initVizes() {
 
-    let center = new Mv()
+    let center = new Mv31()
 
     vizGroup = new THREE.Group()
     vizGroup.position.y = -1.87
@@ -14,8 +14,8 @@ function initVizes() {
     let circleGeo = new THREE.BufferGeometry(1., 500).setFromPoints(circlePoints)
     let lineGeo = new THREE.BufferGeometry(1., 100).setFromPoints([new THREE.Vector3(0., 999., 0.), new THREE.Vector3(0., -999., 0.)])
 
-    let horizontalLine = new Mv() // guaranteed to always be e2 for the actual thing. Whatever.
-    let leftAndRightPp = new Mv()
+    let horizontalLine = new Mv31() // guaranteed to always be e2 for the actual thing. Whatever.
+    let leftAndRightPp = new Mv31()
     let leftAndRightVecs = [ new THREE.Vector3(), new THREE.Vector3() ]
     let defaultMat = new THREE.LineBasicMaterial({ color: 0x00ff00 })
     class CircleViz extends THREE.Object3D {
@@ -35,7 +35,7 @@ function initVizes() {
             this.add(this.circle)
             this.add(this.line)
 
-            this.mv = new Mv()
+            this.mv = new Mv31()
 
             vizGroup.add(this)
 
@@ -84,9 +84,9 @@ function initVizes() {
                 //     debugger
                 _e12.projectOn(this.mv, mv0).flatPpToVec(this.line.position)
                 let onOrigin = this.mv.projectOn(_e12, mv0)
-                let quatMv = onOrigin.mulReverse(_e1, mv1).cheapSqrt(mv2)
-                this.line.quaternion.w = quatMv[0]
-                this.line.quaternion.z = quatMv[5]
+                let quatMv31 = onOrigin.mulReverse(_e1, mv1).cheapSqrt(mv2)
+                this.line.quaternion.w = quatMv31[0]
+                this.line.quaternion.z = quatMv31[5]
             }
         }
     }
@@ -101,7 +101,7 @@ function initVizes() {
             super()
             vizGroup.add(this)
 
-            this.mv = new Mv()
+            this.mv = new Mv31()
 
             if (col === undefined)
                 col = myCol.setRGB(Math.random(), Math.random(), Math.random()).getHex()

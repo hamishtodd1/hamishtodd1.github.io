@@ -5,7 +5,7 @@
 function updateFlowViz() {}
 function updateDomainSizes() {}
 
-flowBiv = new Mv()
+flowBiv = new Mv31()
 flowBiv.zero()
 function initFlowViz() {
 
@@ -72,7 +72,7 @@ function initFlowViz() {
                 }`
     });
 
-    // var study = new Mv()
+    // var study = new Mv31()
     // study[0] = .4
     // study[15] = 0.
     // _e1p.mul(study, flowBiv)
@@ -88,8 +88,8 @@ function initFlowViz() {
     flowViz.position.y = -1.87
     flowViz.position.z -= .01
 
-    let start = new Mv()
-    let end = new Mv()
+    let start = new Mv31()
+    let end = new Mv31()
 
     let holding = false
     document.addEventListener('mousedown', (event) => {

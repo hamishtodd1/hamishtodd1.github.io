@@ -28,14 +28,15 @@ function initGraph() {
 
     let visibleSimplex = -1
     simplices = []
-    simplices[0] = new THREE.Mesh(new THREE.PlaneGeometry(1.,.1))
-    simplices[0].visible = false
-    simplices[0].position.x = 1.6
-    scene.add(simplices[0])
 
     let mazePic = new THREE.Mesh(new THREE.PlaneGeometry(2., 2.), new THREE.MeshBasicMaterial({ transparent:true,map: new THREE.TextureLoader().load('https://hamishtodd1.github.io/fep/data/maze.png')}))
-    mazePic.position.x = -1.6
+    mazePic.position.x = -1.8
     scene.add(mazePic)
+
+    simplices[0] = new THREE.Mesh(new THREE.PlaneGeometry(1.3, 1.3), new THREE.MeshBasicMaterial({ transparent: true, color:0xFFFFFF, map: new THREE.TextureLoader().load('https://hamishtodd1.github.io/fep/data/1d simplex.png') }))
+    simplices[0].position.x = 2.1
+    simplices[0].visible = false
+    scene.add(simplices[0])
 
     //Circles
     let defaultValue = `return 0.5;`

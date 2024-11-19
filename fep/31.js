@@ -13,7 +13,7 @@ function init31WithoutDeclarations() {
 
     let biv = new Float32Array(16)
 
-    class Mv extends GeneralVector {
+    class Mv31 extends GeneralVector {
 
         constructor() {
             super(16)
@@ -21,11 +21,11 @@ function init31WithoutDeclarations() {
 
         //may also be sign errors if it isn't PGA stuff, ya gotta divide!
         projectOn(on, target) {
-            return this.inner(on,newMv).mulReverse(on,target)
+            return this.inner(on,newMv31).mulReverse(on,target)
         }
 
         flatPpToVec(v) {
-            let translator = this.mulReverse(_e12, newMv)
+            let translator = this.mulReverse(_e12, newMv31)
             translator[0] *= 2.
             return translator.translatorToVec(v)
         }
@@ -40,12 +40,12 @@ function init31WithoutDeclarations() {
 
         cheapNormalize(target) {
             //should be doable with sqScalar but the reverse is important
-            let normSq = this.mulReverse(this, newMv)[0]
+            let normSq = this.mulReverse(this, newMv31)[0]
             return this.multiplyScalar(1. / Math.sqrt(Math.abs(normSq)), target)
         }
 
-        mulReverse(b, target) { return this.mul(b.getReverse(newMv), target) }
-        sandwich(b, target) { return this.mul(b, newMv).mulReverse(this, target) }
+        mulReverse(b, target) { return this.mul(b.getReverse(newMv31), target) }
+        sandwich(b, target) { return this.mul(b, newMv31).mulReverse(this, target) }
 
         //possibly negative!
         sqScalar() {
@@ -54,10 +54,10 @@ function init31WithoutDeclarations() {
 
         // "vec" could be Vector2 or Vector3
         translatorFromVec(v) { return _one.addScaled(_e10, v.x/2., this).addScaled(_e20, v.y/2., this) }
-        vecToZrc(v){ return newMv.translatorFromVec(v).sandwich(_eo,this) }
+        vecToZrc(v){ return newMv31.translatorFromVec(v).sandwich(_eo,this) }
 
         circlePosToVec(targetVec) {
-            let translationToCenter = this.inner(_e120, newMv).mulReverse(_e12, newMv)
+            let translationToCenter = this.inner(_e120, newMv31).mulReverse(_e12, newMv31)
             translationToCenter[0] *= 2.
             return translationToCenter.translatorToVec(targetVec)
 
@@ -75,16 +75,16 @@ function init31WithoutDeclarations() {
         pointPairToVecs(targets) {
 
             let mySq = this.sqScalar()
-            let toUse = mySq > 0. ? this : this.inner(_e12pm, newMv)
+            let toUse = mySq > 0. ? this : this.inner(_e12pm, newMv31)
 
-            let projector = toUse.cheapNormalize(newMv)
+            let projector = toUse.cheapNormalize(newMv31)
             projector[0] = 1.
             projector.multiplyScalar(.5, projector)
-            let projectableUna = toUse.inner(_em, newMv)
+            let projectableUna = toUse.inner(_em, newMv31)
 
             for (let i = 0; i < 2; ++i) {
 
-                let zrc = projector.mul(projectableUna, newMv)
+                let zrc = projector.mul(projectableUna, newMv31)
                 if (zrc[3] === zrc[4])
                     targets[i].copy(outOfSightVec3)
                 else
@@ -228,48 +228,45 @@ function init31WithoutDeclarations() {
             return target
         }
     }
-    window.Mv = Mv
-    Mv.indexGrades = [
+    window.Mv31 = Mv31
+    Mv31.indexGrades = [
         0,
         1, 1, 1, 1,
         2, 2, 2, 2, 2, 2,
         3, 3, 3, 3,
         4
     ]
-    Mv.basisNames = ["", "1", "2", "p", "m", "12", "1p", "1m", "2p", "2m", "pm", "12p", "12m", "1pm", "2pm", "12pm"]
+    Mv31.basisNames = ["", "1", "2", "p", "m", "12", "1p", "1m", "2p", "2m", "pm", "12p", "12m", "1pm", "2pm", "12pm"]
 
-    mv0 = new Mv(); mv1 = new Mv(); mv2 = new Mv(); mv3 = new Mv(); mv4 = new Mv(); mv5 = new Mv(); mv6 = new Mv(); mv7 = new Mv(); mv8 = new Mv(); mv9 = new Mv(); mv10 = new Mv(); mv11 = new Mv(); mv12 = new Mv(); mv13 = new Mv(); mv14 = new Mv(); mv15 = new Mv()
+    mv0 = new Mv31(); mv1 = new Mv31(); mv2 = new Mv31(); mv3 = new Mv31(); mv4 = new Mv31(); mv5 = new Mv31(); mv6 = new Mv31(); mv7 = new Mv31(); mv8 = new Mv31(); mv9 = new Mv31(); mv10 = new Mv31(); mv11 = new Mv31(); mv12 = new Mv31(); mv13 = new Mv31(); mv14 = new Mv31(); mv15 = new Mv31()
     
-    _one = new Mv().fromFloatAndIndex(1., 0)
+    _one = new Mv31().fromFloatAndIndex(1., 0)
 
-    _e1 = new Mv().fromFloatAndIndex(1., 1)
-    _e2 = new Mv().fromFloatAndIndex(1., 2)
-    _ep = new Mv().fromFloatAndIndex(1., 3)
-    _em = new Mv().fromFloatAndIndex(1., 4)
-    _e0 = _ep.add(_em, new Mv())
-    _eo = _ep.sub(_em, new Mv())
+    _e1 = new Mv31().fromFloatAndIndex(1., 1)
+    _e2 = new Mv31().fromFloatAndIndex(1., 2)
+    _ep = new Mv31().fromFloatAndIndex(1., 3)
+    _em = new Mv31().fromFloatAndIndex(1., 4)
+    _e0 = _ep.add(_em, new Mv31())
+    _eo = _ep.sub(_em, new Mv31())
 
-    _e12 = _e1.wedge(_e2, new Mv())
-    _e1p = _e1.wedge(_ep, new Mv())
-    _e1m = _e1.wedge(_em, new Mv())
-    _e2p = _e2.wedge(_ep, new Mv())
-    _e2m = _e2.wedge(_em, new Mv())
-    _epm = _ep.wedge(_em, new Mv())
+    _e12 = _e1.wedge(_e2, new Mv31())
+    _e1p = _e1.wedge(_ep, new Mv31())
+    _e1m = _e1.wedge(_em, new Mv31())
+    _e2p = _e2.wedge(_ep, new Mv31())
+    _e2m = _e2.wedge(_em, new Mv31())
+    _epm = _ep.wedge(_em, new Mv31())
 
-    _e10 = _e1.wedge(_e0, new Mv())
-    _e20 = _e2.wedge(_e0, new Mv())
-    _e120 = _e1.wedge(_e20, new Mv())
+    _e10 = _e1.wedge(_e0, new Mv31())
+    _e20 = _e2.wedge(_e0, new Mv31())
+    _e120 = _e1.wedge(_e20, new Mv31())
     
-    _e1o = _e1.wedge(_eo, new Mv())
-    _e2o = _e2.wedge(_eo, new Mv())
-    _e12o = _e1.wedge(_e2o, new Mv())
+    _e1o = _e1.wedge(_eo, new Mv31())
+    _e2o = _e2.wedge(_eo, new Mv31())
 
-    _e12p = _e12.wedge(_ep, new Mv())
-    _e12m = _e12.wedge(_em, new Mv())
-    _e1pm = _e1p.wedge(_em, new Mv())
-    _e2pm = _e2p.wedge(_em, new Mv())
+    //uhp pseudoscalar
+    _e1pm = _e1p.wedge(_em, new Mv31())
 
-    _e12pm = _e12p.wedge(_em, new Mv())
+    _e12pm = _e12.wedge(_epm, new Mv31())
 
     //testing scale
     if(0)

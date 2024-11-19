@@ -17,9 +17,9 @@ function initGa(initFuncWithoutDeclarations) {
 
     let i = 0
     let declarations = ""
-    let withoutDeclarations = funcString.replace(/newMv/g, () => {
-        declarations += "\n    let newMv" + i + " = new Mv()"
-        return "newMv" + (i++)
+    let withoutDeclarations = funcString.replace(/newMv31/g, () => {
+        declarations += "\n    let newMv31" + i + " = new Mv31()"
+        return "newMv31" + (i++)
     })
     var strToEval =
         "(" +

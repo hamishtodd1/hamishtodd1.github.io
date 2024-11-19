@@ -181,7 +181,7 @@ function initHyperbolic() {
             g.mv = examplePps[i].mv
         }
 
-        let displaced = new Mv()
+        let displaced = new Mv31()
         
         //boosting
         if(1)
@@ -189,7 +189,7 @@ function initHyperbolic() {
             let startGaussian = new Gaussian(0x000000, startViz.mv)
             let endGaussian = new Gaussian(0x000000, endViz.mv)
 
-            let boost = new Mv()
+            let boost = new Mv31()
             let timeSinceMouseUp = -1.
             document.addEventListener('mouseup', e => {
                 timeSinceMouseUp = 0.
