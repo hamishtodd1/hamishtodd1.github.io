@@ -19,6 +19,10 @@ function init31WithoutDeclarations() {
             super(16)
         }
 
+        sphereFromRadius(radius) {
+            return _eo.addScaled(_e0, radius * radius, this)
+        }
+
         //may also be sign errors if it isn't PGA stuff, ya gotta divide!
         projectOn(on, target) {
             return this.inner(on,newMv31).mulReverse(on,target)
@@ -268,29 +272,6 @@ function init31WithoutDeclarations() {
 
     _e12pm = _e12.wedge(_epm, new Mv31())
 
-    //testing scale
-    if(0)
-    {
-        let str = ``
-        let str2 = ``
-        for (let i = 0; i <= 3.; i += .01) {
-
-            let zrcOnCircle = mv0.vecToZrc(v1.set(i, 0.))
-            // zrcOnCircle.unrigorousNormalize(zrcOnCircle)
-            let pointOnCircle = zrcOnCircle.inner(_e12pm, mv1)
-            let circle = _e12.inner(pointOnCircle, mv2)
-            // circle.log(``,3)
-            let rotor = _ep.mul(circle, mv3)
-            rotor.cheapSqrt(rotor)
-
-            // rotor.unrigorousNormalize(rotor)
-            // rotor.log((i * 0.1).toFixed(2))
-            let a = Math.asinh(rotor[10]) / Math.acosh(rotor[0])
-            str += `  ` + Math.tanh(a) + `\n`
-            str2 += i + `\n`
-        }
-        log(str)
-        // log(str2)
-    }
+    
 
 }

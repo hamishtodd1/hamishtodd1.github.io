@@ -1,4 +1,12 @@
 /*
+    The story:
+        need a potential function!
+        So it literally costs energy to change your mind a certain way?
+        "take the shortest path" - somehow this is related to moving from one point to another
+            in a way where the points are "easy to mistake for one another"
+        Suppose you were "interrupted half way through changing your mind"
+            You would, in that instant, have a belief that would incorporate both
+
     Generate a fuckload of gaussians. See their graphs and their points
     Apply a bayesian update to them. You know what it looks like for the points, what about for the graphs?
 
@@ -14,10 +22,116 @@
             Metaphysically fucked: reflection in 
  */
 
+updateGalton = () => {
+    
+}
+function initGalton() {
+
+    let localScene = new THREE.Scene()
+    scene.add(localScene)
+
+    let pegs = []
+    //instanceable
+    let pegGeo = new THREE.CircleGeometry(.03, 14)
+    let pegMat = new THREE.MeshBasicMaterial({ color: 0x000000 })
+    let numInThisRow = 0
+    let rows = 1
+    let numBottomRow = 15
+    let pegSpacingY = 1.8 / numBottomRow
+    let pegSpacingX = pegSpacingY * 1.3
+    let numPegs = numBottomRow * (numBottomRow + 1) / 2
+    for(let i = 0; i < numPegs; ++i) {
+        let peg = new THREE.Mesh(pegGeo, pegMat)
+        localScene.add(peg)
+
+        peg.position.x = (numInThisRow - (rows-1)/2.) * pegSpacingX
+        peg.position.y = -rows * pegSpacingY
+        pegs.push(peg)
+        numInThisRow++
+        if(numInThisRow >= rows ) {
+            numInThisRow = 0
+            rows++
+        }
+    }
+    pegs.forEach((peg, i) => {
+        peg.position.y -= pegs[numPegs-1].position.y
+    })
+
+    let scurrying = null
+    let scurryingVelocity = 0.
+    textureLoader.load('https://hamishtodd1.github.io/fep/data/scurrying.png', (texture) => {
+        let mat = new THREE.MeshBasicMaterial({
+            map: texture,
+            transparent: true,
+        })
+        let height = .2
+        scurrying = new THREE.Mesh(new THREE.PlaneGeometry(512. / 143. * height, height), mat)
+        localScene.add(scurrying)
+    })
+
+    let bounceDuration = .5
+    let g = -1.3
+    class Pellet extends THREE.Mesh {
+        constructor() {
+            super(new THREE.CircleGeometry(.02), new THREE.MeshBasicMaterial({ color: 0xFF0000 }))
+            obj3dsWithOnBeforeRenders.push(this)
+            this.position.z = .01
+            localScene.add(this)
+
+            this.bounce = 0
+            this.timeThroughBounce = 0.
+            this.posInitial = new THREE.Vector3().copy(pegs[0].position)
+            this.posFinal = new THREE.Vector3().copy(pegs[Math.random() < .5 ? 1:2].position)
+            this.posInitial.y += .03
+            this.posFinal.y += .03
+        }
+
+        onBeforeRender() {
+            this.timeThroughBounce += frameDelta
+            if (this.timeThroughBounce > bounceDuration && this.bounce < numBottomRow) {
+                this.timeThroughBounce -= bounceDuration
+                this.bounce++
+
+                this.posInitial.copy(this.posFinal)
+                this.posFinal.y -= pegSpacingY
+                this.posFinal.x += pegSpacingX * (Math.random() > .5 ? .5 : -.5)
+            }
+
+            let t = this.timeThroughBounce / bounceDuration
+
+            let u = (this.posFinal.y - this.posInitial.y) - 0.5 * g
+            this.position.y = this.posInitial.y + t * u + 0.5 * g * t * t
+            
+            if(this.position.y < -.5)
+                this.position.y = -.5
+            else
+                this.position.x = this.posInitial.x + t * (this.posFinal.x - this.posInitial.x)
+        }
+    }
+
+    updateGalton = () => {
+        if(!scurrying)
+            return
+
+        if(Math.random() < .02)
+            new Pellet()
+     
+        scurryingVelocity = Math.sin(frameCount * .02) * .1
+        scurrying.position.x += scurryingVelocity * frameDelta
+        scurrying.scale.x = scurryingVelocity > 0 ? 1. : -1.
+    }
+}
+
 updateHyperbolic = () => { }
 function initHyperbolic() {
 
-    initVizes()
+    flowBiv = new Mv31()
+    flowBiv.zero()
+
+    initVizes2d()
+
+    initGalton()
+    return
 
     //upper half plane
     let uhpPss = new CircleViz(0xFF0000)

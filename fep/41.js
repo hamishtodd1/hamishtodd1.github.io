@@ -1,8 +1,17 @@
+/*
+    js->glsl; for each function:
+        in float[16]
+        this -> a
+        in float[16] a
+        Math. -> ``
+        foo.funcName(bar) -> funcName(foo,bar)
+        no return values
+*/
+
+
 function init41WithoutDeclarations() {
 
-    let biv = new Float32Array(32)
-
-    class Mv41 extends GeneralVector {
+    class Cga extends GeneralVector {
 
         constructor() {
             super(32)
@@ -10,18 +19,18 @@ function init41WithoutDeclarations() {
 
         //may also be sign errors if it isn't PGA stuff, ya gotta divide!
         projectOn(on, target) {
-            return this.inner(on, newMv41).mulReverse(on, target)
+            return this.inner(on,newCga).mulReverse(on,target)
         }
 
         flatPpToVec(v) {
-            let translator = this.mulReverse(e123, newMv41)
+            let translator = this.mulReverse(e123, newCga)
             translator[0] *= 2.
             return translator.translatorToVec(v)
         }
 
         cheapSqrt(target) {
             this.cheapNormalize(target)
-            if (target[0] === -1.)
+            if(target[0] === -1.)
                 target.negate(target)
             target[0] += 1.
             return target.cheapNormalize(target)
@@ -29,51 +38,51 @@ function init41WithoutDeclarations() {
 
         cheapNormalize(target) {
             //should be doable with sqScalar but the reverse is important
-            let normSq = this.mulReverse(this, newMv41)[0]
-            return this.multiplyScalar(1. / Math.sqrt(Math.abs(normSq)), target)
+            return this.multiplyScalar(1. / Math.sqrt(Math.abs(this.sqScalar())), target)
         }
 
-        mulReverse(b, target) { return this.mul(b.getReverse(newMv41), target) }
-        sandwich(b, target) { return this.mul(b, newMv41).mulReverse(this, target) }
+        mulReverse(b, target) { return this.mul(b.getReverse(newCga), target) }
+        sandwich(b, target) { return this.mul(b, newCga).mulReverse(this, target) }
 
         //possibly negative!
         sqScalar() {
-            return b[0] * this[0] + b[1] * this[1] + b[2] * this[2] + b[3] * this[3] + b[4] * this[4] - b[5] * this[5] - b[6] * this[6] - b[7] * this[7] - b[8] * this[8] + b[9] * this[9] - b[10] * this[10] - b[11] * this[11] + b[12] * this[12] - b[13] * this[13] + b[14] * this[14] + b[15] * this[15] - b[16] * this[16] - b[17] * this[17] + b[18] * this[18] - b[19] * this[19] + b[20] * this[20] + b[21] * this[21] - b[22] * this[22] + b[23] * this[23] + b[24] * this[24] + b[25] * this[25] + b[26] * this[26] - b[27] * this[27] - b[28] * this[28] - b[29] * this[29] - b[30] * this[30] - b[31] * this[31];
+            return this[0] * this[0] + this[1] * this[1] + this[2] * this[2] + this[3] * this[3] + this[4] * this[4] - this[5] * this[5] - this[6] * this[6] - this[7] * this[7] - this[8] * this[8] + this[9] * this[9] - this[10] * this[10] - this[11] * this[11] + this[12] * this[12] - this[13] * this[13] + this[14] * this[14] + this[15] * this[15] - this[16] * this[16] - this[17] * this[17] + this[18] * this[18] - this[19] * this[19] + this[20] * this[20] + this[21] * this[21] - this[22] * this[22] + this[23] * this[23] + this[24] * this[24] + this[25] * this[25] + this[26] * this[26] - this[27] * this[27] - this[28] * this[28] - this[29] * this[29] - this[30] * this[30] - this[31] * this[31];
         }
 
-        translatorFromVec(v) { return one.addScaled(e10, v.x / 2., this).addScaled(e20, v.y / 2., this).addScaled(e30, v.z / 2., this) }
-        vecToZrc(v) { return newMv41.translatorFromVec(v).sandwich(eo, this) }
+        // "vec" could be Vector2 or Vector3
+        translatorFromVec(v) { return one.addScaled(e10, v.x / 2., this).addScaled(e20, v.y / 2., this).addScaled(e30, v.y / 2., this) }
+        vecToZrc(v){ return newCga.translatorFromVec(v).sandwich(eo,this) }
 
-        circlePosToVec(targetVec) {
-            return this.inner(e1230, newMv41).flatPpToVec(targetVec)
+        spherePosToVec(targetVec) {
+            return this.inner(e1230, newCga).flatPpToVec(targetVec)
+            //wanna get radius? Learn the actual radius-to-dilation-norm function!
         }
 
-        // translatorToVec(target) {
-        //     target.z = 0.
-        //     target.x =
-        //     target.y =
-        //     target.z =
-        //     target.multiplyScalar(1. / this[0], target)
-        //     return target
-        // }
+        translatorToVec(target) {
+            console.error("sort this out")
+            // target.x = this[6] + this[7]
+            // target.y = this[8] + this[9]
+            target.multiplyScalar(1. / this[0], target)
+            return target
+        }
 
         pointPairToVecs(targets) {
 
             let mySq = this.sqScalar()
-            let toUse = mySq > 0. ? this : this.inner(e123pm, newMv41)
+            let toUse = mySq > 0. ? this : this.inner(e123pm, newCga)
 
-            let projector = toUse.cheapNormalize(newMv41)
+            let projector = toUse.cheapNormalize(newCga)
             projector[0] = 1.
             projector.multiplyScalar(.5, projector)
-            let projectableUna = toUse.inner(em, newMv41)
+            let projectableUna = toUse.inner(em, newCga)
 
             for (let i = 0; i < 2; ++i) {
 
-                let zrc = projector.mul(projectableUna, newMv41)
+                let zrc = projector.mul(projectableUna, newCga)
                 if (zrc[3] === zrc[4])
                     targets[i].copy(outOfSightVec3)
                 else
-                    zrc.circlePosToVec(targets[i])
+                    zrc.spherePosToVec(targets[i])
 
                 projector.getReverse(projector)
             }
@@ -81,27 +90,12 @@ function init41WithoutDeclarations() {
             return targets
         }
 
-        // rigorousNormalize(target) {
-            
-        //     return target
-        // }
-
-        // logarithm(target) {
-
-        //     return target
-        // }
-
-        // exp(target) {
-
-        //     return target
-        // }
-
         getReverse(target) {
             target[0] = this[0]; target[1] = this[1]; target[2] = this[2]; target[3] = this[3]; target[4] = this[4]; target[5] = this[5]; target[6] = -this[6]; target[7] = -this[7]; target[8] = -this[8]; target[9] = -this[9]; target[10] = -this[10]; target[11] = -this[11]; target[12] = -this[12]; target[13] = -this[13]; target[14] = -this[14]; target[15] = -this[15]; target[16] = -this[16]; target[17] = -this[17]; target[18] = -this[18]; target[19] = -this[19]; target[20] = -this[20]; target[21] = -this[21]; target[22] = -this[22]; target[23] = -this[23]; target[24] = -this[24]; target[25] = -this[25]; target[26] = this[26]; target[27] = this[27]; target[28] = this[28]; target[29] = this[29]; target[30] = this[30]; target[31] = this[31];
             return target
         }
 
-        mul(b, target) {
+        mul(b,target) {
             target[0] = b[0] * this[0] + b[1] * this[1] + b[2] * this[2] + b[3] * this[3] + b[4] * this[4] - b[5] * this[5] - b[6] * this[6] - b[7] * this[7] - b[8] * this[8] + b[9] * this[9] - b[10] * this[10] - b[11] * this[11] + b[12] * this[12] - b[13] * this[13] + b[14] * this[14] + b[15] * this[15] - b[16] * this[16] - b[17] * this[17] + b[18] * this[18] - b[19] * this[19] + b[20] * this[20] + b[21] * this[21] - b[22] * this[22] + b[23] * this[23] + b[24] * this[24] + b[25] * this[25] + b[26] * this[26] - b[27] * this[27] - b[28] * this[28] - b[29] * this[29] - b[30] * this[30] - b[31] * this[31];
             target[1] = b[1] * this[0] + b[0] * this[1] - b[6] * this[2] - b[7] * this[3] - b[8] * this[4] + b[9] * this[5] + b[2] * this[6] + b[3] * this[7] + b[4] * this[8] - b[5] * this[9] - b[16] * this[10] - b[17] * this[11] + b[18] * this[12] - b[19] * this[13] + b[20] * this[14] + b[21] * this[15] - b[10] * this[16] - b[11] * this[17] + b[12] * this[18] - b[13] * this[19] + b[14] * this[20] + b[15] * this[21] + b[26] * this[22] - b[27] * this[23] - b[28] * this[24] - b[29] * this[25] - b[22] * this[26] + b[23] * this[27] + b[24] * this[28] + b[25] * this[29] - b[31] * this[30] - b[30] * this[31];
             target[2] = b[2] * this[0] + b[6] * this[1] + b[0] * this[2] - b[10] * this[3] - b[11] * this[4] + b[12] * this[5] - b[1] * this[6] + b[16] * this[7] + b[17] * this[8] - b[18] * this[9] + b[3] * this[10] + b[4] * this[11] - b[5] * this[12] - b[22] * this[13] + b[23] * this[14] + b[24] * this[15] + b[7] * this[16] + b[8] * this[17] - b[9] * this[18] - b[26] * this[19] + b[27] * this[20] + b[28] * this[21] - b[13] * this[22] + b[14] * this[23] + b[15] * this[24] - b[30] * this[25] + b[19] * this[26] - b[20] * this[27] - b[21] * this[28] + b[31] * this[29] + b[25] * this[30] + b[29] * this[31];
@@ -137,7 +131,7 @@ function init41WithoutDeclarations() {
             return target
         }
 
-        wedge(b, target) {
+        wedge(b,target) {
             target[0] = b[0] * this[0];
             target[1] = b[1] * this[0] + b[0] * this[1];
             target[2] = b[2] * this[0] + b[0] * this[2];
@@ -173,7 +167,7 @@ function init41WithoutDeclarations() {
             return target
         }
 
-        inner(b, target) {
+        inner(b,target) {
             target[0] = b[0] * this[0] + b[1] * this[1] + b[2] * this[2] + b[3] * this[3] + b[4] * this[4] - b[5] * this[5] - b[6] * this[6] - b[7] * this[7] - b[8] * this[8] + b[9] * this[9] - b[10] * this[10] - b[11] * this[11] + b[12] * this[12] - b[13] * this[13] + b[14] * this[14] + b[15] * this[15] - b[16] * this[16] - b[17] * this[17] + b[18] * this[18] - b[19] * this[19] + b[20] * this[20] + b[21] * this[21] - b[22] * this[22] + b[23] * this[23] + b[24] * this[24] + b[25] * this[25] + b[26] * this[26] - b[27] * this[27] - b[28] * this[28] - b[29] * this[29] - b[30] * this[30] - b[31] * this[31];
             target[1] = b[1] * this[0] + b[0] * this[1] - b[6] * this[2] - b[7] * this[3] - b[8] * this[4] + b[9] * this[5] + b[2] * this[6] + b[3] * this[7] + b[4] * this[8] - b[5] * this[9] - b[16] * this[10] - b[17] * this[11] + b[18] * this[12] - b[19] * this[13] + b[20] * this[14] + b[21] * this[15] - b[10] * this[16] - b[11] * this[17] + b[12] * this[18] - b[13] * this[19] + b[14] * this[20] + b[15] * this[21] + b[26] * this[22] - b[27] * this[23] - b[28] * this[24] - b[29] * this[25] - b[22] * this[26] + b[23] * this[27] + b[24] * this[28] + b[25] * this[29] - b[31] * this[30] - b[30] * this[31];
             target[2] = b[2] * this[0] + b[6] * this[1] + b[0] * this[2] - b[10] * this[3] - b[11] * this[4] + b[12] * this[5] - b[1] * this[6] + b[16] * this[7] + b[17] * this[8] - b[18] * this[9] + b[3] * this[10] + b[4] * this[11] - b[5] * this[12] - b[22] * this[13] + b[23] * this[14] + b[24] * this[15] + b[7] * this[16] + b[8] * this[17] - b[9] * this[18] - b[26] * this[19] + b[27] * this[20] + b[28] * this[21] - b[13] * this[22] + b[14] * this[23] + b[15] * this[24] - b[30] * this[25] + b[19] * this[26] - b[20] * this[27] - b[21] * this[28] + b[31] * this[29] + b[25] * this[30] + b[29] * this[31];
@@ -209,8 +203,8 @@ function init41WithoutDeclarations() {
             return target
         }
     }
-    window.Mv41 = Mv41
-    Mv41.indexGrades = [
+    window.Cga = Cga
+    Cga.indexGrades = [
         0,
         1, 1, 1, 1, 1,
         2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
@@ -218,58 +212,26 @@ function init41WithoutDeclarations() {
         4, 4, 4, 4, 4,
         5
     ]
-    Mv41.basisNames = ["", "1", "2", "3", "p", "m", "12", "13", "1p", "1m", "23", "2p", "2m", "3p", "3m", "pm", "123", "12p", "12m", "13p", "13m", "1pm", "23p", "23m", "2pm", "3pm", "123p", "123m", "12pm", "13pm", "23pm", "123pm"]
+    Cga.basisNames = ["", "1", "2", "3", "p", "m", "12", "13", "1p", "1m", "23", "2p", "2m", "3p", "3m", "pm", "123", "12p", "12m", "13p", "13m", "1pm", "23p", "23m", "2pm", "3pm", "123p", "123m", "12pm", "13pm", "23pm", "123pm"]
 
-    mv0 = new Mv41(); mv1 = new Mv41(); mv2 = new Mv41(); mv3 = new Mv41(); mv4 = new Mv41(); mv5 = new Mv41(); mv6 = new Mv41(); mv7 = new Mv41(); mv8 = new Mv41(); mv9 = new Mv41(); mv10 = new Mv41(); mv11 = new Mv41(); mv12 = new Mv41(); mv13 = new Mv41(); mv14 = new Mv41(); mv15 = new Mv41()
+    cga0 = new Cga(); cga1 = new Cga(); cga2 = new Cga(); cga3 = new Cga(); cga4 = new Cga(); cga5 = new Cga(); cga6 = new Cga(); cga7 = new Cga(); cga8 = new Cga(); cga9 = new Cga(); cga10 = new Cga(); cga11 = new Cga(); cga12 = new Cga(); cga13 = new Cga(); cga14 = new Cga(); cga15 = new Cga()
+    
+    one = new Cga().fromFloatAndIndex(1., 0)
 
-    one = new Mv41().fromFloatAndIndex(1., 0)
+    e1 = new Cga().fromFloatAndIndex(1., 1)
+    e2 = new Cga().fromFloatAndIndex(1., 2)
+    ep = new Cga().fromFloatAndIndex(1., 3)
+    em = new Cga().fromFloatAndIndex(1., 4)
+    e0 = ep.add(em, new Cga())
+    eo = ep.sub(em, new Cga())
 
-    e1 = new Mv41().fromFloatAndIndex(1., 1)
-    e2 = new Mv41().fromFloatAndIndex(1., 2)
-    ep = new Mv41().fromFloatAndIndex(1., 3)
-    em = new Mv41().fromFloatAndIndex(1., 4)
-    e0 = ep.add(em, new Mv41())
-    eo = ep.sub(em, new Mv41())
+    e12 = e1.wedge(e2, new Cga())
+    e1p = e1.wedge(ep, new Cga())
+    e1m = e1.wedge(em, new Cga())
+    e2p = e2.wedge(ep, new Cga())
+    e2m = e2.wedge(em, new Cga())
+    epm = ep.wedge(em, new Cga())
 
-    e12 = e1.wedge(e2, new Mv41())
-    e1p = e1.wedge(ep, new Mv41())
-    e1m = e1.wedge(em, new Mv41())
-    e2p = e2.wedge(ep, new Mv41())
-    e2m = e2.wedge(em, new Mv41())
-    epm = ep.wedge(em, new Mv41())
-
-    e10 = e1.wedge(e0, new Mv41())
-    e20 = e2.wedge(e0, new Mv41())
-    e1230 = e1.wedge(e20, new Mv41())
-
-    e1o = e1.wedge(eo, new Mv41())
-    e2o = e2.wedge(eo, new Mv41())
-    e3o = e3.wedge(eo, new Mv31())
-
-    e123pm = e12p.wedge(em, new Mv41())
-
-    //testing scale
-    if (0) {
-        let str = ``
-        let str2 = ``
-        for (let i = 0; i <= 3.; i += .01) {
-
-            let zrcOnCircle = mv0.vecToZrc(v1.set(i, 0.))
-            // zrcOnCircle.unrigorousNormalize(zrcOnCircle)
-            let pointOnCircle = zrcOnCircle.inner(e123pm, mv1)
-            let circle = e12.inner(pointOnCircle, mv2)
-            // circle.log(``,3)
-            let rotor = ep.mul(circle, mv3)
-            rotor.cheapSqrt(rotor)
-
-            // rotor.unrigorousNormalize(rotor)
-            // rotor.log((i * 0.1).toFixed(2))
-            let a = Math.asinh(rotor[10]) / Math.acosh(rotor[0])
-            str += `  ` + Math.tanh(a) + `\n`
-            str2 += i + `\n`
-        }
-        log(str)
-        // log(str2)
-    }
-
+    e10 = e1.wedge(e0, new Cga())
+    e20 = e2.wedge(e0, new Cga())
 }

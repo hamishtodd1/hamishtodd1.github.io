@@ -1,4 +1,40 @@
-function initVizes() {
+function initVizes3d(localScene) {
+    
+
+    let sphereGeo = new THREE.SphereGeometry(1., 32, 32)
+    let planeGeo = new THREE.PlaneGeometry(1., 1., 32, 32)
+    class SphereViz extends THREE.Object3D {
+        constructor(color) {
+
+            super()
+
+            this.sphere = new THREE.Mesh(sphereGeo, new THREE.MeshPhongMaterial({ color }))
+            this.plane = new THREE.Mesh(planeGeo, new THREE.MeshPhongMaterial({ color }))
+            this.add(this.sphere)
+            this.add(this.plane)
+
+            localScene.add(this)
+
+            this.mv = new Cga()
+        }
+
+        onBeforeRender() {
+
+            let isPlane = this.mv.inner(e1230, cga0).sqScalar() < .001
+            this.sphere.visible = !isPlane
+            this.plane.visible = isPlane
+            if(!isPlane) {
+                this.mv.spherePosToVec(this.sphere.position)
+            }
+
+            // this.sphere.position.copy(this.mv)
+            // this.plane.position.copy(this.mv)
+        }
+    }
+    window.SphereViz = SphereViz
+}
+
+function initVizes2d() {
 
     let center = new Mv31()
 

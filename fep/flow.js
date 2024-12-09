@@ -5,8 +5,6 @@
 function updateFlowViz() {}
 function updateDomainSizes() {}
 
-flowBiv = new Mv31()
-flowBiv.zero()
 function initFlowViz() {
 
 

@@ -11,17 +11,17 @@ function getWhereThisWasCalledFrom(depth) {
     return splitByColons[0] + ":" + splitByColons[1]
 }
 
-function initGa(initFuncWithoutDeclarations) {
+function initGa(initFuncWithoutDeclarations,constructorName) {
 
     let funcString = initFuncWithoutDeclarations.toString().slice(0,-1)
 
     let i = 0
     let declarations = ""
-    let withoutDeclarations = funcString.replace(/newMv31/g, () => {
-        declarations += "\n    let newMv31" + i + " = new Mv31()"
-        return "newMv31" + (i++)
+    let withoutDeclarations = funcString.replaceAll("new"+constructorName, () => {
+        declarations += "\n    let local" + constructorName + i + " = new " + constructorName + "()"
+        return "local" + constructorName + (i++)
     })
-    var strToEval =
+    let strToEval =
         "(" +
         withoutDeclarations +
         declarations +

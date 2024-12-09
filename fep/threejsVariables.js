@@ -33,6 +33,7 @@ const discreteViridis = [
 	{ hex: 0x49BE54, color: new THREE.Color(0.28515625, 0.7421875, 0.328125) },
 	{ hex: 0x2A477A, color: new THREE.Color(0.1640625, 0.27734375, 0.4765625) },
 	{ hex: 0x340042, color: new THREE.Color(0.203125, 0., 0.2578125) }]
+const col0 = new THREE.Color()
 
 const spandrelGeo = new THREE.ShapeGeometry(
 	new THREE.Shape()

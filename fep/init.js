@@ -1,4 +1,11 @@
 /*
+    If you want the spiral picture, well, there is light-like Cl(3,1,1)
+
+    Hessian viz
+        heat equation
+        Local clifford algebras
+        What for though? Not even clear how Hessian and active inference are linked
+
 
     Ball moving around in tet, takes on the color
 
@@ -43,6 +50,8 @@
             But future toos may have that going on - to desperately seek usefulness
         
     notes
+        Survival is a special case of curiosity (?)
+        "reducing uncertainty about the causes of valuable outcomes)."
         "Look as if" you anticipated
             eyes look for data that is unambiguous
         Weird: Symplectomorphism/transformation of the fisher-rao manifold (hopefully analogous...)
@@ -64,18 +73,112 @@
         "To reproduce is to prove your model of the world is correct"c
  */
 
+//do saccadic eye movements too
+
+function initTMaze() {
+
+    let tMazeGroup = new THREE.Group()
+    scene.add(tMazeGroup)
+    
+    let geo = new THREE.BoxGeometry(1., 1., 1.)
+    let floorThickness = .02
+    let width = .5 //"corridor"
+    let armLength = .8
+
+    let bottom = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({color: 0xFF8888}))
+    bottom.scale.z = floorThickness
+    bottom.scale.x = width
+    bottom.scale.y = 1.3
+    bottom.position.y = -bottom.scale.y / 2. - width / 2.
+    tMazeGroup.add(bottom)
+
+    let middle = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({color: 0x88FF88}))
+    middle.scale.z = floorThickness
+    middle.scale.x = width
+    middle.scale.y = width
+    tMazeGroup.add(middle)
+
+    let arms = []
+    for(let i = 0; i < 2; ++i) {
+        let arm = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({color: i?0x8888FF:0x88FFFF}))
+        arms.push(arm)
+        arm.scale.z = floorThickness
+        arm.scale.x = armLength
+        arm.scale.y = width
+        arm.position.x = (i?-1:1)*(armLength / 2. + width / 2.)
+        tMazeGroup.add(arm)
+    }
 
 
-
+    
+}
 
 async function init() {
 
-    initMouse()
+    initMouse() //The mouse you hold
 
+    initTMaze()
+    
+    // initOrthostochastic()
     // initGraph()
     // await initPosa3d()
-    initHyperbolic()
+    // initHyperbolic()
     // initWorldMaps()
+    // initHyperIdeals()
+    // initSimplexField()
+
+    if(0)
+    {
+        let p0 = new THREE.Mesh(new THREE.SphereGeometry(.03), new THREE.MeshBasicMaterial({color: 0x000000}))
+        scene.add(p0)
+        let p1 = new THREE.Mesh(new THREE.SphereGeometry(.03), new THREE.MeshBasicMaterial({ color: 0x000000 }))
+        scene.add(p1)
+        p0.position.x = -1
+        p1.position.x = 1
+
+        let ellipticLine = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0., 1., 0.), new THREE.Vector3(0., -1., 0.)]), new THREE.LineBasicMaterial({color: 0x000000}))
+        p0.add(ellipticLine)
+        let euclideanLine = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0., 1., 0.), new THREE.Vector3(0., -1., 0.)]), new THREE.LineBasicMaterial({ color: 0x000000 }))
+        p1.add(euclideanLine)
+
+        let ellipticStart = new Mv31()
+        _e2.addScaled(_e1, .01, ellipticStart)
+        let ellipticRotor = new Mv31()
+        
+        let euclideanStart = new Mv31()
+        _e0.addScaled(_e1, .01, euclideanStart)
+        let euclideanRotor = new Mv31()
+
+        mrh = () => {
+            ellipticRotor[0] = Math.cos(frameCount * .002)
+            ellipticRotor[5] = Math.sin(frameCount * .002)
+            let elliptic = ellipticRotor.sandwich(ellipticStart, mv0)
+            elliptic.mulReverse(_e1, mv1)
+            ellipticLine.quaternion.w = mv1[0]
+            ellipticLine.quaternion.z = mv1[5]
+
+            _one.addScaled(_e10, frameCount * .01, euclideanRotor)
+            let euclidean = euclideanRotor.sandwich(euclideanStart, mv0)
+            euclidean.mulReverse(_e1, mv1)
+            euclideanLine.quaternion.w = mv0[0]
+            euclideanLine.quaternion.z = mv0[5]
+        }
+    }
+
+    {
+        scene.add(new THREE.HemisphereLight(0x808080, 0x606060))
+
+        const light = new THREE.DirectionalLight(0xffffff)
+        light.position.set(1.8, 3., 3.)
+        light.lookAt(0., 0., 0.)
+        light.castShadow = true
+        light.shadow.camera.top = 40
+        light.shadow.camera.bottom = - 40
+        light.shadow.camera.right = 40
+        light.shadow.camera.left = - 40
+        light.shadow.mapSize.set(2048, 2048)
+        scene.add(light)
+    }
 
     window.addEventListener('resize', () => {
 
@@ -90,7 +193,8 @@ async function init() {
     // renderer.outputEncoding = THREE.sRGBEncoding
     renderer.shadowMap.enabled = true
     renderer.xr.enabled = true
-    renderer.setClearColor(0x405B59)
+    // renderer.setClearColor(0x405B59)
+    renderer.setClearColor(0xFFFFFF)
     rendererContainer.appendChild(renderer.domElement)
 
     camera.position.z += 4.
@@ -111,7 +215,11 @@ async function init() {
         // updateWorldMaps()
         // updateGraph()
         // updatePosa()
-        updateHyperbolic()
+        // updateHyperbolic()
+        // updateGalton()
+        // updateHyperIdeals()
+        // updateSimplexField()
+        // updateOrthostochastic()
 
         obj3dsWithOnBeforeRenders.forEach(obj => obj.onBeforeRender())
 
