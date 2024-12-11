@@ -1,4 +1,6 @@
 /*
+    Can you make an interface for this where you move from thing to thing using your hands? Not just clicking. Get rid of the blocking box by pulling it in
+
     If you want the spiral picture, well, there is light-like Cl(3,1,1)
 
     Hessian viz
@@ -73,59 +75,106 @@
         "To reproduce is to prove your model of the world is correct"c
  */
 
-//do saccadic eye movements too
+function initShm() {
+    let shmGroup = new THREE.Group()
+    scene.add(shmGroup)
 
-function initTMaze() {
+    shmGroup.position.y = .7
 
-    let tMazeGroup = new THREE.Group()
-    scene.add(tMazeGroup)
+    // let bg = new THREE.Mesh(unchangingUnitSquareGeometry, new THREE.MeshBasicMaterial({ color: 0x000000 }))
+    // shmGroup.add(bg)
+    // bg.position.y -= .8
+    // bg.scale.setScalar(1.5)
+    // let phasePt = new THREE.Mesh(new THREE.CircleGeometry(.03), new THREE.MeshBasicMaterial({ color: 0xFF0000 }))
+    // bg.add(phasePt)
     
-    let geo = new THREE.BoxGeometry(1., 1., 1.)
-    let floorThickness = .02
-    let width = .5 //"corridor"
-    let armLength = .8
 
-    let bottom = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({color: 0xFF8888}))
-    bottom.scale.z = floorThickness
-    bottom.scale.x = width
-    bottom.scale.y = 1.3
-    bottom.position.y = -bottom.scale.y / 2. - width / 2.
-    tMazeGroup.add(bottom)
+    let leftBox  = new THREE.Mesh(unchangingUnitSquareGeometry, new THREE.MeshBasicMaterial({ color: 0x0000FF }))
+    let rightBox = new THREE.Mesh(unchangingUnitSquareGeometry, new THREE.MeshBasicMaterial({ color: 0x00FF00 }))
+    shmGroup.add(rightBox)
+    shmGroup.add(leftBox)
+    let boxWidth = .6
+    leftBox.position.x = -2.6
+    leftBox.scale.y = rightBox.scale.y = .4
+    leftBox.scale.x = rightBox.scale.x = boxWidth
 
-    let middle = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({color: 0x88FF88}))
-    middle.scale.z = floorThickness
-    middle.scale.x = width
-    middle.scale.y = width
-    tMazeGroup.add(middle)
+    let springMat = new THREE.MeshBasicMaterial({color: 0x000000})
 
-    let arms = []
-    for(let i = 0; i < 2; ++i) {
-        let arm = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({color: i?0x8888FF:0x88FFFF}))
-        arms.push(arm)
-        arm.scale.z = floorThickness
-        arm.scale.x = armLength
-        arm.scale.y = width
-        arm.position.x = (i?-1:1)*(armLength / 2. + width / 2.)
-        tMazeGroup.add(arm)
+    let springPieces = []
+    let pieceLength = .13
+    let pieceWidth = .03
+    let pieceGeo = new THREE.CircleGeometry(pieceWidth / 2., 10)
+    let arr = pieceGeo.attributes.position.array
+    for(let i = 0, il = arr.length; i < il; i += 3) {
+        if(arr[i] > 0.)
+            arr[i] += pieceLength
     }
-
-
+    for(let i = 0; i < 28; ++i) {
+        let piece = new THREE.Mesh(pieceGeo, springMat)
+        springPieces.push(piece)
+        shmGroup.add(piece)
+    }
+    let startPiece = new THREE.Mesh(unchangingUnitSquareGeometry, springMat)
+    shmGroup.add(startPiece)
+    startPiece.scale.y = pieceWidth
+    startPiece.scale.x = .12
+    startPiece.position.x = leftBox.position.x + leftBox.scale.x / 2. + startPiece.scale.x / 2.
     
+    let endPiece = new THREE.Mesh(unchangingUnitSquareGeometry, springMat)
+    shmGroup.add(endPiece)
+    endPiece.scale.y = pieceWidth
+    endPiece.scale.x = startPiece.scale.x
+    
+    updateShm = () => {
+        rightBox.position.x = Math.sin(frameCount * .04)
+
+        endPiece.position.x = rightBox.position.x - rightBox.scale.x / 2. - endPiece.scale.x / 2.
+
+        let springLength = (endPiece.position.x - endPiece.scale.x / 2.) - (startPiece.position.x + startPiece.scale.x / 2.)
+        let pieceSpacing = springLength / springPieces.length
+        let angle = Math.acos(pieceSpacing / pieceLength)
+        let height = Math.sqrt( pieceLength * pieceLength - pieceSpacing * pieceSpacing )
+        springPieces.forEach((piece, i) => {
+            piece.position.x = startPiece.position.x + startPiece.scale.x / 2.
+            piece.position.x += pieceSpacing * i
+            piece.position.y = 
+                i % 4 == 0 ? 0. :
+                i % 4 == 1 ? height :
+                i % 4 == 2 ? 0. :
+                -height
+            piece.rotation.z =
+                i % 4 == 0 ? angle :
+                i % 4 == 1 ? -angle :
+                i % 4 == 2 ? -angle :
+                angle
+        })
+    }
 }
 
 async function init() {
 
     initMouse() //The mouse you hold
 
-    initTMaze()
+    // {
+    //     let simplex = initSimplexField()
+    //     simplex.position.y -= .8
+    //     simplex.scale.multiplyScalar(.6)
+    //     let state = new SimplexState()
+
+    //     let saccadicScene = initSaccadic(state)
+    //     saccadicScene.position.y += .8
+    //     saccadicScene.scale.multiplyScalar(.6)
+    // }
     
+    initShm()
+    // initTMaze()
     // initOrthostochastic()
     // initGraph()
     // await initPosa3d()
     // initHyperbolic()
     // initWorldMaps()
     // initHyperIdeals()
-    // initSimplexField()
+    
 
     if(0)
     {
@@ -220,6 +269,8 @@ async function init() {
         // updateHyperIdeals()
         // updateSimplexField()
         // updateOrthostochastic()
+        // updateSaccadic()
+        updateShm()
 
         obj3dsWithOnBeforeRenders.forEach(obj => obj.onBeforeRender())
 
