@@ -88,66 +88,15 @@ function initShm() {
     // let phasePt = new THREE.Mesh(new THREE.CircleGeometry(.03), new THREE.MeshBasicMaterial({ color: 0xFF0000 }))
     // bg.add(phasePt)
     
+    let pendulum = new THREE.Group()
+    shmGroup.add(pendulum)
+    let pendulumTop = new THREE.Mesh(new THREE.CircleBufferGeometry(.3), new THREE.MeshBasicMaterial({color: 0x000000}))
+    shmGroup.add(pendulumTop)
+    let bottom = new THREE.Mesh(new THREE.CircleBufferGeometry(.3), new THREE.MeshBasicMaterial({ color: 0x000000 }))
+    pendulum.add(top)
 
-    let leftBox  = new THREE.Mesh(unchangingUnitSquareGeometry, new THREE.MeshBasicMaterial({ color: 0x0000FF }))
-    let rightBox = new THREE.Mesh(unchangingUnitSquareGeometry, new THREE.MeshBasicMaterial({ color: 0x00FF00 }))
-    shmGroup.add(rightBox)
-    shmGroup.add(leftBox)
-    let boxWidth = .6
-    leftBox.position.x = -2.6
-    leftBox.scale.y = rightBox.scale.y = .4
-    leftBox.scale.x = rightBox.scale.x = boxWidth
-
-    let springMat = new THREE.MeshBasicMaterial({color: 0x000000})
-
-    let springPieces = []
-    let pieceLength = .13
-    let pieceWidth = .03
-    let pieceGeo = new THREE.CircleGeometry(pieceWidth / 2., 10)
-    let arr = pieceGeo.attributes.position.array
-    for(let i = 0, il = arr.length; i < il; i += 3) {
-        if(arr[i] > 0.)
-            arr[i] += pieceLength
-    }
-    for(let i = 0; i < 28; ++i) {
-        let piece = new THREE.Mesh(pieceGeo, springMat)
-        springPieces.push(piece)
-        shmGroup.add(piece)
-    }
-    let startPiece = new THREE.Mesh(unchangingUnitSquareGeometry, springMat)
-    shmGroup.add(startPiece)
-    startPiece.scale.y = pieceWidth
-    startPiece.scale.x = .12
-    startPiece.position.x = leftBox.position.x + leftBox.scale.x / 2. + startPiece.scale.x / 2.
-    
-    let endPiece = new THREE.Mesh(unchangingUnitSquareGeometry, springMat)
-    shmGroup.add(endPiece)
-    endPiece.scale.y = pieceWidth
-    endPiece.scale.x = startPiece.scale.x
     
     updateShm = () => {
-        rightBox.position.x = Math.sin(frameCount * .04)
-
-        endPiece.position.x = rightBox.position.x - rightBox.scale.x / 2. - endPiece.scale.x / 2.
-
-        let springLength = (endPiece.position.x - endPiece.scale.x / 2.) - (startPiece.position.x + startPiece.scale.x / 2.)
-        let pieceSpacing = springLength / springPieces.length
-        let angle = Math.acos(pieceSpacing / pieceLength)
-        let height = Math.sqrt( pieceLength * pieceLength - pieceSpacing * pieceSpacing )
-        springPieces.forEach((piece, i) => {
-            piece.position.x = startPiece.position.x + startPiece.scale.x / 2.
-            piece.position.x += pieceSpacing * i
-            piece.position.y = 
-                i % 4 == 0 ? 0. :
-                i % 4 == 1 ? height :
-                i % 4 == 2 ? 0. :
-                -height
-            piece.rotation.z =
-                i % 4 == 0 ? angle :
-                i % 4 == 1 ? -angle :
-                i % 4 == 2 ? -angle :
-                angle
-        })
     }
 }
 
@@ -166,13 +115,13 @@ async function init() {
     //     saccadicScene.scale.multiplyScalar(.6)
     // }
     
-    initShm()
+    // initShm()
     // initTMaze()
     // initOrthostochastic()
     // initGraph()
     // await initPosa3d()
     // initHyperbolic()
-    // initWorldMaps()
+    initWorldMaps()
     // initHyperIdeals()
     
 
@@ -261,7 +210,7 @@ async function init() {
             errorBox.style.visibility = "hidden"
         }
 
-        // updateWorldMaps()
+        updateWorldMaps()
         // updateGraph()
         // updatePosa()
         // updateHyperbolic()
@@ -270,7 +219,7 @@ async function init() {
         // updateSimplexField()
         // updateOrthostochastic()
         // updateSaccadic()
-        updateShm()
+        // updateShm()
 
         obj3dsWithOnBeforeRenders.forEach(obj => obj.onBeforeRender())
 
