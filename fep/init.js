@@ -104,16 +104,16 @@ async function init() {
 
     initMouse() //The mouse you hold
 
-    // {
-    //     let simplex = initSimplexField()
-    //     simplex.position.y -= .8
-    //     simplex.scale.multiplyScalar(.6)
-    //     let state = new SimplexState()
+    {
+        let simplex = initSimplexField()
+        simplex.position.y -= .8
+        simplex.scale.multiplyScalar(.6)
+        let state = new SimplexState()
 
-    //     let saccadicScene = initSaccadic(state)
-    //     saccadicScene.position.y += .8
-    //     saccadicScene.scale.multiplyScalar(.6)
-    // }
+        let saccadicScene = initSaccadic(state)
+        saccadicScene.position.y += .8
+        saccadicScene.scale.multiplyScalar(.6)
+    }
     
     // initShm()
     // initTMaze()
@@ -121,7 +121,7 @@ async function init() {
     // initGraph()
     // await initPosa3d()
     // initHyperbolic()
-    initWorldMaps()
+    // initWorldMaps()
     // initHyperIdeals()
     
 
@@ -210,7 +210,7 @@ async function init() {
             errorBox.style.visibility = "hidden"
         }
 
-        updateWorldMaps()
+        // updateWorldMaps()
         // updateGraph()
         // updatePosa()
         // updateHyperbolic()
@@ -218,7 +218,7 @@ async function init() {
         // updateHyperIdeals()
         // updateSimplexField()
         // updateOrthostochastic()
-        // updateSaccadic()
+        updateSaccadic()
         // updateShm()
 
         obj3dsWithOnBeforeRenders.forEach(obj => obj.onBeforeRender())
