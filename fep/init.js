@@ -105,14 +105,14 @@ async function init() {
     initMouse() //The mouse you hold
 
     {
-        let simplex = initSimplexField()
-        simplex.position.y -= .8
-        simplex.scale.multiplyScalar(.6)
-        let state = new SimplexState()
+        // let simplex = initSimplexField()
+        // simplex.position.y = .8
+        // simplex.scale.multiplyScalar(.6)
+        // let state = new SimplexState()
 
-        let saccadicScene = initSaccadic(state)
-        saccadicScene.position.y += .8
-        saccadicScene.scale.multiplyScalar(.6)
+        // let saccadicScene = initSaccadic(state)
+        // saccadicScene.position.y = -.8
+        // saccadicScene.scale.multiplyScalar(.8)
     }
     
     // initShm()
@@ -121,7 +121,7 @@ async function init() {
     // initGraph()
     // await initPosa3d()
     // initHyperbolic()
-    // initWorldMaps()
+    initWorldMaps()
     // initHyperIdeals()
     
 
@@ -190,7 +190,7 @@ async function init() {
     renderer.setSize(window.innerWidth, window.innerHeight)
     // renderer.outputEncoding = THREE.sRGBEncoding
     renderer.shadowMap.enabled = true
-    renderer.xr.enabled = true
+    // renderer.xr.enabled = true
     // renderer.setClearColor(0x405B59)
     renderer.setClearColor(0xFFFFFF)
     rendererContainer.appendChild(renderer.domElement)
@@ -210,7 +210,7 @@ async function init() {
             errorBox.style.visibility = "hidden"
         }
 
-        // updateWorldMaps()
+        updateWorldMaps()
         // updateGraph()
         // updatePosa()
         // updateHyperbolic()
@@ -218,7 +218,7 @@ async function init() {
         // updateHyperIdeals()
         // updateSimplexField()
         // updateOrthostochastic()
-        updateSaccadic()
+        // updateSaccadic()
         // updateShm()
 
         obj3dsWithOnBeforeRenders.forEach(obj => obj.onBeforeRender())

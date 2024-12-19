@@ -6,20 +6,19 @@ function initWorldMaps() {
     // scene.add(l)
     // l.quaternion.setFromUnitVectors(yUnit, axis)
 
-    mapProjection = { value: 5 }
     updateWorldMaps = () => {
-        if (greenland === null || earth === null)
-            return
-
         // if(frameCount % 450 === 0) {
         //     mapProjection.value += 1
         //     if(mapProjection.value > 3)
         //         mapProjection.value = 2
         // }
 
-        let q = greenland.material.uniforms.quat.value
-        q1.setFromAxisAngle(axis, Math.PI / 3. + TAU * frameCount * .4 / 450.)
-        q.copy(q1)
+        let angle = Math.PI / 3. + TAU * frameCount * .001
+        greenlands.forEach(g => {
+            let q = g.material.uniforms.quat.value
+            q1.setFromAxisAngle(axis, angle)
+            q.copy(q1)
+        })
     }
 
     let earthVert = `
@@ -103,7 +102,7 @@ function initWorldMaps() {
                         float max = 3.;
                         if( abs(pos.y) > max )
                             pos.y = sign(pos.y) * max;
-                        pos *= .5;
+                        pos *= .6;
                     }
 
                     // azimuthal equal area
@@ -121,29 +120,10 @@ function initWorldMaps() {
 
                     //peirce
                     if(mapProjection == 4) {
-                        // Convert to complex plane
-                        vec2 z = vec2(
-                            cos(lat) * cos(lon),
-                            cos(lat) * sin(lon)
-                        );
-
-                        // Stereographic projection from north pole
-                        float k = tan(lat/2.0 + 3.14159265359/4.0);
-                        z = complex_div(
-                            vec2(1.0, 0.0) + z,
-                            vec2(1.0, 0.0) - z
-                        );
-
-                        // Apply elliptic function transformation
-                        vec2 w = sn_cn_dn(atan(z.y, z.x), k).xy;
-
-                        // Scale and translate to final square
-                        w = (w + 1.0) * 0.5; // Map from [-1,1] to [0,1]
-                        pos.xy = w;
-                        pos.z = 0.;
                     }
 
                     //azimuthal equidistant
+                    if(mapProjection == 5)
                     {
                         float lat0 = PI/2.;
                         float d = acos(sin(lat0)*sin(lat)+cos(lat0)*cos(lat)*cos(lon));
@@ -170,45 +150,71 @@ function initWorldMaps() {
                     gl_FragColor = texture2D( map, uv );
                 }`
 
-    let greenland = null
-    let earth = null
     let geo = new THREE.PlaneGeometry(2., 1., 512, 512)
+
+    let earths = []
+    let greenlands = []
+    class MapProjection extends THREE.Mesh {
+        constructor(mapProjection, isGreenland) {
+            let mat = new THREE.ShaderMaterial({
+                transparent: true,
+                uniforms:
+                {
+                    map: { value: null },
+                    quat: { value: new THREE.Vector4() },
+                    mapProjection: { value: mapProjection },
+                    transparent: true
+                },
+                vertexShader: earthVert,
+                fragmentShader: earthFrag
+            });
+            mat.uniforms.quat.value.set(0., 0., 0., 1.)
+            super(geo, mat)
+            scene.add(this)
+
+            if(isGreenland) {
+                greenlands.push(this)
+                this.position.z = .02
+            }
+            else
+                earths.push(this)
+        }
+    }
+
+    let equidistantEarth = new MapProjection(5, false)
+    // equidistantEarth.scale.setScalar(.5)
+    // equidistantEarth.position.y = .85
+    // equidistantEarth.position.x = -1.3
+    
+    // let equidistantGreenland = new MapProjection(5, true)
+    // equidistantGreenland.scale.setScalar(.5)
+    // equidistantGreenland.position.y = .85
+    // equidistantGreenland.position.x = -1.3
+
+    // let mercatorEarth = new MapProjection(2, false)
+    // mercatorEarth.scale.setScalar(.5)
+    // mercatorEarth.position.y = .85
+    // mercatorEarth.position.x = 1.3
+
+    // let mercatorGreenland = new MapProjection(2, true)
+    // mercatorGreenland.scale.setScalar(.5)
+    // mercatorGreenland.position.y = .85
+    // mercatorGreenland.position.x = 1.3
+
+    // let perspectiveEarth = new MapProjection(0, false)
+    // perspectiveEarth.scale.setScalar(.75)
+    // perspectiveEarth.position.y = -.95
+
+    // let perspectiveGreenland = new MapProjection(0, true)
+    // perspectiveGreenland.scale.setScalar(.75)
+    // perspectiveGreenland.position.y = -.95
+
     new THREE.TextureLoader().load('https://hamishtodd1.github.io/fep/data/earthOutline.png', map => {
-
-        let mat = new THREE.ShaderMaterial({
-            transparent: true,
-            uniforms:
-            {
-                map: { value: map },
-                quat: { value: new THREE.Vector4() },
-                mapProjection
-            },
-            vertexShader: earthVert,
-            fragmentShader: earthFrag
-        });
-        mat.uniforms.quat.value.set(0., 0., 0., 1.)
-        earth = new THREE.Mesh(geo, mat)
-        scene.add(earth)
+        earths.forEach(e => e.material.uniforms.map.value = map)
     })
-
-    // new THREE.TextureLoader().load('https://hamishtodd1.github.io/fep/data/greenland.png', map => {
-
-    //     let mat = new THREE.ShaderMaterial({
-    //         transparent: true,
-    //         uniforms:
-    //         {
-    //             map: { value: map },
-    //             quat: { value: new THREE.Vector4() },
-    //             mapProjection
-    //         },
-    //         vertexShader: earthVert,
-    //         fragmentShader: earthFrag
-    //     });
-    //     mat.uniforms.quat.value.set(0., 0., 0., 1.)
-    //     greenland = new THREE.Mesh(geo, mat)
-    //     scene.add(greenland)
-    //     greenland.position.z = .02
-    // })
+    new THREE.TextureLoader().load('https://hamishtodd1.github.io/fep/data/greenland.png', map => {
+        greenlands.forEach(e => e.material.uniforms.map.value = map)
+    })
 
     let spotGeo = new THREE.SphereGeometry(.016)
     for(let i = 0; i < weddingData.length / 2; ++i) { 
@@ -230,42 +236,42 @@ function initWorldMaps() {
     }
 }
 
-// let weddingData = [
-//     35.641662, 139.769279,
-//     41.353676, 2.178857,
-//     43.472731, 5.210011,
-//     48.127993, 11.577923,
-//     48.219988, -2.831188,
-//     48.859017, 2.335184,
-//     49.513356, 3.835002,
-//     50.436565, -104.615205,
-//     51.251535, -0.143348,
-//     51.337057, -0.364519,
-//     51.356205, -0.470535,
-//     51.463026, -2.631284,
-//     51.507717, -0.118954,
-//     51.654612, 0.819422,
-//     51.696911, 0.727709,
-//     51.742198, 0.690139,
-//     52.073084, 0.583992,
-//     52.212512, 0.120120,
-//     52.332619, -0.076488,
-//     52.394059, 0.268199,
-//     52.923337, -1.491600,
-//     52.923522, -1.472429,
-//     53.482178, -2.251885,
-//     53.856335, -1.766660,
-//     54.158753, -4.467326,
-//     54.616032, -5.914004,
-//     55.051160, -1.445771,
-//     55.622363, 12.986120,
-//     55.941532, -3.056444,
-//     55.946778, -3.162601,
-//     51.589808, 0.190250,
-//     51.463745, -0.951860,
-//     52.050812, 1.157639,
-//     50.084606, 14.411776,
-//     51.617126, 0.511961,
-//     52.281634, 0.059784,
-//     -34.558362, -58.383939
-// ]
+let weddingData = [
+    35.641662, 139.769279,
+    41.353676, 2.178857,
+    43.472731, 5.210011,
+    48.127993, 11.577923,
+    48.219988, -2.831188,
+    48.859017, 2.335184,
+    49.513356, 3.835002,
+    50.436565, -104.615205,
+    51.251535, -0.143348,
+    51.337057, -0.364519,
+    51.356205, -0.470535,
+    51.463026, -2.631284,
+    51.507717, -0.118954,
+    51.654612, 0.819422,
+    51.696911, 0.727709,
+    51.742198, 0.690139,
+    52.073084, 0.583992,
+    52.212512, 0.120120,
+    52.332619, -0.076488,
+    52.394059, 0.268199,
+    52.923337, -1.491600,
+    52.923522, -1.472429,
+    53.482178, -2.251885,
+    53.856335, -1.766660,
+    54.158753, -4.467326,
+    54.616032, -5.914004,
+    55.051160, -1.445771,
+    55.622363, 12.986120,
+    55.941532, -3.056444,
+    55.946778, -3.162601,
+    51.589808, 0.190250,
+    51.463745, -0.951860,
+    52.050812, 1.157639,
+    50.084606, 14.411776,
+    51.617126, 0.511961,
+    52.281634, 0.059784,
+    -34.558362, -58.383939
+]
