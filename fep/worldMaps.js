@@ -15,11 +15,31 @@ function initWorldMaps() {
 
         let angle = Math.PI / 3. + TAU * frameCount * .001
         greenlands.forEach(g => {
-            let q = g.material.uniforms.quat.value
             q1.setFromAxisAngle(axis, angle)
-            q.copy(q1)
+            g.material.uniforms.quat.value.copy(q1)
         })
     }
+
+    document.addEventListener('keydown', e => {
+        q1.identity()
+        if(e.key === `ArrowRight`) {
+            q1.setFromAxisAngle(yUnit, .01)
+        }
+        else if(e.key === `ArrowLeft`) {
+            q1.setFromAxisAngle(yUnit, -.01)
+        }
+        else if(e.key === `ArrowUp`) {
+            q1.setFromAxisAngle(xUnit, .01)
+        }
+        else if(e.key === `ArrowDown`) {
+            q1.setFromAxisAngle(xUnit, -.01)
+        }
+
+        q2.copy(equidistantEarth.material.uniforms.quat.value)
+        q2.premultiply(q1)
+        q2.normalize()
+        equidistantEarth.material.uniforms.quat.value.copy(q2)
+    })
 
     let earthVert = `
                 uniform mat4 bivMat4;
@@ -216,9 +236,37 @@ function initWorldMaps() {
         greenlands.forEach(e => e.material.uniforms.map.value = map)
     })
 
+    {
+        const x = 0, y = 0;
+
+        const heartShape = new THREE.Shape();
+
+        heartShape.moveTo(x + 5, y + 5);
+        heartShape.bezierCurveTo(x + 5, y + 5, x + 4, y, x, y);
+        heartShape.bezierCurveTo(x - 6, y, x - 6, y + 7, x - 6, y + 7);
+        heartShape.bezierCurveTo(x - 6, y + 11, x - 3, y + 15.4, x + 5, y + 19);
+        heartShape.bezierCurveTo(x + 12, y + 15.4, x + 16, y + 11, x + 16, y + 7);
+        heartShape.bezierCurveTo(x + 16, y + 7, x + 16, y, x + 10, y);
+        heartShape.bezierCurveTo(x + 7, y, x + 5, y + 5, x + 5, y + 5);
+
+        var heartGeo = new THREE.ShapeGeometry(heartShape);
+        heartGeo.scale(.003,.0035,.004)
+        heartGeo.rotateZ(Math.PI)
+        heartGeo.translate(0.,0.,0.01)
+    }
+
     let spotGeo = new THREE.SphereGeometry(.016)
+    let spotMat = new THREE.MeshBasicMaterial({ color: 0xff0000 })
+    let spotOutlineMat = new THREE.MeshBasicMaterial({ color: 0x000000 })
     for(let i = 0; i < weddingData.length / 2; ++i) { 
-        let spot = new THREE.Mesh(spotGeo, new THREE.MeshBasicMaterial({ color: 0xff0000 }))
+        let spot = new THREE.Mesh(heartGeo, spotMat)
+        let outline = new THREE.Mesh(heartGeo, spotOutlineMat)
+        outline.scale.setScalar(1.3)
+        outline.position.z -= .01
+        outline.position.y += .011
+        outline.position.x += .0053
+        spot.add(outline)
+        spot.scale.setScalar(1.6)
         scene.add(spot)
 
         let lat = weddingData[i * 2] * Math.PI / 180.
