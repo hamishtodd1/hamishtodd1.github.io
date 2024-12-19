@@ -6,6 +6,11 @@ function initWorldMaps() {
     // scene.add(l)
     // l.quaternion.setFromUnitVectors(yUnit, axis)
 
+    let eul = new THREE.Euler()
+    eul.x = 63.23323666292231
+    eul.y = -52.99328280784039
+    let latQuat = new THREE.Quaternion()
+    let lonQuat = new THREE.Quaternion()
     updateWorldMaps = () => {
         // if(frameCount % 450 === 0) {
         //     mapProjection.value += 1
@@ -13,26 +18,57 @@ function initWorldMaps() {
         //         mapProjection.value = 2
         // }
 
-        let angle = Math.PI / 3. + TAU * frameCount * .001
-        greenlands.forEach(g => {
-            q1.setFromAxisAngle(axis, angle)
-            g.material.uniforms.quat.value.copy(q1)
+        // let angle = Math.PI / 3. + TAU * frameCount * .001
+        // greenlands.forEach(g => {
+        //     q1.setFromAxisAngle(axis, angle)
+        //     g.material.uniforms.quat.value.copy(q1)
+        // })
+
+
+        spots.forEach((spot, i) => {
+            let lat = weddingData[i * 2] * Math.PI / 180.
+            let lon = weddingData[i * 2 + 1] * Math.PI / 180.
+
+            latQuat.setFromAxisAngle(xUnit, -lat)
+            lonQuat.setFromAxisAngle(yUnit, lon)
+            v1.copy(zUnit).applyQuaternion(latQuat).applyQuaternion(lonQuat)
+            v1.applyQuaternion(q1.copy(equidistantEarth.material.uniforms.quat.value))
+
+            //xyz to lat lon
+            lat = Math.asin(v1.y)
+            lon = Math.atan2(v1.x, v1.z)
+
+            let pos = spot.position
+            {
+                let lat0 = Math.PI / 2.;
+                let d = Math.acos(Math.sin(lat0) * Math.sin(lat) + Math.cos(lat0) * Math.cos(lat) * Math.cos(lon));
+                let k = d / Math.sin(d);
+                pos.x = .6 * k * Math.cos(lat) * Math.sin(lon);
+                pos.y = .6 * k * (Math.cos(lat0) * Math.sin(lat) - Math.sin(lat0) * Math.cos(lat) * Math.cos(lon));
+                pos.z = 0.;
+            }
         })
     }
 
     document.addEventListener('keydown', e => {
         q1.identity()
         if(e.key === `ArrowRight`) {
-            q1.setFromAxisAngle(yUnit, .01)
+            q1.setFromAxisAngle(zUnit, .01)
         }
         else if(e.key === `ArrowLeft`) {
-            q1.setFromAxisAngle(yUnit, -.01)
+            q1.setFromAxisAngle(zUnit, -.01)
         }
         else if(e.key === `ArrowUp`) {
             q1.setFromAxisAngle(xUnit, .01)
         }
         else if(e.key === `ArrowDown`) {
             q1.setFromAxisAngle(xUnit, -.01)
+        }
+        else if (e.key === `q`) {
+            q1.setFromAxisAngle(yUnit, .01)
+        }
+        else if (e.key === `w`) {
+            q1.setFromAxisAngle(yUnit, -.01)
         }
 
         q2.copy(equidistantEarth.material.uniforms.quat.value)
@@ -138,8 +174,10 @@ function initWorldMaps() {
                         pos *= .7;
                     }
 
-                    //peirce
+                    //gnomonic
                     if(mapProjection == 4) {
+                        pos.xy = .4 * -rotated.xz / rotated.y;
+                        pos.z = 0.;
                     }
 
                     //azimuthal equidistant
@@ -152,6 +190,9 @@ function initWorldMaps() {
                         pos.y = k * (cos(lat0)*sin(lat) - sin(lat0)*cos(lat)*cos(lon));
                         pos.z = 0.;
                         pos *= .6;
+                        float max = 1.9;
+                        if( abs(length(pos.xy)) > max )
+                            pos = vec3(0.,0.,-5.);
                     }
                 
                     gl_Position = projectionMatrix * modelViewMatrix * vec4( pos, 1.0 );
@@ -229,62 +270,29 @@ function initWorldMaps() {
     // perspectiveGreenland.scale.setScalar(.75)
     // perspectiveGreenland.position.y = -.95
 
-    new THREE.TextureLoader().load('https://hamishtodd1.github.io/fep/data/earthOutline.png', map => {
+    textureLoader.load('https://hamishtodd1.github.io/fep/data/earthOutline.png', map => {
         earths.forEach(e => e.material.uniforms.map.value = map)
     })
-    new THREE.TextureLoader().load('https://hamishtodd1.github.io/fep/data/greenland.png', map => {
+    textureLoader.load('https://hamishtodd1.github.io/fep/data/greenland.png', map => {
         greenlands.forEach(e => e.material.uniforms.map.value = map)
     })
 
-    {
-        const x = 0, y = 0;
-
-        const heartShape = new THREE.Shape();
-
-        heartShape.moveTo(x + 5, y + 5);
-        heartShape.bezierCurveTo(x + 5, y + 5, x + 4, y, x, y);
-        heartShape.bezierCurveTo(x - 6, y, x - 6, y + 7, x - 6, y + 7);
-        heartShape.bezierCurveTo(x - 6, y + 11, x - 3, y + 15.4, x + 5, y + 19);
-        heartShape.bezierCurveTo(x + 12, y + 15.4, x + 16, y + 11, x + 16, y + 7);
-        heartShape.bezierCurveTo(x + 16, y + 7, x + 16, y, x + 10, y);
-        heartShape.bezierCurveTo(x + 7, y, x + 5, y + 5, x + 5, y + 5);
-
-        var heartGeo = new THREE.ShapeGeometry(heartShape);
-        heartGeo.scale(.003,.0035,.004)
-        heartGeo.rotateZ(Math.PI)
-        heartGeo.translate(0.,0.,0.01)
-    }
-
-    let spotGeo = new THREE.SphereGeometry(.016)
-    let spotMat = new THREE.MeshBasicMaterial({ color: 0xff0000 })
-    let spotOutlineMat = new THREE.MeshBasicMaterial({ color: 0x000000 })
+    let spotGeo = new THREE.PlaneGeometry(.13, .13)
+    let spotMat = new THREE.MeshBasicMaterial({ transparent: true })
+    textureLoader.load('https://hamishtodd1.github.io/fep/data/heart.png', map => {
+        spotMat.map = map
+        spotMat.needsUpdate = true
+    })
+    wspots = []
     for(let i = 0; i < weddingData.length / 2; ++i) { 
-        let spot = new THREE.Mesh(heartGeo, spotMat)
-        let outline = new THREE.Mesh(heartGeo, spotOutlineMat)
-        outline.scale.setScalar(1.3)
-        outline.position.z -= .01
-        outline.position.y += .011
-        outline.position.x += .0053
-        spot.add(outline)
-        spot.scale.setScalar(1.6)
+        let spot = new THREE.Mesh(spotGeo, spotMat)
         scene.add(spot)
-
-        let lat = weddingData[i * 2] * Math.PI / 180.
-        let lon = weddingData[i * 2 + 1] * Math.PI / 180.
-
-        let pos = spot.position
-        {
-            let lat0 = Math.PI / 2.;
-            let d = Math.acos(Math.sin(lat0) * Math.sin(lat) + Math.cos(lat0) * Math.cos(lat) * Math.cos(lon));
-            let k = d / Math.sin(d);
-            pos.x = .6 * k * Math.cos(lat) * Math.sin(lon);
-            pos.y = .6 * k * (Math.cos(lat0) * Math.sin(lat) - Math.sin(lat0) * Math.cos(lat) * Math.cos(lon));
-            pos.z = 0.;
-        }
+        spots.push(spot)
     }
 }
 
 let weddingData = [
+    63.5896715300584, -53.215017627374436,
     35.641662, 139.769279,
     41.353676, 2.178857,
     43.472731, 5.210011,
