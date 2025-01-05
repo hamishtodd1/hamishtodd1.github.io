@@ -116,9 +116,10 @@ function initGalton() {
         if(Math.random() < .02)
             new Pellet()
      
-        scurryingVelocity = Math.sin(frameCount * .02) * .1
+        scurryingVelocity = Math.cos(frameCount * .02) * 2.2
         scurrying.position.x += scurryingVelocity * frameDelta
         scurrying.scale.x = scurryingVelocity > 0 ? 1. : -1.
+        scurrying.position.y = -.3
     }
 }
 

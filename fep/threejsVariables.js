@@ -24,6 +24,8 @@ const m1 = new THREE.Matrix4()
 const m2 = new THREE.Matrix4()
 const q1 = new THREE.Quaternion()
 const q2 = new THREE.Quaternion()
+const q3 = new THREE.Quaternion()
+const q4 = new THREE.Quaternion()
 
 const unchangingUnitSquareGeometry = new THREE.PlaneGeometry(1., 1.)
 

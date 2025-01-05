@@ -262,14 +262,6 @@ function initGraph() {
         }
     })
 
-    document.addEventListener('mousewheel', (event) => {
-        // raycaster.setFromCamera(mouse, camera)
-        if(event.deltaY < 0.)
-            camera.position.z *= 1.1
-        if (event.deltaY > 0.)
-            camera.position.z *= (1./1.1)
-    })
-
 
     evaluateWholeGraph = () => {
         let result = 1.

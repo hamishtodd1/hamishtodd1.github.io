@@ -1,83 +1,336 @@
 function updateWorldMaps() { }
+
+function initMeasuringStick(perspective, mercator, equidistant, planePerspective, planeMercator, planeEquidistant) {
+
+    let worldMaps = [equidistant, mercator, perspective]
+    let planes = [planeEquidistant, planeMercator, planePerspective]
+
+    let dir = new THREE.Vector3()
+    let yUnitNeg = new THREE.Vector3(0., -1., 0.)
+    function directPlane(plane, nextPosition) {
+        dir.subVectors(nextPosition, plane.position).normalize()
+        plane.quaternion.setFromUnitVectors(yUnitNeg, dir)
+    }
+
+    let globeStickGeoSegments = 32
+    let globeStickGeoInitial = new THREE.PlaneGeometry(.02, 1., 1, globeStickGeoSegments)
+    globeStickGeoInitial.translate(0., .5, 0.)
+    initialCoords = globeStickGeoInitial.attributes.position.array
+    let globeStick = new THREE.Mesh(globeStickGeoInitial.clone(), new THREE.MeshBasicMaterial({ color: 0x000000, side: THREE.DoubleSide }))
+    perspective.add(globeStick)
+    let gsCoords = globeStick.geometry.attributes.position.array
+    
+    let identityQuaternion = new THREE.Quaternion()
+    let displacer = new THREE.Vector3()
+    let perspectiveStart = new THREE.Vector3(0., 0., 1.)
+    let perspectiveEnd = new THREE.Vector3(1., 1., 1.).normalize()
+
+    let globeSphere = new THREE.Sphere()
+    function getGlobeIntersection(target) {
+        globeSphere.center.copy(perspective.position)
+        globeSphere.radius = perspective.scale.x
+        let intersection = raycaster.ray.intersectSphere(globeSphere, v1)
+        if (intersection) {
+            target.copy(v1)
+            perspective.worldToLocal(target)
+            target.normalize()
+        }
+    }
+    
+
+    let measuringStick = new THREE.Mesh(new THREE.PlaneGeometry(.02, 1.), new THREE.MeshBasicMaterial({ color: 0x000000 }))
+    measuringStick.geometry.translate(0., .5, 0.)
+    scene.add(measuringStick)
+    measuringStick.position.z = .05
+    let changingStickMode = false
+    let measuringStickMap = null
+    document.addEventListener('keyup', event => {
+        if (event.key === `1`) {
+            if (changingStickMode === true) {
+                changingStickMode = false
+                backAndForth = 0.
+                forth = true
+            }
+            else {
+                changingStickMode = true
+
+                let closestDist = 1.
+                worldMaps.forEach(map => {
+                    let dist = map.position.distanceToSquared(mousePos)
+                    if (dist < closestDist) {
+                        closestDist = dist
+                        measuringStickMap = map
+                    }
+                })
+
+                measuringStick.position.x = mousePos.x
+                measuringStick.position.y = mousePos.y
+
+                if (measuringStickMap === perspective) {
+                    getGlobeIntersection(perspectiveStart)
+                }
+
+                // if (measuringStickMap !== null) {
+                //     measuringStickMap.worldToLocal(measuringStick.position)
+                // }
+            }
+        }
+    })
+
+    let forth = true
+    let backAndForth = 0.
+    function getPosition(t,target) {
+        target.copy(measuringStick.position)
+        v4.copy(yUnit).applyQuaternion(measuringStick.quaternion).multiplyScalar(measuringStick.scale.y)
+        return target.addScaledVector(v4, t)
+    }
+
+    updateMeasuringStick = () => {
+
+        if (backAndForth > 1.)
+            forth = false
+        else if (backAndForth < 0.)
+            forth = true
+        backAndForth += .8 * (forth ? frameDelta : -frameDelta)
+
+        if (!changingStickMode) {
+            planes.forEach(p => p.visible = true)
+
+            switch (measuringStickMap) {
+
+                case perspective:
+                    q1.setFromUnitVectors(perspectiveStart, perspectiveEnd)
+                    planePerspective.quaternion.slerpQuaternions(identityQuaternion, q1, backAndForth)
+
+                    let northPoleToPerspectiveStart = q1.setFromUnitVectors(yUnit, perspectiveStart)
+                    planePerspective.quaternion.multiply(northPoleToPerspectiveStart)
+
+                    let currentPos = v3.set(0.,1.,0.).applyQuaternion(planePerspective.quaternion)
+
+                    v1.crossVectors(currentPos, forth?perspectiveEnd:perspectiveStart).normalize()
+                    let currentDir = v2.set(0., 0., -1.).applyQuaternion(planePerspective.quaternion)
+                    v2.crossVectors(currentPos, currentDir).normalize()
+                    q1.setFromUnitVectors(v2, v1)
+                    planePerspective.quaternion.premultiply(q1)
+
+                    break
+
+                case null:
+                    break
+
+                default:
+
+                    let plane = planes[worldMaps.indexOf(measuringStickMap)]
+                    getPosition(backAndForth, plane.position)
+                    measuringStickMap.worldToLocal(plane.position)
+
+                    measuringStickMap.worldToLocal(getPosition(backAndForth + .00001*(forth?1.:-1.), v1))
+                    directPlane(plane, v1)
+
+            }
+
+            return
+        }
+        else {
+
+            planes.forEach(p => p.visible = false)
+    
+            switch (measuringStickMap) {
+                case perspective:
+                    getGlobeIntersection(perspectiveEnd)
+                    q1.setFromUnitVectors(perspectiveStart, perspectiveEnd)
+                    displacer.set(q1.x, q1.y, q1.z).setLength(.02)
+                    for (let i = 0, il = gsCoords.length / 3; i < il; i++) {
+                        let t = initialCoords[i * 3 + 1]
+                        q2.slerpQuaternions(identityQuaternion, q1, t)
+    
+                        let pointOn = v1.copy(perspectiveStart).applyQuaternion(q2)
+                        pointOn.addScaledVector(displacer, initialCoords[i * 3] < 0. ? 1. : -1.)
+                        pointOn.setLength(1.015)
+                        pointOn.toArray(gsCoords, i * 3)
+                    }
+                    globeStick.geometry.attributes.position.needsUpdate = true
+    
+                    break
+
+                case null:
+    
+                    break
+    
+                default:
+                    measuringStick.scale.y = mousePos.distanceTo(measuringStick.position)
+                    measuringStick.rotation.z = -yUnit.angleTo(v1.subVectors(mousePos, measuringStick.position))
+                    if (mousePos.x < measuringStick.position.x)
+                        measuringStick.rotation.z *= -1.
+            }
+        }
+    }
+}
+
+
 function initWorldMaps() {
+
+    let greenlandMovingMode = false
+    let posWhenGreenlandMovingModeStarted = new THREE.Vector3()
+    let euler = new THREE.Euler()
+    euler.order = `YXZ`
+
+    document.addEventListener('keyup', event => {
+
+        if (event.key === `2`) {
+            greenlandMovingMode = !greenlandMovingMode
+            posWhenGreenlandMovingModeStarted.copy(mousePos)
+        }
+    })
+
+    document.addEventListener('mousemove', e => {
+        if(greenlandMovingMode) {
+            
+            v1.subVectors(mousePos, posWhenGreenlandMovingModeStarted)
+            q1.setFromAxisAngle(v2.set(1.,0.,1.).normalize(), 2.4 * v1.y)
+            q1.premultiply(q2.setFromAxisAngle(yUnit, 2.4 * v1.x))
+        
+
+            greenlands.forEach(g => {
+                g.material.uniforms.quat.value.copy(q1)
+            })
+        }
+    })
+
+    document.addEventListener('keydown', e => {
+        if (e.key === 'ArrowRight') {
+            //moving the things and scaling them is allowed
+        }
+
+        /*
+            Grab greenland and africa and the plane
+
+            -Bring in Mercator
+            -Grab Greenland and Africa and move them
+            -Bring in equidistant
+            -Bring in globe
+            -Draw a line on equidistant. Plane appears at start
+            -Make notches appear on the line
+            -Make them appear on globe
+            -Same drag on mercator
+            -same drag on globe, it works properly
+
+            Features:
+                The "plane trajectory":
+                    Click on a map, move mouse to somewhere else making a line segment
+                    A plane appears at start, rotates to face in the direction your mouse is in
+                    when you let go, notches appear on the line, plane moves back and forth on it
+                    Can also draw somewhere that isn't a map, it just makes the notches
+                The "grab greenland and africa"
+
+
+
+
+            // T = sqrt(e123/(S.e1230))
+            // Math.log( |log(e4TS~T)| )
+        */
+    })
     
     let axis = v1.set(5., 0., 5.).normalize()
     // let l = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0., -999., 0.), new THREE.Vector3(0., 999., 0.)]), new THREE.LineBasicMaterial({ color: 0x0000ff }))
     // scene.add(l)
     // l.quaternion.setFromUnitVectors(yUnit, axis)
 
-    let eul = new THREE.Euler()
-    eul.x = 63.23323666292231
-    eul.y = -52.99328280784039
-    let latQuat = new THREE.Quaternion()
-    let lonQuat = new THREE.Quaternion()
-    updateWorldMaps = () => {
-        // if(frameCount % 450 === 0) {
-        //     mapProjection.value += 1
-        //     if(mapProjection.value > 3)
-        //         mapProjection.value = 2
-        // }
-
-        // let angle = Math.PI / 3. + TAU * frameCount * .001
-        // greenlands.forEach(g => {
-        //     q1.setFromAxisAngle(axis, angle)
-        //     g.material.uniforms.quat.value.copy(q1)
-        // })
+    
 
 
-        spots.forEach((spot, i) => {
-            let lat = weddingData[i * 2] * Math.PI / 180.
-            let lon = weddingData[i * 2 + 1] * Math.PI / 180.
 
-            latQuat.setFromAxisAngle(xUnit, -lat)
-            lonQuat.setFromAxisAngle(yUnit, lon)
-            v1.copy(zUnit).applyQuaternion(latQuat).applyQuaternion(lonQuat)
-            v1.applyQuaternion(q1.copy(equidistantEarth.material.uniforms.quat.value))
+    let geo = new THREE.PlaneGeometry(2., 1., 512, 512)
 
-            //xyz to lat lon
-            lat = Math.asin(v1.y)
-            lon = Math.atan2(v1.x, v1.z)
+    let earths = []
+    let greenlands = []
+    class MapProjection extends THREE.Mesh {
+        constructor(mapProjection, isGreenland) {
+            let mat = new THREE.ShaderMaterial({
+                transparent: true,
+                uniforms:
+                {
+                    map: { value: null },
+                    quat: { value: new THREE.Vector4() },
+                    mapProjection: { value: mapProjection },
+                    transparent: true
+                },
+                vertexShader: worldMapVert,
+                fragmentShader: worldMapFrag
+            });
+            mat.uniforms.quat.value.set(0., 0., 0., 1.)
+            super(geo, mat)
 
-            let pos = spot.position
-            {
-                let lat0 = Math.PI / 2.;
-                let d = Math.acos(Math.sin(lat0) * Math.sin(lat) + Math.cos(lat0) * Math.cos(lat) * Math.cos(lon));
-                let k = d / Math.sin(d);
-                pos.x = .6 * k * Math.cos(lat) * Math.sin(lon);
-                pos.y = .6 * k * (Math.cos(lat0) * Math.sin(lat) - Math.sin(lat0) * Math.cos(lat) * Math.cos(lon));
-                pos.z = 0.;
+            if(isGreenland) {
+                greenlands.push(this)
+                this.position.z = .02
             }
-        })
+            else
+                earths.push(this)
+        }
     }
 
-    document.addEventListener('keydown', e => {
-        q1.identity()
-        if(e.key === `ArrowRight`) {
-            q1.setFromAxisAngle(zUnit, .01)
-        }
-        else if(e.key === `ArrowLeft`) {
-            q1.setFromAxisAngle(zUnit, -.01)
-        }
-        else if(e.key === `ArrowUp`) {
-            q1.setFromAxisAngle(xUnit, .01)
-        }
-        else if(e.key === `ArrowDown`) {
-            q1.setFromAxisAngle(xUnit, -.01)
-        }
-        else if (e.key === `q`) {
-            q1.setFromAxisAngle(yUnit, .01)
-        }
-        else if (e.key === `w`) {
-            q1.setFromAxisAngle(yUnit, -.01)
-        }
+    let equidistant = new THREE.Group()
+    simplyMoveableThings.push(equidistant)
+    scene.add(equidistant)
+    equidistant.scale.setScalar(.5)
+    equidistant.position.y = .85
+    equidistant.position.x = -1.3
+    equidistant.add(new MapProjection(5, false))
+    equidistant.add(new MapProjection(5, true))
 
-        q2.copy(equidistantEarth.material.uniforms.quat.value)
-        q2.premultiply(q1)
-        q2.normalize()
-        equidistantEarth.material.uniforms.quat.value.copy(q2)
+    let mercator = new THREE.Group()
+    simplyMoveableThings.push(mercator)
+    scene.add(mercator)
+    mercator.scale.setScalar(.5)
+    mercator.position.y = .85
+    mercator.position.x = 1.3
+    mercator.add(new MapProjection(2, false))
+    mercator.add(new MapProjection(2, true))
+
+    let perspective = new THREE.Group()
+    simplyMoveableThings.push(perspective)
+    scene.add(perspective)
+    perspective.scale.setScalar(.75)
+    perspective.position.y = -.95
+    perspective.add(new MapProjection(0, false))
+    perspective.add(new MapProjection(0, true))
+
+    let planeEquidistant = new THREE.Group()
+    equidistant.add(planeEquidistant)
+    let planeMercator = new THREE.Group()
+    mercator.add(planeMercator)
+    let planePerspective = new THREE.Group()
+    perspective.add(planePerspective)
+
+    new THREE.OBJLoader().load('https://hamishtodd1.github.io/fep/data/plane.obj', function (obj) {
+        let planeGeo = obj.children[0].geometry
+        planeGeo.scale(.008, .008, .008)
+        planeGeo.rotateX( TAU / 4. )
+        // scene.add(plane)
+
+        let _planeEquidistant = new THREE.Mesh(planeGeo, new THREE.MeshPhongMaterial({color:0x00FF00}))
+        planeEquidistant.add(_planeEquidistant)
+        let _planeMercator = new THREE.Mesh(planeGeo, new THREE.MeshPhongMaterial({ color: 0x00FF00 }))
+        planeMercator.add(_planeMercator)
+
+        let _planePerspective = new THREE.Mesh(planeGeo, new THREE.MeshPhongMaterial({ color: 0x00FF00 }))
+        planePerspective.add(_planePerspective)
+        _planePerspective.position.y = 1.07
+        _planePerspective.rotation.x = TAU / 4.
     })
 
-    let earthVert = `
+    textureLoader.load('https://hamishtodd1.github.io/fep/data/earthColor.png', map => {
+        earths.forEach(e => e.material.uniforms.map.value = map)
+    })
+    textureLoader.load('https://hamishtodd1.github.io/fep/data/greenland.png', map => {
+        greenlands.forEach(e => e.material.uniforms.map.value = map)
+    })
+
+    initMeasuringStick(perspective, mercator, equidistant, planePerspective, planeMercator, planeEquidistant)
+}
+
+let worldMapVert = `
                 uniform mat4 bivMat4;
 
                 out vec2 vUv;
@@ -198,7 +451,7 @@ function initWorldMaps() {
                     gl_Position = projectionMatrix * modelViewMatrix * vec4( pos, 1.0 );
                     gl_PointSize = 3.5;
                 }`
-    let earthFrag = `
+let worldMapFrag = `
                 precision highp float;
 
                 in vec2 vUv;
@@ -210,124 +463,3 @@ function initWorldMaps() {
 
                     gl_FragColor = texture2D( map, uv );
                 }`
-
-    let geo = new THREE.PlaneGeometry(2., 1., 512, 512)
-
-    let earths = []
-    let greenlands = []
-    class MapProjection extends THREE.Mesh {
-        constructor(mapProjection, isGreenland) {
-            let mat = new THREE.ShaderMaterial({
-                transparent: true,
-                uniforms:
-                {
-                    map: { value: null },
-                    quat: { value: new THREE.Vector4() },
-                    mapProjection: { value: mapProjection },
-                    transparent: true
-                },
-                vertexShader: earthVert,
-                fragmentShader: earthFrag
-            });
-            mat.uniforms.quat.value.set(0., 0., 0., 1.)
-            super(geo, mat)
-            scene.add(this)
-
-            if(isGreenland) {
-                greenlands.push(this)
-                this.position.z = .02
-            }
-            else
-                earths.push(this)
-        }
-    }
-
-    let equidistantEarth = new MapProjection(5, false)
-    // equidistantEarth.scale.setScalar(.5)
-    // equidistantEarth.position.y = .85
-    // equidistantEarth.position.x = -1.3
-    
-    // let equidistantGreenland = new MapProjection(5, true)
-    // equidistantGreenland.scale.setScalar(.5)
-    // equidistantGreenland.position.y = .85
-    // equidistantGreenland.position.x = -1.3
-
-    // let mercatorEarth = new MapProjection(2, false)
-    // mercatorEarth.scale.setScalar(.5)
-    // mercatorEarth.position.y = .85
-    // mercatorEarth.position.x = 1.3
-
-    // let mercatorGreenland = new MapProjection(2, true)
-    // mercatorGreenland.scale.setScalar(.5)
-    // mercatorGreenland.position.y = .85
-    // mercatorGreenland.position.x = 1.3
-
-    // let perspectiveEarth = new MapProjection(0, false)
-    // perspectiveEarth.scale.setScalar(.75)
-    // perspectiveEarth.position.y = -.95
-
-    // let perspectiveGreenland = new MapProjection(0, true)
-    // perspectiveGreenland.scale.setScalar(.75)
-    // perspectiveGreenland.position.y = -.95
-
-    textureLoader.load('https://hamishtodd1.github.io/fep/data/earthOutline.png', map => {
-        earths.forEach(e => e.material.uniforms.map.value = map)
-    })
-    textureLoader.load('https://hamishtodd1.github.io/fep/data/greenland.png', map => {
-        greenlands.forEach(e => e.material.uniforms.map.value = map)
-    })
-
-    let spotGeo = new THREE.PlaneGeometry(.13, .13)
-    let spotMat = new THREE.MeshBasicMaterial({ transparent: true })
-    textureLoader.load('https://hamishtodd1.github.io/fep/data/heart.png', map => {
-        spotMat.map = map
-        spotMat.needsUpdate = true
-    })
-    wspots = []
-    for(let i = 0; i < weddingData.length / 2; ++i) { 
-        let spot = new THREE.Mesh(spotGeo, spotMat)
-        scene.add(spot)
-        spots.push(spot)
-    }
-}
-
-let weddingData = [
-    63.5896715300584, -53.215017627374436,
-    35.641662, 139.769279,
-    41.353676, 2.178857,
-    43.472731, 5.210011,
-    48.127993, 11.577923,
-    48.219988, -2.831188,
-    48.859017, 2.335184,
-    49.513356, 3.835002,
-    50.436565, -104.615205,
-    51.251535, -0.143348,
-    51.337057, -0.364519,
-    51.356205, -0.470535,
-    51.463026, -2.631284,
-    51.507717, -0.118954,
-    51.654612, 0.819422,
-    51.696911, 0.727709,
-    51.742198, 0.690139,
-    52.073084, 0.583992,
-    52.212512, 0.120120,
-    52.332619, -0.076488,
-    52.394059, 0.268199,
-    52.923337, -1.491600,
-    52.923522, -1.472429,
-    53.482178, -2.251885,
-    53.856335, -1.766660,
-    54.158753, -4.467326,
-    54.616032, -5.914004,
-    55.051160, -1.445771,
-    55.622363, 12.986120,
-    55.941532, -3.056444,
-    55.946778, -3.162601,
-    51.589808, 0.190250,
-    51.463745, -0.951860,
-    52.050812, 1.157639,
-    50.084606, 14.411776,
-    51.617126, 0.511961,
-    52.281634, 0.059784,
-    -34.558362, -58.383939
-]

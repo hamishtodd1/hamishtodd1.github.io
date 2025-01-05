@@ -1,3 +1,6 @@
+//have a "highlight" button I guess, which goes across them all
+//the setup could be: record it on the side, then just move stuff around on the side afterwards. Can put in slides etc
+
 /*
     Can you make an interface for this where you move from thing to thing using your hands? Not just clicking. Get rid of the blocking box by pulling it in
 
@@ -75,32 +78,51 @@
         "To reproduce is to prove your model of the world is correct"c
  */
 
-function initShm() {
-    let shmGroup = new THREE.Group()
-    scene.add(shmGroup)
-
-    shmGroup.position.y = .7
-
-    // let bg = new THREE.Mesh(unchangingUnitSquareGeometry, new THREE.MeshBasicMaterial({ color: 0x000000 }))
-    // shmGroup.add(bg)
-    // bg.position.y -= .8
-    // bg.scale.setScalar(1.5)
-    // let phasePt = new THREE.Mesh(new THREE.CircleGeometry(.03), new THREE.MeshBasicMaterial({ color: 0xFF0000 }))
-    // bg.add(phasePt)
-    
-    let pendulum = new THREE.Group()
-    shmGroup.add(pendulum)
-    let pendulumTop = new THREE.Mesh(new THREE.CircleBufferGeometry(.3), new THREE.MeshBasicMaterial({color: 0x000000}))
-    shmGroup.add(pendulumTop)
-    let bottom = new THREE.Mesh(new THREE.CircleBufferGeometry(.3), new THREE.MeshBasicMaterial({ color: 0x000000 }))
-    pendulum.add(top)
-
-    
-    updateShm = () => {
-    }
-}
 
 async function init() {
+
+    //and here's a way of doing that but it only fires once if you hold it down:
+    
+
+    simplyMoveableThings = []
+
+    let grabbed = null
+    document.addEventListener('mousedown', e => {
+        if (e.button === 2) {
+            e.preventDefault()
+            e.stopPropagation()
+
+            //get the one that is closest to mousePos
+            grabbed = null
+            let closestD = Infinity
+            simplyMoveableThings.forEach(thing => {
+                let d = thing.position.distanceToSquared(mousePos)
+                if (d < closestD) {
+                    grabbed = thing
+                    closestD = d
+                }
+            })
+        }
+    })
+    document.addEventListener('contextmenu', e => {
+        e.preventDefault()
+    })
+    document.addEventListener('mousemove', e => {
+        if(grabbed)
+            grabbed.position.add(mousePosDiff)
+    })
+    document.addEventListener('mouseup', e => {
+        if (e.button === 2)
+            grabbed = null
+    })
+
+    document.addEventListener('mousewheel', (event) => {
+        // raycaster.setFromCamera(mouse, camera)
+        if (event.deltaY < 0.)
+            camera.position.z *= 1.1
+        if (event.deltaY > 0.)
+            camera.position.z *= (1. / 1.1)
+    })
 
     initMouse() //The mouse you hold
 
@@ -123,45 +145,7 @@ async function init() {
     // initHyperbolic()
     initWorldMaps()
     // initHyperIdeals()
-    
 
-    if(0)
-    {
-        let p0 = new THREE.Mesh(new THREE.SphereGeometry(.03), new THREE.MeshBasicMaterial({color: 0x000000}))
-        scene.add(p0)
-        let p1 = new THREE.Mesh(new THREE.SphereGeometry(.03), new THREE.MeshBasicMaterial({ color: 0x000000 }))
-        scene.add(p1)
-        p0.position.x = -1
-        p1.position.x = 1
-
-        let ellipticLine = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0., 1., 0.), new THREE.Vector3(0., -1., 0.)]), new THREE.LineBasicMaterial({color: 0x000000}))
-        p0.add(ellipticLine)
-        let euclideanLine = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0., 1., 0.), new THREE.Vector3(0., -1., 0.)]), new THREE.LineBasicMaterial({ color: 0x000000 }))
-        p1.add(euclideanLine)
-
-        let ellipticStart = new Mv31()
-        _e2.addScaled(_e1, .01, ellipticStart)
-        let ellipticRotor = new Mv31()
-        
-        let euclideanStart = new Mv31()
-        _e0.addScaled(_e1, .01, euclideanStart)
-        let euclideanRotor = new Mv31()
-
-        mrh = () => {
-            ellipticRotor[0] = Math.cos(frameCount * .002)
-            ellipticRotor[5] = Math.sin(frameCount * .002)
-            let elliptic = ellipticRotor.sandwich(ellipticStart, mv0)
-            elliptic.mulReverse(_e1, mv1)
-            ellipticLine.quaternion.w = mv1[0]
-            ellipticLine.quaternion.z = mv1[5]
-
-            _one.addScaled(_e10, frameCount * .01, euclideanRotor)
-            let euclidean = euclideanRotor.sandwich(euclideanStart, mv0)
-            euclidean.mulReverse(_e1, mv1)
-            euclideanLine.quaternion.w = mv0[0]
-            euclideanLine.quaternion.z = mv0[5]
-        }
-    }
 
     {
         scene.add(new THREE.HemisphereLight(0x808080, 0x606060))
@@ -220,6 +204,7 @@ async function init() {
         // updateOrthostochastic()
         // updateSaccadic()
         // updateShm()
+        updateMeasuringStick()
 
         obj3dsWithOnBeforeRenders.forEach(obj => obj.onBeforeRender())
 
@@ -227,3 +212,4 @@ async function init() {
     }
     renderer.setAnimationLoop(render)
 }
+
