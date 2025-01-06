@@ -142,8 +142,8 @@ async function init() {
     // initOrthostochastic()
     // initGraph()
     // await initPosa3d()
-    // initHyperbolic()
-    initWorldMaps()
+    initHyperbolic()
+    // initWorldMaps()
     // initHyperIdeals()
 
 
@@ -194,17 +194,17 @@ async function init() {
             errorBox.style.visibility = "hidden"
         }
 
-        updateWorldMaps()
+        // updateWorldMaps()
         // updateGraph()
         // updatePosa()
         // updateHyperbolic()
-        // updateGalton()
+        updateGalton()
         // updateHyperIdeals()
         // updateSimplexField()
         // updateOrthostochastic()
         // updateSaccadic()
         // updateShm()
-        updateMeasuringStick()
+        // updateMeasuringStick()
 
         obj3dsWithOnBeforeRenders.forEach(obj => obj.onBeforeRender())
 

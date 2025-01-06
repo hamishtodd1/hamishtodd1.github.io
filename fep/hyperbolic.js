@@ -27,8 +27,31 @@ updateGalton = () => {
 }
 function initGalton() {
 
-    let localScene = new THREE.Scene()
-    scene.add(localScene)
+    // document.addEventListener('keydown', e => {
+    // })
+
+    let galtonScene = new THREE.Scene()
+    scene.add(galtonScene)
+    simplyMoveableThings.push(galtonScene)
+
+    {
+        let blocker = new THREE.Mesh(unchangingUnitSquareGeometry, new THREE.MeshBasicMaterial({ color: 0x000000 }))
+        blocker.scale.set(2.4, 2.43, 1.)
+        galtonScene.add(blocker)
+        blocker.position.z = .1
+        blocker.position.y = .88
+
+        let holdingBlocker = false
+        document.addEventListener('keyup', e => {
+            if(e.key === "3")
+                holdingBlocker = !holdingBlocker
+        })
+        document.addEventListener('mousemove', e => {
+            if(holdingBlocker) {
+                blocker.position.add(mousePosDiff)
+            }
+        })
+    }
 
     let pegs = []
     //instanceable
@@ -42,7 +65,7 @@ function initGalton() {
     let numPegs = numBottomRow * (numBottomRow + 1) / 2
     for(let i = 0; i < numPegs; ++i) {
         let peg = new THREE.Mesh(pegGeo, pegMat)
-        localScene.add(peg)
+        galtonScene.add(peg)
 
         peg.position.x = (numInThisRow - (rows-1)/2.) * pegSpacingX
         peg.position.y = -rows * pegSpacingY
@@ -66,7 +89,7 @@ function initGalton() {
         })
         let height = .2
         scurrying = new THREE.Mesh(new THREE.PlaneGeometry(512. / 143. * height, height), mat)
-        localScene.add(scurrying)
+        galtonScene.add(scurrying)
     })
 
     let bounceDuration = .5
@@ -76,19 +99,25 @@ function initGalton() {
             super(new THREE.CircleGeometry(.02), new THREE.MeshBasicMaterial({ color: 0xFF0000 }))
             obj3dsWithOnBeforeRenders.push(this)
             this.position.z = .01
-            localScene.add(this)
+            galtonScene.add(this)
 
+            this.posInitial = new THREE.Vector3()
+            this.posFinal = new THREE.Vector3()
+            this.reset()
+        }
+
+        reset() {
             this.bounce = 0
             this.timeThroughBounce = 0.
-            this.posInitial = new THREE.Vector3().copy(pegs[0].position)
-            this.posFinal = new THREE.Vector3().copy(pegs[Math.random() < .5 ? 1:2].position)
+            this.posInitial.copy(pegs[0].position)
+            this.posFinal.copy(pegs[Math.random() < .5 ? 1:2].position)
             this.posInitial.y += .03
             this.posFinal.y += .03
         }
 
         onBeforeRender() {
             this.timeThroughBounce += frameDelta
-            if (this.timeThroughBounce > bounceDuration && this.bounce < numBottomRow) {
+            if (this.timeThroughBounce > bounceDuration && this.bounce < numBottomRow -1) {
                 this.timeThroughBounce -= bounceDuration
                 this.bounce++
 
@@ -102,13 +131,16 @@ function initGalton() {
             let u = (this.posFinal.y - this.posInitial.y) - 0.5 * g
             this.position.y = this.posInitial.y + t * u + 0.5 * g * t * t
             
-            if(this.position.y < -.5)
+            if(this.position.y < -.5) {
                 this.position.y = -.5
+                this.position.x = this.posFinal.x
+            }
             else
                 this.position.x = this.posInitial.x + t * (this.posFinal.x - this.posInitial.x)
         }
     }
 
+    // new Pellet()
     updateGalton = () => {
         if(!scurrying)
             return
@@ -121,6 +153,8 @@ function initGalton() {
         scurrying.scale.x = scurryingVelocity > 0 ? 1. : -1.
         scurrying.position.y = -.3
     }
+
+    return galtonScene
 }
 
 updateHyperbolic = () => { }

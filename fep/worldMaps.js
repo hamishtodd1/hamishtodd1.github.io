@@ -85,6 +85,43 @@ function initMeasuringStick(perspective, mercator, equidistant, planePerspective
         return target.addScaledVector(v4, t)
     }
 
+    let euler = new THREE.Euler()
+    function setOthersFromLatLon(lat,lon,ommitted) {
+
+        if(mercator !== ommitted) {
+            let pos = planeMercator.position
+            pos.x = lon
+            pos.y = Math.log(Math.tan(Math.PI / 4. + lat / 2.))
+            pos.z = 0.
+            let max = 3.
+            if (Math.abs(pos.y) > max)
+                pos.y = Math.sign(pos.y) * max
+            pos.x *= .6
+            pos.y *= .6
+        }
+
+        if(equidistant !== ommitted) {
+            let pos = planeEquidistant.position
+            let lat0 = Math.PI / 2.
+            let k = Math.sqrt(2. / (1. + Math.sin(lat0) * Math.sin(lat) + Math.cos(lat0) * Math.cos(lat) * Math.cos(lon)))
+            let max = 100.
+            if (k > max)
+                k = max
+            pos.x = k * Math.cos(lat) * Math.sin(lon)
+            pos.y = k * (Math.cos(lat0) * Math.sin(lat) - Math.sin(lat0) * Math.cos(lat) * Math.cos(lon))
+            pos.z = 0.
+            pos.x *= .7
+            pos.y *= .7
+        }
+
+        if(perspective !== ommitted) {
+            let q1 = new THREE.Quaternion()
+            q1.setFromEuler(euler.set(lat, lon, 0.))
+            q2.setFromUnitVectors(yUnit,zUnit)
+            planePerspective.quaternion.multiplyQuaternions(q1, q2)
+        }
+    }
+
     updateMeasuringStick = () => {
 
         if (backAndForth > 1.)
@@ -96,6 +133,8 @@ function initMeasuringStick(perspective, mercator, equidistant, planePerspective
         if (!changingStickMode) {
             planes.forEach(p => p.visible = true)
 
+            let plane = planes[worldMaps.indexOf(measuringStickMap)]
+
             switch (measuringStickMap) {
 
                 case perspective:
@@ -105,7 +144,7 @@ function initMeasuringStick(perspective, mercator, equidistant, planePerspective
                     let northPoleToPerspectiveStart = q1.setFromUnitVectors(yUnit, perspectiveStart)
                     planePerspective.quaternion.multiply(northPoleToPerspectiveStart)
 
-                    let currentPos = v3.set(0.,1.,0.).applyQuaternion(planePerspective.quaternion)
+                    let currentPos = v3.set(0.,1.,0.).applyQuaternion(planePerspective.quaternion).normalize()
 
                     v1.crossVectors(currentPos, forth?perspectiveEnd:perspectiveStart).normalize()
                     let currentDir = v2.set(0., 0., -1.).applyQuaternion(planePerspective.quaternion)
@@ -113,19 +152,26 @@ function initMeasuringStick(perspective, mercator, equidistant, planePerspective
                     q1.setFromUnitVectors(v2, v1)
                     planePerspective.quaternion.premultiply(q1)
 
+                    let lat = Math.asin(currentPos.y)
+                    let lon = Math.atan(currentPos.x, currentPos.z)
+
+                    setOthersFromLatLon(lat, lon,perspective)
+
                     break
 
                 case null:
                     break
 
+                //equidistant, mercator
                 default:
 
-                    let plane = planes[worldMaps.indexOf(measuringStickMap)]
                     getPosition(backAndForth, plane.position)
                     measuringStickMap.worldToLocal(plane.position)
 
                     measuringStickMap.worldToLocal(getPosition(backAndForth + .00001*(forth?1.:-1.), v1))
                     directPlane(plane, v1)
+
+                    setOthersFromLatLon(lat, lon, ommitted)
 
             }
 
@@ -187,8 +233,8 @@ function initWorldMaps() {
         if(greenlandMovingMode) {
             
             v1.subVectors(mousePos, posWhenGreenlandMovingModeStarted)
-            q1.setFromAxisAngle(v2.set(1.,0.,1.).normalize(), 2.4 * v1.y)
-            q1.premultiply(q2.setFromAxisAngle(yUnit, 2.4 * v1.x))
+            q1.setFromAxisAngle(v2.set(1.,0.,1.).normalize(), 1.8 * v1.y)
+            q1.premultiply(q2.setFromAxisAngle(yUnit, 1.8 * v1.x))
         
 
             greenlands.forEach(g => {
