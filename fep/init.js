@@ -87,6 +87,26 @@ async function init() {
         // let something = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0., 9., 0.), new THREE.Vector3(0., -9., 0.)]), new THREE.LineBasicMaterial({ color: 0x000000 }))
         // scene.add(something)
         // something.position.x = -.02
+
+        let slideNames = [
+            `Amari.png`,
+            `Davide.png`,
+            `Frank Nielsen.png`,
+            `Lance.png`,
+            `gradient descent.png`,
+            `tensorflow_pytorch.png`,
+        ]
+        slideNames.forEach((name, i) => {
+            textureLoader.load(`https://hamishtodd1.github.io/fep/data/` + name, texture => {
+                let mat = new THREE.MeshBasicMaterial({
+                    map: texture,
+                    transparent: true,
+                    color: 0xFF0000
+                })
+                let head = new THREE.Mesh(unchangingUnitSquareGeometry, mat)
+            })
+
+        })
     }
     
 
