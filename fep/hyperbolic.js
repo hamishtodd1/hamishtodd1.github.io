@@ -45,7 +45,7 @@ function initGalton() {
 
         let holdingBlocker = false
         document.addEventListener('keyup', e => {
-            if(e.key === "3")
+            if(e.key === "q")
                 holdingBlocker = !holdingBlocker
         })
         document.addEventListener('mousemove', e => {
@@ -83,6 +83,9 @@ function initGalton() {
         peg.position.y -= pegs[numPegs-1].position.y
     })
 
+    let speed = 1.
+    let pileUp = true
+
     let bounceDuration = .5
     let g = -1.3
     let bottom = -.46
@@ -91,7 +94,6 @@ function initGalton() {
     pelletGeo.translate(0.,pelletRadius,0.)
     let pelletMat = new THREE.MeshBasicMaterial({ color: 0xFF0000 })
     let pellets = []
-    let speed = 1.
     class Pellet extends THREE.Mesh {
         constructor() {
             super(pelletGeo, pelletMat)
@@ -142,10 +144,13 @@ function initGalton() {
                 pelletsOnBottom.push(pelletOnBottom)
                 pelletOnBottom.position.x = this.posFinal.x
                 pelletOnBottom.position.y = bottom
-                pelletsOnBottom.forEach((pellet, i) => {
-                    if (Math.abs(pellet.position.x - pelletOnBottom.position.x) < .01)
-                        pelletOnBottom.position.y -= pelletRadius * 2.
-                })
+
+                if(pileUp) {
+                    pelletsOnBottom.forEach((pellet, i) => {
+                        if (Math.abs(pellet.position.x - pelletOnBottom.position.x) < .01)
+                            pelletOnBottom.position.y -= pelletRadius * 1.2
+                    })
+                }
 
                 if(pelletsOnBottom.length < 50 )
                     this.reset()

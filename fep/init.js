@@ -81,10 +81,14 @@
 
 async function init() {
 
-    //and here's a way of doing that but it only fires once if you hold it down:
-    
-
     simplyMoveableThings = []
+
+    {
+        // let something = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0., 9., 0.), new THREE.Vector3(0., -9., 0.)]), new THREE.LineBasicMaterial({ color: 0x000000 }))
+        // scene.add(something)
+        // something.position.x = -.02
+    }
+    
 
     let grabbed = null
     document.addEventListener('mousedown', e => {
