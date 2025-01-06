@@ -34,10 +34,12 @@ function initGalton() {
     scene.add(galtonScene)
     simplyMoveableThings.push(galtonScene)
 
+    galtonScene.scale.multiplyScalar(.7)
+
     {
         let blocker = new THREE.Mesh(unchangingUnitSquareGeometry, new THREE.MeshBasicMaterial({ color: 0x000000 }))
         blocker.scale.set(2.4, 2.43, 1.)
-        galtonScene.add(blocker)
+        // galtonScene.add(blocker)
         blocker.position.z = .1
         blocker.position.y = .88
 
@@ -54,6 +56,7 @@ function initGalton() {
     }
 
     let pegs = []
+    let pelletsOnBottom = []
     //instanceable
     let pegGeo = new THREE.CircleGeometry(.03, 14)
     let pegMat = new THREE.MeshBasicMaterial({ color: 0x000000 })
@@ -80,27 +83,24 @@ function initGalton() {
         peg.position.y -= pegs[numPegs-1].position.y
     })
 
-    let scurrying = null
-    let scurryingVelocity = 0.
-    textureLoader.load('https://hamishtodd1.github.io/fep/data/scurrying.png', (texture) => {
-        let mat = new THREE.MeshBasicMaterial({
-            map: texture,
-            transparent: true,
-        })
-        let height = .2
-        scurrying = new THREE.Mesh(new THREE.PlaneGeometry(512. / 143. * height, height), mat)
-        galtonScene.add(scurrying)
-    })
-
     let bounceDuration = .5
     let g = -1.3
+    let bottom = -.46
+    let pelletRadius = .02
+    let pelletGeo = new THREE.CircleGeometry(pelletRadius)
+    pelletGeo.translate(0.,pelletRadius,0.)
+    let pelletMat = new THREE.MeshBasicMaterial({ color: 0xFF0000 })
+    let pellets = []
+    let speed = 1.
     class Pellet extends THREE.Mesh {
         constructor() {
-            super(new THREE.CircleGeometry(.02), new THREE.MeshBasicMaterial({ color: 0xFF0000 }))
+            super(pelletGeo, pelletMat)
+            pellets.push(this)
             obj3dsWithOnBeforeRenders.push(this)
             this.position.z = .01
             galtonScene.add(this)
 
+            // initial FOR THIS BOUNCE
             this.posInitial = new THREE.Vector3()
             this.posFinal = new THREE.Vector3()
             this.reset()
@@ -116,7 +116,11 @@ function initGalton() {
         }
 
         onBeforeRender() {
-            this.timeThroughBounce += frameDelta
+
+            if(this.bounce === -1)
+                return
+
+            this.timeThroughBounce += frameDelta * speed
             if (this.timeThroughBounce > bounceDuration && this.bounce < numBottomRow -1) {
                 this.timeThroughBounce -= bounceDuration
                 this.bounce++
@@ -131,27 +135,49 @@ function initGalton() {
             let u = (this.posFinal.y - this.posInitial.y) - 0.5 * g
             this.position.y = this.posInitial.y + t * u + 0.5 * g * t * t
             
-            if(this.position.y < -.5) {
-                this.position.y = -.5
-                this.position.x = this.posFinal.x
+            if(this.position.y < bottom) {
+
+                let pelletOnBottom = new THREE.Mesh(pelletGeo, pelletMat)
+                galtonScene.add(pelletOnBottom)
+                pelletsOnBottom.push(pelletOnBottom)
+                pelletOnBottom.position.x = this.posFinal.x
+                pelletOnBottom.position.y = bottom
+                pelletsOnBottom.forEach((pellet, i) => {
+                    if (Math.abs(pellet.position.x - pelletOnBottom.position.x) < .01)
+                        pelletOnBottom.position.y -= pelletRadius * 2.
+                })
+
+                if(pelletsOnBottom.length < 50 )
+                    this.reset()
+                else {
+                    this.visible = false
+                    this.bounce = -1
+                }
             }
             else
                 this.position.x = this.posInitial.x + t * (this.posFinal.x - this.posInitial.x)
         }
     }
 
+    textureLoader.load('https://hamishtodd1.github.io/fep/data/mouseHead.png', (texture) => {
+        let mat = new THREE.MeshBasicMaterial({
+            map: texture,
+            transparent: true,
+            color: 0xFF0000
+        })
+        let head = new THREE.Mesh(unchangingUnitSquareGeometry, mat)
+        head.scale.y = .4
+        head.scale.x = head.scale.y * 603. / 535.
+        galtonScene.add(head)
+        head.position.x = -1.6
+        head.position.y = bottom
+    })
+
     // new Pellet()
     updateGalton = () => {
-        if(!scurrying)
-            return
-
-        if(Math.random() < .02)
+        
+        if(Math.random() < .04 && pellets.length < 80)
             new Pellet()
-     
-        scurryingVelocity = Math.cos(frameCount * .02) * 2.2
-        scurrying.position.x += scurryingVelocity * frameDelta
-        scurrying.scale.x = scurryingVelocity > 0 ? 1. : -1.
-        scurrying.position.y = -.3
     }
 
     return galtonScene
