@@ -83,10 +83,11 @@ async function init() {
 
     simplyMoveableThings = []
 
+    if(0)
     {
-        // let something = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0., 9., 0.), new THREE.Vector3(0., -9., 0.)]), new THREE.LineBasicMaterial({ color: 0x000000 }))
-        // scene.add(something)
-        // something.position.x = -.02
+        let separator = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0., 9., 0.), new THREE.Vector3(0., -9., 0.)]), new THREE.LineBasicMaterial({ color: 0x000000 }))
+        scene.add(separator)
+        separator.position.x = -.02
 
         let slideNames = [
             `Amari.png`,
@@ -95,17 +96,24 @@ async function init() {
             `Lance.png`,
             `gradient descent.png`,
             `tensorflow_pytorch.png`,
+            `bloch.png`,
         ]
         slideNames.forEach((name, i) => {
             textureLoader.load(`https://hamishtodd1.github.io/fep/data/` + name, texture => {
                 let mat = new THREE.MeshBasicMaterial({
                     map: texture,
                     transparent: true,
-                    color: 0xFF0000
                 })
-                let head = new THREE.Mesh(unchangingUnitSquareGeometry, mat)
+                
+                let mesh = new THREE.Mesh(unchangingUnitSquareGeometry, mat)
+                mesh.scale.y = 1.1
+                mesh.scale.x = texture.image.width / texture.image.height * mesh.scale.y
+                mesh.position.x = -2.3
+                mesh.position.y = .5 * ( i - slideNames.length / 2)
+                mesh.position.z = .01 * i
+                scene.add(mesh)
+                simplyMoveableThings.push(mesh)
             })
-
         })
     }
     
@@ -200,7 +208,7 @@ async function init() {
     renderer.shadowMap.enabled = true
     // renderer.xr.enabled = true
     // renderer.setClearColor(0x405B59)
-    renderer.setClearColor(0xFFFFFF)
+    renderer.setClearColor(0xFFF5EF)
     rendererContainer.appendChild(renderer.domElement)
 
     camera.position.z += 4.
@@ -221,7 +229,7 @@ async function init() {
         // updateWorldMaps()
         // updateGraph()
         // updatePosa()
-        // updateHyperbolic()
+        updateHyperbolic()
         updateGalton()
         // updateHyperIdeals()
         // updateSimplexField()

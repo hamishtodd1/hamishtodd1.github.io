@@ -1,4 +1,8 @@
 /*
+    Isn't the update rule "take the mean of the samples and the standard deviation"?
+    Can certainly have them travel to the right place via a geodesic at least
+
+
     The story:
         need a potential function!
         So it literally costs energy to change your mind a certain way?
@@ -47,6 +51,17 @@ function initGalton() {
         document.addEventListener('keyup', e => {
             if(e.key === "q")
                 holdingBlocker = !holdingBlocker
+            if(e.key === "w") {
+                let ch = coloredHeads.find(h => !h.visible)
+                if(!ch) {
+                    coloredHeads.forEach(h => h.visible = false)
+                    coloredHeadsGaussians.forEach(h => h.visible = false)
+                }
+                else {
+                    ch.visible = true
+                    coloredHeadsGaussians[coloredHeads.indexOf(ch)].visible = true
+                }
+            }
         })
         document.addEventListener('mousemove', e => {
             if(holdingBlocker) {
@@ -148,7 +163,7 @@ function initGalton() {
                 if(pileUp) {
                     pelletsOnBottom.forEach((pellet, i) => {
                         if (Math.abs(pellet.position.x - pelletOnBottom.position.x) < .01)
-                            pelletOnBottom.position.y -= pelletRadius * 1.2
+                            pelletOnBottom.position.y += pelletRadius * 1.6
                     })
                 }
 
@@ -164,18 +179,48 @@ function initGalton() {
         }
     }
 
+    let colors = [0xFF5555, 0x55FF55, 0x5555FF]
+    let coloredHeads = []
+    let coloredHeadsGaussians = []
     textureLoader.load('https://hamishtodd1.github.io/fep/data/mouseHead.png', (texture) => {
         let mat = new THREE.MeshBasicMaterial({
             map: texture,
             transparent: true,
-            color: 0xFF0000
+            // color: 0xFF0000
         })
-        let head = new THREE.Mesh(unchangingUnitSquareGeometry, mat)
-        head.scale.y = .4
-        head.scale.x = head.scale.y * 603. / 535.
-        galtonScene.add(head)
-        head.position.x = -1.6
-        head.position.y = bottom
+        let yHead = .4
+        let xHead = yHead * 603. / 535.
+        let grayHead = new THREE.Mesh(unchangingUnitSquareGeometry, mat)
+        grayHead.scale.x = xHead
+        grayHead.scale.y = yHead
+        galtonScene.add(grayHead)
+        grayHead.position.x = -1.2
+        grayHead.position.y = bottom
+        let grayGaussian = new Gaussian(0xAAAAAA)
+        galtonScene.add(grayGaussian)
+        grayGaussian.setMeanSd(0., .5)
+
+        colors.forEach((color, i) => {
+            let head = new THREE.Mesh(unchangingUnitSquareGeometry, new THREE.MeshBasicMaterial({ 
+                color, 
+                side: THREE.DoubleSide,
+                map: texture,
+                transparent: true
+            }))
+            head.visible = false
+            head.scale.x = -xHead
+            head.scale.y = yHead
+            galtonScene.add(head)
+            head.position.x = -grayHead.position.x + .39 * i
+            head.position.y = bottom
+            coloredHeads.push(head)
+
+            let gaussian = new Gaussian(color)
+            gaussian.visible = false
+            coloredHeadsGaussians.push(gaussian)
+            galtonScene.add(gaussian)
+            gaussian.setMeanSd(0.3*(i+1), .5)
+        })
     })
 
     // new Pellet()
@@ -188,34 +233,8 @@ function initGalton() {
     return galtonScene
 }
 
-updateHyperbolic = () => { }
-function initHyperbolic() {
-
-    flowBiv = new Mv31()
-    flowBiv.zero()
-
-    initVizes2d()
-
-    initGalton()
-    return
-
-    //upper half plane
-    let uhpPss = new CircleViz(0xFF0000)
-    uhpPss.mv.copy(_e2)
-
-    // initFlowViz()
-    // return
-
-    let hider = new THREE.Mesh(new THREE.PlaneGeometry(100., 50.), new THREE.MeshBasicMaterial({ color: 0x405B59 }))
-    hider.position.y = 25.
-    scene.add(hider)
+function initGaussians() {
     
-    ///////////////
-    // Gaussians //
-    ///////////////
-    let gaussianGroup = new THREE.Group()
-    scene.add(gaussianGroup)
-    // gaussianGroup.position.y = -1.
     let radius = .01
     let tubularSegments = 200
     {
@@ -245,10 +264,10 @@ function initHyperbolic() {
         }
         window.GaussianCurve = GaussianCurve
     }
-    
+
     let vecs = [new THREE.Vector3(), new THREE.Vector3()]
     class Gaussian extends THREE.Group {
-        
+
         constructor(color, mv) {
             const path = new GaussianCurve(10)
 
@@ -260,8 +279,6 @@ function initHyperbolic() {
             this.ordinary = new THREE.Mesh(geometry, material)
             this.add(this.ordinary)
             // this.diracDelta = new THREE.Mesh(geometry, material)
-            
-            gaussianGroup.add(this)
 
             obj3dsWithOnBeforeRenders.push(this)
 
@@ -269,7 +286,7 @@ function initHyperbolic() {
         }
 
         onBeforeRender() {
-            if(this.mv) {
+            if (this.mv) {
                 this.mv.pointPairToVecs(vecs)
                 let vec = vecs[0].y > vecs[1].y ? vecs[0] : vecs[1]
                 this.setMeanSd(vec.x, vec.y)
@@ -277,12 +294,50 @@ function initHyperbolic() {
         }
 
         setMeanSd(newMean, newSd) {
+
             computeGaussianConstants(newMean, newSd)
             this.ordinary.geometry.regenerateAllSegments()
             this.ordinary.geometry.attributes.position.needsUpdate = true
             this.ordinary.geometry.attributes.normal.needsUpdate = true
         }
     }
+    window.Gaussian = Gaussian
+}
+
+updateHyperbolic = () => { }
+function initHyperbolic() {
+
+    initGaussians()
+    initGalton()
+    return
+    
+    flowBiv = new Mv31()
+    flowBiv.zero()
+
+    let gaussianGroup = new THREE.Group()
+    scene.add(gaussianGroup)
+
+    initVizes2d()
+
+    let vecs = [new THREE.Vector3(), new THREE.Vector3()]
+
+    // return
+
+    //upper half plane
+    let uhpPss = new CircleViz(0xFF0000)
+    uhpPss.mv.copy(_e2)
+
+    // initFlowViz()
+    // return
+
+    let hider = new THREE.Mesh(new THREE.PlaneGeometry(100., 50.), new THREE.MeshBasicMaterial({ color: 0x405B59 }))
+    hider.position.y = 25.
+    scene.add(hider)
+    
+    ///////////////
+    // Gaussians //
+    ///////////////
+    
     // let cv = new CircleViz()
     // cv.mv.copy(_e1)
 
@@ -292,6 +347,8 @@ function initHyperbolic() {
     let connectingViz = new CircleViz(0x00FF00)
     let endPointsViz = new PtPairViz(false, 0xFF0000)
     let startGaussian = new Gaussian(0x0000FF)
+    gaussianGroup.add(startGaussian)
+    
     startGaussian.setMeanSd(0., 0.)
     // startGaussian.visible = false
     // let endGaussian = new Gaussian(0x00FFFF)
@@ -355,6 +412,7 @@ function initHyperbolic() {
         for (let i = 0; i < numExampleGaussians; ++i) {
             let col = myCol.setHSL(i / 8., 1., .5).getHex()
             let g = new Gaussian(col)
+            gaussianGroup.add(g)
             exampleGaussians.push(g)
             // exampleGaussians[i].setMeanSd(Math.random() * .2-.1, Math.random() * .2 + .4)
             examplePps[i] = new PtPairViz(false, col)
@@ -367,7 +425,9 @@ function initHyperbolic() {
         if(1)
         {
             let startGaussian = new Gaussian(0x000000, startViz.mv)
+            gaussianGroup.add(startGaussian)
             let endGaussian = new Gaussian(0x000000, endViz.mv)
+            gaussianGroup.add(endGaussian)
 
             let boost = new Mv31()
             let timeSinceMouseUp = -1.
@@ -405,6 +465,7 @@ function initHyperbolic() {
         {
             let centerPp = new PtPairViz(false, 0x000000)
             let centerGaussian = new Gaussian(0x000000)
+            gaussianGroup.add(centerGaussian)
             centerGaussian.mv = centerPp.mv
             _e1p.addScaled(_e1o, 2.7, centerPp.mv).cheapNormalize(centerPp.mv)
 
