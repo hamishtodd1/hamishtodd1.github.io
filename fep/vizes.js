@@ -45,10 +45,14 @@ function initVizes2d() {
                 posInVizGroup.y = hider.scale.y / 2.
             if(posInVizGroup.y < 0.)
                 posInVizGroup.y = 0.
-            if (posInVizGroup.x > hider.scale.x / 2.)
+            if (posInVizGroup.x > hider.scale.x / 2.) {
                 posInVizGroup.x = hider.scale.x / 2.
-            if (posInVizGroup.x < -hider.scale.x / 2.)
+                //maybe infinity?
+            }
+            if (posInVizGroup.x < -hider.scale.x / 2.) {
                 posInVizGroup.x = -hider.scale.x / 2.
+                //maybe infinity?
+            }
 
             vecToPosPp(posInVizGroup, ppVizes[altering].mv)
             ppVizes[altering].gaussian.updateFromMv()

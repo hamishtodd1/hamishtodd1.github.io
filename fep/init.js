@@ -2,6 +2,34 @@
 //the setup could be: record it on the side, then just move stuff around on the side afterwards. Can put in slides etc
 
 /*
+    -Grey rat, cover is over
+    -Remove and replace cover
+    -Gaussian appears. It is changing. Its belief space point changes from place to place along a smooth arc.
+    -More rats
+    -Their gaussians, also changing
+    -horizontal and vertical lines for the gaussians
+    -pause
+    -choose the rat’s initial distribution (by clicking in belief space)
+    -have a starting and ending distribution
+    -make a huge amount of pellets fall out according to the final (by clicking on it I guess)
+    -move distribution in a straight line
+    -click to make a new distribution in belief space
+    -Make the translation from one to the other appear
+    -Click randomly to make a bunch, flash the line segments between them
+    -generate a random translation, apply it to all to get that shape somewhere else
+    -watch them go from one to the other
+    -watch some fun transformations
+    Slide break
+    -Gaussians and rats go away
+    -rotations. Rings of colored beliefs around a center. You can grab the center of rotation and move it obv
+    -random beliefs, flash line segments
+    -make mercator rotate around britain
+    -rotate around a dirac delta
+
+
+
+
+
     Can you make an interface for this where you move from thing to thing using your hands? Not just clicking. Get rid of the blocking box by pulling it in
 
     If you want the spiral picture, well, there is light-like Cl(3,1,1)

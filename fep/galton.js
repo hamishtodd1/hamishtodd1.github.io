@@ -13,11 +13,11 @@ function initGalton() {
     galtonScene.scale.multiplyScalar(.7)
 
     {
-        let blocker = new THREE.Mesh(unchangingUnitSquareGeometry, new THREE.MeshBasicMaterial({ color: 0xFAAD9D }))
-        blocker.scale.set(2.4, 2.43, 1.)
-        // galtonScene.add(blocker)
-        blocker.position.z = .1
-        blocker.position.y = .88
+        let blocker = new THREE.Mesh(unchangingUnitSquareGeometry, new THREE.MeshBasicMaterial({ color: 0x9CF7F6 }))
+        blocker.scale.set(2.5, 1.96, 1.)
+        galtonScene.add(blocker)
+        blocker.position.z = -.01
+        blocker.position.y = .92
 
         let holdingBlocker = false
         document.addEventListener('keyup', e => {
@@ -63,6 +63,7 @@ function initGalton() {
 
         peg.position.x = (numInThisRow - (rows-1)/2.) * pegSpacingX
         peg.position.y = -rows * pegSpacingY
+        peg.position.z = -.02
         pegs.push(peg)
         numInThisRow++
         if(numInThisRow >= rows ) {
@@ -90,7 +91,7 @@ function initGalton() {
             super(pelletGeo, pelletMat)
             pellets.push(this)
             obj3dsWithOnBeforeRenders.push(this)
-            this.position.z = .01
+            this.position.z = -.02
             galtonScene.add(this)
 
             // initial FOR THIS BOUNCE
@@ -138,7 +139,7 @@ function initGalton() {
 
                 if(pileUp) {
                     pelletsOnBottom.forEach((pellet, i) => {
-                        if (Math.abs(pellet.position.x - pelletOnBottom.position.x) < .01)
+                        if (pellet !== pelletOnBottom && Math.abs(pellet.position.x - pelletOnBottom.position.x) < .01)
                             pelletOnBottom.position.y += pelletRadius * 1.6
                     })
                 }
