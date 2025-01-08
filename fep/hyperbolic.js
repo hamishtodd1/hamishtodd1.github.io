@@ -26,216 +26,11 @@
             Metaphysically fucked: reflection in 
  */
 
-updateGalton = () => {
-    
-}
-function initGalton() {
 
-    // document.addEventListener('keydown', e => {
-    // })
-
-    let galtonScene = new THREE.Scene()
-    scene.add(galtonScene)
-    simplyMoveableThings.push(galtonScene)
-
-    galtonScene.scale.multiplyScalar(.7)
-
-    {
-        let blocker = new THREE.Mesh(unchangingUnitSquareGeometry, new THREE.MeshBasicMaterial({ color: 0x000000 }))
-        blocker.scale.set(2.4, 2.43, 1.)
-        // galtonScene.add(blocker)
-        blocker.position.z = .1
-        blocker.position.y = .88
-
-        let holdingBlocker = false
-        document.addEventListener('keyup', e => {
-            if(e.key === "q")
-                holdingBlocker = !holdingBlocker
-            if(e.key === "w") {
-                let ch = coloredHeads.find(h => !h.visible)
-                if(!ch) {
-                    coloredHeads.forEach(h => h.visible = false)
-                    coloredHeadsGaussians.forEach(h => h.visible = false)
-                }
-                else {
-                    ch.visible = true
-                    coloredHeadsGaussians[coloredHeads.indexOf(ch)].visible = true
-                }
-            }
-        })
-        document.addEventListener('mousemove', e => {
-            if(holdingBlocker) {
-                blocker.position.add(mousePosDiff)
-            }
-        })
-    }
-
-    let pegs = []
-    let pelletsOnBottom = []
-    //instanceable
-    let pegGeo = new THREE.CircleGeometry(.03, 14)
-    let pegMat = new THREE.MeshBasicMaterial({ color: 0x000000 })
-    let numInThisRow = 0
-    let rows = 1
-    let numBottomRow = 15
-    let pegSpacingY = 1.8 / numBottomRow
-    let pegSpacingX = pegSpacingY * 1.3
-    let numPegs = numBottomRow * (numBottomRow + 1) / 2
-    for(let i = 0; i < numPegs; ++i) {
-        let peg = new THREE.Mesh(pegGeo, pegMat)
-        galtonScene.add(peg)
-
-        peg.position.x = (numInThisRow - (rows-1)/2.) * pegSpacingX
-        peg.position.y = -rows * pegSpacingY
-        pegs.push(peg)
-        numInThisRow++
-        if(numInThisRow >= rows ) {
-            numInThisRow = 0
-            rows++
-        }
-    }
-    pegs.forEach((peg, i) => {
-        peg.position.y -= pegs[numPegs-1].position.y
-    })
-
-    let speed = 1.
-    let pileUp = true
-
-    let bounceDuration = .5
-    let g = -1.3
-    let bottom = -.46
-    let pelletRadius = .02
-    let pelletGeo = new THREE.CircleGeometry(pelletRadius)
-    pelletGeo.translate(0.,pelletRadius,0.)
-    let pelletMat = new THREE.MeshBasicMaterial({ color: 0xFF0000 })
-    let pellets = []
-    class Pellet extends THREE.Mesh {
-        constructor() {
-            super(pelletGeo, pelletMat)
-            pellets.push(this)
-            obj3dsWithOnBeforeRenders.push(this)
-            this.position.z = .01
-            galtonScene.add(this)
-
-            // initial FOR THIS BOUNCE
-            this.posInitial = new THREE.Vector3()
-            this.posFinal = new THREE.Vector3()
-            this.reset()
-        }
-
-        reset() {
-            this.bounce = 0
-            this.timeThroughBounce = 0.
-            this.posInitial.copy(pegs[0].position)
-            this.posFinal.copy(pegs[Math.random() < .5 ? 1:2].position)
-            this.posInitial.y += .03
-            this.posFinal.y += .03
-        }
-
-        onBeforeRender() {
-
-            if(this.bounce === -1)
-                return
-
-            this.timeThroughBounce += frameDelta * speed
-            if (this.timeThroughBounce > bounceDuration && this.bounce < numBottomRow -1) {
-                this.timeThroughBounce -= bounceDuration
-                this.bounce++
-
-                this.posInitial.copy(this.posFinal)
-                this.posFinal.y -= pegSpacingY
-                this.posFinal.x += pegSpacingX * (Math.random() > .5 ? .5 : -.5)
-            }
-
-            let t = this.timeThroughBounce / bounceDuration
-
-            let u = (this.posFinal.y - this.posInitial.y) - 0.5 * g
-            this.position.y = this.posInitial.y + t * u + 0.5 * g * t * t
-            
-            if(this.position.y < bottom) {
-
-                let pelletOnBottom = new THREE.Mesh(pelletGeo, pelletMat)
-                galtonScene.add(pelletOnBottom)
-                pelletsOnBottom.push(pelletOnBottom)
-                pelletOnBottom.position.x = this.posFinal.x
-                pelletOnBottom.position.y = bottom
-
-                if(pileUp) {
-                    pelletsOnBottom.forEach((pellet, i) => {
-                        if (Math.abs(pellet.position.x - pelletOnBottom.position.x) < .01)
-                            pelletOnBottom.position.y += pelletRadius * 1.6
-                    })
-                }
-
-                if(pelletsOnBottom.length < 50 )
-                    this.reset()
-                else {
-                    this.visible = false
-                    this.bounce = -1
-                }
-            }
-            else
-                this.position.x = this.posInitial.x + t * (this.posFinal.x - this.posInitial.x)
-        }
-    }
-
-    let colors = [0xFF5555, 0x55FF55, 0x5555FF]
-    let coloredHeads = []
-    let coloredHeadsGaussians = []
-    textureLoader.load('https://hamishtodd1.github.io/fep/data/mouseHead.png', (texture) => {
-        let mat = new THREE.MeshBasicMaterial({
-            map: texture,
-            transparent: true,
-            // color: 0xFF0000
-        })
-        let yHead = .4
-        let xHead = yHead * 603. / 535.
-        let grayHead = new THREE.Mesh(unchangingUnitSquareGeometry, mat)
-        grayHead.scale.x = xHead
-        grayHead.scale.y = yHead
-        galtonScene.add(grayHead)
-        grayHead.position.x = -1.2
-        grayHead.position.y = bottom
-        let grayGaussian = new Gaussian(0xAAAAAA)
-        galtonScene.add(grayGaussian)
-        grayGaussian.setMeanSd(0., .5)
-
-        colors.forEach((color, i) => {
-            let head = new THREE.Mesh(unchangingUnitSquareGeometry, new THREE.MeshBasicMaterial({ 
-                color, 
-                side: THREE.DoubleSide,
-                map: texture,
-                transparent: true
-            }))
-            head.visible = false
-            head.scale.x = -xHead
-            head.scale.y = yHead
-            galtonScene.add(head)
-            head.position.x = -grayHead.position.x + .39 * i
-            head.position.y = bottom
-            coloredHeads.push(head)
-
-            let gaussian = new Gaussian(color)
-            gaussian.visible = false
-            coloredHeadsGaussians.push(gaussian)
-            galtonScene.add(gaussian)
-            gaussian.setMeanSd(0.3*(i+1), .5)
-        })
-    })
-
-    // new Pellet()
-    updateGalton = () => {
-        
-        if(Math.random() < .04 && pellets.length < 80)
-            new Pellet()
-    }
-
-    return galtonScene
-}
 
 function initGaussians() {
     
-    let radius = .01
+    let tubeRadius = .01
     let tubularSegments = 200
     {
         let mean = 0.
@@ -256,8 +51,9 @@ function initGaussians() {
 
             getPoint(t, optionalTarget = new THREE.Vector3()) {
 
-                const x = (t - .5) * 5.
-                const y = constant0 * Math.exp((x - mean) * (x - mean) * constant1)
+                let x = (t - .5) * 5.
+                let y = constant0 * Math.exp((x - mean) * (x - mean) * constant1)
+                // y = -Math.log(y)
 
                 return optionalTarget.set(x, y, 0.)
             }
@@ -265,40 +61,64 @@ function initGaussians() {
         window.GaussianCurve = GaussianCurve
     }
 
+    vecToPosPp = (v, mv) => {
+        let zrc = mv0.vecToZrc(v)
+        zrc.wedge(_e2, mv1).inner(_e12pm, mv) //so it's a rotation pp
+        return mv.cheapNormalize(mv)
+    }
+
     let vecs = [new THREE.Vector3(), new THREE.Vector3()]
+    let diracDeltaGeo0 = new THREE.CylinderGeometry(tubeRadius, tubeRadius, 5., 4)
+    diracDeltaGeo0.rotateZ(TAU / 4.)
+    let diracDeltaGeo1 = new THREE.CylinderGeometry(tubeRadius, tubeRadius, 100., 4)
+    diracDeltaGeo1.translate(0.,50.,0.)
     class Gaussian extends THREE.Group {
 
-        constructor(color, mv) {
+        constructor(color) {
             const path = new GaussianCurve(10)
 
             computeGaussianConstants(0., 1.)
-            const geometry = new THREE.TubeGeometry(path, tubularSegments, radius, 4, false)
-            const material = new THREE.MeshBasicMaterial({ color })
+            const geometry = new THREE.TubeGeometry(path, tubularSegments, tubeRadius, 4, false)
+            const material = new THREE.MeshPhongMaterial({ color })
 
             super()
             this.ordinary = new THREE.Mesh(geometry, material)
-            this.add(this.ordinary)
-            // this.diracDelta = new THREE.Mesh(geometry, material)
+            this.diracDelta = new THREE.Group()
+            this.diracDelta.add(new THREE.Mesh(diracDeltaGeo1, material))
+            this.diracDelta.add(new THREE.Mesh(diracDeltaGeo0, material))
+            this.add(this.ordinary, this.diracDelta)
 
             obj3dsWithOnBeforeRenders.push(this)
 
-            this.mv = mv || null
+            this.viz = new PtPairViz(false, color, this)
         }
 
-        onBeforeRender() {
-            if (this.mv) {
-                this.mv.pointPairToVecs(vecs)
-                let vec = vecs[0].y > vecs[1].y ? vecs[0] : vecs[1]
-                this.setMeanSd(vec.x, vec.y)
-            }
+        updateFromMv() {
+            this.viz.mv.pointPairToVecs(vecs)
+            let vec = vecs[0].y > vecs[1].y ? vecs[0] : vecs[1]
+            this.setCurve(vec.x, vec.y)
         }
 
         setMeanSd(newMean, newSd) {
+            vecToPosPp(v1.set(newMean,newSd,0.), this.viz.mv)
+            this.updateFromMv()
+        }
 
-            computeGaussianConstants(newMean, newSd)
-            this.ordinary.geometry.regenerateAllSegments()
-            this.ordinary.geometry.attributes.position.needsUpdate = true
-            this.ordinary.geometry.attributes.normal.needsUpdate = true
+        setCurve(newMean, newSd) {
+            if(newSd > .01 && newSd !== Infinity ) {
+                this.ordinary.visible = true
+                this.diracDelta.visible = false
+
+                computeGaussianConstants(newMean, newSd)
+                this.ordinary.geometry.regenerateAllSegments()
+                this.ordinary.geometry.attributes.position.needsUpdate = true
+                this.ordinary.geometry.attributes.normal.needsUpdate = true
+            }
+            else {
+                this.ordinary.visible = false
+                this.diracDelta.visible = true
+                this.diracDelta.children[0].position.x = newMean
+            }
         }
     }
     window.Gaussian = Gaussian
@@ -307,8 +127,15 @@ function initGaussians() {
 updateHyperbolic = () => { }
 function initHyperbolic() {
 
+    initVizes2d()
+    
     initGaussians()
-    initGalton()
+
+    let galton = initGalton()
+    galton.position.y += .5
+
+    vizGroup.position.y -= 0.
+
     return
     
     flowBiv = new Mv31()
@@ -317,7 +144,6 @@ function initHyperbolic() {
     let gaussianGroup = new THREE.Group()
     scene.add(gaussianGroup)
 
-    initVizes2d()
 
     let vecs = [new THREE.Vector3(), new THREE.Vector3()]
 
@@ -330,9 +156,7 @@ function initHyperbolic() {
     // initFlowViz()
     // return
 
-    let hider = new THREE.Mesh(new THREE.PlaneGeometry(100., 50.), new THREE.MeshBasicMaterial({ color: 0x405B59 }))
-    hider.position.y = 25.
-    scene.add(hider)
+    
     
     ///////////////
     // Gaussians //
@@ -354,12 +178,7 @@ function initHyperbolic() {
     // let endGaussian = new Gaussian(0x00FFFF)
     // endGaussian.visible = false
 
-    function vecToPosPp(v,mv) {
-        v1.subVectors(v, vizGroup.position)
-        let mouseZrc = mv0.vecToZrc(v1)
-        mouseZrc.wedge(_e2, mv1).inner(_e12pm, mv) //so it's a rotation pp
-        return mv.cheapNormalize(mv)
-    }
+    
 
     document.addEventListener(`keydown`, e => {
         if (e.key === "ArrowUp") {

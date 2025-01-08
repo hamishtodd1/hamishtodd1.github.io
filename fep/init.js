@@ -92,11 +92,14 @@ async function init() {
         let slideNames = [
             `Amari.png`,
             `Davide.png`,
+            `Poincare.png`,
             `Frank Nielsen.png`,
             `Lance.png`,
             `gradient descent.png`,
             `tensorflow_pytorch.png`,
             `bloch.png`,
+            `nn.png`,
+            `nn2.png`,
         ]
         slideNames.forEach((name, i) => {
             textureLoader.load(`https://hamishtodd1.github.io/fep/data/` + name, texture => {
@@ -118,19 +121,19 @@ async function init() {
     }
     
 
-    let grabbed = null
+    let grabbedSmt = null
     document.addEventListener('mousedown', e => {
         if (e.button === 2) {
             e.preventDefault()
             e.stopPropagation()
 
             //get the one that is closest to mousePos
-            grabbed = null
+            grabbedSmt = null
             let closestD = Infinity
             simplyMoveableThings.forEach(thing => {
                 let d = thing.position.distanceToSquared(mousePos)
                 if (d < closestD) {
-                    grabbed = thing
+                    grabbedSmt = thing
                     closestD = d
                 }
             })
@@ -140,12 +143,14 @@ async function init() {
         e.preventDefault()
     })
     document.addEventListener('mousemove', e => {
-        if(grabbed)
-            grabbed.position.add(mousePosDiff)
+        if(grabbedSmt) {
+            grabbedSmt.position.add(mousePosDiff)
+            vizGroup.position.y = -1.87
+        }
     })
     document.addEventListener('mouseup', e => {
         if (e.button === 2)
-            grabbed = null
+            grabbedSmt = null
     })
 
     document.addEventListener('mousewheel', (event) => {

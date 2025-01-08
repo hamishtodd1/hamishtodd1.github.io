@@ -36,11 +36,64 @@ function initVizes3d(localScene) {
 
 function initVizes2d() {
 
+    let altering = -1
+    document.addEventListener('mousemove', e => {
+        if (altering !== -1) {
+            
+            let posInVizGroup = v1.copy(mousePos).sub(vizGroup.position)
+            if (posInVizGroup.y > hider.scale.y / 2.)
+                posInVizGroup.y = hider.scale.y / 2.
+            if(posInVizGroup.y < 0.)
+                posInVizGroup.y = 0.
+            if (posInVizGroup.x > hider.scale.x / 2.)
+                posInVizGroup.x = hider.scale.x / 2.
+            if (posInVizGroup.x < -hider.scale.x / 2.)
+                posInVizGroup.x = -hider.scale.x / 2.
+
+            vecToPosPp(posInVizGroup, ppVizes[altering].mv)
+            ppVizes[altering].gaussian.updateFromMv()
+        }
+    })
+    document.addEventListener('mousedown', e => {
+        if(e.button !== 0)
+            return
+
+        let posInVizGroup = v1.copy(mousePos).sub(vizGroup.position)
+        let inFrame = Math.abs(posInVizGroup.x) < hider.scale.x / 2. && Math.abs(posInVizGroup.y) < hider.scale.y / 2.
+        if( inFrame ) {
+            altering = -1
+            let lowestDist = Infinity
+            ppVizes.forEach((ppv,i)=>{
+                if(ppv.visible === false)
+                    return
+                let dist = posInVizGroup.distanceTo(ppv.positions[0].y > 0. ? ppv.positions[0] : ppv.positions[1])
+                if ( dist < lowestDist) {
+                    lowestDist = dist
+                    altering = i
+                }
+            })
+        }
+    })
+    document.addEventListener('mouseup', e => {
+        if (e.button === 0)
+            altering = -1
+    })
+
     let center = new Mv31()
 
     vizGroup = new THREE.Group()
+    simplyMoveableThings.push(vizGroup)
     vizGroup.position.y = -1.87
     scene.add(vizGroup)
+
+    let hider = new THREE.Mesh(unchangingUnitSquareGeometry, new THREE.MeshBasicMaterial({ color: 0xA2D6F9 }))
+    hider.scale.setScalar(2.7,1.6,1.)
+    hider.position.z = -.1
+    vizGroup.add(hider)
+    let frame = new THREE.Mesh(unchangingUnitSquareGeometry, new THREE.MeshBasicMaterial({ color: 0x000000 }))
+    frame.scale.set(hider.scale.x + .1, hider.scale.y + .1, 1.)
+    frame.position.z = -.11
+    vizGroup.add(frame)
 
     let circlePoints = []
     for (let i = 0; i < 100; ++i) {
@@ -130,11 +183,13 @@ function initVizes2d() {
 
     let ptGeo = new THREE.SphereGeometry(.04)
     let myCol = new THREE.Color()
+    let ppVizes = []
     class PtPairViz extends THREE.Object3D {
 
-        constructor(haveCircles = false, col) {
+        constructor(haveCircles = false, col, gaussian) {
 
             super()
+            ppVizes.push(this)
             vizGroup.add(this)
 
             this.mv = new Mv31()
@@ -157,6 +212,8 @@ function initVizes2d() {
             //and two circles for a gauging
 
             obj3dsWithOnBeforeRenders.push(this)
+
+            this.gaussian = gaussian || null
         }
 
         onBeforeRender() {
