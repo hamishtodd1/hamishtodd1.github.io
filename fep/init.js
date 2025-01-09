@@ -5,9 +5,8 @@
     -Grey rat, cover is over
     -Remove and replace cover
     -Gaussian appears. It is changing. Its belief space point changes from place to place along a smooth arc.
-    -More rats
-    -Their gaussians, also changing
-    -horizontal and vertical lines for the gaussians
+    -More rats, and their gaussians
+    -horizontal and vertical lines for the belief space points
     -pause
     -choose the rat’s initial distribution (by clicking in belief space)
     -have a starting and ending distribution
@@ -15,7 +14,7 @@
     -move distribution in a straight line
     -click to make a new distribution in belief space
     -Make the translation from one to the other appear
-    -Click randomly to make a bunch, flash the line segments between them
+    -Click randomly to make a bunch, flash the arcs between them
     -generate a random translation, apply it to all to get that shape somewhere else
     -watch them go from one to the other
     -watch some fun transformations
@@ -27,7 +26,17 @@
     -rotate around a dirac delta
 
 
-
+    TODO
+        Click to make the "true distribution"
+        button to do the translation between whatever the last two interacted with (or back again)
+        Click to make a new distributions
+        button to toggle connections between all on-screen points
+        button to
+            make a random transformation and apply it to those points, showing the new copy elsewhere...
+            ...then same button to move that bunch of points to the copy
+        button to make a load of pellets fall out from last-created distribution
+        button to cause a random series of translations to happen
+        button to make concentric sets of points centered on the mouse
 
 
     Can you make an interface for this where you move from thing to thing using your hands? Not just clicking. Get rid of the blocking box by pulling it in
@@ -111,6 +120,8 @@ async function init() {
 
     simplyMoveableThings = []
 
+    initMouse() //The mouse you hold
+
     if(0)
     {
         let separator = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0., 9., 0.), new THREE.Vector3(0., -9., 0.)]), new THREE.LineBasicMaterial({ color: 0x000000 }))
@@ -173,7 +184,7 @@ async function init() {
     document.addEventListener('mousemove', e => {
         if(grabbedSmt) {
             grabbedSmt.position.add(mousePosDiff)
-            vizGroup.position.y = -1.87
+            beliefSpaceScene.position.y = -1.87
         }
     })
     document.addEventListener('mouseup', e => {
@@ -189,7 +200,7 @@ async function init() {
             camera.position.z *= (1. / 1.1)
     })
 
-    initMouse() //The mouse you hold
+    
 
     {
         // let simplex = initSimplexField()
@@ -201,13 +212,23 @@ async function init() {
         // saccadicScene.position.y = -.8
         // saccadicScene.scale.multiplyScalar(.8)
     }
+
+    {
+        initVizes2d()
+
+        initGaussians()
+
+        initGalton()
+        
+        beliefSpaceScene.position.y -= 0.
+    }
     
     // initShm()
     // initTMaze()
     // initOrthostochastic()
     // initGraph()
     // await initPosa3d()
-    initHyperbolic()
+    // initHyperbolic()
     // initWorldMaps()
     // initHyperIdeals()
 
@@ -241,6 +262,7 @@ async function init() {
     renderer.shadowMap.enabled = true
     // renderer.xr.enabled = true
     // renderer.setClearColor(0x405B59)
+    renderer.localClippingEnabled = true
     renderer.setClearColor(0xFFF5EF)
     rendererContainer.appendChild(renderer.domElement)
 
@@ -262,7 +284,6 @@ async function init() {
         // updateWorldMaps()
         // updateGraph()
         // updatePosa()
-        updateHyperbolic()
         updateGalton()
         // updateHyperIdeals()
         // updateSimplexField()

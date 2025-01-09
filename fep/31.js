@@ -19,6 +19,7 @@ function init31WithoutDeclarations() {
             super(16)
         }
 
+
         sphereFromRadius(radius) {
             return _eo.addScaled(_e0, radius * radius, this)
         }
@@ -48,7 +49,10 @@ function init31WithoutDeclarations() {
             return this.multiplyScalar(1. / Math.sqrt(Math.abs(normSq)), target)
         }
 
-        mulReverse(b, target) { return this.mul(b.getReverse(newMv31), target) }
+        mulReverse(b, target) {
+            let bReverse = b.getReverse(newMv31)
+            return this.mul(bReverse, target) 
+        }
         sandwich(b, target) { return this.mul(b, newMv31).mulReverse(this, target) }
 
         //possibly negative!

@@ -26,118 +26,10 @@
             Metaphysically fucked: reflection in 
  */
 
+updateHyperbolic = () => {}
 
-
-function initGaussians() {
-    
-    let tubeRadius = .01
-    let tubularSegments = 200
-    {
-        let mean = 0.
-        let constant0 = -1.
-        let constant1 = -1.
-        function computeGaussianConstants(newMean, newSd) {
-            // debugger
-            mean = newMean
-            let sd = newSd
-            constant0 = 1. / (sd * Math.sqrt(2. * Math.PI))
-            constant1 = -1. / (2. * sd * sd)
-        }
-        class GaussianCurve extends THREE.Curve {
-
-            constructor() {
-                super();
-            }
-
-            getPoint(t, optionalTarget = new THREE.Vector3()) {
-
-                let x = (t - .5) * 5.
-                let y = constant0 * Math.exp((x - mean) * (x - mean) * constant1)
-                // y = -Math.log(y)
-
-                return optionalTarget.set(x, y, 0.)
-            }
-        }
-        window.GaussianCurve = GaussianCurve
-    }
-
-    vecToPosPp = (v, mv) => {
-        let zrc = mv0.vecToZrc(v)
-        zrc.wedge(_e2, mv1).inner(_e12pm, mv) //so it's a rotation pp
-        return mv.cheapNormalize(mv)
-    }
-
-    let vecs = [new THREE.Vector3(), new THREE.Vector3()]
-    let diracDeltaGeo0 = new THREE.CylinderGeometry(tubeRadius, tubeRadius, 5., 4)
-    diracDeltaGeo0.rotateZ(TAU / 4.)
-    let diracDeltaGeo1 = new THREE.CylinderGeometry(tubeRadius, tubeRadius, 100., 4)
-    diracDeltaGeo1.translate(0.,50.,0.)
-    class Gaussian extends THREE.Group {
-
-        constructor(color) {
-            const path = new GaussianCurve(10)
-
-            computeGaussianConstants(0., 1.)
-            const geometry = new THREE.TubeGeometry(path, tubularSegments, tubeRadius, 4, false)
-            const material = new THREE.MeshPhongMaterial({ color })
-
-            super()
-            this.ordinary = new THREE.Mesh(geometry, material)
-            this.diracDelta = new THREE.Group()
-            this.diracDelta.add(new THREE.Mesh(diracDeltaGeo1, material))
-            this.diracDelta.add(new THREE.Mesh(diracDeltaGeo0, material))
-            this.add(this.ordinary, this.diracDelta)
-
-            obj3dsWithOnBeforeRenders.push(this)
-
-            this.viz = new PtPairViz(false, color, this)
-        }
-
-        updateFromMv() {
-            this.viz.mv.pointPairToVecs(vecs)
-            let vec = vecs[0].y > vecs[1].y ? vecs[0] : vecs[1]
-            this.setCurve(vec.x, vec.y)
-        }
-
-        setMeanSd(newMean, newSd) {
-            vecToPosPp(v1.set(newMean,newSd,0.), this.viz.mv)
-            this.updateFromMv()
-        }
-
-        setCurve(newMean, newSd) {
-            if(newSd > .01 && newSd !== Infinity ) {
-                this.ordinary.visible = true
-                this.diracDelta.visible = false
-
-                computeGaussianConstants(newMean, newSd)
-                this.ordinary.geometry.regenerateAllSegments()
-                this.ordinary.geometry.attributes.position.needsUpdate = true
-                this.ordinary.geometry.attributes.normal.needsUpdate = true
-            }
-            else {
-                this.ordinary.visible = false
-                this.diracDelta.visible = true
-                this.diracDelta.children[0].position.x = newMean
-            }
-        }
-    }
-    window.Gaussian = Gaussian
-}
-
-updateHyperbolic = () => { }
 function initHyperbolic() {
 
-    initVizes2d()
-    
-    initGaussians()
-
-    let galton = initGalton()
-    galton.position.y += .5
-
-    vizGroup.position.y -= 0.
-
-    return
-    
     flowBiv = new Mv31()
     flowBiv.zero()
 
@@ -266,7 +158,7 @@ function initHyperbolic() {
 
                 startViz.mv.pointPairToVecs(vecs)
                 let startCenter = (vecs[0].y > vecs[1].y ? vecs[0] : vecs[1])
-                startCenter.y += vizGroup.position.y + 0.1
+                startCenter.y += beliefSpaceScene.position.y + 0.1
                 vecToPosPp(startCenter,displaced)
 
                 for (let i = 0; i < numExampleGaussians; ++i) {
@@ -303,10 +195,6 @@ function initHyperbolic() {
 
     updateHyperbolic = () => {
         
-        updateGaussians()
-
-
-
         // vecToPosPp(mousePpViz.mv)
 
         // pt.position.copy(mousePos)

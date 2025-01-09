@@ -1,5 +1,4 @@
 function initVizes3d(localScene) {
-    
 
     let sphereGeo = new THREE.SphereGeometry(1., 32, 32)
     let planeGeo = new THREE.PlaneGeometry(1., 1., 32, 32)
@@ -37,45 +36,79 @@ function initVizes3d(localScene) {
 function initVizes2d() {
 
     let altering = -1
+    let posInbeliefSpaceScene = new THREE.Vector3()
+    let freeGaussians = []
+    let connectingArcs = []
     document.addEventListener('mousemove', e => {
         if (altering !== -1) {
             
-            let posInVizGroup = v1.copy(mousePos).sub(vizGroup.position)
-            if (posInVizGroup.y > hider.scale.y / 2.)
-                posInVizGroup.y = hider.scale.y / 2.
-            if(posInVizGroup.y < 0.)
-                posInVizGroup.y = 0.
-            if (posInVizGroup.x > hider.scale.x / 2.) {
-                posInVizGroup.x = hider.scale.x / 2.
+            beliefSpaceScene.worldToLocal(posInbeliefSpaceScene.copy(mousePos))
+
+            if (posInbeliefSpaceScene.y > bg.scale.y / 2.)
+                posInbeliefSpaceScene.y = bg.scale.y / 2.
+            if(posInbeliefSpaceScene.y < 0.)
+                posInbeliefSpaceScene.y = 0.
+            if (posInbeliefSpaceScene.x > bg.scale.x / 2.) {
+                posInbeliefSpaceScene.x = bg.scale.x / 2.
                 //maybe infinity?
             }
-            if (posInVizGroup.x < -hider.scale.x / 2.) {
-                posInVizGroup.x = -hider.scale.x / 2.
+            if (posInbeliefSpaceScene.x < -bg.scale.x / 2.) {
+                posInbeliefSpaceScene.x = -bg.scale.x / 2.
                 //maybe infinity?
             }
 
-            vecToPosPp(posInVizGroup, ppVizes[altering].mv)
-            ppVizes[altering].gaussian.updateFromMv()
+            ppVizes[altering].gaussian.setMeanSd(posInbeliefSpaceScene.x, posInbeliefSpaceScene.y)
+            resetRatIfExistent(ppVizes[altering])
+
+            if(freeGaussians.length > 1) {
+
+                let index = 0
+                for(let i = 0, il = freeGaussians.length; i < il; ++i) {
+                    for(let j = i+1, jl = freeGaussians.length; j < jl; ++j) {
+                        connectingArcs[index].setFromStartEnd(freeGaussians[i].viz, freeGaussians[j].viz)
+                        connectingArcs[index].visible = true
+                        ++index
+                    }
+                }
+                for(let i = index, il = connectingArcs.length; i < il; ++i)
+                    connectingArcs[i].visible = false
+            }
         }
     })
     document.addEventListener('mousedown', e => {
         if(e.button !== 0)
             return
 
-        let posInVizGroup = v1.copy(mousePos).sub(vizGroup.position)
-        let inFrame = Math.abs(posInVizGroup.x) < hider.scale.x / 2. && Math.abs(posInVizGroup.y) < hider.scale.y / 2.
-        if( inFrame ) {
-            altering = -1
-            let lowestDist = Infinity
-            ppVizes.forEach((ppv,i)=>{
-                if(ppv.visible === false)
-                    return
-                let dist = posInVizGroup.distanceTo(ppv.positions[0].y > 0. ? ppv.positions[0] : ppv.positions[1])
-                if ( dist < lowestDist) {
-                    lowestDist = dist
-                    altering = i
-                }
-            })
+        beliefSpaceScene.worldToLocal(posInbeliefSpaceScene.copy(mousePos))
+
+        let inFrame = Math.abs(posInbeliefSpaceScene.x) < bg.scale.x / 2. && Math.abs(posInbeliefSpaceScene.y) < bg.scale.y / 2.
+        if(!inFrame)
+            return
+
+        altering = -1
+        let lowestDist = Infinity
+        let minDist = .15
+        ppVizes.forEach((ppv,i)=>{
+            if(ppv.visible === false)
+                return
+            let dist = posInbeliefSpaceScene.distanceTo(ppv.positions[0].y > 0. ? ppv.positions[0] : ppv.positions[1])
+            if ( dist < lowestDist && dist < minDist) {
+                lowestDist = dist
+                altering = i
+            }
+        })
+
+        if(altering === -1) {
+            // debugger
+            col0.setHSL( Math.random(), 1., .5 )
+            let gaussian = new Gaussian(col0.getHex())
+            altering = ppVizes.indexOf(gaussian.viz)
+            gaussian.setMeanSd(posInbeliefSpaceScene.x, posInbeliefSpaceScene.y)
+
+            gaussian.visible = true
+            gaussian.viz.visible = true
+
+            freeGaussians.push(gaussian)
         }
     })
     document.addEventListener('mouseup', e => {
@@ -83,21 +116,19 @@ function initVizes2d() {
             altering = -1
     })
 
-    let center = new Mv31()
+    beliefSpaceScene = new THREE.Group()
+    simplyMoveableThings.push(beliefSpaceScene)
+    beliefSpaceScene.position.y = -1.87
+    scene.add(beliefSpaceScene)
 
-    vizGroup = new THREE.Group()
-    simplyMoveableThings.push(vizGroup)
-    vizGroup.position.y = -1.87
-    scene.add(vizGroup)
-
-    let hider = new THREE.Mesh(unchangingUnitSquareGeometry, new THREE.MeshBasicMaterial({ color: 0xA2D6F9 }))
-    hider.scale.setScalar(2.7,1.6,1.)
-    hider.position.z = -.1
-    vizGroup.add(hider)
+    let bg = new THREE.Mesh(unchangingUnitSquareGeometry, new THREE.MeshBasicMaterial({ color: 0xA2D6F9 }))
+    bg.scale.setScalar(2.7,1.6,1.)
+    bg.position.z = -.1
+    beliefSpaceScene.add(bg)
     let frame = new THREE.Mesh(unchangingUnitSquareGeometry, new THREE.MeshBasicMaterial({ color: 0x000000 }))
-    frame.scale.set(hider.scale.x + .1, hider.scale.y + .1, 1.)
+    frame.scale.set(bg.scale.x + .1, bg.scale.y + .1, 1.)
     frame.position.z = -.11
-    vizGroup.add(frame)
+    beliefSpaceScene.add(frame)
 
     let circlePoints = []
     for (let i = 0; i < 100; ++i) {
@@ -111,6 +142,12 @@ function initVizes2d() {
     let leftAndRightPp = new Mv31()
     let leftAndRightVecs = [ new THREE.Vector3(), new THREE.Vector3() ]
     let defaultMat = new THREE.LineBasicMaterial({ color: 0x00ff00 })
+    let center = new Mv31()
+    let someClippingPlanes = [
+        new THREE.Plane().setComponents( 1.,0.,0., bg.scale.x/2.),
+        new THREE.Plane().setComponents(-1.,0.,0., bg.scale.x/2.),
+        new THREE.Plane().setComponents( 0.,1.,0., bg.scale.y/2.),
+    ]
     class CircleViz extends THREE.Object3D {
 
         constructor(color) {
@@ -122,7 +159,13 @@ function initVizes2d() {
 
             super()
 
-            let mat = color === undefined ? defaultMat : new THREE.LineBasicMaterial({ color })
+            let mat = color === undefined ? defaultMat : new THREE.LineBasicMaterial({
+                color,
+                clippingPlanes: [
+                    new THREE.Plane().setComponents(  1., 0., 0., 0.),
+                    new THREE.Plane().setComponents( -1., 0., 0., 0.),
+                ],
+            })
             this.circle = new THREE.LineLoop(circleGeo, mat)
             this.line = new THREE.LineLoop(lineGeo, mat)
             this.add(this.circle)
@@ -130,9 +173,20 @@ function initVizes2d() {
 
             this.mv = new Mv31()
 
-            vizGroup.add(this)
+            beliefSpaceScene.add(this)
 
             obj3dsWithOnBeforeRenders.push(this)
+        }
+
+        setFromStartEnd(startViz, endViz) {
+            endViz.mv.mulReverse(startViz.mv, mv0).cheapSqrt(mv0).selectGrade(2,mv0)
+            mv0.inner(_e1pm, this.mv)
+            let xStart = startViz.pt1.getWorldPosition(v1).x
+            let xEnd   = endViz.pt1.getWorldPosition(v1).x
+            let higher = xStart > xEnd ? xStart : xEnd
+            let lower = xStart < xEnd ? xStart : xEnd
+            this.circle.material.clippingPlanes[0].constant = -lower
+            this.circle.material.clippingPlanes[1].constant = higher
         }
 
         onBeforeRender() {
@@ -184,24 +238,26 @@ function initVizes2d() {
         }
     }
     window.CircleViz = CircleViz
+    for (let i = 0; i < 6; ++i)
+        connectingArcs.push(new CircleViz(0x000000))
 
     let ptGeo = new THREE.SphereGeometry(.04)
     let myCol = new THREE.Color()
     let ppVizes = []
     class PtPairViz extends THREE.Object3D {
 
-        constructor(haveCircles = false, col, gaussian) {
+        constructor( haveCircles = false, col, gaussian ) {
 
             super()
             ppVizes.push(this)
-            vizGroup.add(this)
+            beliefSpaceScene.add(this)
 
             this.mv = new Mv31()
 
             if (col === undefined)
                 col = myCol.setRGB(Math.random(), Math.random(), Math.random()).getHex()
-            let pt1Mat = new THREE.MeshBasicMaterial({ color: col })
-            let pt2Mat = new THREE.MeshBasicMaterial({ color: col * 0.8 })
+            let pt1Mat = new THREE.MeshBasicMaterial({ color: col * 0.8 })
+            let pt2Mat = new THREE.MeshBasicMaterial({ color: col })
 
             this.pt1 = new THREE.Mesh(ptGeo, pt1Mat)
             this.pt2 = new THREE.Mesh(ptGeo, pt2Mat)
@@ -222,8 +278,11 @@ function initVizes2d() {
 
         onBeforeRender() {
             let mySq = this.mv.sqScalar()
-            if (mySq !== 0.)
+            if (mySq !== 0.) {
                 this.mv.pointPairToVecs(this.positions)
+                this.pt1.visible = this.pt1.position.y < bg.scale.y / 2. && this.pt1.position.x < bg.scale.x / 2. && this.pt1.position.x > -bg.scale.x / 2.
+                this.pt2.visible = this.pt2.position.y < bg.scale.y / 2. && this.pt2.position.x < bg.scale.x / 2. && this.pt2.position.x > -bg.scale.x / 2.
+            }
             else {
                 //push them apart a little. conformalDance did.
             }
