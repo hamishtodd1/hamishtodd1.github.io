@@ -324,8 +324,14 @@ function initRotations() {
 
     })
     document.addEventListener('mouseup', e => {
-        heldFreeGaussianIndex = -1
-        holdingRotater = false
+
+        if(heldFreeGaussianIndex !== -1) {
+            let g = freeGaussians.find(g => g.viz === ppVizes[heldFreeGaussianIndex])
+            makeBunchComeOutFromDistribution(g)
+    
+            heldFreeGaussianIndex = -1
+            holdingRotater = false
+        }
     })
 
     let demoTransformFactor = 0.

@@ -26,15 +26,6 @@
     -rotate around a dirac delta
 
 
-    TODO
-        button to toggle connections between all on-screen points
-        button to
-            make a random transformation and apply it to those points, showing the new copy elsewhere...
-            ...then same button to move that bunch of points to the copy
-        THIS ONE: button to make a load of pellets fall out from last-created distribution
-        button to cause a random series of translations to happen
-        button to make concentric sets of points centered on the mouse
-
 
     Can you make an interface for this where you move from thing to thing using your hands? Not just clicking. Get rid of the blocking box by pulling it in
 
@@ -119,11 +110,11 @@ async function init() {
 
     initMouse() //The mouse you hold
 
-    if(0)
+    if(1)
     {
         let separator = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0., 9., 0.), new THREE.Vector3(0., -9., 0.)]), new THREE.LineBasicMaterial({ color: 0x000000 }))
         scene.add(separator)
-        separator.position.x = -.02
+        separator.position.x = -.2
 
         let slideNames = [
             `Amari.png`,
@@ -155,7 +146,6 @@ async function init() {
             })
         })
     }
-    
 
     let grabbedSmt = null
     document.addEventListener('mousedown', e => {
@@ -197,8 +187,6 @@ async function init() {
             camera.position.z *= (1. / 1.1)
     })
 
-    
-
     {
         // let simplex = initSimplexField()
         // simplex.position.y = .8
@@ -220,6 +208,8 @@ async function init() {
         initRotations()
         
         beliefSpaceScene.position.y -= 0.
+        beliefSpaceScene.position.x = 1.4
+        galtonScene.position.x = 1.3
     }
     
     // initShm()

@@ -22,6 +22,38 @@ function initGalton() {
         }
     }
 
+    makeBunchComeOutFromDistribution = (gaussian) => {
+
+        pelletsOnBottom.forEach(p => p.visible = false)
+
+        for (let i = 0; i < maxSamples; ++i) {
+            let U1 = Math.random()
+            let U2 = Math.random()
+            let z0 = Math.sqrt(-2. * Math.log(U1)) * Math.cos(TAU * U2)
+            // let z1 = Math.sqrt(-2. * Math.log(U1)) * Math.sin(TAU * U2)
+
+            let mean = gaussian.viz.positions[0].x
+            let sd = gaussian.viz.positions[0].y
+
+            //sample from the gaussian with that mean and standard deviation:
+            let sample = z0 * sd + mean
+            sample = pegSpacingX * Math.round(sample / pegSpacingX) //+ pegSpacingX / 2.
+            settleOnBottom(pelletsOnBottom[i], sample)
+        }
+
+        pellets.forEach(p => {
+            p.visible = false
+            p.bounce = -1
+        })
+    }
+
+    resetGalton = () => {
+        pellets.forEach(p => p.visible = false)
+        pellets.forEach(p => p.bounce = -1)
+        rats.forEach(r => r.samples.length = 0)
+        pelletsOnBottom.forEach(p => p.visible = false)
+    }
+
     {
         let blocker = new THREE.Mesh(unchangingUnitSquareGeometry, new THREE.MeshBasicMaterial({ color: 0x9CF7F6 }))
         textureLoader.load('https://hamishtodd1.github.io/fep/data/foodDispenser.png', (texture) => {
@@ -84,36 +116,45 @@ function initGalton() {
             }
         })
     }
+
+    //////////
+    // Pegs //
+    //////////
     
     let pegs = []
-    let pelletsOnBottom = []
-    //instanceable
-    let pegGeo = new THREE.CircleGeometry(.03, 14)
-    let pegMat = new THREE.MeshBasicMaterial({ color: 0xF9A720 })
-    let numInThisRow = 0
-    let rows = 1
     let numBottomRow = 15
     let pegSpacingY = 1.8 / numBottomRow
     let pegSpacingX = pegSpacingY * 1.3
-    let numPegs = numBottomRow * (numBottomRow + 1) / 2
-    for(let i = 0; i < numPegs; ++i) {
-        let peg = new THREE.Mesh(pegGeo, pegMat)
-        galtonScene.add(peg)
-
-        peg.position.x = (numInThisRow - (rows-1)/2.) * pegSpacingX
-        peg.position.y = -rows * pegSpacingY + .46
-        peg.position.z = -.02
-        pegs.push(peg)
-        numInThisRow++
-        if(numInThisRow >= rows ) {
-            numInThisRow = 0
-            rows++
+    {
+        //instanceable
+        let pegGeo = new THREE.CircleGeometry(.03, 14)
+        let pegMat = new THREE.MeshBasicMaterial({ color: 0xF9A720 })
+        let numInThisRow = 0
+        let rows = 1
+        let numPegs = numBottomRow * (numBottomRow + 1) / 2
+        for(let i = 0; i < numPegs; ++i) {
+            let peg = new THREE.Mesh(pegGeo, pegMat)
+            galtonScene.add(peg)
+    
+            peg.position.x = (numInThisRow - (rows-1)/2.) * pegSpacingX
+            peg.position.y = -rows * pegSpacingY + .46
+            peg.position.z = -.02
+            pegs.push(peg)
+            numInThisRow++
+            if(numInThisRow >= rows ) {
+                numInThisRow = 0
+                rows++
+            }
         }
+        pegs.forEach((peg, i) => {
+            peg.position.y -= pegs[numPegs-1].position.y
+            peg.position.y += .46
+        })
     }
-    pegs.forEach((peg, i) => {
-        peg.position.y -= pegs[numPegs-1].position.y
-        peg.position.y += .46
-    })
+
+    /////////////
+    // Pellets //
+    /////////////
 
     let speed = 1.
     let bounceDuration = .5
@@ -123,7 +164,6 @@ function initGalton() {
     pelletGeo.translate(0.,pelletRadius,0.)
     let pelletMat = new THREE.MeshBasicMaterial({ color: 0x000000 })
     let pellets = []
-    let maxSamples = 100
     class Pellet extends THREE.Mesh {
         constructor() {
             super(pelletGeo, pelletMat)
@@ -136,10 +176,13 @@ function initGalton() {
             this.posInitial = new THREE.Vector3()
             this.posFinal = new THREE.Vector3()
             this.reset()
+            this.bounce = -1
+            this.visible = false
         }
 
         reset() {
             this.bounce = 0
+            this.visible = true
             this.timeThroughBounce = 0.
             this.posInitial.copy(pegs[0].position)
             this.posFinal.copy(pegs[Math.random() < .5 ? 1:2].position)
@@ -169,16 +212,9 @@ function initGalton() {
 
             if(this.position.y < 0.) {
 
-                let pelletOnBottom = new THREE.Mesh(pelletGeo, pelletMat)
-                galtonScene.add(pelletOnBottom)
-                pelletsOnBottom.push(pelletOnBottom)
-                pelletOnBottom.position.x = this.posFinal.x
-                pelletOnBottom.position.y = 0.
-
-                pelletsOnBottom.forEach((pellet, i) => {
-                    if (pellet !== pelletOnBottom && Math.abs(pellet.position.x - pelletOnBottom.position.x) < .01)
-                        pelletOnBottom.position.y += pelletRadius * 1.6
-                })
+                let pelletOnBottom = pelletsOnBottom.find(p => !p.visible)
+                
+                settleOnBottom( pelletOnBottom, this.posFinal.x )
 
                 rats.forEach((r, i) => {
                     let g = r.gaussian
@@ -207,7 +243,7 @@ function initGalton() {
                     }
                 })
 
-                if(pelletsOnBottom.length < maxSamples )
+                if (isAnotherPelletWanted() )
                     this.reset()
                 else {
                     this.visible = false
@@ -218,6 +254,36 @@ function initGalton() {
                 this.position.x = this.posInitial.x + t * (this.posFinal.x - this.posInitial.x)
         }
     }
+    let pelletsOnBottom = []
+    let maxSamples = 100
+    for (let i = 0; i < maxSamples; ++i) {
+        let pellet = new THREE.Mesh(pelletGeo, pelletMat)
+        galtonScene.add(pellet)
+        pelletsOnBottom.push(pellet)
+        pellet.visible = false
+    }
+
+    function settleOnBottom(pelletOb, x) {
+        pelletOb.visible = true
+        pelletOb.position.y = 0.
+        pelletOb.position.x = x
+        pelletsOnBottom.forEach((pellet, i) => {
+            let otherVisiblePelletInSamePlace = pellet.visible && pellet !== pelletOb && Math.abs(pelletOb.position.x - pellet.position.x) < .01
+            if (otherVisiblePelletInSamePlace)
+                pelletOb.position.y += pelletRadius * 1.6
+        })
+    }
+
+    function isAnotherPelletWanted() {
+        let numVisibleOnBottom = pelletsOnBottom.filter(p => p.visible).length
+        let numComing = pellets.filter(p => p.bounce !== -1).length
+        let numPellets = numVisibleOnBottom + numComing
+        return numPellets < maxSamples
+    }
+
+    //////////
+    // Rats //
+    //////////
 
     let rats = []
     let length = 100
@@ -287,7 +353,8 @@ function initGalton() {
         let rat = new Rat(color)
         rat.scale.x = -rat.scale.x
         
-        rat.position.x = -grayRat.position.x + .39 * i
+        rat.position.x = -grayRat.position.x
+        rat.position.y = .2 * i
         coloredRats.push(rat)
         
         rat.visible = false
@@ -300,10 +367,18 @@ function initGalton() {
         })
     })
 
+    for(let i = 0; i < 30; ++i) {
+        new Pellet()
+    }
+
     // new Pellet()
     updateGalton = () => {
-        if(Math.random() < .04 && pellets.length < 30)
-            new Pellet()
+
+        if (isAnotherPelletWanted() && Math.random() < .04 ) {
+            let p = pellets.find(p => !p.visible)
+            if(p)
+                p.reset()
+        }
 
         rats.forEach((r, i) => {
             if(!r.gaussian.visible)

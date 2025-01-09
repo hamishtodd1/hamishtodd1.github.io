@@ -80,10 +80,10 @@ function initVizes2d() {
 
             let mat = color === undefined ? defaultMat : new THREE.LineBasicMaterial({
                 color,
-                // clippingPlanes: [
-                //     new THREE.Plane().setComponents(  1., 0., 0., 9999.),
-                //     new THREE.Plane().setComponents( -1., 0., 0., 9999.),
-                // ],
+                clippingPlanes: [
+                    new THREE.Plane().setComponents(  1., 0., 0., 9999.),
+                    new THREE.Plane().setComponents( -1., 0., 0., 9999.),
+                ],
             })
             this.circle = new THREE.LineLoop(circleGeo, mat)
             this.line = new THREE.LineLoop(lineGeo, mat)
@@ -117,7 +117,7 @@ function initVizes2d() {
                 this.line.visible = false
             }
             
-            
+
 
             // debugger
             // zero-bugs version

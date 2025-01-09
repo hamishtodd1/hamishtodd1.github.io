@@ -236,7 +236,6 @@ function initWorldMaps() {
             q1.setFromAxisAngle(v2.set(1.,0.,1.).normalize(), 1.8 * v1.y)
             q1.premultiply(q2.setFromAxisAngle(yUnit, 1.8 * v1.x))
         
-
             greenlands.forEach(g => {
                 g.material.uniforms.quat.value.copy(q1)
             })
@@ -244,10 +243,6 @@ function initWorldMaps() {
     })
 
     document.addEventListener('keydown', e => {
-        if (e.key === 'ArrowRight') {
-            //moving the things and scaling them is allowed
-        }
-
         /*
             Grab greenland and africa and the plane
 
