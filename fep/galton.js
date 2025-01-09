@@ -24,7 +24,12 @@ function initGalton() {
 
     {
         let blocker = new THREE.Mesh(unchangingUnitSquareGeometry, new THREE.MeshBasicMaterial({ color: 0x9CF7F6 }))
-        blocker.scale.set(2.5, 1.96, 1.)
+        textureLoader.load('https://hamishtodd1.github.io/fep/data/foodDispenser.png', (texture) => {
+            blocker.material.map = texture
+            blocker.material.needsUpdate = true
+            blocker.scale.y = 1.96
+            blocker.scale.x = texture.image.width / texture.image.height * blocker.scale.y
+        })
         galtonScene.add(blocker)
         blocker.position.z = -.01
         blocker.position.y = 1.38
@@ -72,88 +77,14 @@ function initGalton() {
                     r.horizontalDotted.visible = !r.horizontalDotted.visible
                 })
             }
-
-            //demo transform
-            if(e.key === `y`) {
-                resetDemoTransform()
-            }
         })
         document.addEventListener('mousemove', e => {
             if(holdingBlocker) {
                 blocker.position.add(mousePosDiff)
             }
         })
-        document.addEventListener('keydown', e => {
-            if (e.key === `ArrowLeft`) {
-
-                if (demoTransform.isZero())
-                    resetDemoTransform()
-
-                demoTransformDirection = -1.
-
-                if (demoTransformFactor === 0.)
-                    demoTransformFactor = 1.
-            }
-            if(e.key === `ArrowRight`) {
-
-                if(demoTransform.isZero())
-                    resetDemoTransform()
-
-                demoTransformDirection = 1.
-
-                if(demoTransformFactor === 1.)
-                    demoTransformFactor = 0.
-            }
-        })
     }
-
-    let demoTransformFactor = 0.
-    let demoTransformDirection = 0.
-    let demoTransform = new Mv31()
-    let demoGaussians = []
-    function resetDemoTransform() {
-        let a = null
-        let b = null
-        ppVizes.forEach(pp => {
-            if (pp.visible && demoGaussians.find(d => d.viz === pp) === undefined) {
-                a = b
-                b = pp
-            }
-        })
-        if (a && b) {
-            b.mv.mulReverse(a.mv, mv0).cheapSqrt(mv1).logarithm(mv2).multiplyScalar(.01, mv2).exp(demoTransform)
-            demoTransformFactor = 0.
-        }
-    }
-    for(let i = 0; i < 3; ++i) {
-        demoGaussians.push(new Gaussian(0x000000))
-        demoGaussians[i].setMeanSd(1.3 * (Math.random() - .5), .8 * Math.random())
-    }
-    updateDemoTransform = () => {
-
-        if(demoTransformDirection === 0.)
-            return
-
-        mv0.copy(demoTransform)
-        if(demoTransformDirection === -1.)
-            mv0.getReverse(mv0)
-        
-        demoTransformFactor += frameDelta * demoTransformDirection
-        log(demoTransform)
-
-        if(demoTransformFactor > 1.) {
-            demoTransformFactor = 1.
-            demoTransformDirection = 0.
-        }
-        if (demoTransformFactor < 0.) {
-            demoTransformFactor = 0.
-            demoTransformDirection = 0.
-        }
-        demoGaussians.forEach(dg => {
-            dg.viz.mv.copy( mv0.sandwich(dg.viz.mv, mv1) )
-        })
-    }
-
+    
     let pegs = []
     let pelletsOnBottom = []
     //instanceable

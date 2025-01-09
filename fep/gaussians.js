@@ -33,6 +33,8 @@ function initGaussians() {
     }
 
     let meanSdVec = new THREE.Vector3()
+    let zrc = new Mv31()
+    let something = new Mv31()
     meanSdToPosPp = (mean, sd, mv) => {
 
         if(mean === Infinity || mean === -Infinity ) {
@@ -41,8 +43,8 @@ function initGaussians() {
             return mv.copy(_e10)
         }
         else {
-            let zrc = mv0.vecToZrc(meanSdVec.set(mean,sd,0.))
-            zrc.wedge(_e2, mv1).inner(_e12pm, mv) //so it's a rotation pp
+            zrc.vecToZrc(meanSdVec.set(mean,sd,0.))
+            zrc.wedge(_e2, something).inner(_e12pm, mv) //so it's a rotation pp
             return mv.cheapNormalize(mv)
         }
     }
