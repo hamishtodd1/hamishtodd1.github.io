@@ -4,9 +4,6 @@ updateGalton = () => {
 
 function initGalton() {
 
-    // document.addEventListener('keydown', e => {
-    // })
-
     let pausePellets = false
 
     galtonScene = new THREE.Scene()
@@ -34,11 +31,13 @@ function initGalton() {
 
         let holdingBlocker = false
         document.addEventListener('keyup', e => {
-            if(e.key === "q")
+
+            //grab blocker
+            if(e.key === `q`)
                 holdingBlocker = !holdingBlocker
 
-            //"if the head is visible, make the rest visible"
-            if(e.key === "e") {
+            //`if the head is visible, make the rest visible`
+            if(e.key === `e`) {
                 rats.forEach(r => {
                     if(r.visible) {
                         r.gaussian.visible = true
@@ -47,7 +46,8 @@ function initGalton() {
                 })
             }
             
-            if(e.key === "w") {
+            // make another head visible
+            if(e.key === `w`) {
 
                 let nonVisibleRat = rats.find(r => !r.visible)
                 if( nonVisibleRat )
@@ -61,20 +61,96 @@ function initGalton() {
                 }
             }
             
-            if (e.key === "r")
+            //pause
+            if (e.key === `r`)
                 pausePellets = !pausePellets
 
-            if(e.key === "t") {
+            //toggle dots
+            if(e.key === `t`) {
                 rats.forEach(r => {
                     r.verticalDotted.visible = !r.verticalDotted.visible
                     r.horizontalDotted.visible = !r.horizontalDotted.visible
                 })
+            }
+
+            //demo transform
+            if(e.key === `y`) {
+                resetDemoTransform()
             }
         })
         document.addEventListener('mousemove', e => {
             if(holdingBlocker) {
                 blocker.position.add(mousePosDiff)
             }
+        })
+        document.addEventListener('keydown', e => {
+            if (e.key === `ArrowLeft`) {
+
+                if (demoTransform.isZero())
+                    resetDemoTransform()
+
+                demoTransformDirection = -1.
+
+                if (demoTransformFactor === 0.)
+                    demoTransformFactor = 1.
+            }
+            if(e.key === `ArrowRight`) {
+
+                if(demoTransform.isZero())
+                    resetDemoTransform()
+
+                demoTransformDirection = 1.
+
+                if(demoTransformFactor === 1.)
+                    demoTransformFactor = 0.
+            }
+        })
+    }
+
+    let demoTransformFactor = 0.
+    let demoTransformDirection = 0.
+    let demoTransform = new Mv31()
+    let demoGaussians = []
+    function resetDemoTransform() {
+        let a = null
+        let b = null
+        ppVizes.forEach(pp => {
+            if (pp.visible && demoGaussians.find(d => d.viz === pp) === undefined) {
+                a = b
+                b = pp
+            }
+        })
+        if (a && b) {
+            b.mv.mulReverse(a.mv, mv0).cheapSqrt(mv1).logarithm(mv2).multiplyScalar(.01, mv2).exp(demoTransform)
+            demoTransformFactor = 0.
+        }
+    }
+    for(let i = 0; i < 3; ++i) {
+        demoGaussians.push(new Gaussian(0x000000))
+        demoGaussians[i].setMeanSd(1.3 * (Math.random() - .5), .8 * Math.random())
+    }
+    updateDemoTransform = () => {
+
+        if(demoTransformDirection === 0.)
+            return
+
+        mv0.copy(demoTransform)
+        if(demoTransformDirection === -1.)
+            mv0.getReverse(mv0)
+        
+        demoTransformFactor += frameDelta * demoTransformDirection
+        log(demoTransform)
+
+        if(demoTransformFactor > 1.) {
+            demoTransformFactor = 1.
+            demoTransformDirection = 0.
+        }
+        if (demoTransformFactor < 0.) {
+            demoTransformFactor = 0.
+            demoTransformDirection = 0.
+        }
+        demoGaussians.forEach(dg => {
+            dg.viz.mv.copy( mv0.sandwich(dg.viz.mv, mv1) )
         })
     }
 
@@ -109,7 +185,6 @@ function initGalton() {
     })
 
     let speed = 1.
-
     let bounceDuration = .5
     let g = -1.3
     let pelletRadius = .02
@@ -273,7 +348,7 @@ function initGalton() {
     }
     
     let grayRat = new Rat(0xFFFFFF)
-    grayRat.position.x = -1.6
+    grayRat.position.x = -1.9
     
     let coloredRats = []
     let colors = [0xFF5555, 0x55FF55, 0x5555FF]

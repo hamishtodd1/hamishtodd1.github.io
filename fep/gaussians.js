@@ -23,7 +23,7 @@ function initGaussians() {
 
                 let x = (t - .5) * 3.5
                 let y = constant0 * Math.exp((x - mean) * (x - mean) * constant1)
-                y *= .5 //hacked in but why not, it's linear
+                // y *= .5 //hacked in but why not, it's linear
                 // y = -Math.log(y)
 
                 return optionalTarget.set(x, y, 0.)

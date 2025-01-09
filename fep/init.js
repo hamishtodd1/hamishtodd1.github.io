@@ -34,7 +34,7 @@
         button to
             make a random transformation and apply it to those points, showing the new copy elsewhere...
             ...then same button to move that bunch of points to the copy
-        button to make a load of pellets fall out from last-created distribution
+        THIS ONE: button to make a load of pellets fall out from last-created distribution
         button to cause a random series of translations to happen
         button to make concentric sets of points centered on the mouse
 
@@ -219,6 +219,8 @@ async function init() {
         initGaussians()
 
         initGalton()
+
+        initRotations()
         
         beliefSpaceScene.position.y -= 0.
     }
@@ -285,6 +287,8 @@ async function init() {
         // updateGraph()
         // updatePosa()
         updateGalton()
+        updateRotations()
+        updateDemoTransform()
         // updateHyperIdeals()
         // updateSimplexField()
         // updateOrthostochastic()

@@ -35,96 +35,15 @@ function initVizes3d(localScene) {
 
 function initVizes2d() {
 
-    let altering = -1
-    let posInbeliefSpaceScene = new THREE.Vector3()
-    let freeGaussians = []
-    let connectingArcs = []
-    document.addEventListener('mousemove', e => {
-        if (altering !== -1) {
-            
-            beliefSpaceScene.worldToLocal(posInbeliefSpaceScene.copy(mousePos))
-
-            if (posInbeliefSpaceScene.y > bg.scale.y / 2.)
-                posInbeliefSpaceScene.y = bg.scale.y / 2.
-            if(posInbeliefSpaceScene.y < 0.)
-                posInbeliefSpaceScene.y = 0.
-            if (posInbeliefSpaceScene.x > bg.scale.x / 2.) {
-                posInbeliefSpaceScene.x = bg.scale.x / 2.
-                //maybe infinity?
-            }
-            if (posInbeliefSpaceScene.x < -bg.scale.x / 2.) {
-                posInbeliefSpaceScene.x = -bg.scale.x / 2.
-                //maybe infinity?
-            }
-
-            ppVizes[altering].gaussian.setMeanSd(posInbeliefSpaceScene.x, posInbeliefSpaceScene.y)
-            resetRatIfExistent(ppVizes[altering])
-
-            if(freeGaussians.length > 1) {
-
-                let index = 0
-                for(let i = 0, il = freeGaussians.length; i < il; ++i) {
-                    for(let j = i+1, jl = freeGaussians.length; j < jl; ++j) {
-                        connectingArcs[index].setFromStartEnd(freeGaussians[i].viz, freeGaussians[j].viz)
-                        connectingArcs[index].visible = true
-                        ++index
-                    }
-                }
-                for(let i = index, il = connectingArcs.length; i < il; ++i)
-                    connectingArcs[i].visible = false
-            }
-        }
-    })
-    document.addEventListener('mousedown', e => {
-        if(e.button !== 0)
-            return
-
-        beliefSpaceScene.worldToLocal(posInbeliefSpaceScene.copy(mousePos))
-
-        let inFrame = Math.abs(posInbeliefSpaceScene.x) < bg.scale.x / 2. && Math.abs(posInbeliefSpaceScene.y) < bg.scale.y / 2.
-        if(!inFrame)
-            return
-
-        altering = -1
-        let lowestDist = Infinity
-        let minDist = .15
-        ppVizes.forEach((ppv,i)=>{
-            if(ppv.visible === false)
-                return
-            let dist = posInbeliefSpaceScene.distanceTo(ppv.positions[0].y > 0. ? ppv.positions[0] : ppv.positions[1])
-            if ( dist < lowestDist && dist < minDist) {
-                lowestDist = dist
-                altering = i
-            }
-        })
-
-        if(altering === -1) {
-            // debugger
-            col0.setHSL( Math.random(), 1., .5 )
-            let gaussian = new Gaussian(col0.getHex())
-            altering = ppVizes.indexOf(gaussian.viz)
-            gaussian.setMeanSd(posInbeliefSpaceScene.x, posInbeliefSpaceScene.y)
-
-            gaussian.visible = true
-            gaussian.viz.visible = true
-
-            freeGaussians.push(gaussian)
-        }
-    })
-    document.addEventListener('mouseup', e => {
-        if (e.button === 0)
-            altering = -1
-    })
-
     beliefSpaceScene = new THREE.Group()
     simplyMoveableThings.push(beliefSpaceScene)
     beliefSpaceScene.position.y = -1.87
     scene.add(beliefSpaceScene)
 
     let bg = new THREE.Mesh(unchangingUnitSquareGeometry, new THREE.MeshBasicMaterial({ color: 0xA2D6F9 }))
+    beliefSpaceScene.add(bg)
     bg.scale.setScalar(2.7,1.6,1.)
     bg.position.z = -.1
-    beliefSpaceScene.add(bg)
     let frame = new THREE.Mesh(unchangingUnitSquareGeometry, new THREE.MeshBasicMaterial({ color: 0x000000 }))
     frame.scale.set(bg.scale.x + .1, bg.scale.y + .1, 1.)
     frame.position.z = -.11
@@ -238,12 +157,10 @@ function initVizes2d() {
         }
     }
     window.CircleViz = CircleViz
-    for (let i = 0; i < 6; ++i)
-        connectingArcs.push(new CircleViz(0x000000))
 
     let ptGeo = new THREE.SphereGeometry(.04)
     let myCol = new THREE.Color()
-    let ppVizes = []
+    ppVizes = []
     class PtPairViz extends THREE.Object3D {
 
         constructor( haveCircles = false, col, gaussian ) {
