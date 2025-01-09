@@ -27,9 +27,6 @@
 
 
     TODO
-        Click to make the "true distribution"
-        button to do the translation between whatever the last two interacted with (or back again)
-        Click to make a new distributions
         button to toggle connections between all on-screen points
         button to
             make a random transformation and apply it to those points, showing the new copy elsewhere...

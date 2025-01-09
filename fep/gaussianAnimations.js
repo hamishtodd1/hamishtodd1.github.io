@@ -143,7 +143,12 @@ function initRotations() {
         ////////////////////
         // Demo transform //
         ////////////////////
-        if (demoTransformDirection !== 0.) {
+        if (demoTransformDirection === 0.)
+            demoTransformCircle.visible = false
+        else {
+
+            demoTransformCircle.visible = true
+            log(demoTransformCircle.mv, demoTransformCircle.visible)
 
             mv0.copy(demoTransform)
             if (demoTransformDirection === -1.)
@@ -160,8 +165,8 @@ function initRotations() {
                 demoTransformDirection = 0.
             }
             freeGaussians.forEach(fg => {
-                // if (fromToGaussians.indexOf(fg) === -1)
-                fg.viz.mv.copy(mv0.sandwich(fg.viz.mv, mv1))
+                if (fromToGaussians.indexOf(fg) === -1)
+                    fg.viz.mv.copy(mv0.sandwich(fg.viz.mv, mv1))
             })
         }
 
@@ -325,6 +330,7 @@ function initRotations() {
 
     let demoTransformFactor = 0.
     let demoTransformDirection = 0.
+    let demoTransformCircle = new CircleViz(0x000000)
     let demoTransform = new Mv31()
     let fromToGaussians = [null,null]
     function resetDemoTransform() {
@@ -333,6 +339,9 @@ function initRotations() {
             fromToGaussians[1] = freeGaussians[freeGaussians.length-1]
             fromToGaussians[1].viz.mv.mulReverse(fromToGaussians[0].viz.mv, mv0).cheapSqrt(mv1).logarithm(mv2).multiplyScalar(.01, mv2).exp(demoTransform)
             demoTransformFactor = 0.
+
+            mv2.inner(_e1pm, demoTransformCircle.mv).cheapNormalize(demoTransformCircle.mv)
+            // demoTransformCircle.mv.copy(_ep)
         }
     }
 }

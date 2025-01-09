@@ -80,10 +80,10 @@ function initVizes2d() {
 
             let mat = color === undefined ? defaultMat : new THREE.LineBasicMaterial({
                 color,
-                clippingPlanes: [
-                    new THREE.Plane().setComponents(  1., 0., 0., 0.),
-                    new THREE.Plane().setComponents( -1., 0., 0., 0.),
-                ],
+                // clippingPlanes: [
+                //     new THREE.Plane().setComponents(  1., 0., 0., 9999.),
+                //     new THREE.Plane().setComponents( -1., 0., 0., 9999.),
+                // ],
             })
             this.circle = new THREE.LineLoop(circleGeo, mat)
             this.line = new THREE.LineLoop(lineGeo, mat)
@@ -100,6 +100,7 @@ function initVizes2d() {
         setFromStartEnd(startViz, endViz) {
             endViz.mv.mulReverse(startViz.mv, mv0).cheapSqrt(mv0).selectGrade(2,mv0)
             mv0.inner(_e1pm, this.mv)
+
             let xStart = startViz.pt1.getWorldPosition(v1).x
             let xEnd   = endViz.pt1.getWorldPosition(v1).x
             let higher = xStart > xEnd ? xStart : xEnd
@@ -110,11 +111,15 @@ function initVizes2d() {
 
         onBeforeRender() {
 
+            
             if(this.mv.isZero()) {
                 this.circle.visible = false
                 this.line.visible = false
             }
+            
+            
 
+            // debugger
             // zero-bugs version
             // let screenBounds = [e1+e0, e1-e0...]
             // screenBounds.forEach(bound => {
