@@ -117,16 +117,16 @@ async function init() {
         separator.position.x = -.2
 
         let slideNames = [
-            `Amari.png`,
             `Davide.png`,
-            `Poincare.png`,
+            `bloch.png`,
             `Frank Nielsen.png`,
             `Lance.png`,
             `gradient descent.png`,
             `tensorflow_pytorch.png`,
-            `bloch.png`,
+            `Poincare.png`,
             `nn.png`,
             `nn2.png`,
+            `Amari.png`,
         ]
         slideNames.forEach((name, i) => {
             textureLoader.load(`https://hamishtodd1.github.io/fep/data/` + name, texture => {
@@ -271,10 +271,11 @@ async function init() {
         }
 
         // updateWorldMaps()
-        // updateGraph()
-        // updatePosa()
         updateGalton()
         updateGaussianAnimations()
+
+        // updateGraph()
+        // updatePosa()
         // updateHyperIdeals()
         // updateSimplexField()
         // updateOrthostochastic()

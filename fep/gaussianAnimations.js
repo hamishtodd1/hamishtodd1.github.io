@@ -280,6 +280,9 @@ function initRotations() {
     })
     document.addEventListener('mousedown', e => {
 
+        if(e.button !== 0)
+            return
+
         beliefSpaceScene.worldToLocal(posInbeliefSpaceScene.copy(mousePos))
         let inFrame = Math.abs(posInbeliefSpaceScene.x) < bg.scale.x / 2. && Math.abs(posInbeliefSpaceScene.y) < bg.scale.y / 2.
         if (!inFrame)
