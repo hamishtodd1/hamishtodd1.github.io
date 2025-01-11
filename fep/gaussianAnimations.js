@@ -165,8 +165,10 @@ function initRotations() {
                 demoTransformDirection = 0.
             }
             freeGaussians.forEach(fg => {
-                if (fromToGaussians.indexOf(fg) === -1)
+                if (fromToGaussians.indexOf(fg) === -1) {
                     fg.viz.mv.copy(mv0.sandwich(fg.viz.mv, mv1))
+                    fg.updateFromMv()
+                }
             })
         }
 
@@ -259,7 +261,8 @@ function initRotations() {
                 //maybe infinity?
             }
 
-            ppVizes[heldFreeGaussianIndex].gaussian.setMeanSd(posInbeliefSpaceScene.x, posInbeliefSpaceScene.y)
+            let y = posInbeliefSpaceScene.y < .03 ? 0. : posInbeliefSpaceScene.y
+            ppVizes[heldFreeGaussianIndex].gaussian.setMeanSd(posInbeliefSpaceScene.x, y)
             resetRatIfExistent(ppVizes[heldFreeGaussianIndex])
         }
         else if(holdingRotater) {

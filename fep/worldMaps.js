@@ -39,6 +39,7 @@ function initMeasuringStick(perspective, mercator, equidistant, planePerspective
     
 
     let measuringStick = new THREE.Mesh(new THREE.PlaneGeometry(.02, 1.), new THREE.MeshBasicMaterial({ color: 0x000000 }))
+    measuringStick.visible = false
     measuringStick.geometry.translate(0., .5, 0.)
     scene.add(measuringStick)
     measuringStick.position.z = .05
@@ -53,6 +54,7 @@ function initMeasuringStick(perspective, mercator, equidistant, planePerspective
             }
             else {
                 changingStickMode = true
+                measuringStick.visible = true
 
                 let closestDist = 1.
                 worldMaps.forEach(map => {
@@ -135,6 +137,8 @@ function initMeasuringStick(perspective, mercator, equidistant, planePerspective
 
             let plane = planes[worldMaps.indexOf(measuringStickMap)]
 
+            let lat, lon;
+
             switch (measuringStickMap) {
 
                 case perspective:
@@ -152,8 +156,8 @@ function initMeasuringStick(perspective, mercator, equidistant, planePerspective
                     q1.setFromUnitVectors(v2, v1)
                     planePerspective.quaternion.premultiply(q1)
 
-                    let lat = Math.asin(currentPos.y)
-                    let lon = Math.atan(currentPos.x, currentPos.z)
+                    lat = Math.asin(currentPos.y)
+                    lon = Math.atan(currentPos.x, currentPos.z)
 
                     setOthersFromLatLon(lat, lon,perspective)
 
@@ -171,7 +175,20 @@ function initMeasuringStick(perspective, mercator, equidistant, planePerspective
                     measuringStickMap.worldToLocal(getPosition(backAndForth + .00001*(forth?1.:-1.), v1))
                     directPlane(plane, v1)
 
-                    setOthersFromLatLon(lat, lon, ommitted)
+                    lat = -1.
+                    lon = -1.
+                    if(measuringStickMap === equidistant) {
+                        //equidistant
+                        lat = Math.PI / 2. - plane.position.length()
+                        lon = Math.atan2(plane.position.x, -plane.position.y)
+                    }
+                    else {
+                        //mercator
+                        lon = plane.position.x / .6
+                        lat = 2. * (Math.atan(Math.exp(plane.position.y)) - Math.PI / 4.)
+                    }
+
+                    setOthersFromLatLon(lat, lon, measuringStickMap)
 
             }
 
@@ -233,7 +250,7 @@ function initWorldMaps() {
         if(greenlandMovingMode) {
             
             v1.subVectors(mousePos, posWhenGreenlandMovingModeStarted)
-            q1.setFromAxisAngle(v2.set(1.,0.,1.).normalize(), 1.8 * v1.y)
+            q1.setFromAxisAngle(v2.set(1.,0.,1.).normalize(), -1.8 * v1.y)
             q1.premultiply(q2.setFromAxisAngle(yUnit, 1.8 * v1.x))
         
             greenlands.forEach(g => {

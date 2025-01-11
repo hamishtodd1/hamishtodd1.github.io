@@ -117,6 +117,7 @@ async function init() {
         separator.position.x = -.2
 
         let slideNames = [
+            `1d simplex.png`,
             `Davide.png`,
             `bloch.png`,
             `Frank Nielsen.png`,
@@ -136,10 +137,10 @@ async function init() {
                 })
                 
                 let mesh = new THREE.Mesh(unchangingUnitSquareGeometry, mat)
-                mesh.scale.y = 1.1
+                mesh.scale.y = 1.1 / 3.
                 mesh.scale.x = texture.image.width / texture.image.height * mesh.scale.y
-                mesh.position.x = -2.3
-                mesh.position.y = .5 * ( i - slideNames.length / 2)
+                mesh.position.x = -2.5
+                mesh.position.y = -.33 * (i - slideNames.length / 2)
                 mesh.position.z = .01 * i
                 scene.add(mesh)
                 simplyMoveableThings.push(mesh)
@@ -157,6 +158,7 @@ async function init() {
             grabbedSmt = null
             let closestD = Infinity
             simplyMoveableThings.forEach(thing => {
+
                 let d = thing.position.distanceToSquared(mousePos)
                 if (d < closestD) {
                     grabbedSmt = thing
@@ -170,8 +172,20 @@ async function init() {
     })
     document.addEventListener('mousemove', e => {
         if(grabbedSmt) {
+
+            let oldX = grabbedSmt.position.x
+
             grabbedSmt.position.add(mousePosDiff)
             beliefSpaceScene.position.y = -1.87
+
+            let scaleChange = 3.
+            let changeX = -1.5
+            if (oldX < changeX && grabbedSmt.position.x > changeX) {
+                grabbedSmt.scale.multiplyScalar(scaleChange)
+            }
+            if (oldX > changeX && grabbedSmt.position.x < changeX) {
+                grabbedSmt.scale.multiplyScalar(1. / scaleChange)
+            }
         }
     })
     document.addEventListener('mouseup', e => {
@@ -207,9 +221,8 @@ async function init() {
 
         initRotations()
         
-        beliefSpaceScene.position.y -= 0.
-        beliefSpaceScene.position.x = 1.4
-        galtonScene.position.x = 1.3
+        beliefSpaceScene.position.x = 1.45
+        galtonScene.position.x = 1.45
     }
     
     // initShm()
@@ -271,6 +284,7 @@ async function init() {
         }
 
         // updateWorldMaps()
+        // updateMeasuringStick()
         updateGalton()
         updateGaussianAnimations()
 
@@ -281,7 +295,6 @@ async function init() {
         // updateOrthostochastic()
         // updateSaccadic()
         // updateShm()
-        // updateMeasuringStick()
 
         obj3dsWithOnBeforeRenders.forEach(obj => obj.onBeforeRender())
 
