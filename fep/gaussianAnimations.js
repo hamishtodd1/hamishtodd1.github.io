@@ -41,6 +41,11 @@ function initRotations() {
             rotatingMode = !rotatingMode
         if (e.key === 's')
             connectingArcsVisible = !connectingArcsVisible
+        if (e.key === `g`) {
+            isoSurprises.forEach(isoSurprise => {
+                isoSurprise.visible = !isoSurprise.visible
+            })
+        }
         if (e.key === 'd') {
             if (tRandomTransform !== -1)
                 tRandomTransform = -1.
@@ -143,18 +148,13 @@ function initRotations() {
         ////////////////////
         // Demo transform //
         ////////////////////
-        if (demoTransformDirection === 0.)
-            demoTransformCircle.visible = false
-        else {
-
-            demoTransformCircle.visible = true
-            log(demoTransformCircle.mv, demoTransformCircle.visible)
+        if (demoTransformDirection !== 0.) {
 
             mv0.copy(demoTransform)
             if (demoTransformDirection === -1.)
                 mv0.getReverse(mv0)
 
-            demoTransformFactor += frameDelta * demoTransformDirection
+            demoTransformFactor += frameDelta * demoTransformDirection * 4.
 
             if (demoTransformFactor > 1.) {
                 demoTransformFactor = 1.
@@ -241,6 +241,14 @@ function initRotations() {
             })
         }
     }
+
+    let isoSurprises = [
+        new CircleViz(0xff0000), new CircleViz(0xff0000), new CircleViz(0xff0000), new CircleViz(0xff0000), new CircleViz(0xff0000), new CircleViz(0xff0000),
+        new CircleViz(0x0000ff), new CircleViz(0x0000ff), new CircleViz(0x0000ff), new CircleViz(0x0000ff), new CircleViz(0x0000ff), new CircleViz(0x00ff00),
+    ]
+    isoSurprises.forEach((isoSurprise,i) => {
+        // isoSurprise.visible = false
+    })
 
     document.addEventListener('mousemove', e => {
 
@@ -343,17 +351,35 @@ function initRotations() {
     let demoTransformFactor = 0.
     let demoTransformDirection = 0.
     let demoTransformCircle = new CircleViz(0x000000)
-    let demoTransform = new Mv31()
+    let demoTransform = new Mv31() 
     let fromToGaussians = [null,null]
+    let toward = new Mv31()
+    let vecs = [new THREE.Vector3(), new THREE.Vector3()]
     function resetDemoTransform() {
         if(freeGaussians.length > 1) {
             fromToGaussians[0] = freeGaussians[freeGaussians.length-2]
             fromToGaussians[1] = freeGaussians[freeGaussians.length-1]
-            fromToGaussians[1].viz.mv.mulReverse(fromToGaussians[0].viz.mv, mv0).cheapSqrt(mv1).logarithm(mv2).multiplyScalar(.01, mv2).exp(demoTransform)
+            fromToGaussians[1].viz.mv.mulReverse(fromToGaussians[0].viz.mv, toward).logarithm(mv2).multiplyScalar(.005, mv2).exp(demoTransform)
+            // toward.pow(.01,demoTransform)
             demoTransformFactor = 0.
 
             mv2.inner(_e1pm, demoTransformCircle.mv).cheapNormalize(demoTransformCircle.mv)
             // demoTransformCircle.mv.copy(_ep)
+
+            for(let i = 0; i < 2; ++i) {
+                for (let j = 0, jl = isoSurprises.length / 2; j < jl; ++j) {
+                    let isoSurprise = isoSurprises[i * jl + j]
+                    toward.pow(.5*(j+1) / (jl + 1), mv0)
+                    mv0.sandwich(fromToGaussians[i].viz.mv, mv1).pointPairToVecs(vecs)
+                    let v = vecs[0].y > vecs[1].y ? vecs[0] : vecs[1]
+                    mv2.vecToZrc(v)
+                    let pointor = mv2.mul(_e12pm, mv3)
+                    pointor.inner(fromToGaussians[i].viz.mv, isoSurprise.mv)
+                    // debugger
+                }
+            }
         }
+
+        demoTransformCircle.visible = true
     }
 }

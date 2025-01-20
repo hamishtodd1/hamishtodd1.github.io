@@ -1,32 +1,37 @@
-//have a "highlight" button I guess, which goes across them all
-//the setup could be: record it on the side, then just move stuff around on the side afterwards. Can put in slides etc
+/*
+    Hiding the planes and trajectories properly
+    Rotation on mercator!
+    Gaussian
+        Grab a point, mousewheel to rotate
+        Grab background and move mouse and see that rigid motion
+    Simplex
+        Cloud of flies above, they come down and hop from pad to pad
+        Multiple frogs
+    Recolor background
+    Sound effects
+    Rats scurry in
+    Cover semi-transparent
+    A switch on the box to "dispense food"
+    Different coloured background
+    Some kind of "glow" followed by the pellets popping out
+        click the distribution in belief space or the curve to see a plop
+        plop should work properly
+    show surprisal with a shader?
+    Ugh finish off the fucking simplex
+    Spacebar to move simplyMoveableThings, not right click
+    Make "food dispenser" look better
+    Could have the belief space be upside down, no reason why not
+    
+    Logo?
+    
+    Edit in the footage!
+
+    Record by wednesday night, edit on thurs
+
+ */
 
 /*
-    -Grey rat, cover is over
-    -Remove and replace cover
-    -Gaussian appears. It is changing. Its belief space point changes from place to place along a smooth arc.
-    -More rats, and their gaussians
-    -horizontal and vertical lines for the belief space points
-    -pause
-    -choose the rat’s initial distribution (by clicking in belief space)
-    -have a starting and ending distribution
-    -make a huge amount of pellets fall out according to the final (by clicking on it I guess)
-    -move distribution in a straight line
-    -click to make a new distribution in belief space
-    -Make the translation from one to the other appear
-    -Click randomly to make a bunch, flash the arcs between them
-    -generate a random translation, apply it to all to get that shape somewhere else
-    -watch them go from one to the other
-    -watch some fun transformations
-    Slide break
-    -Gaussians and rats go away
-    -rotations. Rings of colored beliefs around a center. You can grab the center of rotation and move it obv
-    -random beliefs, flash line segments
-    -make mercator rotate around britain
-    -rotate around a dirac delta
-
-
-
+    
     Can you make an interface for this where you move from thing to thing using your hands? Not just clicking. Get rid of the blocking box by pulling it in
 
     If you want the spiral picture, well, there is light-like Cl(3,1,1)
@@ -110,7 +115,7 @@ async function init() {
 
     initMouse() //The mouse you hold
 
-    if(1)
+    if(0)
     {
         let separator = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0., 9., 0.), new THREE.Vector3(0., -9., 0.)]), new THREE.LineBasicMaterial({ color: 0x000000 }))
         scene.add(separator)
@@ -193,13 +198,7 @@ async function init() {
             grabbedSmt = null
     })
 
-    document.addEventListener('mousewheel', (event) => {
-        // raycaster.setFromCamera(mouse, camera)
-        if (event.deltaY < 0.)
-            camera.position.z *= 1.1
-        if (event.deltaY > 0.)
-            camera.position.z *= (1. / 1.1)
-    })
+    
 
     {
         // let simplex = initSimplexField()
@@ -212,6 +211,7 @@ async function init() {
         // saccadicScene.scale.multiplyScalar(.8)
     }
 
+    if(0)
     {
         initVizes2d()
 
@@ -231,8 +231,16 @@ async function init() {
     // initGraph()
     // await initPosa3d()
     // initHyperbolic()
-    // initWorldMaps()
+    initWorldMaps()
     // initHyperIdeals()
+
+    document.addEventListener('mousewheel', (event) => {
+        // raycaster.setFromCamera(mouse, camera)
+        if (event.deltaY < 0.)
+            camera.position.z *= 1.1
+        if (event.deltaY > 0.)
+            camera.position.z *= (1. / 1.1)
+    })
 
 
     {
@@ -283,10 +291,9 @@ async function init() {
             errorBox.style.visibility = "hidden"
         }
 
-        // updateWorldMaps()
-        // updateMeasuringStick()
-        updateGalton()
-        updateGaussianAnimations()
+        updateWorldMaps()
+        // updateGalton()
+        // updateGaussianAnimations()
 
         // updateGraph()
         // updatePosa()

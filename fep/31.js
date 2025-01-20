@@ -35,6 +35,12 @@ function init31WithoutDeclarations() {
             return translator.translatorToVec(v)
         }
 
+        pow(exponent, target) {
+            let logged = this.logarithm(newMv31)
+            logged.multiplyScalar(exponent, logged)
+            return logged.exp(target)
+        }
+
         cheapSqrt(target) {
             this.cheapNormalize(target)
             if(target[0] === -1.)

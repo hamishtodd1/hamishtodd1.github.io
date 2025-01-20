@@ -1,6 +1,7 @@
-function updateWorldMaps() { }
-
-function initMeasuringStick(perspective, mercator, equidistant, planePerspective, planeMercator, planeEquidistant) {
+function initMeasuringStick(
+    perspective, mercator, equidistant, 
+    planePerspective, planeMercator, planeEquidistant,
+    isochroneCenterA, isochroneCenterB) {
 
     let worldMaps = [equidistant, mercator, perspective]
     let planes = [planeEquidistant, planeMercator, planePerspective]
@@ -12,14 +13,6 @@ function initMeasuringStick(perspective, mercator, equidistant, planePerspective
         plane.quaternion.setFromUnitVectors(yUnitNeg, dir)
     }
 
-    let globeStickGeoSegments = 32
-    let globeStickGeoInitial = new THREE.PlaneGeometry(.02, 1., 1, globeStickGeoSegments)
-    globeStickGeoInitial.translate(0., .5, 0.)
-    initialCoords = globeStickGeoInitial.attributes.position.array
-    let globeStick = new THREE.Mesh(globeStickGeoInitial.clone(), new THREE.MeshBasicMaterial({ color: 0x000000, side: THREE.DoubleSide }))
-    perspective.add(globeStick)
-    let gsCoords = globeStick.geometry.attributes.position.array
-    
     let identityQuaternion = new THREE.Quaternion()
     let displacer = new THREE.Vector3()
     let perspectiveStart = new THREE.Vector3(0., 0., 1.)
@@ -36,13 +29,28 @@ function initMeasuringStick(perspective, mercator, equidistant, planePerspective
             target.normalize()
         }
     }
-    
 
-    let measuringStick = new THREE.Mesh(new THREE.PlaneGeometry(.02, 1.), new THREE.MeshBasicMaterial({ color: 0x000000 }))
-    measuringStick.visible = false
-    measuringStick.geometry.translate(0., .5, 0.)
-    scene.add(measuringStick)
-    measuringStick.position.z = .05
+    let mrh = false
+    document.addEventListener('mousedown', event => {
+        if(event.button === 1)
+            mrh = true
+    })
+    document.addEventListener('mouseup', event => {
+        if(event.button === 1)
+            mrh = false
+    })
+    let axis = new THREE.Vector3()
+    document.addEventListener('mousewheel', event => {
+        if(mrh) {
+            getGlobeIntersection(axis)
+            q1.setFromAxisAngle(axis, event.deltaY * .001)
+            q2.copy(perspective.children[0].material.uniforms.quat.value)
+            q3.multiplyQuaternions(q1, q2)
+            perspective.children[0].material.uniforms.quat.value.copy(q3)
+        }
+        event.stopImmediatePropagation()
+    })
+    
     let changingStickMode = false
     let measuringStickMap = null
     document.addEventListener('keyup', event => {
@@ -54,7 +62,6 @@ function initMeasuringStick(perspective, mercator, equidistant, planePerspective
             }
             else {
                 changingStickMode = true
-                measuringStick.visible = true
 
                 let closestDist = 1.
                 worldMaps.forEach(map => {
@@ -65,16 +72,19 @@ function initMeasuringStick(perspective, mercator, equidistant, planePerspective
                     }
                 })
 
-                measuringStick.position.x = mousePos.x
-                measuringStick.position.y = mousePos.y
-
                 if (measuringStickMap === perspective) {
                     getGlobeIntersection(perspectiveStart)
                 }
-
-                // if (measuringStickMap !== null) {
-                //     measuringStickMap.worldToLocal(measuringStick.position)
-                // }
+                else if(measuringStickMap === mercator) {
+                    let [lat, lon] = mercatorToLatLon(mousePos)
+                    latLonToPerspective( lat, lon, perspectiveStart )
+                }
+                else if (measuringStickMap === equidistant) {
+                    // debugger
+                    let [lat, lon] = equidistantToLatLon(mousePos)
+                    latLonToPerspective( lat, lon, perspectiveStart )
+                }
+                isochroneCenterA.copy(perspectiveStart)
             }
         }
     })
@@ -87,44 +97,58 @@ function initMeasuringStick(perspective, mercator, equidistant, planePerspective
         return target.addScaledVector(v4, t)
     }
 
-    let euler = new THREE.Euler()
-    function setOthersFromLatLon(lat,lon,ommitted) {
-
-        if(mercator !== ommitted) {
-            let pos = planeMercator.position
-            pos.x = lon
-            pos.y = Math.log(Math.tan(Math.PI / 4. + lat / 2.))
-            pos.z = 0.
-            let max = 3.
-            if (Math.abs(pos.y) > max)
-                pos.y = Math.sign(pos.y) * max
-            pos.x *= .6
-            pos.y *= .6
-        }
-
-        if(equidistant !== ommitted) {
-            let pos = planeEquidistant.position
-            let lat0 = Math.PI / 2.
-            let k = Math.sqrt(2. / (1. + Math.sin(lat0) * Math.sin(lat) + Math.cos(lat0) * Math.cos(lat) * Math.cos(lon)))
-            let max = 100.
-            if (k > max)
-                k = max
-            pos.x = k * Math.cos(lat) * Math.sin(lon)
-            pos.y = k * (Math.cos(lat0) * Math.sin(lat) - Math.sin(lat0) * Math.cos(lat) * Math.cos(lon))
-            pos.z = 0.
-            pos.x *= .7
-            pos.y *= .7
-        }
-
-        if(perspective !== ommitted) {
-            let q1 = new THREE.Quaternion()
-            q1.setFromEuler(euler.set(lat, lon, 0.))
-            q2.setFromUnitVectors(yUnit,zUnit)
-            planePerspective.quaternion.multiplyQuaternions(q1, q2)
-        }
+    function latLonToEquidistant(lat, lon, target) {
+        let lat0 = Math.PI / 2.;
+        let d = Math.acos(Math.sin(lat0) * Math.sin(lat) + Math.cos(lat0) * Math.cos(lat) * Math.cos(lon));
+        let k = d / Math.sin(d);
+        target.x = k * Math.cos(lat) * Math.sin(lon);
+        target.y = k * (Math.cos(lat0) * Math.sin(lat) - Math.sin(lat0) * Math.cos(lat) * Math.cos(lon));
+        target.z = 0.
+        target.multiplyScalar(.6)
+        return target
+    }
+    function latLonToMercator(lat, lon, target) {
+        target.x = lon
+        target.y = Math.log(Math.tan(Math.PI / 4. + lat / 2.))
+        let max = 3.
+        if (Math.abs(target.y) > max)
+            target.y = Math.sign(target.y) * max
+        target.z = 0.
+        target.multiplyScalar(.6)
+        return target
     }
 
-    updateMeasuringStick = () => {
+    let va = new THREE.Vector3()
+    function mercatorToLatLon(v) {
+        mercator.worldToLocal(va.copy(v))
+        va.z = 0.
+        va.multiplyScalar(1. / .6)
+        let lon = va.x
+        let lat = 2. * (Math.atan(Math.exp(va.y)) - Math.PI / 4.)
+        return [lat, lon]
+    }
+    function equidistantToLatLon(v) {
+        equidistant.worldToLocal(va.copy(v))
+        va.z = 0.
+        va.multiplyScalar(1. / .6)
+        let lat = Math.PI / 2. - va.length()
+        let lon = Math.atan2(va.x, -va.y)
+        return [lat, lon]
+    }
+    function perspectiveToLatLon(v) {
+        let lon = Math.atan2(v.x, v.z);
+        let lat = Math.asin(v.y);
+        return [lat, lon]
+    }
+    function latLonToPerspective(lat, lon, target) {
+        q1.setFromAxisAngle(yUnit, lon)
+        q2.setFromAxisAngle(xUnit, -lat)
+        q3.multiplyQuaternions(q1, q2)
+        target.copy(zUnit).applyQuaternion(q3).normalize()
+    }
+
+    let previousPos = new THREE.Vector3()
+    updateWorldMaps = () => {
 
         if (backAndForth > 1.)
             forth = false
@@ -133,66 +157,42 @@ function initMeasuringStick(perspective, mercator, equidistant, planePerspective
         backAndForth += .8 * (forth ? frameDelta : -frameDelta)
 
         if (!changingStickMode) {
-            planes.forEach(p => p.visible = true)
+            planes.forEach(p => p.visible = (measuringStickMap !== null))
 
-            let plane = planes[worldMaps.indexOf(measuringStickMap)]
+            if (measuringStickMap) {
+                q1.setFromUnitVectors(perspectiveStart, perspectiveEnd)
+                planePerspective.quaternion.slerpQuaternions(identityQuaternion, q1, backAndForth)
 
-            let lat, lon;
+                let northPoleToPerspectiveStart = q1.setFromUnitVectors(yUnit, perspectiveStart)
+                planePerspective.quaternion.multiply(northPoleToPerspectiveStart)
 
-            switch (measuringStickMap) {
+                let currentPos = v3.set(0., 1., 0.).applyQuaternion(planePerspective.quaternion).normalize()
+                v1.crossVectors(currentPos, forth?perspectiveEnd:perspectiveStart).normalize()
+                let currentDir = v2.set(0., 0., -1.).applyQuaternion(planePerspective.quaternion)
+                v2.crossVectors(currentPos, currentDir).normalize()
+                q1.setFromUnitVectors(v2, v1)
+                planePerspective.quaternion.premultiply(q1)
 
-                case perspective:
-                    q1.setFromUnitVectors(perspectiveStart, perspectiveEnd)
-                    planePerspective.quaternion.slerpQuaternions(identityQuaternion, q1, backAndForth)
+                // currentPos.set(Math.sqrt(2.), 0., Math.sqrt(2.))
+                let [lat, lon] = perspectiveToLatLon(currentPos)
+                previousPos.copy(planeMercator.position)
+                latLonToMercator(lat, lon, planeMercator.position)
+                planeMercator.rotation.z = yUnit.angleTo(v1.subVectors(planeMercator.position, previousPos))
+                if(!forth)
+                    planeMercator.rotation.z += Math.PI
+                else
+                    planeMercator.rotation.z = Math.PI - planeMercator.rotation.z
 
-                    let northPoleToPerspectiveStart = q1.setFromUnitVectors(yUnit, perspectiveStart)
-                    planePerspective.quaternion.multiply(northPoleToPerspectiveStart)
 
-                    let currentPos = v3.set(0.,1.,0.).applyQuaternion(planePerspective.quaternion).normalize()
-
-                    v1.crossVectors(currentPos, forth?perspectiveEnd:perspectiveStart).normalize()
-                    let currentDir = v2.set(0., 0., -1.).applyQuaternion(planePerspective.quaternion)
-                    v2.crossVectors(currentPos, currentDir).normalize()
-                    q1.setFromUnitVectors(v2, v1)
-                    planePerspective.quaternion.premultiply(q1)
-
-                    lat = Math.asin(currentPos.y)
-                    lon = Math.atan(currentPos.x, currentPos.z)
-
-                    setOthersFromLatLon(lat, lon,perspective)
-
-                    break
-
-                case null:
-                    break
-
-                //equidistant, mercator
-                default:
-
-                    getPosition(backAndForth, plane.position)
-                    measuringStickMap.worldToLocal(plane.position)
-
-                    measuringStickMap.worldToLocal(getPosition(backAndForth + .00001*(forth?1.:-1.), v1))
-                    directPlane(plane, v1)
-
-                    lat = -1.
-                    lon = -1.
-                    if(measuringStickMap === equidistant) {
-                        //equidistant
-                        lat = Math.PI / 2. - plane.position.length()
-                        lon = Math.atan2(plane.position.x, -plane.position.y)
-                    }
-                    else {
-                        //mercator
-                        lon = plane.position.x / .6
-                        lat = 2. * (Math.atan(Math.exp(plane.position.y)) - Math.PI / 4.)
-                    }
-
-                    setOthersFromLatLon(lat, lon, measuringStickMap)
+                previousPos.copy(planeEquidistant.position)
+                latLonToEquidistant(lat, lon, planeEquidistant.position)
+                planeEquidistant.rotation.z = yUnit.angleTo(v1.subVectors(planeEquidistant.position, previousPos))
+                if (!forth)
+                    planeEquidistant.rotation.z += Math.PI
+                else
+                    planeEquidistant.rotation.z = Math.PI - planeEquidistant.rotation.z
 
             }
-
-            return
         }
         else {
 
@@ -201,22 +201,25 @@ function initMeasuringStick(perspective, mercator, equidistant, planePerspective
             switch (measuringStickMap) {
                 case perspective:
                     getGlobeIntersection(perspectiveEnd)
-                    q1.setFromUnitVectors(perspectiveStart, perspectiveEnd)
-                    displacer.set(q1.x, q1.y, q1.z).setLength(.02)
-                    for (let i = 0, il = gsCoords.length / 3; i < il; i++) {
-                        let t = initialCoords[i * 3 + 1]
-                        q2.slerpQuaternions(identityQuaternion, q1, t)
-    
-                        let pointOn = v1.copy(perspectiveStart).applyQuaternion(q2)
-                        pointOn.addScaledVector(displacer, initialCoords[i * 3] < 0. ? 1. : -1.)
-                        pointOn.setLength(1.015)
-                        pointOn.toArray(gsCoords, i * 3)
-                    }
-                    globeStick.geometry.attributes.position.needsUpdate = true
-    
+                    isochroneCenterB.copy(perspectiveEnd)
+
                     break
 
                 case null:
+    
+                    break
+
+                case mercator:
+                    [lat, lon] = mercatorToLatLon(mousePos)
+                    latLonToPerspective(lat, lon, perspectiveEnd)
+                    isochroneCenterB.copy(perspectiveEnd)
+
+                    break
+
+                case equidistant:
+                    [lat, lon] = equidistantToLatLon(mousePos)
+                    latLonToPerspective(lat, lon, perspectiveEnd)
+                    isochroneCenterB.copy(perspectiveEnd)
     
                     break
     
@@ -253,10 +256,9 @@ function initWorldMaps() {
             q1.setFromAxisAngle(v2.set(1.,0.,1.).normalize(), -1.8 * v1.y)
             q1.premultiply(q2.setFromAxisAngle(yUnit, 1.8 * v1.x))
         
-            greenlands.forEach(g => {
-                g.material.uniforms.quat.value.copy(q1)
-            })
+            greenlands[0].material.uniforms.quat.value.copy(q1)
         }
+        greenlands.forEach(g => g.visible = greenlandMovingMode)
     })
 
     document.addEventListener('keydown', e => {
@@ -297,27 +299,36 @@ function initWorldMaps() {
     
 
 
-
-    let geo = new THREE.PlaneGeometry(2., 1., 512, 512)
-
     let earths = []
     let greenlands = []
+    let mapProjectionGeo = new THREE.PlaneGeometry(2., 1., 512, 512)
+    let isochroneCenterA = new THREE.Vector3()
+    let isochroneCenterB = new THREE.Vector3()
+    let greenlandQuat = new THREE.Vector4()
+    let nonGreenlandQuat = new THREE.Vector4()
     class MapProjection extends THREE.Mesh {
         constructor(mapProjection, isGreenland) {
             let mat = new THREE.ShaderMaterial({
                 transparent: true,
+                // opacity: .1,
                 uniforms:
                 {
                     map: { value: null },
-                    quat: { value: new THREE.Vector4() },
+                    quat: { value: isGreenland ? greenlandQuat : nonGreenlandQuat },
                     mapProjection: { value: mapProjection },
-                    transparent: true
+
+                    isochroneCenterA: { value: isochroneCenterA },
+                    isochroneCenterB: { value: isochroneCenterB },
                 },
                 vertexShader: worldMapVert,
                 fragmentShader: worldMapFrag
             });
             mat.uniforms.quat.value.set(0., 0., 0., 1.)
-            super(geo, mat)
+
+            super(mapProjectionGeo, mat)
+
+            // isochroneCenterA.set( 1., 1., 1.).normalize()
+            // isochroneCenterB.set(-1., 1., 1.).normalize()
 
             if(isGreenland) {
                 greenlands.push(this)
@@ -369,12 +380,14 @@ function initWorldMaps() {
 
         let _planeEquidistant = new THREE.Mesh(planeGeo, new THREE.MeshPhongMaterial({color:0x00FF00}))
         planeEquidistant.add(_planeEquidistant)
+        // planeEquidistant.position.x = TAU / 2. * .6
         let _planeMercator = new THREE.Mesh(planeGeo, new THREE.MeshPhongMaterial({ color: 0x00FF00 }))
         planeMercator.add(_planeMercator)
+        // planeMercator.position.x = TAU / 2. * .6
 
         let _planePerspective = new THREE.Mesh(planeGeo, new THREE.MeshPhongMaterial({ color: 0x00FF00 }))
         planePerspective.add(_planePerspective)
-        _planePerspective.position.y = 1.07
+        _planePerspective.position.y = 1.09
         _planePerspective.rotation.x = TAU / 4.
     })
 
@@ -385,13 +398,17 @@ function initWorldMaps() {
         greenlands.forEach(e => e.material.uniforms.map.value = map)
     })
 
-    initMeasuringStick(perspective, mercator, equidistant, planePerspective, planeMercator, planeEquidistant)
+    initMeasuringStick(
+        perspective, mercator, equidistant, 
+        planePerspective, planeMercator, planeEquidistant, 
+        isochroneCenterA, isochroneCenterB)
 }
 
 let worldMapVert = `
                 uniform mat4 bivMat4;
 
                 out vec2 vUv;
+                out vec3 globePos;
 
                 #define PI 3.1415926535897932384626433832795
 
@@ -441,17 +458,17 @@ let worldMapVert = `
                     float lat = PI * position.y;
 
                     // globe
-                    vec3 globePos;
-                    globePos.y = sin(lat);
-                    globePos.x = cos(lat) * sin(lon);
-                    globePos.z = cos(lat) * cos(lon);
+                    vec3 globePosUnrotated;
+                    globePosUnrotated.y = sin(lat);
+                    globePosUnrotated.x = cos(lat) * sin(lon);
+                    globePosUnrotated.z = cos(lat) * cos(lon);
 
-                    vec3 rotated = applyQuaternion(globePos,quat);
-                    lon = atan(rotated.x, rotated.z);
-                    lat = asin(rotated.y);
+                    globePos = normalize(applyQuaternion(globePosUnrotated,quat));
+                    lon = atan(globePos.x, globePos.z);
+                    lat = asin(globePos.y);
 
                     if(mapProjection == 0) {
-                        pos = rotated;
+                        pos = globePos;
                     }
 
                     //equirectangular
@@ -482,12 +499,12 @@ let worldMapVert = `
                         pos.x = k * cos(lat) * sin(lon);
                         pos.y = k * (cos(lat0)*sin(lat) - sin(lat0)*cos(lat)*cos(lon));
                         pos.z = 0.;
-                        pos *= .7;
+                        pos *= .9;
                     }
 
                     //gnomonic
                     if(mapProjection == 4) {
-                        pos.xy = .4 * -rotated.xz / rotated.y;
+                        pos.xy = .4 * -globePos.xz / globePos.y;
                         pos.z = 0.;
                     }
 
@@ -505,6 +522,13 @@ let worldMapVert = `
                         if( abs(length(pos.xy)) > max )
                             pos = vec3(0.,0.,-5.);
                     }
+
+                    if(mapProjection == 0) {
+                        pos *= 1.03;
+                    }
+                    else {
+                        pos.z += .01;
+                    }
                 
                     gl_Position = projectionMatrix * modelViewMatrix * vec4( pos, 1.0 );
                     gl_PointSize = 3.5;
@@ -513,11 +537,38 @@ let worldMapFrag = `
                 precision highp float;
 
                 in vec2 vUv;
+                in vec3 globePos;
                 uniform sampler2D map;
+                uniform vec3 isochroneCenterA;
+                uniform vec3 isochroneCenterB;
 
                 void main (void) {
 
                     vec2 uv = vUv;
 
                     gl_FragColor = texture2D( map, uv );
+
+                    float totalRadius = acos(dot(isochroneCenterA,isochroneCenterB));
+                    float spacing = 26.;
+                    
+                    float angleA = acos(dot(globePos,isochroneCenterA));
+                    float angleB = acos(dot(globePos,isochroneCenterB));
+                    
+                    float cA = cos( angleA * spacing );
+                    float cB = cos( angleB * spacing );
+                    
+                    float angleToAxis = abs(dot(globePos,normalize(cross(isochroneCenterA,isochroneCenterB))));
+
+                    if( angleToAxis < 999. ){
+                        if(angleA < totalRadius && cA > .985 )
+                            gl_FragColor.rgb = vec3(1.,0.,0.);
+                        if(angleB < totalRadius && cB > .985 )
+                            gl_FragColor.rgb = vec3(0.,0.,1.);
+                    }
+
+                    vec3 halfway = normalize(isochroneCenterA + isochroneCenterB);
+                    float angleToHalfway = acos(dot(globePos,halfway));
+                    
+                    if(angleToAxis < .01 && angleToHalfway < totalRadius / 2.)
+                        gl_FragColor.rgb = vec3(0.,0.,0.);
                 }`

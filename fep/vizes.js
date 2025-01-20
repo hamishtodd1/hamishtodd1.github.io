@@ -42,11 +42,11 @@ function initVizes2d() {
 
     let bg = new THREE.Mesh(unchangingUnitSquareGeometry, new THREE.MeshBasicMaterial({ color: 0xA2D6F9 }))
     beliefSpaceScene.add(bg)
-    bg.scale.setScalar(2.7,1.6,1.)
-    bg.position.z = -.1
+    bg.scale.setScalar(3.2,1.9,1.)
+    bg.position.z = -.01
     let frame = new THREE.Mesh(unchangingUnitSquareGeometry, new THREE.MeshBasicMaterial({ color: 0x000000 }))
     frame.scale.set(bg.scale.x + .1, bg.scale.y + .1, 1.)
-    frame.position.z = -.11
+    frame.position.z = -.011
     beliefSpaceScene.add(frame)
 
     let circlePoints = []
@@ -62,10 +62,10 @@ function initVizes2d() {
     let leftAndRightVecs = [ new THREE.Vector3(), new THREE.Vector3() ]
     let defaultMat = new THREE.LineBasicMaterial({ color: 0x00ff00 })
     let center = new Mv31()
-    let someClippingPlanes = [
-        new THREE.Plane().setComponents( 1.,0.,0., bg.scale.x/2.),
-        new THREE.Plane().setComponents(-1.,0.,0., bg.scale.x/2.),
-        new THREE.Plane().setComponents( 0.,1.,0., bg.scale.y/2.),
+    let bgClippingPlanes = [
+        new THREE.Plane().setComponents( 0., -1., 0., 0.),
+        new THREE.Plane().setComponents(-1.,  0., 0., 0.),
+        new THREE.Plane().setComponents( 1.,  0., 0., 0.),
     ]
     class CircleViz extends THREE.Object3D {
 
@@ -83,6 +83,9 @@ function initVizes2d() {
                 clippingPlanes: [
                     new THREE.Plane().setComponents(  1., 0., 0., 9999.),
                     new THREE.Plane().setComponents( -1., 0., 0., 9999.),
+                    bgClippingPlanes[0],
+                    bgClippingPlanes[1],
+                    bgClippingPlanes[2],
                 ],
             })
             this.circle = new THREE.LineLoop(circleGeo, mat)
@@ -111,14 +114,15 @@ function initVizes2d() {
 
         onBeforeRender() {
 
+            this.circle.material.clippingPlanes[2].constant = beliefSpaceScene.position.y + bg.scale.y/2. * beliefSpaceScene.scale.y
+            this.circle.material.clippingPlanes[3].constant = beliefSpaceScene.position.x + bg.scale.x/2. * beliefSpaceScene.scale.x
+            this.circle.material.clippingPlanes[4].constant =-beliefSpaceScene.position.x + bg.scale.x/2. * beliefSpaceScene.scale.x
             
             if(this.mv.isZero()) {
                 this.circle.visible = false
                 this.line.visible = false
             }
             
-
-
             // debugger
             // zero-bugs version
             // let screenBounds = [e1+e0, e1-e0...]

@@ -58,6 +58,8 @@ function initGalton() {
         let blocker = new THREE.Mesh(unchangingUnitSquareGeometry, new THREE.MeshBasicMaterial({ color: 0x9CF7F6 }))
         textureLoader.load('https://hamishtodd1.github.io/fep/data/foodDispenser.png', (texture) => {
             blocker.material.map = texture
+            blocker.material.transparent = true
+            blocker.material.opacity = .9
             blocker.material.needsUpdate = true
             blocker.scale.y = 1.96
             blocker.scale.x = texture.image.width / texture.image.height * blocker.scale.y
