@@ -192,7 +192,7 @@ async function init() {
             grabbedSmt = null
     })
 
-    // if(0)
+    if(0)
     {
         let simplex = initSimplexField()
         simplex.position.y = .8
@@ -218,8 +218,8 @@ async function init() {
         galtonScene.position.x = 1.45
     }
     
-    // initWorldMaps()
-
+    initWorldMaps()
+    
     // initShm()
     // initTMaze()
     // initOrthostochastic()
@@ -285,7 +285,7 @@ async function init() {
             errorBox.style.visibility = "hidden"
         }
 
-        // updateWorldMaps()
+        updateWorldMaps()
         // updateGalton()
         // updateGaussianAnimations()
 
@@ -293,7 +293,7 @@ async function init() {
         // updatePosa()
         // updateHyperIdeals()
         // updateSimplexField()
-        updateSaccadic()
+        // updateSaccadic()
         // updateOrthostochastic()
         // updateShm()
 
