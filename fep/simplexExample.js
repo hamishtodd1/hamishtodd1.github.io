@@ -1,83 +1,118 @@
+/*
+    Simplex
+        Multiple frogs
+        Color in the lilypads
+        frog stares forward when no fly
+        grab the state and force it to a corner?
+        Make the fucking math work
+ */
+
 function initSaccadic(state) {
 
     let saccadicScene = new THREE.Group()
     scene.add(saccadicScene)
     saccadicScene.rotation.y = TAU * .07
 
-    let eyeballGeo = new THREE.SphereGeometry(.07)
-    let lidGeo = new THREE.SphereGeometry(.08, 32, 16, 0., TAU, 0., Math.PI * .45)
-    let lidMat = new THREE.MeshPhongMaterial({ color: 0x6D584F })
-    let eyeballMat = new THREE.MeshPhongMaterial({ color: 0xFFFFFF })
-    let pupilMat = new THREE.MeshPhongMaterial({ color: 0x000000 })
-    let pupilGeo = new THREE.SphereGeometry(.076, 32, 16, 0., TAU, 0., Math.PI * .11)
-    pupilGeo.rotateX(TAU * .25)
-
     let eyes = []
     let lids = []
-    for (let i = 0; i < 2; ++i) {
-        let eye = new THREE.Mesh(eyeballGeo, eyeballMat)
-        eyes.push(eye)
+    {
+        let eyeballGeo = new THREE.SphereGeometry(.07)
+        let lidGeo = new THREE.SphereGeometry(.08, 32, 16, 0., TAU, 0., Math.PI * .45)
+        let lidMat = new THREE.MeshPhongMaterial({ color: 0x6D584F })
+        let eyeballMat = new THREE.MeshPhongMaterial({ color: 0xFFFFFF })
+        let pupilMat = new THREE.MeshPhongMaterial({ color: 0x000000 })
+        let pupilGeo = new THREE.SphereGeometry(.076, 32, 16, 0., TAU, 0., Math.PI * .11)
+        pupilGeo.rotateX(TAU * .25)
 
-        eye.position.x = .14 * (i?1.:-1.)
-        eye.position.z = .47
-        eye.position.y = .52
-
-        let pupil = new THREE.Mesh(pupilGeo, pupilMat)
-        eye.add(pupil)
-
-        let lid = new THREE.Mesh(lidGeo, lidMat)
-        lids[i] = lid
-        lid.rotation.x = -TAU * .07
-        lid.position.copy(eye.position)
+        for (let i = 0; i < 2; ++i) {
+            let eye = new THREE.Mesh(eyeballGeo, eyeballMat)
+            eyes.push(eye)
+    
+            eye.position.x = .14 * (i?1.:-1.)
+            eye.position.z = .51
+            eye.position.y = .52
+    
+            let pupil = new THREE.Mesh(pupilGeo, pupilMat)
+            eye.add(pupil)
+    
+            let lid = new THREE.Mesh(lidGeo, lidMat)
+            lids[i] = lid
+            lid.rotation.x = -TAU * .07
+            lid.position.copy(eye.position)
+        }
     }
 
     let water = new THREE.Mesh(new THREE.CircleGeometry(.5), new THREE.MeshBasicMaterial({ color: 0x17777C }))
-    water.rotation.x = -TAU * .25
-    water.position.y = -.01
-    water.position.z = -.6
-    water.scale.set(3.8,5.2,1.)
-    saccadicScene.add(water)
     let spacing = 1.5
-    let lilypadGeo = new THREE.CircleGeometry(spacing * .45, 32, 0, TAU * .95)
-    lilypadGeo.rotateX(-TAU * .25)
-    let lilypadMat = new THREE.MeshBasicMaterial({ color: 0x729646 })
-    for (let i = 0; i < 4; ++i) {
-        let lilypad = new THREE.Mesh(lilypadGeo, lilypadMat)
-        lilypad.rotation.y = Math.random() * TAU
-        saccadicScene.add(lilypad)
-        lilypad.position.x = spacing*(i%2?.5:-.5)
-        lilypad.position.z = spacing*(i<2?.5:-.5)
+    let frogLilypad = null
+    {
+        water.rotation.x = -TAU * .25
+        water.position.y = -.01
+        water.position.z = -.6
+        water.scale.set(3.8, 5.2, 1.)
+        saccadicScene.add(water)
+        let lilypadGeo = new THREE.CircleGeometry(spacing * .45, 32, 0, TAU * .95)
+        lilypadGeo.rotateX(-TAU * .25)
+        let lilypadMat = new THREE.MeshBasicMaterial({ color: 0x729646 })
+        for (let i = 0; i < 4; ++i) {
+            let lilypad = new THREE.Mesh(lilypadGeo, lilypadMat)
+            lilypad.rotation.y = Math.random() * TAU
+            saccadicScene.add(lilypad)
+            lilypad.position.x = spacing * (i % 2 ? .5 : -.5)
+            lilypad.position.z = spacing * (i < 2 ? .5 : -.5)
+        }
+        frogLilypad = new THREE.Mesh(lilypadGeo, lilypadMat)
+        frogLilypad.position.z = -spacing * 1.6
+        // frogLilypad.position.x = 0.
+        saccadicScene.add(frogLilypad)
     }
-    let frogLilypad = new THREE.Mesh(lilypadGeo, lilypadMat)
-    frogLilypad.position.z = -spacing * 1.6
-    // frogLilypad.position.x = 0.
-    saccadicScene.add(frogLilypad)
 
     let tongue = new THREE.Mesh(new THREE.CylinderGeometry(.01, .01, 1.), new THREE.MeshBasicMaterial({ color: 0xFF0000 }))
-    tongue.geometry.translate(0.,0.5,0.)
-    tongue.geometry.scale(2.,1.,1.)
-    tongue.position.z = frogLilypad.position.z + .52
-    tongue.position.y = .4
-    tongue.scale.y = 0.
-    saccadicScene.add(tongue)
-
     let tongueTime = 0.
-    let fly = new THREE.Mesh(
-        new THREE.SphereGeometry(.04),
-        new THREE.MeshBasicMaterial({ color: 0x000000, side: THREE.DoubleSide }))
-    fly.scale.x = 1.7
-    fly.rotation.y = TAU *.2
-    saccadicScene.add(fly)
-    let wingGeo = new THREE.CircleGeometry(.04)
-    wingGeo.scale(1.,2.,1.)
-    wingGeo.translate(0.,0.04,0.)
-    let wingMat = new THREE.MeshBasicMaterial({ color: 0xCCCCCC, side: THREE.DoubleSide })
-    let wings = []
-    for(let i = 0; i < 2; ++i) {
-        let wing = new THREE.Mesh(wingGeo, wingMat)
-        wings.push(wing)
-        fly.add(wing)
+    {
+        tongue.geometry.translate(0., 0.5, 0.)
+        tongue.geometry.scale(2., 1., 1.)
+        tongue.position.z = frogLilypad.position.z + .52
+        tongue.position.y = .4
+        tongue.scale.y = 0.
+        saccadicScene.add(tongue)
     }
+
+    {
+        let flyGeo = new THREE.SphereGeometry(.04)
+        let flyMat = new THREE.MeshBasicMaterial({ color: 0x000000, side: THREE.DoubleSide })
+        let wingGeo = new THREE.CircleGeometry(.04)
+        wingGeo.scale(1., 2., 1.)
+        wingGeo.translate(0., 0.04, 0.)
+        let wingMat = new THREE.MeshBasicMaterial({ color: 0xCCCCCC, side: THREE.DoubleSide })
+        class Fly extends THREE.Mesh {
+            constructor() {
+                super(flyGeo, flyMat)
+
+                this.scale.x = 1.7
+                this.rotation.y = TAU * .2
+                saccadicScene.add(this)
+
+                this.wings = []
+                for (let i = 0; i < 2; ++i) {
+                    this.wings[i] = new THREE.Mesh(wingGeo, wingMat)
+                    this.wings.push(this.wings[i])
+                    this.add(this.wings[i])
+                }
+            }
+
+            onBeforeRender() {
+                this.wings[0].rotation.x = TAU * .15 * (.8 + .5 * Math.sin(frameCount * .22))
+                this.wings[1].rotation.x = -this.wings[0].rotation.x
+            }
+        }
+        window.Fly = Fly
+    }
+    let fly  = new Fly()
+    let behindFrog = new THREE.Vector3(0., 0., eyes[0].position.z * 2.)
+    fly.position.copy(behindFrog)
+
+    let flyIntendedPos = new THREE.Vector3()
 
     //view
     {
@@ -114,6 +149,7 @@ function initSaccadic(state) {
 
     let v4 = new THREE.Vector4()
     eating = false
+    let halfDistance = -1.
     updateSaccadic = () => {
 
         // if(frameCount === 100) {
@@ -126,15 +162,18 @@ function initSaccadic(state) {
         if(frameCount === 650)
             eating = true
 
-        wings[0].rotation.x = TAU * .15 * (.8 + .5 * Math.sin(frameCount * .22))
-        wings[1].rotation.x = -wings[0].rotation.x
-
         if(!eating) {
             if (frameCount % 50 === 1) {
-                fly.position.x = .5 * (Math.random() < .5 ? -spacing : spacing)
-                fly.position.z = .5 * (Math.random() < .5 ? -spacing : spacing)
-                fly.position.y = .03
+                flyIntendedPos.x = .5 * (Math.random() < .5 ? -spacing : spacing)
+                flyIntendedPos.z = .5 * (Math.random() < .5 ? -spacing : spacing)
+                flyIntendedPos.y = .03
+                halfDistance = fly.position.distanceTo(flyIntendedPos) * .5
             }
+
+            fly.position.lerp(flyIntendedPos, .2)
+            let horizontalDist = fly.position.distanceTo(flyIntendedPos)
+            fly.position.y = .7 * (sq(halfDistance) - sq(horizontalDist - halfDistance))
+
             fly.getWorldPosition(v1)
             lookPos.lerpVectors(lookPos, v1, .1)
             eyes[0].lookAt(lookPos)
@@ -191,14 +230,10 @@ function initSaccadic(state) {
         mesh.geometry.rotateX(-TAU * .25)
         organism.add(mesh)
         
-        
-
         // organism.onBeforeRender = () => {
         //     eyes[0].lookAt(mousePos.x, mousePos.y, 2.)
         //     eyes[1].lookAt(mousePos.x, mousePos.y, 2.)
         // }
-
-        
 
         textureLoader.load('https://hamishtodd1.github.io/fep/data/RatHead_BaseColor.png', texture => {
             mesh.material.map = texture

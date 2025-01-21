@@ -247,6 +247,7 @@ function initWorldMaps() {
             greenlandMovingMode = !greenlandMovingMode
             posWhenGreenlandMovingModeStarted.copy(mousePos)
         }
+        greenlands.forEach(g => g.visible = greenlandMovingMode)
     })
 
     document.addEventListener('mousemove', e => {
@@ -258,7 +259,6 @@ function initWorldMaps() {
         
             greenlands[0].material.uniforms.quat.value.copy(q1)
         }
-        greenlands.forEach(g => g.visible = greenlandMovingMode)
     })
 
     document.addEventListener('keydown', e => {
@@ -332,6 +332,7 @@ function initWorldMaps() {
 
             if(isGreenland) {
                 greenlands.push(this)
+                this.visible = greenlandMovingMode
                 this.position.z = .02
             }
             else

@@ -1,33 +1,27 @@
 /*
-    Hiding the planes and trajectories properly
-    Rotation on mercator!
-    Gaussian
+    
+    Gaussian - change controls
         Grab a point, mousewheel to rotate
         Grab background and move mouse and see that rigid motion
-    Simplex
-        Cloud of flies above, they come down and hop from pad to pad
-        Multiple frogs
+    Change sampling
+        Some kind of "glow" followed by the pellets popping out
+        click the distribution in belief space or the curve to see a plop
+        plop should work properly
+        A switch on the box to "dispense food"?
+    Also gaussians
+        Make "food dispenser" look better?
+        More pegs
+    Clickbait name
     Recolor background
     Sound effects
     Rats scurry in
-    Cover semi-transparent
-    A switch on the box to "dispense food"
     Different coloured background
-    Some kind of "glow" followed by the pellets popping out
-        click the distribution in belief space or the curve to see a plop
-        plop should work properly
     show surprisal with a shader?
-    Ugh finish off the fucking simplex
-    Spacebar to move simplyMoveableThings, not right click
-    Make "food dispenser" look better
-    Could have the belief space be upside down, no reason why not
+    Spacebar to move simplyMoveableThings, not right click?
     
     Logo?
     
-    Edit in the footage!
-
-    Record by wednesday night, edit on thurs
-
+    Edit in the footage
  */
 
 /*
@@ -198,17 +192,16 @@ async function init() {
             grabbedSmt = null
     })
 
-    
-
+    // if(0)
     {
-        // let simplex = initSimplexField()
-        // simplex.position.y = .8
-        // simplex.scale.multiplyScalar(.6)
-        // let state = new SimplexState()
+        let simplex = initSimplexField()
+        simplex.position.y = .8
+        simplex.scale.multiplyScalar(.6)
+        let state = new SimplexState()
 
-        // let saccadicScene = initSaccadic(state)
-        // saccadicScene.position.y = -.8
-        // saccadicScene.scale.multiplyScalar(.8)
+        let saccadicScene = initSaccadic(state)
+        saccadicScene.position.y = -.8
+        saccadicScene.scale.multiplyScalar(.8)
     }
 
     if(0)
@@ -225,13 +218,14 @@ async function init() {
         galtonScene.position.x = 1.45
     }
     
+    // initWorldMaps()
+
     // initShm()
     // initTMaze()
     // initOrthostochastic()
     // initGraph()
     // await initPosa3d()
     // initHyperbolic()
-    initWorldMaps()
     // initHyperIdeals()
 
     document.addEventListener('mousewheel', (event) => {
@@ -291,7 +285,7 @@ async function init() {
             errorBox.style.visibility = "hidden"
         }
 
-        updateWorldMaps()
+        // updateWorldMaps()
         // updateGalton()
         // updateGaussianAnimations()
 
@@ -299,8 +293,8 @@ async function init() {
         // updatePosa()
         // updateHyperIdeals()
         // updateSimplexField()
+        updateSaccadic()
         // updateOrthostochastic()
-        // updateSaccadic()
         // updateShm()
 
         obj3dsWithOnBeforeRenders.forEach(obj => obj.onBeforeRender())
