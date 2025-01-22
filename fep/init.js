@@ -107,6 +107,22 @@ async function init() {
     let haveFrog = false
     let haveGaussians = false
     let haveMaps = true
+
+    textureLoader.load(`https://hamishtodd1.github.io/fep/data/backdrop.png`, texture => {
+        let mat = new THREE.MeshBasicMaterial({
+            map: texture,
+            transparent: true,
+            color: new THREE.Color().setHSL(0., .5, .5),
+        })
+
+        let mesh = new THREE.Mesh(unchangingUnitSquareGeometry, mat)
+        mesh.scale.y = 4.7
+        mesh.scale.x = texture.image.width / texture.image.height * mesh.scale.y
+        mesh.scale.x *= 1.04
+        mesh.position.x = 1.68
+        mesh.position.z = -1.
+        scene.add(mesh)
+    })
     
     if(0)
     {
