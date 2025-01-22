@@ -37,15 +37,15 @@ function initRotations() {
     let randomTransformBiv = new Mv31()
     let tRandomTransform = -1.
     document.addEventListener(`keydown`, e => { 
-        if(e.key === `a`) 
-            rotatingMode = !rotatingMode
+        if(e.key === `a`) {
+            if(fromToGaussians[0] && fromToGaussians[1]) {
+                isoContours.forEach(isoContour => {
+                    isoContour.visible = !isoContour.visible
+                })
+            }
+        }
         if (e.key === 's')
             connectingArcsVisible = !connectingArcsVisible
-        if (e.key === `g`) {
-            isoSurprises.forEach(isoSurprise => {
-                isoSurprise.visible = !isoSurprise.visible
-            })
-        }
         if (e.key === 'd') {
             if (tRandomTransform !== -1)
                 tRandomTransform = -1.
@@ -53,7 +53,7 @@ function initRotations() {
                 tRandomTransform = 1.1
         }
         if(e.key === `f`) {
-            for(let i = 0; i < 4; ++i) {
+            for(let i = 0; i < 7; ++i) {
                 let gaussian = new Gaussian(col0.setHSL(Math.random(), 1., .5).getHex())
                 randomizeGaussian(gaussian)
                 gaussian.visible = true
@@ -176,78 +176,78 @@ function initRotations() {
         // Random transforms //
         ///////////////////////
 
-        if (tRandomTransform !== -1.) {
+        // if (tRandomTransform !== -1.) {
 
-            //attempt at resetting
-            // freeGaussians.forEach(fg => {
-            //     // if(frameCount > 150)
-            //     //     debugger    
-            //     let inSpace = 
-            //         fg.viz.positions[0].x < bg.scale.x / 2. &&
-            //         fg.viz.positions[0].x > -bg.scale.x / 2. //&&
-            //         // fg.viz.positions[0].y < bg.scale.y / 2. &&
-            //         // fg.viz.positions[0].y > 0.
-            //     if (!inSpace) {
-            //         log("y")
-            //         randomizeGaussian(fg)
-            //     }
-            // })
+        //     //attempt at resetting
+        //     // freeGaussians.forEach(fg => {
+        //     //     // if(frameCount > 150)
+        //     //     //     debugger    
+        //     //     let inSpace = 
+        //     //         fg.viz.positions[0].x < bg.scale.x / 2. &&
+        //     //         fg.viz.positions[0].x > -bg.scale.x / 2. //&&
+        //     //         // fg.viz.positions[0].y < bg.scale.y / 2. &&
+        //     //         // fg.viz.positions[0].y > 0.
+        //     //     if (!inSpace) {
+        //     //         log("y")
+        //     //         randomizeGaussian(fg)
+        //     //     }
+        //     // })
 
-            tRandomTransform += frameDelta * .8
+        //     tRandomTransform += frameDelta * .8
 
-            if( tRandomTransform >= 1. ) {
-                tRandomTransform = 0.
+        //     if( tRandomTransform >= 1. ) {
+        //         tRandomTransform = 0.
                 
-                // sometimes parabolic
-                // sometimes rotation
-                // sometimes hyperbolic
-                let r = Math.random()
-                if(r < .2) {
-                    log("rotation")
-                    meanSdToPosPp((Math.random() - .5), .4 + .2 * Math.random(), randomTransformBiv).cheapNormalize(randomTransformBiv)
-                    if(Math.random() < .5 )
-                        randomTransformBiv.negate()
-                }
-                else if(r < .5) {
-                    log("hyperbolic")
-                    meanSdToPosPp((Math.random() - .5), .6 * Math.random(), mv0)
-                    meanSdToPosPp((Math.random() - .5), .6 * Math.random(), mv1)
-                    mv0.mulReverse(mv1, mv2).cheapSqrt(mv3).logarithm(randomTransformBiv).cheapNormalize(randomTransformBiv)
-                }
-                else if(r < .8) {
-                    log("scaling")
-                    let x = (Math.random() - .5)
-                    // debugger
-                    meanSdToPosPp(x, 1., mv0)
-                    meanSdToPosPp(x, 1.1, mv1)
-                    mv0.mulReverse(mv1, mv2).cheapSqrt(mv3).logarithm(randomTransformBiv)
-                    randomTransformBiv.cheapNormalize(randomTransformBiv).multiplyScalar(Math.random()>.5?.3:-.3, randomTransformBiv)
-                }
-                else {
-                    log("parabolic")
-                    let location = .87 * (Math.random() - .5)
-                    _one.addScaled(_e10, location, mv0)
-                    mv0.sandwich(_e1o, mv1)
-                    let speed = .5 * (Math.random() < .5 ? 1. : -1.)
-                    mv1.multiplyScalar(speed, randomTransformBiv)
-                }
-                //translation?
-            }
+        //         // sometimes parabolic
+        //         // sometimes rotation
+        //         // sometimes hyperbolic
+        //         let r = Math.random()
+        //         if(r < .2) {
+        //             log("rotation")
+        //             meanSdToPosPp((Math.random() - .5), .4 + .2 * Math.random(), randomTransformBiv).cheapNormalize(randomTransformBiv)
+        //             if(Math.random() < .5 )
+        //                 randomTransformBiv.negate()
+        //         }
+        //         else if(r < .5) {
+        //             log("hyperbolic")
+        //             meanSdToPosPp((Math.random() - .5), .6 * Math.random(), mv0)
+        //             meanSdToPosPp((Math.random() - .5), .6 * Math.random(), mv1)
+        //             mv0.mulReverse(mv1, mv2).cheapSqrt(mv3).logarithm(randomTransformBiv).cheapNormalize(randomTransformBiv)
+        //         }
+        //         else if(r < .8) {
+        //             log("scaling")
+        //             let x = (Math.random() - .5)
+        //             // debugger
+        //             meanSdToPosPp(x, 1., mv0)
+        //             meanSdToPosPp(x, 1.1, mv1)
+        //             mv0.mulReverse(mv1, mv2).cheapSqrt(mv3).logarithm(randomTransformBiv)
+        //             randomTransformBiv.cheapNormalize(randomTransformBiv).multiplyScalar(Math.random()>.5?.3:-.3, randomTransformBiv)
+        //         }
+        //         else {
+        //             log("parabolic")
+        //             let location = .87 * (Math.random() - .5)
+        //             _one.addScaled(_e10, location, mv0)
+        //             mv0.sandwich(_e1o, mv1)
+        //             let speed = .5 * (Math.random() < .5 ? 1. : -1.)
+        //             mv1.multiplyScalar(speed, randomTransformBiv)
+        //         }
+        //         //translation?
+        //     }
 
-            randomTransformBiv.multiplyScalar( .01, mv0).exp(mv1)
-            freeGaussians.forEach(fg => {
-                fg.viz.mv.copy(mv1.sandwich(fg.viz.mv, mv2))
-                fg.updateFromMv()
-            })
-        }
+        //     randomTransformBiv.multiplyScalar( .01, mv0).exp(mv1)
+        //     freeGaussians.forEach(fg => {
+        //         fg.viz.mv.copy(mv1.sandwich(fg.viz.mv, mv2))
+        //         fg.updateFromMv()
+        //     })
+        // }
     }
 
-    let isoSurprises = [
+    let isoContours = [
         new CircleViz(0xff0000), new CircleViz(0xff0000), new CircleViz(0xff0000), new CircleViz(0xff0000), new CircleViz(0xff0000), new CircleViz(0xff0000),
-        new CircleViz(0x0000ff), new CircleViz(0x0000ff), new CircleViz(0x0000ff), new CircleViz(0x0000ff), new CircleViz(0x0000ff), new CircleViz(0x00ff00),
+        new CircleViz(0x0000ff), new CircleViz(0x0000ff), new CircleViz(0x0000ff), new CircleViz(0x0000ff), new CircleViz(0x0000ff), new CircleViz(0x0000ff),
     ]
-    isoSurprises.forEach((isoSurprise,i) => {
-        // isoSurprise.visible = false
+    isoContours.forEach((isoContour,i) => {
+        // isoContour.visible = false
     })
 
     document.addEventListener('mousemove', e => {
@@ -272,6 +272,11 @@ function initRotations() {
             let y = posInbeliefSpaceScene.y < .03 ? 0. : posInbeliefSpaceScene.y
             ppVizes[heldFreeGaussianIndex].gaussian.setMeanSd(posInbeliefSpaceScene.x, y)
             resetRatIfExistent(ppVizes[heldFreeGaussianIndex])
+
+            if(fromToGaussians[0] && fromToGaussians[1] && fromToGaussians[0].viz.visible && fromToGaussians[1].viz.visible) {
+                if(fromToGaussians[0].viz === ppVizes[heldFreeGaussianIndex] || fromToGaussians[1].viz === ppVizes[heldFreeGaussianIndex]) 
+                    resetDemoTransform()
+            }
         }
         else if(holdingRotater) {
             frameOfLastRotaterMovement = frameCount
@@ -341,6 +346,7 @@ function initRotations() {
 
         if(heldFreeGaussianIndex !== -1) {
             let g = freeGaussians.find(g => g.viz === ppVizes[heldFreeGaussianIndex])
+            g.buzzStart = frameCount
             makeBunchComeOutFromDistribution(g)
     
             heldFreeGaussianIndex = -1
@@ -367,19 +373,83 @@ function initRotations() {
             // demoTransformCircle.mv.copy(_ep)
 
             for(let i = 0; i < 2; ++i) {
-                for (let j = 0, jl = isoSurprises.length / 2; j < jl; ++j) {
-                    let isoSurprise = isoSurprises[i * jl + j]
+                for (let j = 0, jl = isoContours.length / 2; j < jl; ++j) {
+                    let isoContour = isoContours[i * jl + j]
                     toward.pow(.5*(j+1) / (jl + 1), mv0)
                     mv0.sandwich(fromToGaussians[i].viz.mv, mv1).pointPairToVecs(vecs)
                     let v = vecs[0].y > vecs[1].y ? vecs[0] : vecs[1]
                     mv2.vecToZrc(v)
                     let pointor = mv2.mul(_e12pm, mv3)
-                    pointor.inner(fromToGaussians[i].viz.mv, isoSurprise.mv)
+                    pointor.inner(fromToGaussians[i].viz.mv, isoContour.mv)
                     // debugger
                 }
             }
         }
 
         demoTransformCircle.visible = true
+    }
+
+    
+
+    function setIsoContour(index, center, radius) {
+        let isoContour = isoContours[i * jl + j]
+        toward.pow(radius, mv0)
+        mv0.sandwich(fromToGaussians[i].viz.mv, mv1).pointPairToVecs(vecs)
+        let v = vecs[0].y > vecs[1].y ? vecs[0] : vecs[1]
+        mv2.vecToZrc(v)
+        let pointor = mv2.mul(_e12pm, mv3)
+        pointor.inner(fromToGaussians[i].viz.mv, isoContour.mv)
+    }
+
+    {
+        let grabbed = false
+        let grabStart = new Mv31()
+        let rotationAngle = 0.
+        let initialGaussianMvs = []
+        document.addEventListener('mousedown', e => {
+            if (e.button === 1) {
+                grabbed = true
+                beliefSpaceScene.worldToLocal(posInbeliefSpaceScene.copy(mousePos))
+                let y = posInbeliefSpaceScene.y < .03 ? 0. : posInbeliefSpaceScene.y
+                meanSdToPosPp(posInbeliefSpaceScene.x, y, grabStart)
+
+                while (initialGaussianMvs.length < freeGaussians.length)
+                    initialGaussianMvs.push(new Mv31())
+
+                freeGaussians.forEach((fg, i) => {
+                    initialGaussianMvs[i].copy(fg.viz.mv)
+                })
+            }
+        })
+        document.addEventListener('mouseup', e => {
+            if (e.button === 1)
+                grabbed = false
+        })
+        document.addEventListener('mousewheel', e => {
+            if (grabbed) {
+                rotationAngle += e.deltaY * .0003
+                updateGrab()
+                e.stopImmediatePropagation()
+            }
+        })
+        document.addEventListener('mousemove', e => {
+            if (grabbed)
+                updateGrab()
+        })
+
+        function updateGrab() {
+            mv3.copy(grabStart).cheapNormalize(mv3).multiplyScalar(rotationAngle, mv3).exp(mv3)
+
+            beliefSpaceScene.worldToLocal(posInbeliefSpaceScene.copy(mousePos))
+            let y = posInbeliefSpaceScene.y < .03 ? 0. : posInbeliefSpaceScene.y
+            let grabCurrent = meanSdToPosPp(posInbeliefSpaceScene.x, y, mv0)
+
+            grabCurrent.mulReverse(grabStart, mv1).cheapSqrt(mv2).mul(mv3, mv4)
+
+            freeGaussians.forEach((fg, i) => {
+                mv4.sandwich(initialGaussianMvs[i], fg.viz.mv)
+                fg.updateFromMv()
+            })
+        }
     }
 }

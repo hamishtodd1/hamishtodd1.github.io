@@ -1,24 +1,15 @@
 /*
-    
-    Gaussian - change controls
-        Grab a point, mousewheel to rotate
-        Grab background and move mouse and see that rigid motion
     Change sampling
         Some kind of "glow" followed by the pellets popping out
-        click the distribution in belief space or the curve to see a plop
-        plop should work properly
-        A switch on the box to "dispense food"?
     Also gaussians
         Make "food dispenser" look better?
-        More pegs
     Clickbait name
     Recolor background
     Sound effects
     Rats scurry in
-    Different coloured background
+
     show surprisal with a shader?
     Spacebar to move simplyMoveableThings, not right click?
-    
     Logo?
     
     Edit in the footage
@@ -109,12 +100,16 @@ async function init() {
 
     initMouse() //The mouse you hold
 
+    let separator = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0., 9., 0.), new THREE.Vector3(0., -9., 0.)]), new THREE.LineBasicMaterial({ color: 0x000000 }))
+    scene.add(separator)
+    separator.position.x = -.35
+
+    let haveFrog = false
+    let haveGaussians = false
+    let haveMaps = true
+    
     if(0)
     {
-        let separator = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0., 9., 0.), new THREE.Vector3(0., -9., 0.)]), new THREE.LineBasicMaterial({ color: 0x000000 }))
-        scene.add(separator)
-        separator.position.x = -.2
-
         let slideNames = [
             `1d simplex.png`,
             `Davide.png`,
@@ -192,7 +187,7 @@ async function init() {
             grabbedSmt = null
     })
 
-    if(0)
+    if(haveFrog)
     {
         let simplex = initSimplexField()
         simplex.position.y = .8
@@ -204,7 +199,7 @@ async function init() {
         saccadicScene.scale.multiplyScalar(.8)
     }
 
-    if(0)
+    if(haveGaussians)
     {
         initVizes2d()
 
@@ -218,7 +213,8 @@ async function init() {
         galtonScene.position.x = 1.45
     }
     
-    initWorldMaps()
+    if(haveMaps)
+        initWorldMaps()
     
     // initShm()
     // initTMaze()
@@ -228,13 +224,13 @@ async function init() {
     // initHyperbolic()
     // initHyperIdeals()
 
-    document.addEventListener('mousewheel', (event) => {
-        // raycaster.setFromCamera(mouse, camera)
-        if (event.deltaY < 0.)
-            camera.position.z *= 1.1
-        if (event.deltaY > 0.)
-            camera.position.z *= (1. / 1.1)
-    })
+    // document.addEventListener('mousewheel', (event) => {
+    //     // raycaster.setFromCamera(mouse, camera)
+    //     if (event.deltaY < 0.)
+    //         camera.position.z *= 1.1
+    //     if (event.deltaY > 0.)
+    //         camera.position.z *= (1. / 1.1)
+    // })
 
 
     {
@@ -267,7 +263,7 @@ async function init() {
     // renderer.xr.enabled = true
     // renderer.setClearColor(0x405B59)
     renderer.localClippingEnabled = true
-    renderer.setClearColor(0xFFF5EF)
+    renderer.setClearColor(0xB4B1B2)
     rendererContainer.appendChild(renderer.domElement)
 
     camera.position.z += 4.
@@ -285,15 +281,19 @@ async function init() {
             errorBox.style.visibility = "hidden"
         }
 
-        updateWorldMaps()
-        // updateGalton()
-        // updateGaussianAnimations()
+        if(haveGaussians) {
+            updateGalton()
+            updateGaussianAnimations()
+        }
+        if(haveMaps)
+            updateWorldMaps()
+        if(haveFrog)
+            updateSaccadic()
 
         // updateGraph()
         // updatePosa()
         // updateHyperIdeals()
         // updateSimplexField()
-        // updateSaccadic()
         // updateOrthostochastic()
         // updateShm()
 

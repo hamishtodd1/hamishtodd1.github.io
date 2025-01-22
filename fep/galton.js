@@ -5,6 +5,7 @@ updateGalton = () => {
 function initGalton() {
 
     let pausePellets = false
+    let plopModeTimer = -1
 
     galtonScene = new THREE.Scene()
     scene.add(galtonScene)
@@ -24,6 +25,8 @@ function initGalton() {
 
     makeBunchComeOutFromDistribution = (gaussian) => {
 
+        plopModeTimer = 0
+
         pelletsOnBottom.forEach(p => p.visible = false)
 
         for (let i = 0; i < maxSamples; ++i) {
@@ -39,6 +42,9 @@ function initGalton() {
             let sample = z0 * sd + mean
             sample = pegSpacingX * Math.round(sample / pegSpacingX) //+ pegSpacingX / 2.
             settleOnBottom(pelletsOnBottom[i], sample)
+        }
+        for(let i = 0; i < maxSamples; ++i) {
+            pelletsOnBottom[i].visible = false
         }
 
         pellets.forEach(p => {
@@ -152,7 +158,19 @@ function initGalton() {
             peg.position.y -= pegs[numPegs-1].position.y
             peg.position.y += .46
         })
+
+        for(let i = 0; i < numBottomRow - 2; ++i) {
+            for(let j = 0; j < (i%2===0?numBottomRow:(numBottomRow-1)); ++j) {
+                let fakePeg = new THREE.Mesh(pegGeo, pegMat)
+                galtonScene.add(fakePeg)
+                fakePeg.position.copy(pegs[pegs.length - numBottomRow + j].position)
+                fakePeg.position.y = pegs[Math.floor(i * (i + 1) * .5)].position.y
+                if(i%2===1)
+                    fakePeg.position.x += pegSpacingX * .5
+            }
+        }
     }
+
 
     /////////////
     // Pellets //
@@ -194,9 +212,15 @@ function initGalton() {
 
         onBeforeRender() {
 
-            if(this.bounce === -1 || pausePellets)
+            if(this.bounce === -1 || pausePellets )
                 return
 
+            if(plopModeTimer !== -1) {
+                this.visible = false
+                return
+            }
+
+            // debugger
             this.timeThroughBounce += frameDelta * speed
             if (this.timeThroughBounce > bounceDuration && this.bounce < numBottomRow -1) {
                 this.timeThroughBounce -= bounceDuration
@@ -212,7 +236,9 @@ function initGalton() {
             let u = (this.posFinal.y - this.posInitial.y) - 0.5 * g
             this.position.y = this.posInitial.y + t * u + 0.5 * g * t * t
 
-            if(this.position.y < 0.) {
+            if(this.position.y >= 0.) 
+                this.position.x = this.posInitial.x + t * (this.posFinal.x - this.posInitial.x)
+            else {
 
                 let pelletOnBottom = pelletsOnBottom.find(p => !p.visible)
                 
@@ -252,8 +278,6 @@ function initGalton() {
                     this.bounce = -1
                 }
             }
-            else
-                this.position.x = this.posInitial.x + t * (this.posFinal.x - this.posInitial.x)
         }
     }
     let pelletsOnBottom = []
@@ -265,6 +289,7 @@ function initGalton() {
         pellet.visible = false
     }
 
+    let bottomSpacing = pelletRadius * 1.6
     function settleOnBottom(pelletOb, x) {
         pelletOb.visible = true
         pelletOb.position.y = 0.
@@ -272,7 +297,7 @@ function initGalton() {
         pelletsOnBottom.forEach((pellet, i) => {
             let otherVisiblePelletInSamePlace = pellet.visible && pellet !== pelletOb && Math.abs(pelletOb.position.x - pellet.position.x) < .01
             if (otherVisiblePelletInSamePlace)
-                pelletOb.position.y += pelletRadius * 1.6
+                pelletOb.position.y += bottomSpacing
         })
     }
 
@@ -375,6 +400,14 @@ function initGalton() {
 
     // new Pellet()
     updateGalton = () => {
+
+        if (plopModeTimer !== -1) {
+            plopModeTimer += 1
+            pelletsOnBottom.forEach(p => {
+                if (p.position.y < plopModeTimer * bottomSpacing)
+                    p.visible = true
+            })
+        }
 
         if (isAnotherPelletWanted() && Math.random() < .04 ) {
             let p = pellets.find(p => !p.visible)

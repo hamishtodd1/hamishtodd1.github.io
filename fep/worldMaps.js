@@ -14,9 +14,8 @@ function initMeasuringStick(
     }
 
     let identityQuaternion = new THREE.Quaternion()
-    let displacer = new THREE.Vector3()
-    let perspectiveStart = new THREE.Vector3(0., 0., 1.)
-    let perspectiveEnd = new THREE.Vector3(1., 1., 1.).normalize()
+    let perspectiveStart = new THREE.Vector3(0., 0., 0.)
+    let perspectiveEnd = new THREE.Vector3(0., 0., 0.)
 
     let globeSphere = new THREE.Sphere()
     function getGlobeIntersection(target) {
@@ -30,20 +29,24 @@ function initMeasuringStick(
         }
     }
 
-    let mrh = false
+    let holdingForRotation = false
     document.addEventListener('mousedown', event => {
         if(event.button === 1)
-            mrh = true
+            holdingForRotation = true
     })
     document.addEventListener('mouseup', event => {
         if(event.button === 1)
-            mrh = false
+            holdingForRotation = false
     })
     let axis = new THREE.Vector3()
     document.addEventListener('mousewheel', event => {
-        if(mrh) {
+        if(holdingForRotation) {
             getGlobeIntersection(axis)
             q1.setFromAxisAngle(axis, event.deltaY * .001)
+
+            perspectiveStart.applyQuaternion(q1)
+            perspectiveEnd.applyQuaternion(q1)
+
             q2.copy(perspective.children[0].material.uniforms.quat.value)
             q3.multiplyQuaternions(q1, q2)
             perspective.children[0].material.uniforms.quat.value.copy(q3)
@@ -84,7 +87,6 @@ function initMeasuringStick(
                     let [lat, lon] = equidistantToLatLon(mousePos)
                     latLonToPerspective( lat, lon, perspectiveStart )
                 }
-                isochroneCenterA.copy(perspectiveStart)
             }
         }
     })
@@ -150,6 +152,9 @@ function initMeasuringStick(
     let previousPos = new THREE.Vector3()
     updateWorldMaps = () => {
 
+        isochroneCenterA.copy(perspectiveStart)
+        isochroneCenterB.copy(perspectiveEnd)
+
         if (backAndForth > 1.)
             forth = false
         else if (backAndForth < 0.)
@@ -201,7 +206,6 @@ function initMeasuringStick(
             switch (measuringStickMap) {
                 case perspective:
                     getGlobeIntersection(perspectiveEnd)
-                    isochroneCenterB.copy(perspectiveEnd)
 
                     break
 
@@ -212,14 +216,12 @@ function initMeasuringStick(
                 case mercator:
                     [lat, lon] = mercatorToLatLon(mousePos)
                     latLonToPerspective(lat, lon, perspectiveEnd)
-                    isochroneCenterB.copy(perspectiveEnd)
 
                     break
 
                 case equidistant:
                     [lat, lon] = equidistantToLatLon(mousePos)
                     latLonToPerspective(lat, lon, perspectiveEnd)
-                    isochroneCenterB.copy(perspectiveEnd)
     
                     break
     
@@ -241,6 +243,7 @@ function initWorldMaps() {
     let euler = new THREE.Euler()
     euler.order = `YXZ`
 
+    let showIsochrones = { value: false }
     document.addEventListener('keyup', event => {
 
         if (event.key === `2`) {
@@ -248,6 +251,10 @@ function initWorldMaps() {
             posWhenGreenlandMovingModeStarted.copy(mousePos)
         }
         greenlands.forEach(g => g.visible = greenlandMovingMode)
+
+        if (event.key === `3`) {
+            showIsochrones.value = !showIsochrones.value
+        }
     })
 
     document.addEventListener('mousemove', e => {
@@ -260,44 +267,6 @@ function initWorldMaps() {
             greenlands[0].material.uniforms.quat.value.copy(q1)
         }
     })
-
-    document.addEventListener('keydown', e => {
-        /*
-            Grab greenland and africa and the plane
-
-            -Bring in Mercator
-            -Grab Greenland and Africa and move them
-            -Bring in equidistant
-            -Bring in globe
-            -Draw a line on equidistant. Plane appears at start
-            -Make notches appear on the line
-            -Make them appear on globe
-            -Same drag on mercator
-            -same drag on globe, it works properly
-
-            Features:
-                The "plane trajectory":
-                    Click on a map, move mouse to somewhere else making a line segment
-                    A plane appears at start, rotates to face in the direction your mouse is in
-                    when you let go, notches appear on the line, plane moves back and forth on it
-                    Can also draw somewhere that isn't a map, it just makes the notches
-                The "grab greenland and africa"
-
-
-
-
-            // T = sqrt(e123/(S.e1230))
-            // Math.log( |log(e4TS~T)| )
-        */
-    })
-    
-    let axis = v1.set(5., 0., 5.).normalize()
-    // let l = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0., -999., 0.), new THREE.Vector3(0., 999., 0.)]), new THREE.LineBasicMaterial({ color: 0x0000ff }))
-    // scene.add(l)
-    // l.quaternion.setFromUnitVectors(yUnit, axis)
-
-    
-
 
     let earths = []
     let greenlands = []
@@ -316,7 +285,8 @@ function initWorldMaps() {
                     map: { value: null },
                     quat: { value: isGreenland ? greenlandQuat : nonGreenlandQuat },
                     mapProjection: { value: mapProjection },
-
+                    
+                    showIsochrones,
                     isochroneCenterA: { value: isochroneCenterA },
                     isochroneCenterB: { value: isochroneCenterB },
                 },
@@ -326,9 +296,6 @@ function initWorldMaps() {
             mat.uniforms.quat.value.set(0., 0., 0., 1.)
 
             super(mapProjectionGeo, mat)
-
-            // isochroneCenterA.set( 1., 1., 1.).normalize()
-            // isochroneCenterB.set(-1., 1., 1.).normalize()
 
             if(isGreenland) {
                 greenlands.push(this)
@@ -542,6 +509,7 @@ let worldMapFrag = `
                 uniform sampler2D map;
                 uniform vec3 isochroneCenterA;
                 uniform vec3 isochroneCenterB;
+                uniform float showIsochrones;
 
                 void main (void) {
 
@@ -560,7 +528,7 @@ let worldMapFrag = `
                     
                     float angleToAxis = abs(dot(globePos,normalize(cross(isochroneCenterA,isochroneCenterB))));
 
-                    if( angleToAxis < 999. ){
+                    if( showIsochrones > .5 && angleToAxis < 999. ){
                         if(angleA < totalRadius && cA > .985 )
                             gl_FragColor.rgb = vec3(1.,0.,0.);
                         if(angleB < totalRadius && cB > .985 )

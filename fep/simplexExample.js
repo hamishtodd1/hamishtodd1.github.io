@@ -2,9 +2,9 @@
     Simplex
         Multiple frogs
         Color in the lilypads
-        frog stares forward when no fly
         grab the state and force it to a corner?
         Make the fucking math work
+        A thing that shows the probabilities as numbers?
  */
 
 function initSaccadic(state) {
@@ -29,8 +29,8 @@ function initSaccadic(state) {
             eyes.push(eye)
     
             eye.position.x = .14 * (i?1.:-1.)
-            eye.position.z = .51
             eye.position.y = .52
+            eye.position.z = .51
     
             let pupil = new THREE.Mesh(pupilGeo, pupilMat)
             eye.add(pupil)
@@ -66,6 +66,13 @@ function initSaccadic(state) {
         // frogLilypad.position.x = 0.
         saccadicScene.add(frogLilypad)
     }
+
+    let organism = new THREE.Group()
+    saccadicScene.add(organism)
+    organism.position.copy(frogLilypad.position)
+    organism.add(eyes[0], eyes[1], lids[0], lids[1])
+    let lookPos = new THREE.Vector3()
+    let lookPosIntended = new THREE.Vector3()
 
     let tongue = new THREE.Mesh(new THREE.CylinderGeometry(.01, .01, 1.), new THREE.MeshBasicMaterial({ color: 0xFF0000 }))
     let tongueTime = 0.
@@ -109,7 +116,7 @@ function initSaccadic(state) {
         window.Fly = Fly
     }
     let fly  = new Fly()
-    let behindFrog = new THREE.Vector3(0., 0., eyes[0].position.z * 2.)
+    let behindFrog = new THREE.Vector3(0., .03, eyes[0].getWorldPosition(v1).z * 3.) 
     fly.position.copy(behindFrog)
 
     let flyIntendedPos = new THREE.Vector3()
@@ -147,9 +154,16 @@ function initSaccadic(state) {
         }
     }
 
-    let v4 = new THREE.Vector4()
+    function getRandomLilyPosition(target) {
+        target.x = .5 * (Math.random() < .5 ? -spacing : spacing)
+        target.z = .5 * (Math.random() < .5 ? -spacing : spacing)
+        target.y = .03
+        return target
+    }
+
     eating = false
     let halfDistance = -1.
+    state.p.setScalar(1./4.)
     updateSaccadic = () => {
 
         // if(frameCount === 100) {
@@ -159,32 +173,56 @@ function initSaccadic(state) {
         //     camera.rotation.x = -TAU / 2.
         // }
 
-        if(frameCount === 650)
-            eating = true
 
         if(!eating) {
-            if (frameCount % 50 === 1) {
-                flyIntendedPos.x = .5 * (Math.random() < .5 ? -spacing : spacing)
-                flyIntendedPos.z = .5 * (Math.random() < .5 ? -spacing : spacing)
-                flyIntendedPos.y = .03
-                halfDistance = fly.position.distanceTo(flyIntendedPos) * .5
+
+            if (frameCount % 120 === 1) {
+                getRandomLilyPosition(flyIntendedPos)
+                halfDistance = .5 * v1.copy(fly.position).setComponent(1, flyIntendedPos.y).distanceTo(flyIntendedPos)
             }
 
-            fly.position.lerp(flyIntendedPos, .2)
-            let horizontalDist = fly.position.distanceTo(flyIntendedPos)
-            fly.position.y = .7 * (sq(halfDistance) - sq(horizontalDist - halfDistance))
+            fly.position.lerp(flyIntendedPos, .09)
+            let horizontalDist = v1.copy(fly.position).setComponent(1, flyIntendedPos.y).distanceTo(flyIntendedPos)
+            fly.position.y = .35 * (sq(halfDistance) - sq(horizontalDist - halfDistance))
+            fly.position.y = Math.max(0., fly.position.y)
 
-            fly.getWorldPosition(v1)
-            lookPos.lerpVectors(lookPos, v1, .1)
-            eyes[0].lookAt(lookPos)
-            eyes[1].lookAt(lookPos)
+            //update eyes
+            {
+                if (frameCount % 50 === 49) {
+                    do {
+                        getRandomLilyPosition(lookPosIntended)
+                    } while(lookPos.distanceTo(lookPosIntended) < .1)
+                    fly.parent.localToWorld(lookPosIntended)
+                }
+                lookPos.lerpVectors(lookPos, lookPosIntended, .1)
+                eyes[0].lookAt(lookPos)
+                eyes[1].lookAt(lookPos)
+            }
 
-            v4.x = fly.position.x > 0. && fly.position.z > 0. ? 1. : 0.
-            v4.y = fly.position.x < 0. && fly.position.z > 0. ? 1. : 0.
-            v4.z = fly.position.x < 0. && fly.position.z < 0. ? 1. : 0.
-            v4.w = fly.position.x > 0. && fly.position.z < 0. ? 1. : 0.
-            state.p.lerpVectors(state.p, v4, .02)
         }
+
+        if(lookPos.distanceTo(lookPosIntended) < .05 && lookPosIntended.lengthSq() > 0.)
+        {
+            if (fly.parent.localToWorld(v1.copy(fly.position)).distanceTo(lookPos) < .05) {
+                eating = true
+                state.p.x = (lookPosIntended.x > 0. && lookPosIntended.z > 0.) ? .9 : 0.1
+                state.p.y = (lookPosIntended.x < 0. && lookPosIntended.z > 0.) ? .9 : 0.1
+                state.p.z = (lookPosIntended.x < 0. && lookPosIntended.z < 0.) ? .9 : 0.1
+                state.p.w = (lookPosIntended.x > 0. && lookPosIntended.z < 0.) ? .9 : 0.1
+                state.p.multiplyScalar(1. / state.p.manhattanLength())
+            }
+            else {
+                //update simplex
+                let amt = 0.003
+                // debugger
+                state.p.x = Math.max(0., state.p.x + ((lookPosIntended.x > 0. && lookPosIntended.z > 0.) ? amt : -amt))
+                state.p.y = Math.max(0., state.p.y + ((lookPosIntended.x < 0. && lookPosIntended.z > 0.) ? amt : -amt))
+                state.p.z = Math.max(0., state.p.z + ((lookPosIntended.x < 0. && lookPosIntended.z < 0.) ? amt : -amt))
+                state.p.w = Math.max(0., state.p.w + ((lookPosIntended.x > 0. && lookPosIntended.z < 0.) ? amt : -amt))
+                state.p.multiplyScalar(1./state.p.manhattanLength())
+            }
+        }
+        
         if(eating) {
             
             tongueTime += frameDelta * 18.
@@ -198,18 +236,18 @@ function initSaccadic(state) {
             if (tongueTime > Math.PI / 2. && tongueTime < Math.PI)
                 fly.position.copy(tongue.position).addScaledVector(v1, tongue.scale.y)
             else if(tongueTime > Math.PI) {
-                fly.position.y = 1.
-                fly.position.z = -8. + tongueTime * .2
-                fly.position.x = 0.
+                // fly.position.y = 1.
+                // fly.position.z = -8. + tongueTime * .2
+                // fly.position.x = 0.
 
                 eyes[0].lookAt(saccadicScene.position)
                 eyes[1].lookAt(saccadicScene.position)
             }
 
-            if (tongueTime/18. > 2.) {
-                tongueTime = 0.
-                eating = false
-            }
+            // if (tongueTime/18. > 2.) {
+            //     tongueTime = 0.
+            //     eating = false
+            // }
         }
 
         // saccadicScene.rotation.y = frameCount * .03
@@ -217,11 +255,6 @@ function initSaccadic(state) {
         renderView()
     }
 
-    let organism = new THREE.Group()
-    saccadicScene.add(organism)
-    organism.position.copy(frogLilypad.position)
-    organism.add(eyes[0], eyes[1], lids[0], lids[1])
-    let lookPos = new THREE.Vector3()
     new THREE.OBJLoader().load('https://hamishtodd1.github.io/fep/data/Toad.obj', obj => {
 
         let mesh = obj.children[0]
@@ -239,6 +272,15 @@ function initSaccadic(state) {
             mesh.material.map = texture
             mesh.material.needsUpdate = true
         })
+    })
+
+    document.addEventListener('keydown', e => {
+        if(e.key === `z`) {
+            fly.position.copy(behindFrog)
+            tongueTime = 0.
+            eating = false
+            state.p.setScalar(1./4.)
+        }
     })
 
     return saccadicScene

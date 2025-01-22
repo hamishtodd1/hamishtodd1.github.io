@@ -32,8 +32,14 @@ function initSimplexField() {
     scene.add(simplexScene)
 
     let holding = false
-    document.addEventListener('mousedown', (event) => { holding = true })
-    document.addEventListener('mouseup', (event) => { holding = false })
+    document.addEventListener('mousedown', (event) => { 
+        if(event.button == 0)
+            holding = true 
+    })
+    document.addEventListener('mouseup', (event) => { 
+        if(event.button == 0)
+            holding = false 
+    })
     document.addEventListener('mousemove', (event) => {
         if (holding && mousePosDiff.lengthSq() > 0) {
             let angle = mousePosDiff.length() * .7
@@ -126,6 +132,7 @@ function initSimplexField() {
 
         update(sample)  {
 
+
             /*
                 Correct thing to do given p:
                     compute M = FIM and its inverse
@@ -156,7 +163,9 @@ function initSimplexField() {
             // this.position.z += .03 * (Math.random() - .5)
         }
 
-        onBeforeRender(sample) {
+        onBeforeRender() {
+
+            // debugger
 
             normalizeProbability(this.p)
 
@@ -183,8 +192,8 @@ function initSimplexField() {
                 this.material.color.g += coefficient * corner.material.color.g
                 this.material.color.b += coefficient * corner.material.color.b
             })
-            let closest = corners.reduce((a, b) => this.position.distanceToSquared(a.position) < this.position.distanceToSquared(b.position) ? a : b)
-            this.lookAt(closest.position)
+            // let closest = corners.reduce((a, b) => this.position.distanceToSquared(a.position) < this.position.distanceToSquared(b.position) ? a : b)
+            // this.lookAt(closest.position)
         }
     }
     window.SimplexState = SimplexState

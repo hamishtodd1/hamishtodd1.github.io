@@ -23,7 +23,7 @@ function initGaussians() {
 
                 let x = (t - .5) * 3.5
                 let y = constant0 * Math.exp((x - mean) * (x - mean) * constant1)
-                // y *= .5 //hacked in but why not, it's linear
+                y *= .65 //hacked in but why not, it's linear
                 // y = -Math.log(y)
 
                 return optionalTarget.set(x, y, 0.)
@@ -63,6 +63,8 @@ function initGaussians() {
             galtonScene.add(this)
 
             const path = new GaussianCurve(10)
+
+            this.buzzStart = -1.
 
             computeGaussianConstants(0., 1.)
             const geometry = new THREE.TubeGeometry(path, tubularSegments, tubeRadius, 4, false)
@@ -107,6 +109,23 @@ function initGaussians() {
                 this.diracDelta.children[0].position.x = newMean
             }
         }
+
+        onBeforeRender() {
+            if (this.buzzStart !== -1.) {
+                this.ordinary.material.color.getHSL(hsl)
+                this.ordinary.material.color.setHSL
+
+                let framesSinceStart = frameCount - this.buzzStart - 1
+                let x = (.5+.5*Math.sin(framesSinceStart * .45)) / (1. + framesSinceStart * .1) //goes to 0
+                let l = .5 + .5 * x
+                this.ordinary.material.color.setHSL(hsl.h, hsl.s, l)
+
+                this.viz.children[0].material.color.copy(this.ordinary.material.color)
+                this.viz.children[1].material.color.copy(this.ordinary.material.color)
+            }
+        }
     }
     window.Gaussian = Gaussian
+
+    let hsl = {h:0.,s:0.,l:0.}
 }
