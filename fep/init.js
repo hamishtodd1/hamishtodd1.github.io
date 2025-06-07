@@ -100,29 +100,30 @@ async function init() {
 
     initMouse() //The mouse you hold
 
-    let separator = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0., 9., 0.), new THREE.Vector3(0., -9., 0.)]), new THREE.LineBasicMaterial({ color: 0x000000 }))
-    scene.add(separator)
-    separator.position.x = -.35
+    // let separator = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0., 9., 0.), new THREE.Vector3(0., -9., 0.)]), new THREE.LineBasicMaterial({ color: 0x000000 }))
+    // scene.add(separator)
+    // separator.position.x = -.35
 
     let haveFrog = false
-    let haveGaussians = false
-    let haveMaps = true
+    let haveGaussians = true
+    let haveMaps = false
+    
+    // backdrop = new THREE.Mesh(unchangingUnitSquareGeometry, new THREE.MeshBasicMaterial())
+    // textureLoader.load(`https://hamishtodd1.github.io/fep/data/backdrop.png`, texture => {
+    //     backdrop.material.map = texture
+    //     backdrop.material.needsUpdate = true
 
-    textureLoader.load(`https://hamishtodd1.github.io/fep/data/backdrop.png`, texture => {
-        let mat = new THREE.MeshBasicMaterial({
-            map: texture,
-            transparent: true,
-            color: new THREE.Color().setHSL(0., .5, .5),
-        })
+    //     backdrop.scale.y = 4.7
+    //     backdrop.scale.x = texture.image.width / texture.image.height * backdrop.scale.y
+    //     backdrop.scale.x *= 1.04
+    //     backdrop.position.x = 1.68
+    //     backdrop.position.z = -1.
+    //     scene.add(backdrop)
 
-        let mesh = new THREE.Mesh(unchangingUnitSquareGeometry, mat)
-        mesh.scale.y = 4.7
-        mesh.scale.x = texture.image.width / texture.image.height * mesh.scale.y
-        mesh.scale.x *= 1.04
-        mesh.position.x = 1.68
-        mesh.position.z = -1.
-        scene.add(mesh)
-    })
+    //     // backdrop.position.z = -2.
+    //     // backdrop.scale.multiplyScalar(1.3)
+    //     // backdrop.position.x = 0.
+    // })
     
     if(0)
     {
@@ -207,12 +208,17 @@ async function init() {
     {
         let simplex = initSimplexField()
         simplex.position.y = .8
-        simplex.scale.multiplyScalar(.6)
+        simplex.position.x += .65
+        simplex.scale.multiplyScalar(.5)
         let state = new SimplexState()
 
-        let saccadicScene = initSaccadic(state)
-        saccadicScene.position.y = -.8
-        saccadicScene.scale.multiplyScalar(.8)
+        simplyMoveableThings.push(simplex)
+
+        // let saccadicScene = initSaccadic(state)
+        // saccadicScene.position.y = -.8
+        // // saccadicScene.position.x = 1.45
+        // saccadicScene.scale.multiplyScalar(.8)
+        // simplyMoveableThings.push(saccadicScene)
     }
 
     if(haveGaussians)
@@ -225,8 +231,8 @@ async function init() {
 
         initRotations()
         
-        beliefSpaceScene.position.x = 1.45
-        galtonScene.position.x = 1.45
+        beliefSpaceScene.position.x = 0.
+        galtonScene.position.x = 0.
     }
     
     if(haveMaps)
@@ -242,10 +248,18 @@ async function init() {
 
     // document.addEventListener('mousewheel', (event) => {
     //     // raycaster.setFromCamera(mouse, camera)
-    //     if (event.deltaY < 0.)
+
+    //     let ratio = Math.abs(backdrop.position.z - camera.position.z)
+
+    //     if (event.deltaY < 0.) {
     //         camera.position.z *= 1.1
-    //     if (event.deltaY > 0.)
+    //     }
+    //     if (event.deltaY > 0.) {
     //         camera.position.z *= (1. / 1.1)
+    //     }
+    //     let mrh = Math.abs(camera.position.z - backdrop.position.z) / ratio
+    //     backdrop.scale.multiplyScalar(mrh)
+    //     backdrop.position.x *= mrh
     // })
 
 
@@ -303,8 +317,8 @@ async function init() {
         }
         if(haveMaps)
             updateWorldMaps()
-        if(haveFrog)
-            updateSaccadic()
+        // if(haveFrog)
+        //     updateSaccadic()
 
         // updateGraph()
         // updatePosa()

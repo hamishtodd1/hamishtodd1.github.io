@@ -128,8 +128,8 @@ function initSaccadic(state) {
         let view = new THREE.Mesh(unchangingUnitSquareGeometry, viewMat)
         view.scale.y = .95
         view.scale.x = view.scale.y
-        view.position.x = -2.1
-        view.position.y = -.65
+        view.position.x = -.8
+        view.position.y = 1.
         scene.add(view)
         
         let frame = new THREE.Mesh(unchangingUnitSquareGeometry, new THREE.MeshBasicMaterial({ color: 0x000000 }))
@@ -176,7 +176,7 @@ function initSaccadic(state) {
 
         if(!eating) {
 
-            if (frameCount % 120 === 1) {
+            if (frameCount % 80 === 1) {
                 getRandomLilyPosition(flyIntendedPos)
                 halfDistance = .5 * v1.copy(fly.position).setComponent(1, flyIntendedPos.y).distanceTo(flyIntendedPos)
             }
@@ -188,7 +188,7 @@ function initSaccadic(state) {
 
             //update eyes
             {
-                if (frameCount % 50 === 49) {
+                if (frameCount % 35 === 34) {
                     do {
                         getRandomLilyPosition(lookPosIntended)
                     } while(lookPos.distanceTo(lookPosIntended) < .1)
@@ -243,11 +243,16 @@ function initSaccadic(state) {
                 eyes[0].lookAt(saccadicScene.position)
                 eyes[1].lookAt(saccadicScene.position)
             }
-
             // if (tongueTime/18. > 2.) {
             //     tongueTime = 0.
             //     eating = false
             // }
+        }
+
+        if(eating && tongueTime > Math.PI * 1.5) {
+            if (Math.random() < .009) {
+                resetFly()
+            }
         }
 
         // saccadicScene.rotation.y = frameCount * .03
@@ -276,12 +281,16 @@ function initSaccadic(state) {
 
     document.addEventListener('keydown', e => {
         if(e.key === `z`) {
-            fly.position.copy(behindFrog)
-            tongueTime = 0.
-            eating = false
-            state.p.setScalar(1./4.)
+            resetFly()
         }
     })
+
+    function resetFly() {
+        fly.position.copy(behindFrog)
+        tongueTime = 0.
+        eating = false
+        state.p.setScalar(1. / 4.)
+    }
 
     return saccadicScene
 }

@@ -54,11 +54,13 @@ function initGaussians() {
     diracDeltaGeo0.rotateZ(TAU / 4.)
     let diracDeltaGeo1 = new THREE.CylinderGeometry(tubeRadius, tubeRadius, 100., 4)
     diracDeltaGeo1.translate(0.,50.,0.)
+    gaussians = []
     class Gaussian extends THREE.Group {
 
         constructor(color) {
 
             super()
+            gaussians.push(this)
 
             galtonScene.add(this)
 

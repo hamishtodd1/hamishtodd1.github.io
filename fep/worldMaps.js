@@ -41,8 +41,9 @@ function initMeasuringStick(
     let axis = new THREE.Vector3()
     document.addEventListener('mousewheel', event => {
         if(holdingForRotation) {
+
             getGlobeIntersection(axis)
-            q1.setFromAxisAngle(axis, event.deltaY * .001)
+            q1.setFromAxisAngle(axis, event.deltaY * .0003)
 
             perspectiveStart.applyQuaternion(q1)
             perspectiveEnd.applyQuaternion(q1)
@@ -50,8 +51,9 @@ function initMeasuringStick(
             q2.copy(perspective.children[0].material.uniforms.quat.value)
             q3.multiplyQuaternions(q1, q2)
             perspective.children[0].material.uniforms.quat.value.copy(q3)
+            
+            event.stopImmediatePropagation()
         }
-        event.stopImmediatePropagation()
     })
     
     let changingStickMode = false
@@ -250,7 +252,6 @@ function initWorldMaps() {
             greenlandMovingMode = !greenlandMovingMode
             posWhenGreenlandMovingModeStarted.copy(mousePos)
         }
-        greenlands.forEach(g => g.visible = greenlandMovingMode)
 
         if (event.key === `3`) {
             showIsochrones.value = !showIsochrones.value
@@ -299,7 +300,7 @@ function initWorldMaps() {
 
             if(isGreenland) {
                 greenlands.push(this)
-                this.visible = greenlandMovingMode
+                this.visible = false
                 this.position.z = .02
             }
             else

@@ -23,7 +23,7 @@ function initGalton() {
         }
     }
 
-    makeBunchComeOutFromDistribution = (gaussian) => {
+    makeBunchPlopOutFromGaussian = (gaussian) => {
 
         plopModeTimer = 0
 
@@ -69,6 +69,12 @@ function initGalton() {
             blocker.material.needsUpdate = true
             blocker.scale.y = 1.96
             blocker.scale.x = texture.image.width / texture.image.height * blocker.scale.y
+
+            let mrh = new THREE.Mesh(unchangingUnitSquareGeometry, new THREE.MeshBasicMaterial({ color: 0xA1B2F4 }))
+            mrh.scale.x += .06
+            mrh.scale.y += .1
+            mrh.position.z = -.06
+            blocker.add(mrh)
         })
         galtonScene.add(blocker)
         blocker.position.z = -.01
@@ -77,35 +83,6 @@ function initGalton() {
         let holdingBlocker = false
         document.addEventListener('keyup', e => {
 
-            //grab blocker
-            if(e.key === `q`)
-                holdingBlocker = !holdingBlocker
-
-            //`if the head is visible, make the rest visible`
-            if(e.key === `e`) {
-                rats.forEach(r => {
-                    if(r.visible) {
-                        r.gaussian.visible = true
-                        r.gaussian.viz.visible = true
-                    }
-                })
-            }
-            
-            // make another head visible
-            if(e.key === `w`) {
-
-                let nonVisibleRat = rats.find(r => !r.visible)
-                if( nonVisibleRat )
-                    nonVisibleRat.visible = true
-                else {
-                    rats.forEach(r => { 
-                        r.visible = false
-                        r.gaussian.visible = false
-                        r.gaussian.viz.visible = false
-                    })
-                }
-            }
-            
             //pause
             if (e.key === `r`)
                 pausePellets = !pausePellets
@@ -136,7 +113,7 @@ function initGalton() {
     {
         //instanceable
         let pegGeo = new THREE.CircleGeometry(.03, 14)
-        let pegMat = new THREE.MeshBasicMaterial({ color: 0xF9A720 })
+        let pegMat = new THREE.MeshBasicMaterial({ color: 0xFF0000 })
         let numInThisRow = 0
         let rows = 1
         let numPegs = numBottomRow * (numBottomRow + 1) / 2
@@ -182,7 +159,7 @@ function initGalton() {
     let pelletRadius = .02
     let pelletGeo = new THREE.CircleGeometry(pelletRadius)
     pelletGeo.translate(0.,pelletRadius,0.)
-    let pelletMat = new THREE.MeshBasicMaterial({ color: 0x000000 })
+    let pelletMat = new THREE.MeshBasicMaterial({ color: 0x00FF00 })
     let pellets = []
     class Pellet extends THREE.Mesh {
         constructor() {
@@ -331,6 +308,7 @@ function initGalton() {
 
             let mat = new THREE.MeshBasicMaterial({
                 transparent: true,
+                opacity: 0.,
                 color,
                 side: THREE.DoubleSide
             })
@@ -372,27 +350,28 @@ function initGalton() {
     }
     
     let grayRat = new Rat(0xFFFFFF)
+    // grayRat.visible = false
     grayRat.position.x = -1.9
     
-    let coloredRats = []
-    let colors = [0xFF5555, 0x55FF55, 0x5555FF]
-    colors.forEach((color, i) => {
-        let rat = new Rat(color)
-        rat.scale.x = -rat.scale.x
+    // let coloredRats = []
+    // let colors = [0xFF5555, 0x55FF55, 0x5555FF]
+    // colors.forEach((color, i) => {
+    //     let rat = new Rat(color)
+    //     rat.scale.x = -rat.scale.x
         
-        rat.position.x = -grayRat.position.x
-        rat.position.y = .2 * i
-        coloredRats.push(rat)
+    //     rat.position.x = -grayRat.position.x
+    //     rat.position.y = .2 * i
+    //     coloredRats.push(rat)
         
-        rat.visible = false
-    })
+    //     rat.visible = false
+    // })
 
-    textureLoader.load('https://hamishtodd1.github.io/fep/data/mouseHead.png', (texture) => {
-        rats.forEach(r => {
-            r.material.map = texture
-            r.material.needsUpdate = true
-        })
-    })
+    // textureLoader.load('https://hamishtodd1.github.io/fep/data/mouseHead.png', (texture) => {
+    //     rats.forEach(r => {
+    //         r.material.map = texture
+    //         r.material.needsUpdate = true
+    //     })
+    // })
 
     for(let i = 0; i < 30; ++i) {
         new Pellet()

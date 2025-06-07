@@ -37,13 +37,6 @@ function initRotations() {
     let randomTransformBiv = new Mv31()
     let tRandomTransform = -1.
     document.addEventListener(`keydown`, e => { 
-        if(e.key === `a`) {
-            if(fromToGaussians[0] && fromToGaussians[1]) {
-                isoContours.forEach(isoContour => {
-                    isoContour.visible = !isoContour.visible
-                })
-            }
-        }
         if (e.key === 's')
             connectingArcsVisible = !connectingArcsVisible
         if (e.key === 'd') {
@@ -247,12 +240,14 @@ function initRotations() {
         new CircleViz(0x0000ff), new CircleViz(0x0000ff), new CircleViz(0x0000ff), new CircleViz(0x0000ff), new CircleViz(0x0000ff), new CircleViz(0x0000ff),
     ]
     isoContours.forEach((isoContour,i) => {
-        // isoContour.visible = false
+        isoContour.visible = true
     })
 
     document.addEventListener('mousemove', e => {
 
         beliefSpaceScene.worldToLocal(posInbeliefSpaceScene.copy(mousePos))
+
+        log(heldFreeGaussianIndex)
         
         if (heldFreeGaussianIndex !== -1) {
 
@@ -345,9 +340,9 @@ function initRotations() {
     document.addEventListener('mouseup', e => {
 
         if(heldFreeGaussianIndex !== -1) {
-            let g = freeGaussians.find(g => g.viz === ppVizes[heldFreeGaussianIndex])
+            let g = gaussians.find(g => g.viz === ppVizes[heldFreeGaussianIndex])
             g.buzzStart = frameCount
-            makeBunchComeOutFromDistribution(g)
+            makeBunchPlopOutFromGaussian(g)
     
             heldFreeGaussianIndex = -1
             holdingRotater = false
@@ -357,14 +352,15 @@ function initRotations() {
     let demoTransformFactor = 0.
     let demoTransformDirection = 0.
     let demoTransformCircle = new CircleViz(0x000000)
+    demoTransformCircle.visible = false
     let demoTransform = new Mv31() 
     let fromToGaussians = [null,null]
     let toward = new Mv31()
     let vecs = [new THREE.Vector3(), new THREE.Vector3()]
     function resetDemoTransform() {
         if(freeGaussians.length > 1) {
-            fromToGaussians[0] = freeGaussians[freeGaussians.length-2]
-            fromToGaussians[1] = freeGaussians[freeGaussians.length-1]
+            fromToGaussians[0] = freeGaussians[0]
+            fromToGaussians[1] = freeGaussians[1]
             fromToGaussians[1].viz.mv.mulReverse(fromToGaussians[0].viz.mv, toward).logarithm(mv2).multiplyScalar(.005, mv2).exp(demoTransform)
             // toward.pow(.01,demoTransform)
             demoTransformFactor = 0.
@@ -386,7 +382,7 @@ function initRotations() {
             }
         }
 
-        demoTransformCircle.visible = true
+        // demoTransformCircle.visible = true
     }
 
     
@@ -407,7 +403,7 @@ function initRotations() {
         let rotationAngle = 0.
         let initialGaussianMvs = []
         document.addEventListener('mousedown', e => {
-            if (e.button === 1) {
+            if (e.button === 1 && mousePos.y < -.3) {
                 grabbed = true
                 beliefSpaceScene.worldToLocal(posInbeliefSpaceScene.copy(mousePos))
                 let y = posInbeliefSpaceScene.y < .03 ? 0. : posInbeliefSpaceScene.y
@@ -422,8 +418,10 @@ function initRotations() {
             }
         })
         document.addEventListener('mouseup', e => {
-            if (e.button === 1)
+            if (e.button === 1) {
                 grabbed = false
+                rotationAngle = 0.
+            }
         })
         document.addEventListener('mousewheel', e => {
             if (grabbed) {
@@ -445,6 +443,7 @@ function initRotations() {
             let grabCurrent = meanSdToPosPp(posInbeliefSpaceScene.x, y, mv0)
 
             grabCurrent.mulReverse(grabStart, mv1).cheapSqrt(mv2).mul(mv3, mv4)
+            _one.mul(mv3, mv4)
 
             freeGaussians.forEach((fg, i) => {
                 mv4.sandwich(initialGaussianMvs[i], fg.viz.mv)
