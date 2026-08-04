@@ -1,68 +1,9 @@
 function getMinorRadius(position) {
-    let ret = Math.max(.09,.12 * Math.pow(position.distanceTo(camera.position), .05))
+    let ret = .35*Math.max(.09,.12 * Math.pow(position.distanceTo(camera.position), .05))
     return ret
 }
 
-class SphereViz extends THREE.Group {
-    constructor(color) {
-        super()
 
-        let frontMat = new THREE.MeshPhongMaterial({
-            color,
-            clippingPlanes,
-            clipShadows: true,
-            side: THREE.FrontSide,
-            transparent: true,
-            opacity: .75,
-        })
-        let backMat = new THREE.MeshPhongMaterial({
-            color: color * .8,
-            clippingPlanes,
-            clipShadows: true,
-            side: THREE.BackSide,
-            transparent: true,
-            opacity: .75,
-        })
-
-        this.sphereGroup = new THREE.Group()
-        this.sphereGroup.add(new THREE.Mesh(sGeo, frontMat), new THREE.Mesh(sGeo, backMat))
-        // this.sphereGroup.castShadow = true
-        this.add(this.sphereGroup)
-
-        this.planeGroup = new THREE.Group()
-        this.planeGroup.add(new THREE.Mesh(pGeo, frontMat), new THREE.Mesh(pGeo, backMat))
-        // this.planeGroup.castShadow = true
-        this.planeGroup.scale.setScalar(999.)
-        this.add(this.planeGroup)
-
-        this.setFromSphere(_e5)
-    }
-
-    setFromSphere(sphere) {
-
-        let isHyperIdeal = sphere.inner(sphere, even0) < 0.
-        let isPlane = sphere.meet(_e1230, odd0)[15] === 0.
-
-        if (isHyperIdeal) {
-            this.sphereGroup.visible = false
-            this.planeGroup.visible = false
-        }
-        else if (isPlane) {
-            this.sphereGroup.visible = false
-            this.planeGroup.visible = true
-
-            _e123.projectOn(sphere, odd0).flatPointToVec3(this.planeGroup.position)
-            sphere.mulReverse(_e3, even0).toQuaternion(this.planeGroup.quaternion)
-            getSqrtQuaternion(this.planeGroup.quaternion, this.planeGroup.quaternion)
-        }
-        else {
-            this.sphereGroup.visible = true
-            this.planeGroup.visible = false
-            let radius = sphere.getSpherePositionVec3AndRadius(this.sphereGroup.position)
-            this.sphereGroup.scale.setScalar(radius)
-        }
-    }
-}
 
 class SimpleBivViz extends THREE.Group {
     
@@ -145,7 +86,8 @@ class SimpleBivViz extends THREE.Group {
         if (square !== 0.)
             bivector.multiplyScalar(1. / Math.sqrt(Math.abs(square)), bivector)
 
-        let incidentWithPointAtInf = bivector.mul(_e1230, even0).selectGrade(4, even1).isZero()
+        bivector.meet(_e0, odd0)
+        let incidentWithPointAtInf = odd0.isZero()
 
         if (square > 0.) {
             // hyperbolic or scaling
@@ -224,9 +166,8 @@ function initInvariants() {
     scene.add(bVizes[0], bVizes[1])
 
     let bivector = new Even()
-
     
-    updateVizes = (pieces, transform) => {
+    updateVizesEven = (pieces, transform) => {
 
         bVizes[0].visible = pieces.length >= 2
         bVizes[1].visible = pieces.length >= 4
@@ -242,8 +183,41 @@ function initInvariants() {
             bivector[0] = 0.
             bVizes[1].update(bivector)
         }
+    }
 
-        //yeah and there are odd elements coming!
+    let trivector = new Odd()
+    let unavector = new Odd()
+    let dualized = new Even()
+    updateVizesOdd = (pieces, transform) => {
+
+        //1-vector, 3-vector, 5-vector
+        transform.selectGrade(3, trivector)
+        transform.selectGrade(3, unavector)
+
+        if(pieces.length === 5) {
+            pieces[0].mul(pieces[1], bivector)
+            bivector[0] = 0.
+            bVizes[0].update(bivector)
+
+            pieces[2].mul(pieces[3], bivector)
+            bivector[0] = 0.
+            bVizes[1].update(bivector)
+
+            bVizes[1].visible = true
+        }
+        else if (pieces.length === 3) {
+            trivector.mul(_e12345, dualized)
+            bVizes[0].visible = true
+            // debugger
+            bVizes[0].update(dualized)
+
+            bVizes[1].visible = false
+        }
+        else {
+            bVizes[0].visible = false
+            bVizes[1].visible = false
+        }
+        
     }
 }
 

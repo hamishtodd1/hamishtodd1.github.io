@@ -42,7 +42,7 @@ async function init() {
     orbitControls.enableRotate = false
     orbitControls.enableZoom = true
 
-    initVoice()
+    // initVoice()
 
     initBrushStroke()
 

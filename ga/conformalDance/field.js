@@ -1,6 +1,9 @@
 updateField = ()=> {}
 function initField() {
 
+    let theField = new THREE.Group()
+    scene.add(theField)
+
     let loaded = false
     let modelCoords = null
     new THREE.OBJLoader().load(`data/glove.obj`, (file) => {
@@ -22,7 +25,7 @@ function initField() {
         let scale = .013
         geo.scale(scale, scale, scale)
 
-        // scene.add(file.children[1])
+        // theField.add(file.children[1])
         loaded = true
         modelCoords = geo.attributes.position.array
     })
@@ -59,19 +62,22 @@ function initField() {
     // }
 
     let geo = new THREE.SphereGeometry(.05)
+    setFieldVisibility = (newVal) => {
+        instanceMesh.visible = newVal
+    }
     let instanceMesh = new THREE.InstancedMesh(
         geo,
-        new THREE.MeshPhongMaterial({ color: 0xBD8ED2 }), numPoints);
+        new THREE.MeshPhongMaterial({ color: 0xFF0000 }), numPoints);
     instanceMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage); // will be updated every frame
     instanceMesh.castShadow = true
-    scene.add(instanceMesh);
+    theField.add(instanceMesh);
 
     let instanceMeshInitial = new THREE.InstancedMesh(
         geo,
         new THREE.MeshPhongMaterial({ color: 0xEAB63C }), numPoints);
     instanceMeshInitial.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
     instanceMeshInitial.castShadow = true
-    scene.add(instanceMeshInitial)
+    theField.add(instanceMeshInitial)
 
     let fullTransform = null
     let fullTransformEven = new Even()
@@ -113,4 +119,6 @@ function initField() {
         instanceMeshInitial.instanceMatrix.needsUpdate = true;
         // geo.attributes.position.needsUpdate = true
     }
+
+    return theField
 }

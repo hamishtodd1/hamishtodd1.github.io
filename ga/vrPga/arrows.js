@@ -22,6 +22,7 @@ function initArrows() {
         float[8] around; fromUnitAxisAndSeparation( aroundLog, angleAround, around );
     `
 
+    log(egaVerboseGlsl + egaGlsl)
     let arrowMatInjections = [
         `arrow`,
         {
@@ -123,8 +124,10 @@ function initArrows() {
                 y = y / shaftSegments
             else
                 y = 1.001 + (y - shaftSegments - 1) / headSegments
+            log(attr.array[i * 3 + 1],y)
             attr.array[i * 3 + 1] = y
         }
+
 
         var headlessGeo = new THREE.CylinderGeometry( 1., 1., 1.,
             radialSegments, shaftSegments, true)
@@ -168,14 +171,14 @@ function initArrows() {
             pointHalfWayAlongArrow ) 
             {
 
+            //if you're non-nega, you have an extraShaft, but that isn't "arrow" for these purposes
+            nonNegaDq.copy(possiblyNegaDq)
+            var isNega = nonNegaDq[0] < 0. && Math.abs(bivPart.eNormSq()) < eps // && !bivPart.isZero() //and this surely?
+            if (isNega)
+                nonNegaDq.multiplyScalar(-1., nonNegaDq)
+
             //extend viz's bounding box
             {
-                //if you're non-nega, you have an extraShaft, but that isn't "arrow" for these purposes
-                nonNegaDq.copy(possiblyNegaDq)
-                var isNega = nonNegaDq[0] < 0. && Math.abs(bivPart.eNormSq()) < eps
-                if (isNega)
-                    nonNegaDq.multiplyScalar(-1., nonNegaDq)
-
                 //bounding box and determination of arrow arclength
                 let numSamples = 8
                 for (let i = 0; i < numSamples; ++i) {

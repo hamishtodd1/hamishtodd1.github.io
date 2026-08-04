@@ -85,14 +85,16 @@ async function init() {
         
         let clockDelta = clock.getDelta()
         frameDelta = clockDelta < .1 ? clockDelta : .1 //clamped because debugger pauses create weirdness
+        let time = clock.getElapsedTime()
         ++frameCount
-        
+
         updateCameraMvs()
         updateHandMvs()
         buttonWhileDowns()
 
         // camera.position.set(0.,1.,0.)
-        // camera.position.applyAxisAngle(yUnit, -.004)
+        // camera.position.set(-6.749999999999999, 1.8000000000000012, 8.325000000000001) 
+        // camera.position.applyAxisAngle(yUnit, -.5 * time)
         camera.lookAt(0., 0., 0.)
         
         // {

@@ -16,9 +16,9 @@ function initSpheres() {
 
     let sGeo = new THREE.SphereGeometry(1.,64,32)
     let pGeo = new THREE.PlaneGeometry(1.,1.)
-    let h = 5.6 * 999.
-    let w = 6.6 * 999.
-    let clippingPlanes = [
+    let h = 5.6 
+    let w = 6.6 
+    clippingPlanes = [
         new THREE.Plane(new THREE.Vector3( 0, 0, 1), w*.5),
         new THREE.Plane(new THREE.Vector3( 0, 0,-1), w*.5),
         new THREE.Plane(new THREE.Vector3( 0, 1, 0), h*.5),
@@ -26,6 +26,15 @@ function initSpheres() {
         new THREE.Plane(new THREE.Vector3( 1, 0, 0), w*.5),
         new THREE.Plane(new THREE.Vector3(-1, 0, 0), w*.5),
     ]
+
+    setSpheresVisibility = (newVal) => {
+        clippingPlanes[0].constant = newVal ? w*.5 : 0.
+        clippingPlanes[1].constant = newVal ? w*.5 : 0.
+        clippingPlanes[2].constant = newVal ? h*.5 : 0.
+        clippingPlanes[3].constant = newVal ? h*.5 : 0.
+        clippingPlanes[4].constant = newVal ? w*.5 : 0.
+        clippingPlanes[5].constant = newVal ? w*.5 : 0.
+    }
 
     let mrh = new THREE.BufferGeometry().setFromPoints([
         new THREE.Vector3(  w/2.,  h/2.,  w/2.), new THREE.Vector3(  w/2., -h/2.,  w/2.),
@@ -109,11 +118,11 @@ function initSpheres() {
     window.SphereViz = SphereViz
 
     let svs = [
+        new SphereViz( 0x5ec962),
+        new SphereViz( 0xfde725),
         new SphereViz( 0x440154),
         new SphereViz( 0x3b528b),
         new SphereViz( 0x21918c),
-        new SphereViz( 0x5ec962),
-        new SphereViz( 0xfde725),
         //TODO viridis
     ]
     svs.forEach(sv=>scene.add(sv))

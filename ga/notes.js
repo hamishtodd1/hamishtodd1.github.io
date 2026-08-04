@@ -264,8 +264,6 @@ The kinds of question to answer (ONLY EXPERIENCE OF TRYING TO IMPLEMENT THE BELO
 	Each of these metrics that get "orientations" I guess
 
 
-One way you can have 0 is the meet of two lines that don't meet. Ummm that is e0123
-
 
 Could have a transformation that is either the identity or 0
 "Multiply this by 0 if..." is equivalent to "only have this thing appear if", which is good
