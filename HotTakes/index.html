@@ -22,18 +22,33 @@
       display: block;
       width: 100%;
       height: 100%;
+      /* touch-action is NOT inherited, so setting it on body above does nothing for
+         the canvas — and the canvas is where every touch actually lands. Without
+         this the browser claims multi-finger gestures as a pinch and fires
+         pointercancel on the in-flight drags, which breaks exactly the multitouch
+         case the game depends on. */
+      touch-action: none;
+      -webkit-touch-callout: none;
     }
     /* Off-screen input: captures the soft keyboard on mobile. Never visually shown;
        all text is drawn on the canvas. Focused when the user taps an editable box. */
     #keyboard-capture {
       position: fixed;
-      top: -100px;
-      left: -100px;
+      /* Kept INSIDE the viewport (under the canvas) — iOS scrolls to reveal a
+         focused input, and an off-screen one shifts the whole page, which would
+         invalidate the cached canvas rect and offset every touch coordinate. */
+      top: 0;
+      left: 0;
       width: 1px;
       height: 1px;
-      opacity: 0;
+      /* Not 0: some iOS versions decline to raise the keyboard for a fully
+         transparent input. The canvas covers it either way. */
+      opacity: 0.01;
+      /* Must be >= 16px or iOS auto-zooms the viewport on focus. */
+      font-size: 16px;
       border: 0;
       padding: 0;
+      z-index: -1;
       pointer-events: none;
     }
   </style>
