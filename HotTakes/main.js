@@ -150,8 +150,20 @@ var playerMaxH = 0;     // never taller than the space reserved below the outcom
 var MAX_TOP = 6;
 var TOP_COLORS = ['#FEE824', '#37588C', '#340B6E', '#3BA8A9', '#1F1E80', '#1F1E80'];
 
+// Background: a vertical gradient rather than flat black. Deliberately
+// desaturated and darkest at the BOTTOM, so the player boxes (#2a2a33) read as
+// lighter panels sitting on it while the vivid outcome colours still pop at the
+// top. Built once per resize — creating a gradient allocates, so never per frame.
+var BG_TOP = '#1c2a33';
+var BG_BOTTOM = '#0a0d14';
+var bgGradient = null;
+
+var OUTCOME_OUTLINE = '#0a0a0a';   // outcome boxes are outlined, like the betBoxes
+var OUTCOME_OUTLINE_W = 0.014;     // ÷ box height
+
 var BOTTOM_COUNT = 2;
 var BOTTOM_COLOR = '#2a2a33';
+var PLAYER_GAP_MULT = 2.6;         // gap BETWEEN players ÷ margin — they sit well apart
 var SELECTION_COLOR = '#2a6fff';
 
 // --- Resolve --------------------------------------------------------------
@@ -617,7 +629,8 @@ function layout() {
   layoutTop(margin, bottomRowH);
   // Players get their x/w from the row; their HEIGHT comes from their contents
   // (updatePlayerBoxes), capped so they can never climb into the outcomes.
-  layoutRow(bottomBoxes, BOTTOM_COUNT, margin, viewH - margin - bottomRowH, bottomRowH);
+  layoutRow(bottomBoxes, BOTTOM_COUNT, margin, viewH - margin - bottomRowH, bottomRowH,
+            margin * PLAYER_GAP_MULT);
   layoutMargin = margin;
   playerPad = Math.max(4, margin * 0.4);
   playerMaxH = bottomRowH;
@@ -897,12 +910,13 @@ function resetOutcome(b) {
   b.joltTime = 0;
 }
 
-function layoutRow(boxes, count, margin, rowY, rowH) {
-  var gap = margin;
-  var boxW = (viewW - gap * (count + 1)) / count;
+// `innerGap` is the space BETWEEN boxes, which is wider than the screen margin
+// for players so they read as clearly separate hands.
+function layoutRow(boxes, count, margin, rowY, rowH, innerGap) {
+  var boxW = (viewW - 2 * margin - innerGap * (count - 1)) / count;
   for (var k = 0; k < count; k++) {
     var b = boxes[k];
-    b.x = gap + k * (boxW + gap);
+    b.x = margin + k * (boxW + innerGap);
     b.y = rowY; b.w = boxW; b.h = rowH;
   }
 }
@@ -920,8 +934,29 @@ var gx = 0, gy = 0;
 
 // Interior geometry of a player, recomputed on demand (pure arithmetic).
 var plInnerX = 0, plInnerW = 0;
-var plMoneyY = 0, plMoneyH = 0, plMoneyCols = 1, plMoneyRows = 0;
+var plMoneyY = 0, plMoneyH = 0, plMoneyRows = 0;
+var plGroupsPerRow = 1, plGroupW = 0, plGroupGap = 0, plMoneyStartX = 0;
 var plPileTop = 0, pileRows = 0;
+
+// Money is stacked in GROUPS of maxPrice boxes — the same shape as a bet — so a
+// glance at a pile reads as "n bets' worth". Groups sit side by side with a wider
+// gap between them than between the boxes inside one, and wrap onto further rows.
+// Any amount that is not a multiple of maxPrice leaves one short final group.
+var MONEY_GROUP_GAP = 2.5;   // gap between groups ÷ unitGap
+
+function moneyGroupWidth() {
+  return maxPrice * unitW + (maxPrice - 1) * unitGap;
+}
+
+function moneyGroupsPerRow(innerW) {
+  var gap = unitGap * MONEY_GROUP_GAP;
+  return Math.max(1, Math.floor((innerW + gap) / (moneyGroupWidth() + gap)));
+}
+
+function moneyRowsFor(slots, innerW) {
+  if (slots <= 0) return 0;
+  return Math.ceil(Math.ceil(slots / maxPrice) / moneyGroupsPerRow(innerW));
+}
 
 // Height of `n` stacked rows of cells.
 function rowsHeight(n) {
@@ -952,9 +987,8 @@ function playerMoneySlots(p) {
 function updatePlayerBoxes() {
   for (var i = 0; i < BOTTOM_COUNT; i++) {
     var p = bottomBoxes[i];
-    var cols = Math.max(1, Math.floor((p.w - 2 * playerPad - unitGap) / (unitW + unitGap)));
     var bh = rowsHeight(pileTotal(p));
-    var mh = rowsHeight(Math.ceil(playerMoneySlots(p) / cols));
+    var mh = rowsHeight(moneyRowsFor(playerMoneySlots(p), p.w - 2 * playerPad));
     var h = playerPad * 2 + bh + mh + ((bh > 0 && mh > 0) ? playerPad : 0);
     if (h < playerMinH) h = playerMinH;
     if (h > playerMaxH) h = playerMaxH;   // never grow up into the outcomes
@@ -966,7 +1000,12 @@ function updatePlayerBoxes() {
 function computePlayerLayout(p) {
   plInnerX = p.x + playerPad;
   plInnerW = p.w - 2 * playerPad;
-  plMoneyCols = Math.max(1, Math.floor((plInnerW - unitGap) / (unitW + unitGap)));
+  // Money groups: as many across as fit, the block of them centred like the bets.
+  plGroupW = moneyGroupWidth();
+  plGroupGap = unitGap * MONEY_GROUP_GAP;
+  plGroupsPerRow = moneyGroupsPerRow(plInnerW);
+  var blockW = plGroupsPerRow * plGroupW + (plGroupsPerRow - 1) * plGroupGap;
+  plMoneyStartX = plInnerX + (plInnerW - blockW) * 0.5;
 
   // Money sits along the BOTTOM, filling upward from the floor of the box; the
   // bet pile starts at the TOP and reads downward.
@@ -976,7 +1015,7 @@ function computePlayerLayout(p) {
   // silently clips the LAST row. Clipping only ever happens when the box has hit
   // playerMaxH, so that is the only case that recomputes a capacity.
   var interior = p.h - 2 * playerPad;
-  plMoneyRows = Math.ceil(playerMoneySlots(p) / plMoneyCols);
+  plMoneyRows = moneyRowsFor(playerMoneySlots(p), plInnerW);
   plMoneyH = rowsHeight(plMoneyRows);
   if (plMoneyH > interior) {
     plMoneyRows = Math.max(1, Math.floor((interior + unitGap) / (unitH + unitGap)));
@@ -1023,10 +1062,14 @@ function betCellPos(b, level, col) {
   gy = b.y + b.h * bodyTopFrac + unitGap + level * (unitH + unitGap);
 }
 
-// Money box `index` in a player's grid. Assumes computePlayerLayout(p) ran.
+// Money box `index` in a player's pile. Boxes fill a GROUP of maxPrice, groups
+// fill a row, rows stack downward. Assumes computePlayerLayout(p) ran.
 function moneyCellPos(index) {
-  gx = plInnerX + unitGap + (index % plMoneyCols) * (unitW + unitGap);
-  gy = plMoneyY + unitGap + ((index / plMoneyCols) | 0) * (unitH + unitGap);
+  var group = (index / maxPrice) | 0;
+  var inGroup = index % maxPrice;
+  gx = plMoneyStartX + (group % plGroupsPerRow) * (plGroupW + plGroupGap)
+       + inGroup * (unitW + unitGap);
+  gy = plMoneyY + ((group / plGroupsPerRow) | 0) * (unitH + unitGap);
 }
 
 // Cell (slot, col) of a bet held in a player's hand. Cells are `unitW × unitH` — a
@@ -1114,7 +1157,8 @@ function render(t) {
   // Player boxes are sized by their contents, which change constantly.
   updatePlayerBoxes();
 
-  ctx.clearRect(0, 0, viewW, viewH);
+  ctx.fillStyle = bgGradient;   // covers the frame, so no clearRect needed
+  ctx.fillRect(0, 0, viewW, viewH);
 
   // Active drag pipes first, so boxes sit cleanly over the anchor ends.
   for (var k = 0; k < MAX_POINTERS; k++) {
@@ -1494,6 +1538,9 @@ function drawOutcomeBox(b, x, y, w, h, focused, resolve) {
   roundRectPath(x, y, w, h, Math.round(h * 0.1));
   ctx.fillStyle = b.color;
   ctx.fill();
+  ctx.lineWidth = Math.max(1.5, h * OUTCOME_OUTLINE_W);
+  ctx.strokeStyle = OUTCOME_OUTLINE;
+  ctx.stroke();
   if (focused) {
     ctx.lineWidth = 4; ctx.strokeStyle = '#ffffff'; ctx.stroke();
   }
@@ -1699,7 +1746,7 @@ function drawMoneyGrid(p) {
   if (count <= 0 || unitH <= 0.5 || plMoneyH <= 0) return;
 
   // If the box hit its cap the band holds fewer rows than the count needs.
-  var fits = plMoneyRows * plMoneyCols;
+  var fits = plMoneyRows * plGroupsPerRow * maxPrice;
   if (count > fits) count = fits;
 
   // Exactly the size a bet is — same cell, same fill fraction.
@@ -1742,16 +1789,40 @@ function inRect(r, px, py) {
   return px >= r.x && px <= r.x + r.w && py >= r.y && py <= r.y + r.h;
 }
 
-// Box in the row OPPOSITE the drag source that contains (px,py), or null.
+// Squared distance from a point to a rectangle — 0 anywhere inside it.
+function rectDist2(r, px, py) {
+  var dx = px < r.x ? r.x - px : (px > r.x + r.w ? px - (r.x + r.w) : 0);
+  var dy = py < r.y ? r.y - py : (py > r.y + r.h ? py - (r.y + r.h) : 0);
+  return dx * dx + dy * dy;
+}
+
+// Player boxes do not have to be hit exactly. The whole lower part of the screen
+// — everything below the top of the TALLEST player box — belongs to the players,
+// and a touch there picks whichever one it is nearest to. The boxes are narrow
+// and change height constantly, so demanding a direct hit made them fiddly.
+// Returns null above that zone.
+function playerAt(px, py) {
+  var zoneTop = Infinity;
+  var i;
+  for (i = 0; i < BOTTOM_COUNT; i++) {
+    if (bottomBoxes[i].y < zoneTop) zoneTop = bottomBoxes[i].y;
+  }
+  if (py < zoneTop) return null;
+
+  var best = null, bestD = Infinity;
+  for (i = 0; i < BOTTOM_COUNT; i++) {
+    var d = rectDist2(bottomBoxes[i], px, py);
+    if (d < bestD) { bestD = d; best = bottomBoxes[i]; }
+  }
+  return best;
+}
+
+// Box in the row OPPOSITE the drag source that (px,py) selects, or null. Outcomes
+// must be hit directly; players only have to be the nearest one in their zone.
 function boxInOppositeRow(sourceIsTop, px, py) {
-  if (sourceIsTop) {
-    for (var i = 0; i < BOTTOM_COUNT; i++) {
-      if (inRect(bottomBoxes[i], px, py)) return bottomBoxes[i];
-    }
-  } else {
-    for (var j = 0; j < topCount; j++) {
-      if (inRect(topBoxes[j], px, py)) return topBoxes[j];
-    }
+  if (sourceIsTop) return playerAt(px, py);
+  for (var j = 0; j < topCount; j++) {
+    if (inRect(topBoxes[j], px, py)) return topBoxes[j];
   }
   return null;
 }
@@ -1969,10 +2040,11 @@ function onPointerDown(pointerId, px, py) {
   for (var i = 0; i < topCount; i++) {
     if (inRect(topBoxes[i], px, py)) { src = topBoxes[i]; srcIsTop = true; break; }
   }
+  // Starting a drag is as forgiving as landing one: anywhere in the players'
+  // zone begins a drag from the nearest player.
   if (!src) {
-    for (var j = 0; j < BOTTOM_COUNT; j++) {
-      if (inRect(bottomBoxes[j], px, py)) { src = bottomBoxes[j]; srcIsTop = false; break; }
-    }
+    src = playerAt(px, py);
+    srcIsTop = false;
   }
   if (!src) { focusBox(null); return; }
 
@@ -2052,6 +2124,10 @@ function resize() {
   var rect = canvas.getBoundingClientRect();
   canvasLeft = rect.left;
   canvasTop = rect.top;
+
+  bgGradient = ctx.createLinearGradient(0, 0, 0, viewH);
+  bgGradient.addColorStop(0, BG_TOP);
+  bgGradient.addColorStop(1, BG_BOTTOM);
 
   layout();
   needsRender = true;

@@ -11,7 +11,9 @@
       width: 100%;
       height: 100%;
       overflow: hidden;
-      background: #000;
+      /* Matches the bottom of the canvas gradient in main.js, so safe-area
+         insets and any overscroll flash blend in rather than showing black. */
+      background: #0a0d14;
       /* Disable browser touch gestures (scroll, pinch, double-tap zoom) on the canvas. */
       touch-action: none;
       -webkit-user-select: none;
