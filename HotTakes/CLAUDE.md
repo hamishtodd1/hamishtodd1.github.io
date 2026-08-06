@@ -113,7 +113,7 @@ The transaction **commits in full at purchase time**. Each half is stamped with 
 
 ## Resolving an outcome
 
-Every outcome has a **resolve button** in its **top-right corner** — plain blue (`RESOLVE_COLOR`) for now, square, the height of the header strip, which shrinks to make room for it. Only the big top boxes get one; mirrors pass `resolve=false` to `drawOutcomeBox()`. `resolveBtnRect()` is the shared geometry for drawing and hit-testing.
+Every outcome has a **resolve button** in its **top-right corner** — a **`⚖️` balance-scales emoji** (`RESOLVE_EMOJI`), drawn bare with no plate behind it. Its *hit* rect is still the whole square `resolveBtnRect()` describes, so it stays as easy to tap as it looks. The header strip shrinks to make room for it. Only the big top boxes get one; mirrors pass `resolve=false` to `drawOutcomeBox()`. `resolveBtnRect()` is the shared geometry for drawing and hit-testing.
 
 Tapping it opens a **modal** (`resolveBox` holds the outcome, or null):
 - A **scrim** (`SCRIM_COLOR`) covers the whole board, dulling it.

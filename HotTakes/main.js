@@ -42,6 +42,8 @@ var TITLE_MAX_LINES = 3;
 var TITLE_FONT_FRAC = [0.120, 0.098, 0.084];  // font size, by line count
 var TITLE_HEADER_FRAC = [0.20, 0.27, 0.33];   // white strip height, by line count
 var TITLE_BODY_TOP = [0.29, 0.36, 0.42];      // where the bet grid starts, by line count
+var TITLE_TEXT_PAD = 0.04;    // ÷ box width — clear space each side of the text
+var TITLE_TEXT_VPAD = 0.07;   // ÷ header height — clear space above and below
 
 var titleLines = 1;        // shared line count — the max any outcome needs
 var titleFontFrac = TITLE_FONT_FRAC[0];
@@ -58,11 +60,18 @@ function applyTitleLines(n) {
   bodyHFrac = 0.94 - bodyTopFrac;
 }
 
-// Width available to a title: the box minus its side padding and the space the
-// resolve button occupies. Every line wraps to this, including the ones below
-// the button, so all lines break against the same width.
+// Width of the white strip: the box minus its side padding and the space the
+// resolve button occupies.
 function titleFieldWidth(w, h) {
   return w - 2 * (w * 0.08) - (Math.min(h * TITLE_HEADER_FRAC[0], w * RESOLVE_BTN_MAX_W) + w * 0.02);
+}
+
+// Width the TEXT may occupy — the strip less a padding each side. Wrapping to the
+// bare strip width let glyphs sit right on its edge (and overhang it slightly,
+// since measureText reports advance width, not ink extent). Every line wraps to
+// this, including the ones below the button, so all lines break at one width.
+function titleTextWidth(w, h) {
+  return titleFieldWidth(w, h) - 2 * (w * TITLE_TEXT_PAD);
 }
 
 // Greedy word wrap into `out`, at most `maxLines`, using the font already set on
@@ -107,7 +116,7 @@ function fittedLineCount(text, fw, boxH) {
 // Settle the shared line count, then wrap every title again at that final size so
 // the breaks match the font they will actually be drawn in.
 function rewrapTitles(boxW, boxH) {
-  var fw = titleFieldWidth(boxW, boxH);
+  var fw = titleTextWidth(boxW, boxH);
   var need = 1;
   for (var i = 0; i < topCount; i++) {
     var n = fittedLineCount(topBoxes[i].text, fw, boxH);
@@ -151,7 +160,7 @@ var SELECTION_COLOR = '#2a6fff';
 // colour asks whether the outcome happened. While it is open nothing else on the
 // board is touchable. Choosing an option has no effect on the game yet — it just
 // closes, like tapping outside does.
-var RESOLVE_COLOR = '#2a6fff';         // the button — plain blue for now
+var RESOLVE_EMOJI = '⚖️';    // balance scales — the resolve button
 var RESOLVE_BTN_MAX_W = 0.25;          // button size ÷ box width, ceiling
 var SCRIM_COLOR = 'rgba(0, 0, 0, 0.6)';
 var RESOLVE_QUESTION = 'Did this outcome happen?';
@@ -245,15 +254,81 @@ var MONEY_COLOR = '#16A34A';
 // level, bet j at level j — soon they will move while the outlines stay put.
 // NOTE: `numBetLevels`, `getBetPrice()` and `maxPrice` live in manual.js.
 var BETBOX_COLOR = '#0a0a0a';  // colour of the (stroked) betBox outlines
-var BET_COLOR = '#ffffff';     // bets are white
-// Outline weight and the size of what sits inside it are two ends of one dial:
-// the stroke is centred on the cell edge, so it eats BETBOX_STROKE_FRAC of the
-// cell overall, leaving (1 - BETBOX_STROKE_FRAC) clear inside. BET_SIZE_FRAC
-// must stay below that or the squares will sit under the outline rather than in
-// it. The stroke also spreads half its width outward, so BETBOX_STROKE_FRAC must
-// stay under BET_GAP_RATIO or neighbouring outlines will touch.
+
+// A bet is drawn in ITS OUTCOME'S colour, shifted in lightness and saturation so
+// it stands off the outcome box it sits on. Derived once per box at startup
+// (`Box.betColor`) — never per frame. The shift moves AWAY from the base
+// lightness: pale outcomes get a deep bet, dark ones a bright bet.
+// The hue is KEPT — only lightness and saturation move — so a bet always reads as
+// belonging to its outcome. It goes to one of two lightnesses; which one is
+// decided by measuring, not by a threshold, because a bet has to stand off TWO
+// backgrounds: its own outcome box (a bet's tail runs past the row's outlines
+// onto the bare box) and the dark player hand it ends up in. Whichever end wins
+// the worse of those two contrasts is the one used. Neither end goes near white —
+// that was the whole point of colouring them.
+var BET_L_DARK = 0.24, BET_L_LIGHT = 0.72;
+var BET_SAT_GAIN = 1.10, BET_SAT_LIFT = 0.08;
+
+function srgbToLinear(v) {
+  return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+}
+function relLuminance(r, g, b) {
+  return 0.2126 * srgbToLinear(r) + 0.7152 * srgbToLinear(g) + 0.0722 * srgbToLinear(b);
+}
+function contrastRatio(a, b) {
+  return (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
+}
+
+// HSL -> luminance, without building an rgb object.
+function hslLuminance(h, s, l) {
+  var a = s * Math.min(l, 1 - l);
+  var hh = h / 360;
+  var ch = function (n) {
+    var k = (n + hh * 12) % 12;
+    return l - a * Math.max(-1, Math.min(k - 3, Math.min(9 - k, 1)));
+  };
+  return relLuminance(ch(0), ch(8), ch(4));
+}
+
+function deriveBetColor(hex, againstLum) {
+  var r = parseInt(hex.slice(1, 3), 16) / 255;
+  var g = parseInt(hex.slice(3, 5), 16) / 255;
+  var b = parseInt(hex.slice(5, 7), 16) / 255;
+  var mx = Math.max(r, g, b), mn = Math.min(r, g, b), d = mx - mn;
+
+  var hue = 0;
+  if (d !== 0) {
+    if (mx === r) hue = 60 * (((g - b) / d) % 6);
+    else if (mx === g) hue = 60 * ((b - r) / d + 2);
+    else hue = 60 * ((r - g) / d + 4);
+    if (hue < 0) hue += 360;
+  }
+  var l = (mx + mn) * 0.5;
+  var s = d === 0 ? 0 : d / (1 - Math.abs(2 * l - 1));
+  var ns = Math.min(1, s * BET_SAT_GAIN + BET_SAT_LIFT);
+
+  var baseLum = relLuminance(r, g, b);
+  var bestL = BET_L_LIGHT, bestScore = -1;
+  for (var i = 0; i < 2; i++) {
+    var cand = i === 0 ? BET_L_LIGHT : BET_L_DARK;
+    var cl = hslLuminance(hue, ns, cand);
+    var score = Math.min(contrastRatio(cl, baseLum), contrastRatio(cl, againstLum));
+    if (score > bestScore) { bestScore = score; bestL = cand; }
+  }
+  return 'hsl(' + Math.round(hue) + ',' + Math.round(ns * 100) + '%,' + Math.round(bestL * 100) + '%)';
+}
+
+// The outline stroke is centred on the cell edge, so it covers the outer
+// BETBOX_STROKE_FRAC/2 of a box filling that cell — which is exactly how a bet
+// reads as framed rather than floating. The stroke also spreads half its width
+// OUTWARD, so BETBOX_STROKE_FRAC must stay under BET_GAP_RATIO or neighbouring
+// outlines will touch.
 var BETBOX_STROKE_FRAC = 0.28; // outline thickness ÷ cell
-var BET_SIZE_FRAC = 0.55;      // bet/money square size ÷ cell, so it sits inside the outline
+// Bet boxes and money boxes are ALWAYS the same size — this fraction of the cell,
+// applied to both. At 1 they fill the cell exactly, so a betBox outline frames
+// its bet and a coin is the same box wherever it is. Lowering it insets both
+// together (by the same absolute amount on all four sides), never one alone.
+var BOX_FILL_FRAC = 1.0;
 
 // PRICE: a bet is always `maxPrice` boxes wide; the number of betBox OUTLINES in
 // the row it rests on is its price. Buying always takes the CHEAPEST remaining
@@ -312,16 +387,25 @@ function Box(editable) {
   this.ownedCount = null;  // bottom boxes only: bets this player holds, per outcome index
   this.ownedLevel = null;  // bottom boxes only: level each held bet was bought at (price record)
   this.ownedArrive = null; // bottom boxes only: when each held bet finishes flying in
+  this.betColor = '#ffffff';  // top boxes only: `color` shifted, for bets on this outcome
   this.lines = ['', '', ''];  // top boxes only: `text` word-wrapped, recomputed on change
   this.lineCount = 1;
   this.crownTime = 0;      // bottom boxes only: when this player was crowned (0 = not)
   this.joltTime = 0;       // performance.now() of the last vibrate jolt
 }
 
+// The player-hand background, as a luminance — the second surface every bet
+// colour has to stand off. Computed once.
+var HAND_LUM = relLuminance(
+  parseInt(BOTTOM_COLOR.slice(1, 3), 16) / 255,
+  parseInt(BOTTOM_COLOR.slice(3, 5), 16) / 255,
+  parseInt(BOTTOM_COLOR.slice(5, 7), 16) / 255);
+
 var topBoxes = new Array(MAX_TOP);
 for (var i = 0; i < MAX_TOP; i++) {
   topBoxes[i] = new Box(true);
   topBoxes[i].color = TOP_COLORS[i];
+  topBoxes[i].betColor = deriveBetColor(TOP_COLORS[i], HAND_LUM);
   topBoxes[i].betPrices = new Float32Array(numBetLevels);
   var cols = maxPrice;                                 // a bet is maxPrice cells wide
   for (var s = 0; s < numBetLevels; s++) {
@@ -1077,21 +1161,20 @@ function drawResolution() {
   var flashing = e < RESOLVE_FLASH_MS;
   var k = flashing ? 0 : easeInOut((e - RESOLVE_FLASH_MS) / RESOLVE_MOVE_MS);
 
-  var hFrom = unitH * BET_SIZE_FRAC;
-  var inset = (unitH - hFrom) * 0.5;
-  var wFrom = unitW - 2 * inset;
-  var h = flashing ? hFrom : hFrom + (unitH - hFrom) * k;   // grows to full money size
-  var w = flashing ? wFrom : wFrom + (unitW - wFrom) * k;
+  // Bets and money are the same size, so nothing grows on the way to the pile.
+  var h = unitH * BOX_FILL_FRAC;
+  var inset = (unitH - h) * 0.5;
+  var w = unitW - 2 * inset;
   var r = Math.min(h * 0.25, 3);
 
-  // Held bets wear their outcome's colour, so that is what flashes.
+  // Held bets wear their outcome's bet colour, so that is what flashes.
   if (flashing) {
     var on = (((e / RESOLVE_FLASH_PERIOD) | 0) % 2) === 0;
-    ctx.fillStyle = on ? resolving.color : (resolveWin ? MONEY_COLOR : LOSE_FLASH_COLOR);
+    ctx.fillStyle = on ? resolving.betColor : (resolveWin ? MONEY_COLOR : LOSE_FLASH_COLOR);
   } else if (resolveWin) {
     ctx.fillStyle = MONEY_COLOR;
   } else {
-    ctx.fillStyle = resolving.color;
+    ctx.fillStyle = resolving.betColor;
     ctx.globalAlpha = 1 - k;
   }
 
@@ -1211,14 +1294,13 @@ function drawTransfer(tr) {
 
   // The bet. Its size is CONSTANT throughout the flight — a bet is the same size
   // in the outcome, in the air, and in the hand. Only position moves.
-  var betH = unitH * BET_SIZE_FRAC;
+  var betH = unitH * BOX_FILL_FRAC;
   var betIn = (unitH - betH) * 0.5;
   var betW = unitW - 2 * betIn;
   var betR = Math.min(betH * 0.25, 3);
-  // A bet is white in the outcome (where it sits on a coloured box) but takes the
-  // outcome's colour in a hand (where colour is all that identifies it). In
-  // flight it wears the colour it will have on ARRIVAL.
-  ctx.fillStyle = sell ? BET_COLOR : tr.outcome.color;
+  // A bet is its outcome's bet colour everywhere — in the grid, in the air and in
+  // a hand — so it no longer changes appearance on arrival.
+  ctx.fillStyle = tr.outcome.betColor;
   ctx.strokeStyle = ctx.fillStyle;
   // The blur samples a fixed slice of REAL time; a square's local clock only runs
   // over the non-queueing part of the flight, hence the conversion.
@@ -1244,18 +1326,18 @@ function drawTransfer(tr) {
   // The money — exactly `price` squares, which is exactly the width of the row
   // they occupy. Money is full-cell in the pile and bet-inset in the row, so the
   // size eases between the two in whichever direction it is going.
-  var inRowH = unitH * BET_SIZE_FRAC;
-  var coinIn = (unitH - inRowH) * 0.5;
-  var inRowW = unitW - 2 * coinIn;
+  // Money is the same size as a bet, and the same size in the pile as in a row,
+  // so a coin in flight no longer changes size at all.
+  var coinH = unitH * BOX_FILL_FRAC;
+  var coinIn = (unitH - coinH) * 0.5;
+  var coinW = unitW - 2 * coinIn;
+  var coinR = Math.min(coinH * 0.22, 3);
   ctx.fillStyle = MONEY_COLOR;
   ctx.strokeStyle = MONEY_COLOR;
   for (var i = 0; i < tr.price; i++) {
     var ml = staggeredT(e, i, tr.price);
     var mp = ml - dtLin; if (mp < 0) mp = 0;
     var mt = easeInOut(ml);
-    var coinH = sell ? inRowH + (unitH - inRowH) * mt : unitH + (inRowH - unitH) * mt;
-    var coinW = sell ? inRowW + (unitW - inRowW) * mt : unitW + (inRowW - unitW) * mt;
-    var coinR = Math.min(coinH * 0.22, 3);
     moneyCellPos(tr.coinFrom + i);
     var pileX = gx, pileY = gy;
     betCellPos(tr.outcome, tr.level, i); // the row's outlines, left-justified
@@ -1427,9 +1509,10 @@ function drawOutcomeBox(b, x, y, w, h, focused, resolve) {
   if (resolve) {
     resolveBtnRect(x, y, w, h);
     fw -= rbW + w * 0.02;
-    roundRectPath(rbX, rbY, rbW, rbH, Math.round(rbH * 0.25));
-    ctx.fillStyle = RESOLVE_COLOR;
-    ctx.fill();
+    // Just the emoji — no plate behind it. The hit rect is still the whole
+    // square resolveBtnRect() describes, so it stays as easy to tap.
+    ctx.font = Math.round(rbH * 0.86) + 'px serif';
+    ctx.fillText(RESOLVE_EMOJI, rbX + rbW * 0.5, rbY + rbH * 0.5);
   }
 
   roundRectPath(fx, fy, fw, fh, Math.round(fh * 0.25));
@@ -1439,9 +1522,12 @@ function drawOutcomeBox(b, x, y, w, h, focused, resolve) {
   if (b.lineCount === 1 && b.lines[0].length === 0) return;
 
   // The strip is always titleLines tall; a title needing fewer sits centred in
-  // it, so a one-line name still looks centred next to a three-line one.
-  var lineH = fh / titleLines;
-  var top = fy + (titleLines - b.lineCount) * lineH * 0.5;
+  // it, so a one-line name still looks centred next to a three-line one. The
+  // lines are inset top and bottom so ascenders and descenders stay off the edge.
+  var vpad = fh * TITLE_TEXT_VPAD;
+  var lineH = (fh - 2 * vpad) / titleLines;
+  var top = fy + vpad + (titleLines - b.lineCount) * lineH * 0.5;
+  var textW = fw - 2 * (w * TITLE_TEXT_PAD);
   var cx = fx + fw * 0.5;
   ctx.font = Math.round(h * titleFontFrac) + 'px sans-serif';
 
@@ -1450,7 +1536,7 @@ function drawOutcomeBox(b, x, y, w, h, focused, resolve) {
     var cy = top + (i + 0.5) * lineH;
     if (focused && selected) {
       var tw = ctx.measureText(line).width;
-      var hlW = Math.min(tw + 10, fw - 6);
+      var hlW = Math.min(tw + lineH * 0.3, textW);
       ctx.fillStyle = SELECTION_COLOR;
       ctx.fillRect(cx - hlW * 0.5, cy - lineH * 0.4, hlW, lineH * 0.8);
       ctx.fillStyle = '#ffffff';
@@ -1488,13 +1574,13 @@ function drawBetColumn(b) {
   // bets (white), behind — each is maxPrice cells wide at its own level.
   // A bet that has been bought is no longer alive here; it is either in flight
   // (drawn by its Transfer) or already sitting in the buyer's hand.
-  // The inner box is inset by the SAME amount on every side, so the outline's
-  // border reads uniformly thick however wide the boxes get.
-  var bh = unitH * BET_SIZE_FRAC;
+  // Bets and money are the same size; any inset is the SAME amount on every side,
+  // so the outline's border reads uniformly thick however wide the boxes get.
+  var bh = unitH * BOX_FILL_FRAC;
   var off = (unitH - bh) * 0.5;
   var bw = unitW - 2 * off;
   var betR = Math.min(bh * 0.25, 3);
-  ctx.fillStyle = BET_COLOR;
+  ctx.fillStyle = b.betColor;
   for (var j = 0; j < rows; j++) {
     if (!b.betAlive[j] || nowMs < b.betArrive[j]) continue; // a sold-back bet is still flying in
     var by = y0 + b.betLevel[j] * stepY + off;
@@ -1571,7 +1657,7 @@ function drawHeldBets(p) {
   var total = pileTotal(p);
   if (total === 0) return;
 
-  var bh = unitH * BET_SIZE_FRAC;
+  var bh = unitH * BOX_FILL_FRAC;
   var off = (unitH - bh) * 0.5;
   var bw = unitW - 2 * off;
   var r = Math.min(bh * 0.25, 3);
@@ -1580,7 +1666,7 @@ function drawHeldBets(p) {
   for (var oi = 0; oi < topCount; oi++) {
     var n = p.ownedCount[oi];
     var hidden = (resolving !== null && oi === resolvingIndex); // drawResolution owns those
-    ctx.fillStyle = topBoxes[oi].color;
+    ctx.fillStyle = topBoxes[oi].betColor;
     for (var s = 0; s < n; s++, idx++) {
       if (hidden || idx >= pileRows) continue;   // overflow past a capped box
       if (nowMs < p.ownedArrive[oi * numBetLevels + s]) continue;
@@ -1616,11 +1702,15 @@ function drawMoneyGrid(p) {
   var fits = plMoneyRows * plMoneyCols;
   if (count > fits) count = fits;
 
-  var r = Math.min(unitH * 0.22, 3);
+  // Exactly the size a bet is — same cell, same fill fraction.
+  var mh = unitH * BOX_FILL_FRAC;
+  var moff = (unitH - mh) * 0.5;
+  var mw = unitW - 2 * moff;
+  var r = Math.min(mh * 0.22, 3);
   ctx.fillStyle = MONEY_COLOR;
   for (var i = 0; i < count; i++) {
     moneyCellPos(i);
-    roundRectPath(gx, gy, unitW, unitH, r);
+    roundRectPath(gx + moff, gy + moff, mw, mh, r);
     ctx.fill();
   }
 }
