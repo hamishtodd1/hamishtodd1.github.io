@@ -174,9 +174,17 @@ var keyboardInset = 0;
 var KEYBOARD_MIN_INSET = 40;  // ignore address-bar sized changes
 var KEYBOARD_CLEARANCE = 8;   // gap left between the name field and the keyboard
 
-// Top ("outcome") box palette, in fill order. Max 6 boxes.
+// Top ("outcome") box palette: SIX EVEN SAMPLES OF VIRIDIS (t = 0, .2, .4, .6,
+// .8, 1), reordered so that consecutive outcomes are far apart on the colormap —
+// boxes are filled in this order, and the first two or three are what most games
+// actually use, so they must be the most distinct of the lot. The smallest gap
+// between neighbours here is 0.4 of the ramp.
+//   #FDE725 t=1.0 yellow    #440154 t=0.0 deep purple   #2A788E t=0.4 teal
+//   #7AD151 t=0.8 green     #414487 t=0.2 indigo        #22A884 t=0.6 sea green
+// Every entry must be DIFFERENT — two slots held the same hex before, which made
+// outcomes 5 and 6 indistinguishable.
 var MAX_TOP = 6;
-var TOP_COLORS = ['#FEE824', '#37588C', '#340B6E', '#3BA8A9', '#1F1E80', '#1F1E80'];
+var TOP_COLORS = ['#FDE725', '#440154', '#2A788E', '#7AD151', '#414487', '#22A884'];
 
 // Background: a vertical gradient rather than flat black. Deliberately
 // desaturated and darkest at the BOTTOM, so the player boxes (#2a2a33) read as
@@ -186,8 +194,20 @@ var BG_TOP = '#1c2a33';
 var BG_BOTTOM = '#0a0d14';
 var bgGradient = null;
 
-var OUTCOME_OUTLINE = '#0a0a0a';   // outcome boxes are outlined, like the betBoxes
-var OUTCOME_OUTLINE_W = 0.014;     // ÷ box height
+// ONE outline colour for every box — outcomes, hands, and therefore the walls of
+// any pipe, since a pipe is the box it grows out of extruded. Note this is NOT
+// the betBox ladder's black (`BETBOX_COLOR`) or the resolve plate's: those are
+// contents, and stay black against whatever colour their box happens to be.
+var BOX_OUTLINE = '#8893aa';
+// White fields — outcome titles, player names, the resolve plate — are outlined
+// in black, so they read as inset panels rather than as white holes in the box.
+var FIELD_OUTLINE = '#0a0a0a';
+var FIELD_STROKE_FRAC = 0.06;      // that outline's width ÷ the field's own height
+var BOX_OUTLINE_W = 0.014;         // ÷ OUTCOME box height — sets the one width every box uses
+// Outcomes, hands and the walls of a pipe are all outlined at the SAME thickness,
+// so a pipe reads as a tube of the same material as the box it grows out of.
+// Derived from the outcome box height in layoutTop() and used by all three.
+var boxOutlineW = 2;
 
 var MAX_BOTTOM = 6;      // pool size — players are pooled like outcomes
 var bottomCount = 2;     // how many are in the game right now
@@ -203,12 +223,15 @@ var SELECTION_COLOR = '#2a6fff';
 // board is touchable. Choosing an option has no effect on the game yet — it just
 // closes, like tapping outside does.
 var RESOLVE_EMOJI = '⚖️';    // balance scales — the resolve button
-// It sits on a grey plate outlined in black, so it reads as a button on every
-// palette colour rather than as decoration floating on the box.
-var RESOLVE_PLATE = '#b9bcc4';
-var RESOLVE_PLATE_PRESSED = '#8f929a';  // dips darker while held, with the emoji
-var RESOLVE_PLATE_OUTLINE = '#0a0a0a';  // the same black as the box and betBox outlines
+// It sits on a white plate outlined in black, so it reads as a button on every
+// palette colour rather than as decoration floating on the box — the same white
+// field idiom as the titles and the name fields.
+var RESOLVE_PLATE = '#ffffff';
+var RESOLVE_PLATE_PRESSED = '#d2d5dc';  // dips darker while held, with the emoji
+// The plate is outlined in FIELD_OUTLINE like every other white field; only its
+// width is its own, being tuned to the button rather than to a text field.
 var RESOLVE_PLATE_STROKE = 0.07;        // its outline width ÷ plate size
+var RESOLVE_EMOJI_DROP = 0.05;          // how far the scales sit below the plate's centre ÷ PLATE height
 var RESOLVE_BTN_MAX_W = 0.40;          // button size ÷ box width, ceiling
 var RESOLVE_BTN_H = 0.16;              // button size ÷ box height
 var RESOLVE_BAND_GAP = 0.02;           // clear space above and below it ÷ box height
@@ -305,11 +328,13 @@ var activeParticles = 0;
 // Counts can grow large and money will move between holders, so rendering is a
 // plain count→grid loop (allocation-free); no per-coin objects.
 // NOTE: `MONEY_PER_PLAYER` (starting cash) lives in manual.js (loaded first).
-// Banknote green. Deliberately kept clear of TOP_COLORS[3] ('#3BA8A9'), the only
-// other green-ish colour on the board: that one is a desaturated TEAL at hue
-// ~181°, this is a saturated green at hue ~142°. Money also fills rows inside
-// the outcome boxes, so it has to stay legible sitting directly on that teal —
-// hence the difference in saturation and lightness as well as hue.
+// Banknote green. Money fills rows INSIDE the outcome boxes, so it has to stay
+// legible on every palette colour — and viridis is a green-heavy ramp, so two of
+// them are the ones to watch: '#7AD151' (dE 25) and '#22A884' (dE 30) are the
+// closest anything gets to this. Both are still clearly distinct — the ramp
+// greens are lighter and yellower — and every coin is framed by the heavy
+// BETBOX_COLOR outline, which does most of the separating. If you retune either
+// this or TOP_COLORS, re-measure: those two are the binding pair.
 var MONEY_COLOR = '#16A34A';
 
 // --- Bets -----------------------------------------------------------------
@@ -338,8 +363,17 @@ var BETBOX_COLOR = '#0a0a0a';  // colour of the (stroked) betBox outlines
 // that was the whole point of colouring them.
 // Kept fairly close to the outcome's own lightness, so a bet reads as a shade of
 // its outcome rather than a different colour. Pulling these further apart buys
-// contrast at the cost of that family resemblance.
-var BET_L_DARK = 0.32, BET_L_LIGHT = 0.62;
+// contrast at the cost of that family resemblance — so they are tried IN ORDER
+// of preference and the first one that is actually legible wins, rather than the
+// most contrasty one always winning and washing every bet out towards white.
+//
+// Two moderate shades handle a light or dark box. They both fail on a box of
+// MIDDLING lightness — the viridis teal and sea green — where neither is far
+// enough from it: those scored 1.41 and 1.19 against their own box, i.e. all but
+// invisible. Hence the wider fallbacks, only reached when the moderate pair
+// cannot clear BET_MIN_CONTRAST against BOTH the box and the hand.
+var BET_L_CANDIDATES = [0.62, 0.32, 0.74, 0.20, 0.84, 0.12];
+var BET_MIN_CONTRAST = 2.6;
 var BET_SAT_GAIN = 1.10, BET_SAT_LIFT = 0.08;
 
 function srgbToLinear(v) {
@@ -380,12 +414,15 @@ function deriveBetColor(hex, againstLum) {
   var s = d === 0 ? 0 : d / (1 - Math.abs(2 * l - 1));
   var ns = Math.min(1, s * BET_SAT_GAIN + BET_SAT_LIFT);
 
+  // Walk the candidates in preference order and stop at the first that is
+  // legible on BOTH backgrounds; if none is, fall back to whichever scored best.
   var baseLum = relLuminance(r, g, b);
-  var bestL = BET_L_LIGHT, bestScore = -1;
-  for (var i = 0; i < 2; i++) {
-    var cand = i === 0 ? BET_L_LIGHT : BET_L_DARK;
+  var bestL = BET_L_CANDIDATES[0], bestScore = -1;
+  for (var i = 0; i < BET_L_CANDIDATES.length; i++) {
+    var cand = BET_L_CANDIDATES[i];
     var cl = hslLuminance(hue, ns, cand);
     var score = Math.min(contrastRatio(cl, baseLum), contrastRatio(cl, againstLum));
+    if (score >= BET_MIN_CONTRAST) { bestL = cand; bestScore = score; break; }
     if (score > bestScore) { bestScore = score; bestL = cand; }
   }
   return 'hsl(' + Math.round(hue) + ',' + Math.round(ns * 100) + '%,' + Math.round(bestL * 100) + '%)';
@@ -436,8 +473,7 @@ var unitGap = 0;               // px gap between cells, both axes (computed in l
 
 var DRAG_THRESHOLD = 8; // px of movement before a tap becomes a drag
 var JOLT_MS = 220;      // duration of a box's vibrate jolt
-var PIPE_OUTER = 16;    // pipe outline thickness
-var PIPE_INNER = 9;     // hollow interior thickness
+var PIPE_INNER = 9;     // the bore: how wide the tube is inside its walls
 var PIPE_CURVE = 0.45;  // bezier control offset ÷ vertical span
 var PIPE_CURVE_MIN = 16; // ...plus this, so short hops still curve
 
@@ -868,6 +904,11 @@ function layoutTop(margin, bottomRowH) {
   // rather than as an outcome itself.
   var addGap = boxH * ADD_STACK_GAP;
   var addSize = (boxH - addGap) * 0.5;
+
+  // The ONE outline weight: outcomes, hands and pipe walls all use it. Derived
+  // from the outcome box height because that is what it was always scaled to;
+  // the hands are a different height and would otherwise disagree.
+  boxOutlineW = Math.max(1.5, boxH * BOX_OUTLINE_W);
 
   // Titles are wrapped now that the box size is settled, because how many lines
   // they need decides how tall the header is — and so how much room is left for
@@ -1370,6 +1411,16 @@ function handBetCellPos(p, oi, slot, col) {
 // Rendering
 // ---------------------------------------------------------------------------
 
+// How thick a white field's black outline is. Scaled to the field's own height so
+// a three-line title does not get a hairline and a one-line name a slab, but
+// capped at the box outline weight — nothing on the board is heavier than that.
+function fieldStrokeW(fieldH) {
+  var w = fieldH * FIELD_STROKE_FRAC;
+  if (w < 1.5) w = 1.5;
+  if (w > boxOutlineW) w = boxOutlineW;
+  return w;
+}
+
 function roundRectPath(x, y, w, h, r) {
   if (r > w * 0.5) r = w * 0.5;
   if (r > h * 0.5) r = h * 0.5;
@@ -1414,16 +1465,49 @@ function pipePoint(x1, y1, x2, y2, dir, t) {
   gy = a * y1 + b * c1y + c * c2y + d * y2;
 }
 
-function drawPipe(x1, y1, x2, y2, color, dir) {
+// The pipe's centreline, run out past each anchor by `ext` so the end can be
+// buried in the box it meets. The stub is vertical and the bezier leaves both
+// endpoints vertically (the control points share their x), so it is exactly
+// tangent — the CURVE is untouched. That matters: pipePoint() is the single
+// definition of the path the squares fly along, and moving the endpoints instead
+// would change `pull` and bend it.
+function pipePath(x1, y1, x2, y2, dir, ext) {
   var pull = pipePull(y1, y2);
-  ctx.lineCap = 'round';
   ctx.beginPath();
-  ctx.moveTo(x1, y1);
+  ctx.moveTo(x1, y1 - dir * ext);
+  ctx.lineTo(x1, y1);
   ctx.bezierCurveTo(x1, y1 + dir * pull, x2, y2 - dir * pull, x2, y2);
-  ctx.strokeStyle = color;
-  ctx.lineWidth = PIPE_OUTER;
+  ctx.lineTo(x2, y2 + dir * ext);
+}
+
+// A pipe is drawn as the SOURCE BOX EXTRUDED: its interior is that box's fill
+// colour and its walls are the box outline — same colour and same thickness that
+// every box is outlined with (`BOX_OUTLINE` / `boxOutlineW`), so only the fill
+// says where the pipe came from. Two passes: the wall colour at the full outside
+// width, then the fill over it at the bore width, leaving exactly boxOutlineW of
+// wall showing on each side.
+//
+// The two passes run to DIFFERENT lengths. A box outline is centred on the box's
+// edge, so it sticks out half its width past the point a pipe anchors to; the
+// interior therefore runs on that far, burying it, and the mouth reads as the
+// tube opening into the box. The walls stop half an outline SHORT of the
+// interior at both ends, so they die into the box's own outline instead of
+// crossing it.
+function drawPipe(x1, y1, x2, y2, fill, dir) {
+  // Flat ends, not round: a round cap adds a semicircle of pipe past each
+  // endpoint, so the tube bulged out beyond the box edge it is anchored to
+  // instead of meeting it squarely.
+  ctx.lineCap = 'butt';
+
+  var over = boxOutlineW * 0.5 + 0.5;   // half the outline, plus a hair for antialiasing
+
+  pipePath(x1, y1, x2, y2, dir, over - boxOutlineW * 0.5);
+  ctx.strokeStyle = BOX_OUTLINE;
+  ctx.lineWidth = PIPE_INNER + 2 * boxOutlineW;
   ctx.stroke();
-  ctx.strokeStyle = '#000000';
+
+  pipePath(x1, y1, x2, y2, dir, over);
+  ctx.strokeStyle = fill;
   ctx.lineWidth = PIPE_INNER;
   ctx.stroke();
 }
@@ -1450,7 +1534,14 @@ function render(t) {
   if (addBtn.visible) drawAddButton(addBtn, 'Outcome');
   if (addUserBtn.visible) drawAddButton(addUserBtn, 'Player');
 
-  // Active drag pipes next, so boxes sit cleanly over the anchor ends.
+  for (var a = 0; a < topCount; a++) drawTopBox(topBoxes[a]);
+  for (var b2 = 0; b2 < bottomCount; b2++) drawPlayer(bottomBoxes[b2]);
+
+  // Pipes go JUST above the boxes and their outlines: a pipe is that box
+  // extruded — its own fill inside its own outline — so its mouth has to sit on
+  // top of the box wall rather than be swallowed by it. Only just above, though:
+  // the squares running through it, the price ladder and everything after still
+  // draw over the tube.
   for (var k = 0; k < MAX_POINTERS; k++) {
     var dr = drags[k];
     if (dr.active && dr.moved) drawActiveDrag(dr);
@@ -1459,9 +1550,6 @@ function render(t) {
   for (var tp = 0; tp < MAX_TRANSFERS; tp++) {
     if (transfers[tp].active) drawTransferPipe(transfers[tp]);
   }
-
-  for (var a = 0; a < topCount; a++) drawTopBox(topBoxes[a]);
-  for (var b2 = 0; b2 < bottomCount; b2++) drawPlayer(bottomBoxes[b2]);
 
   // Transfers last — bets and money in flight pass OVER the boxes. Finished ones
   // are retired here; by this point their arrival times have passed, so the
@@ -1844,7 +1932,8 @@ function drawTransferPipe(tr) {
 
   transferPipeEnds(tr);
   if (e > PIPE_FADE_FRAC) ctx.globalAlpha = 1 - (e - PIPE_FADE_FRAC) / (1 - PIPE_FADE_FRAC);
-  drawPipe(pipeSX, pipeSY, pipeEX, pipeEY, tr.sell ? tr.player.color : tr.outcome.color, pipeDir);
+  drawPipe(pipeSX, pipeSY, pipeEX, pipeEY,
+           tr.sell ? tr.player.color : tr.outcome.color, pipeDir);
   ctx.globalAlpha = 1;
 }
 
@@ -1857,8 +1946,8 @@ function drawOutcomeBox(b, x, y, w, h, focused, resolve) {
   roundRectPath(x, y, w, h, Math.round(h * 0.1));
   ctx.fillStyle = b.color;
   ctx.fill();
-  ctx.lineWidth = Math.max(1.5, h * OUTCOME_OUTLINE_W);
-  ctx.strokeStyle = OUTCOME_OUTLINE;
+  ctx.lineWidth = boxOutlineW;   // shared with the hands and with a pipe's walls
+  ctx.strokeStyle = BOX_OUTLINE;
   ctx.stroke();
   if (focused) {
     ctx.lineWidth = 4; ctx.strokeStyle = '#ffffff'; ctx.stroke();
@@ -1885,18 +1974,29 @@ function drawOutcomeBox(b, x, y, w, h, focused, resolve) {
     ctx.fillStyle = held ? RESOLVE_PLATE_PRESSED : RESOLVE_PLATE;
     ctx.fill();
     ctx.lineWidth = sw;
-    ctx.strokeStyle = RESOLVE_PLATE_OUTLINE;
+    ctx.strokeStyle = FIELD_OUTLINE;
     ctx.stroke();
 
-    ctx.fillStyle = '#ffffff';
+    // Dark, not white: on a white plate a fallback glyph (a device without a
+    // colour emoji font) would otherwise be invisible.
+    ctx.fillStyle = '#1a1a1a';
     var press = held ? 0.62 : 0.72;   // smaller than before: it now has to fit ON the plate
     ctx.font = Math.round(rbH * press) + 'px serif';
-    ctx.fillText(RESOLVE_EMOJI, rbX + rbW * 0.5, rbY + rbH * 0.5);
+    // Sat slightly BELOW the plate's centre, by a fraction of the PLATE's own
+    // height — so the nudge stays in proportion to the button at any box size.
+    ctx.fillText(RESOLVE_EMOJI, rbX + rbW * 0.5, rbY + rbH * (0.5 + RESOLVE_EMOJI_DROP));
   }
 
-  roundRectPath(fx, fy, fw, fh, Math.round(fh * 0.25));
+  // The title field, outlined in black like every other white field. The stroke
+  // is centred on the path, so the field is inset by half of it and the outline
+  // lands inside the space the field already had.
+  var fsw = fieldStrokeW(fh);
+  roundRectPath(fx + fsw * 0.5, fy + fsw * 0.5, fw - fsw, fh - fsw, Math.round(fh * 0.25));
   ctx.fillStyle = '#ffffff';
   ctx.fill();
+  ctx.lineWidth = fsw;
+  ctx.strokeStyle = FIELD_OUTLINE;
+  ctx.stroke();
 
   if (b.lineCount === 1 && b.lines[0].length === 0) return;
 
@@ -2136,8 +2236,8 @@ function drawPlayer(b) {
   roundRectPath(b.x, b.y, b.w, b.h, Math.round(b.h * 0.06));
   ctx.fillStyle = b.color;
   ctx.fill();
-  ctx.lineWidth = 2;
-  ctx.strokeStyle = '#8893aa';
+  ctx.lineWidth = boxOutlineW;   // the same weight as an outcome's outline
+  ctx.strokeStyle = BOX_OUTLINE;
   ctx.stroke();
 
   computePlayerLayout(b);
@@ -2163,9 +2263,13 @@ function drawPlayer(b) {
 // as an outcome's header, and editable the same way (tap it to type).
 function drawPlayerName(p) {
   playerNameRect(p);
-  roundRectPath(pnX, pnY, pnW, pnH, Math.round(pnH * 0.25));
+  var nsw = fieldStrokeW(pnH);
+  roundRectPath(pnX + nsw * 0.5, pnY + nsw * 0.5, pnW - nsw, pnH - nsw, Math.round(pnH * 0.25));
   ctx.fillStyle = '#ffffff';
   ctx.fill();
+  ctx.lineWidth = nsw;
+  ctx.strokeStyle = FIELD_OUTLINE;
+  ctx.stroke();
 
   var cx = pnX + pnW * 0.5, cy = pnY + pnH * 0.5;
   ctx.font = Math.round(pnH * 0.5) + 'px sans-serif';
@@ -2590,11 +2694,7 @@ function onPointerDown(pointerId, px, py) {
 
   if (!src) {
     for (i = 0; i < topCount; i++) {
-      if (inRect(topBoxes[i], px, py)) {
-        src = topBoxes[i]; srcIsTop = true;
-        playTick();      // touching an outcome is acknowledged at once, not on release
-        break;
-      }
+      if (inRect(topBoxes[i], px, py)) { src = topBoxes[i]; srcIsTop = true; break; }
     }
   }
 
@@ -2617,6 +2717,11 @@ function onPointerDown(pointerId, px, py) {
   // players' zone begins a drag from the nearest hand.
   if (!src) src = playerAt(px, py);
   if (!src) { focusBox(null); return; }
+
+  // Landing on a box of either kind is acknowledged AT ONCE, not on release —
+  // the release belongs to whatever the gesture turned out to mean. A miss (no
+  // box at all) stays silent.
+  playTick();
 
   var dr = acquireDrag(pointerId);
   if (!dr) return;
