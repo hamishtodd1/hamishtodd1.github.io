@@ -30,7 +30,7 @@ var joltUntil = 0;      // keep animating until this time (for the vibrate jolt)
 // rows (like text). The boxes then shrink vertically so all rows fit above the
 // players. No scrolling.
 var MIN_TOP_W = 120;    // min width of a top box before it wraps to the next line
-var ADD_BTN_SCALE = 0.5; // "Add Outcome" square ÷ outcome box height
+var ADD_STACK_GAP = 0.06; // gap between the two add buttons ÷ outcome box height
 // These two set how big a bet/money box ends up: the cell is derived to make the
 // numBetLevels-row grid exactly fill an outcome box's body, so giving the boxes
 // more height is the only way to make the cells bigger. Tuned together — pushing
@@ -163,6 +163,17 @@ var playerMaxH = 0;     // never taller than the space reserved below the outcom
 var playerNameH = 0;    // height of the editable name field at the foot of a hand
 var PLAYER_NAME_MULT = 1.6;   // name field height ÷ margin
 
+// Height of the screen the on-screen keyboard is covering, in CSS pixels. The
+// player name fields live on the floor of the hands, which is exactly where the
+// keyboard appears — so while one is being edited its box is lifted clear.
+// Measured from `visualViewport`, which is the only reliable signal: iOS never
+// shrinks the layout viewport for the keyboard, and current Chrome does not
+// either. Where a platform DOES shrink it, `resize` fires, `viewH` drops, the
+// bottom-anchored players move up on their own, and this stays 0.
+var keyboardInset = 0;
+var KEYBOARD_MIN_INSET = 40;  // ignore address-bar sized changes
+var KEYBOARD_CLEARANCE = 8;   // gap left between the name field and the keyboard
+
 // Top ("outcome") box palette, in fill order. Max 6 boxes.
 var MAX_TOP = 6;
 var TOP_COLORS = ['#FEE824', '#37588C', '#340B6E', '#3BA8A9', '#1F1E80', '#1F1E80'];
@@ -178,7 +189,8 @@ var bgGradient = null;
 var OUTCOME_OUTLINE = '#0a0a0a';   // outcome boxes are outlined, like the betBoxes
 var OUTCOME_OUTLINE_W = 0.014;     // ÷ box height
 
-var BOTTOM_COUNT = 2;
+var MAX_BOTTOM = 6;      // pool size — players are pooled like outcomes
+var bottomCount = 2;     // how many are in the game right now
 var BOTTOM_COLOR = '#2a2a33';
 var PLAYER_GAP_MULT = 2.6;         // gap BETWEEN players ÷ margin — they sit well apart
 var SELECTION_COLOR = '#2a6fff';
@@ -191,6 +203,12 @@ var SELECTION_COLOR = '#2a6fff';
 // board is touchable. Choosing an option has no effect on the game yet — it just
 // closes, like tapping outside does.
 var RESOLVE_EMOJI = '⚖️';    // balance scales — the resolve button
+// It sits on a grey plate outlined in black, so it reads as a button on every
+// palette colour rather than as decoration floating on the box.
+var RESOLVE_PLATE = '#b9bcc4';
+var RESOLVE_PLATE_PRESSED = '#8f929a';  // dips darker while held, with the emoji
+var RESOLVE_PLATE_OUTLINE = '#0a0a0a';  // the same black as the box and betBox outlines
+var RESOLVE_PLATE_STROKE = 0.07;        // its outline width ÷ plate size
 var RESOLVE_BTN_MAX_W = 0.40;          // button size ÷ box width, ceiling
 var RESOLVE_BTN_H = 0.16;              // button size ÷ box height
 var RESOLVE_BAND_GAP = 0.02;           // clear space above and below it ÷ box height
@@ -221,6 +239,20 @@ var RESOLVE_BOUNCE_H = 1.8;       // bounce height ÷ unitH
 var RESOLVE_BOUNCE_STAGGER = 45;  // ms of phase offset per bet down the pile
 var RESOLVE_MS = RESOLVE_FLASH_MS + RESOLVE_MOVE_MS;
 var LOSE_FLASH_COLOR = '#ff5a5a';
+
+// --- Arriving / rearranging outcomes --------------------------------------
+// The mirror image of a resolution: a new outcome EXPANDS from nothing, and the
+// ones already on the board slide and resize to make room for it instead of
+// jumping. Both are draw-time transforms — the geometry in the Box is already
+// final, so hit-testing, pipes and anything in flight use the new positions from
+// the first frame. That can be seen for a few hundred ms if a purchase happens
+// to be animating as an outcome is added; it is not worth a second geometry.
+// Shorter than the resolve shrink (which is paced by the bets flying out of it):
+// this one answers a button tap and wants to feel immediate.
+var SPAWN_MS = 420;         // a new outcome growing from 0 to full size
+var LAYOUT_MORPH_MS = 420;  // the others moving to their new places
+var morphStart = 0;         // when the current rearrangement began (0 = none)
+var topAnimUntil = 0;       // keep rendering until this time
 
 var resolving = null;      // outcome being resolved, or null
 var resolvingIndex = -1;   // its index in topBoxes for the duration
@@ -365,6 +397,8 @@ function deriveBetColor(hex, againstLum) {
 // OUTWARD, so BETBOX_STROKE_FRAC must stay under BET_GAP_RATIO or neighbouring
 // outlines will touch.
 var BETBOX_STROKE_FRAC = 0.28; // outline thickness ÷ cell
+var PERCENT_SIZE = 3.2;        // implied-percentage font size ÷ cell height
+var PERCENT_INSET = 0.04;      // its left margin ÷ box width
 // Bet boxes and money boxes are ALWAYS the same size — this fraction of the cell,
 // applied to both. At 1 they fill the cell exactly, so a betBox outline frames
 // its bet and a coin is the same box wherever it is. Lowering it insets both
@@ -433,6 +467,11 @@ function Box(editable) {
   this.lineCount = 1;
   this.crownTime = 0;      // bottom boxes only: when this player was crowned (0 = not)
   this.joltTime = 0;       // performance.now() of the last vibrate jolt
+  this.spawnTime = 0;      // top boxes only: when this outcome began expanding in (0 = not)
+  // Where this box was BEFORE the current rearrangement, so it can be drawn
+  // moving from there to x/y/w/h. mw === 0 means "no morph" — a box that has
+  // just appeared has nowhere to come from.
+  this.mx = 0; this.my = 0; this.mw = 0; this.mh = 0;
 }
 
 // The player-hand background, as a luminance — the second surface every bet
@@ -468,8 +507,8 @@ var topCount = 2;
 topBoxes[0].text = 'Outcome 1';
 topBoxes[1].text = 'Outcome 2';
 
-var bottomBoxes = new Array(BOTTOM_COUNT);
-for (var j = 0; j < BOTTOM_COUNT; j++) {
+var bottomBoxes = new Array(MAX_BOTTOM);
+for (var j = 0; j < MAX_BOTTOM; j++) {
   bottomBoxes[j] = new Box(false);
   bottomBoxes[j].color = BOTTOM_COLOR;
   bottomBoxes[j].money = MONEY_PER_PLAYER;
@@ -482,7 +521,11 @@ for (var j = 0; j < BOTTOM_COUNT; j++) {
   bottomBoxes[j].ownedArrive = new Float64Array(MAX_TOP * numBetLevels);
 }
 
-var addBtn = { x: 0, y: 0, w: 0, h: 0, visible: true }; // x in content coords too
+// Two stacked controls that together occupy exactly one outcome box's height.
+// mx/my/mw/mh as on Box: where the button is travelling FROM while the outcomes
+// rearrange, so the stack slides along with them instead of teleporting.
+var addBtn = { x: 0, y: 0, w: 0, h: 0, visible: true, mx: 0, my: 0, mw: 0, mh: 0 };      // + Add Outcome
+var addUserBtn = { x: 0, y: 0, w: 0, h: 0, visible: true, mx: 0, my: 0, mw: 0, mh: 0 };  // + Add Player
 
 var focusedBox = null; // currently-edited top box, or null
 var selected = false;  // true while the focused box's text is highlighted
@@ -656,9 +699,101 @@ function playSell() {
   osc.stop(t + 0.27);
 }
 
+// A finger landing on an outcome: the shortest possible acknowledgement that the
+// touch registered. Deliberately FLAT (no sweep) and quiet, because the sound
+// that carries the meaning is the one on RELEASE — judging, renaming, or a trade
+// going through — and this must be long gone by then rather than still ringing
+// under it. 30ms at a third of the gain of everything else.
+function playTick() {
+  if (!audioCtx) return;
+  var osc = audioCtx.createOscillator();
+  var gain = audioCtx.createGain();
+  var t = audioCtx.currentTime;
+  osc.type = 'triangle';
+  osc.frequency.value = 1000;
+  gain.gain.setValueAtTime(0.0001, t);
+  gain.gain.exponentialRampToValueAtTime(0.08, t + 0.004);
+  gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.03);
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+  osc.start(t);
+  osc.stop(t + 0.04);
+}
+
+// Crowning: a rising arpeggio, one note per step, played ONCE however many
+// players are crowned — a tie is one event, not one sound per head.
+var CROWN_NOTES = [523.25, 659.25, 783.99, 1046.5];  // C5 E5 G5 C6
+var CROWN_NOTE_MS = 0.09;
+function playCrown() {
+  if (!audioCtx) return;
+  var t0 = audioCtx.currentTime;
+  for (var i = 0; i < CROWN_NOTES.length; i++) {
+    var t = t0 + i * CROWN_NOTE_MS;
+    var osc = audioCtx.createOscillator();
+    var gain = audioCtx.createGain();
+    osc.type = 'triangle';
+    osc.frequency.value = CROWN_NOTES[i];
+    gain.gain.setValueAtTime(0.0001, t);
+    gain.gain.exponentialRampToValueAtTime(0.2, t + 0.015);
+    // The last note is left to ring on, so the run lands rather than stopping dead.
+    gain.gain.exponentialRampToValueAtTime(0.0001, t + (i === CROWN_NOTES.length - 1 ? 0.5 : 0.14));
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start(t);
+    osc.stop(t + (i === CROWN_NOTES.length - 1 ? 0.52 : 0.16));
+  }
+}
+
+// A new outcome arriving: two notes a fifth apart, swelling up together as the
+// box expands. Longer and softer than the trade sounds so it reads as something
+// appearing rather than as a transaction going through.
+function playAppear() {
+  if (!audioCtx) return;
+  var t = audioCtx.currentTime;
+  var gain = audioCtx.createGain();
+  gain.gain.setValueAtTime(0.0001, t);
+  gain.gain.exponentialRampToValueAtTime(0.22, t + 0.06);
+  gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.42);
+  gain.connect(audioCtx.destination);
+
+  var lo = audioCtx.createOscillator();
+  lo.type = 'triangle';
+  lo.frequency.setValueAtTime(392, t);            // G4
+  lo.frequency.exponentialRampToValueAtTime(784, t + 0.3);
+  lo.connect(gain);
+  lo.start(t);
+  lo.stop(t + 0.44);
+
+  var hi = audioCtx.createOscillator();
+  hi.type = 'sine';
+  hi.frequency.setValueAtTime(587, t);            // D5, a fifth above
+  hi.frequency.exponentialRampToValueAtTime(1175, t + 0.3);
+  hi.connect(gain);
+  hi.start(t + 0.04);                             // just behind, so it blooms
+  hi.stop(t + 0.44);
+}
+
 // ---------------------------------------------------------------------------
 // Layout — recomputed only on resize / box add, never per frame
 // ---------------------------------------------------------------------------
+
+// Remember where every outcome is RIGHT NOW, so that once the relayout has moved
+// them they can be drawn travelling from there rather than jumping. Call this
+// BEFORE changing topCount, then startTopAnim() after layout() has run.
+function beginTopMorph() {
+  for (var i = 0; i < topCount; i++) markMorphFrom(topBoxes[i]);
+  markMorphFrom(addBtn);      // the add stack flows in the same row and moves with them
+  markMorphFrom(addUserBtn);
+}
+
+function markMorphFrom(b) {
+  b.mx = b.x; b.my = b.y; b.mw = b.w; b.mh = b.h;
+}
+
+function startTopAnim() {
+  morphStart = now();
+  topAnimUntil = morphStart + (SPAWN_MS > LAYOUT_MORPH_MS ? SPAWN_MS : LAYOUT_MORPH_MS);
+}
 
 function layout() {
   var margin = Math.round(Math.min(viewW, viewH) * 0.04);
@@ -670,14 +805,27 @@ function layout() {
   var bottomRowH = Math.round(viewH * BOTTOM_RESERVE_FRAC);
 
   layoutTop(margin, bottomRowH);
-  // Players get their x/w from the row; their HEIGHT comes from their contents
-  // (updatePlayerBoxes), capped so they can never climb into the outcomes.
-  layoutRow(bottomBoxes, BOTTOM_COUNT, margin, viewH - margin - bottomRowH, bottomRowH,
-            margin * PLAYER_GAP_MULT);
   layoutMargin = margin;
   playerPad = Math.max(4, margin * 0.4);
   playerPadY = Math.max(8, margin * PLAYER_PADY_MULT);
   playerNameH = Math.max(18, margin * PLAYER_NAME_MULT);
+
+  // Players sit well apart — but the gap YIELDS as more of them join, rather than
+  // eating the width they need. A hand should ideally be wide enough for one
+  // money group; the gap gives up whatever it must to get them there, down to a
+  // floor. With enough players on a narrow screen they end up narrower than that
+  // regardless, and the gap has simply collapsed to its minimum.
+  var wantW = moneyGroupWidth() + 2 * playerPad;
+  var innerGap = margin * PLAYER_GAP_MULT;
+  if (bottomCount > 1) {
+    var maxGap = (viewW - 2 * margin - bottomCount * wantW) / (bottomCount - 1);
+    if (maxGap < innerGap) innerGap = maxGap;
+    if (innerGap < margin * 0.4) innerGap = margin * 0.4;
+  }
+
+  // Players get their x/w from the row; their HEIGHT comes from their contents
+  // (updatePlayerBoxes), capped so they can never climb into the outcomes.
+  layoutRow(bottomBoxes, bottomCount, margin, viewH - margin - bottomRowH, bottomRowH, innerGap);
   fitPlayerNames();
   playerMaxH = bottomRowH;
   playerMinH = viewH * 0.1;
@@ -692,13 +840,14 @@ function layout() {
 function layoutTop(margin, bottomRowH) {
   var gap = margin;
   addBtn.visible = topCount < MAX_TOP;
+  addUserBtn.visible = bottomCount < MAX_BOTTOM;
   var baseH = Math.round(viewH * TOP_BOX_H_FRAC); // preferred box height — tall, to fit the bet grid
 
   // Single-row fill width (boxes share the row with a square add button).
   var fillGaps = addBtn.visible ? (topCount + 2) : (topCount + 1);
   // topCount can reach 0 once every outcome has been resolved away.
   var fillW = topCount > 0
-    ? (viewW - fillGaps * gap - (addBtn.visible ? baseH * ADD_BTN_SCALE : 0)) / topCount
+    ? (viewW - fillGaps * gap - ((addBtn.visible || addUserBtn.visible) ? baseH * 0.5 : 0)) / topCount
     : viewW;
 
   var boxW, perRow, rows;
@@ -707,16 +856,18 @@ function layoutTop(margin, bottomRowH) {
   } else {
     boxW = MIN_TOP_W;
     perRow = Math.max(1, Math.floor(viewW / (boxW + gap)));
-    rows = Math.ceil((topCount + (addBtn.visible ? 1 : 0)) / perRow);
+    rows = Math.ceil((topCount + ((addBtn.visible || addUserBtn.visible) ? 1 : 0)) / perRow);
   }
 
   // Shrink box height so all rows fit in the area above the players.
   var topAvail = viewH - 2 * margin - bottomRowH - gap;
   var boxH = Math.floor(Math.min(baseH, (topAvail - (rows - 1) * gap) / rows));
   if (boxH < 24) boxH = 24;
-  // The add button is a small square rather than a full-height one — it is a
-  // control, not an outcome, so it should not read as one.
-  var addSize = boxH * ADD_BTN_SCALE;
+  // Add Outcome and Add Player stack, and TOGETHER they fill exactly one outcome
+  // box's height — so the pair reads as one control column beside the outcomes
+  // rather than as an outcome itself.
+  var addGap = boxH * ADD_STACK_GAP;
+  var addSize = (boxH - addGap) * 0.5;
 
   // Titles are wrapped now that the box size is settled, because how many lines
   // they need decides how tall the header is — and so how much room is left for
@@ -744,11 +895,19 @@ function layoutTop(margin, bottomRowH) {
     b.x = x; b.y = y; b.w = boxW; b.h = boxH;
     x += boxW + gap;
   }
-  if (addBtn.visible) {
+  if (addBtn.visible || addUserBtn.visible) {
     if (x + addSize > viewW - gap + 0.5) { x = gap; y += boxH + gap; }
-    // Centred in the row it flows into, since it is shorter than the boxes.
-    addBtn.x = x; addBtn.y = y + (boxH - addSize) * 0.5;
+    // The stack spans the full row height: Add Outcome on top, Add Player below.
+    // If only one of them is live it sits centred in the row instead.
+    if (addBtn.visible && addUserBtn.visible) {
+      addBtn.x = x; addBtn.y = y;
+      addUserBtn.x = x; addUserBtn.y = y + addSize + addGap;
+    } else {
+      var solo = addBtn.visible ? addBtn : addUserBtn;
+      solo.x = x; solo.y = y + (boxH - addSize) * 0.5;
+    }
     addBtn.w = addSize; addBtn.h = addSize;
+    addUserBtn.w = addSize; addUserBtn.h = addSize;
   }
 
   topRowsH = (y + boxH) - margin;
@@ -837,7 +996,7 @@ function startResolve(b, win) {
   resolveStart = now();
   payoutCount = 0;
 
-  for (var p = 0; p < BOTTOM_COUNT; p++) {
+  for (var p = 0; p < bottomCount; p++) {
     var pl = bottomBoxes[p];
     var n = pl.ownedCount[oi];
     var moneyIndex = pl.money;   // winnings land on the end of the existing pile
@@ -873,11 +1032,15 @@ function finishResolve() {
 // This is what makes the outcome disappear from the top row AND from every hand.
 function removeOutcome(oi) {
   var removed = topBoxes[oi];
+  // The survivors close the gap by MOVING into it, the same way they opened one
+  // to let a new outcome in. Captured before the shuffle — though it would not
+  // matter, since the geometry rides on the Box objects themselves.
+  beginTopMorph();
   for (var i = oi; i < topCount - 1; i++) topBoxes[i] = topBoxes[i + 1];
   topBoxes[topCount - 1] = removed;
   topCount--;
 
-  for (var p = 0; p < BOTTOM_COUNT; p++) {
+  for (var p = 0; p < bottomCount; p++) {
     var b = bottomBoxes[p];
     for (var k = oi; k < topCount; k++) {
       b.ownedCount[k] = b.ownedCount[k + 1];
@@ -891,6 +1054,7 @@ function removeOutcome(oi) {
 
   resetOutcome(removed);   // hand the pool slot back clean, ready for Add Outcome
   layout();
+  startTopAnim();
   updateCrowns();          // resolving the last outcome decides the winner
 }
 
@@ -901,28 +1065,33 @@ function removeOutcome(oi) {
 function updateCrowns() {
   var i;
   if (topCount > 0) {
-    for (i = 0; i < BOTTOM_COUNT; i++) bottomBoxes[i].crownTime = 0;
+    for (i = 0; i < bottomCount; i++) bottomBoxes[i].crownTime = 0;
     needsRender = true;
     return;
   }
 
   var best = -1;
-  for (i = 0; i < BOTTOM_COUNT; i++) {
+  for (i = 0; i < bottomCount; i++) {
     if (bottomBoxes[i].money > best) best = bottomBoxes[i].money;
   }
 
   var t = now();
-  for (i = 0; i < BOTTOM_COUNT; i++) {
+  var fresh = false;
+  for (i = 0; i < bottomCount; i++) {
     var p = bottomBoxes[i];
     if (p.money === best) {           // ties share the crown
       if (p.crownTime === 0) {
         p.crownTime = t;
         emitCrownBurst(p);
+        fresh = true;
       }
     } else {
       p.crownTime = 0;
     }
   }
+  // Once for the event, not once per head: a tie crowns several players at the
+  // same instant and four arpeggios on top of each other is a mess.
+  if (fresh) playCrown();
   needsRender = true;
 }
 
@@ -973,6 +1142,8 @@ function resetOutcome(b) {
   }
   b.text = '';
   b.joltTime = 0;
+  b.spawnTime = 0;
+  b.mw = 0;      // nowhere to come from: a returning slot is a brand new box
 }
 
 // `innerGap` is the space BETWEEN boxes, which is wider than the screen margin
@@ -1038,7 +1209,7 @@ function playerNameRect(p) {
 // cached in `lines[0]` — never measured per frame.
 function fitPlayerNames() {
   ctx.font = Math.round(playerNameH * 0.5) + 'px sans-serif';
-  for (var i = 0; i < BOTTOM_COUNT; i++) {
+  for (var i = 0; i < bottomCount; i++) {
     var p = bottomBoxes[i];
     var avail = p.w - 2 * playerPad - 2 * (p.w * 0.04);
     var t = p.text;
@@ -1077,7 +1248,7 @@ function playerMoneySlots(p) {
 // multiplications per player) rather than only in layout(), so it tracks state
 // changes and in-flight transfers without anything having to remember to ask.
 function updatePlayerBoxes() {
-  for (var i = 0; i < BOTTOM_COUNT; i++) {
+  for (var i = 0; i < bottomCount; i++) {
     var p = bottomBoxes[i];
     var bh = rowsHeight(pileTotal(p));
     var mh = rowsHeight(moneyRowsFor(playerMoneySlots(p), p.w - 2 * playerPad));
@@ -1088,6 +1259,18 @@ function updatePlayerBoxes() {
     if (h > playerMaxH) h = playerMaxH;   // never grow up into the outcomes
     p.h = h;
     p.y = viewH - layoutMargin - h;
+
+    // Being edited with the keyboard up: lift this hand until its name field
+    // clears the keyboard. The whole box moves, so the field stays attached to
+    // it, and it is clamped so it cannot leave the top of the screen.
+    if (p === focusedBox && keyboardInset > 0) {
+      var nameBottom = p.y + h - playerPadY;
+      var limit = viewH - keyboardInset - KEYBOARD_CLEARANCE;
+      if (nameBottom > limit) {
+        p.y -= (nameBottom - limit);
+        if (p.y < layoutMargin) p.y = layoutMargin;
+      }
+    }
   }
 }
 
@@ -1264,7 +1447,8 @@ function render(t) {
   // Its hit test is unaffected: nothing else occupies its rect.
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  if (addBtn.visible) drawAddButton();
+  if (addBtn.visible) drawAddButton(addBtn, 'Outcome');
+  if (addUserBtn.visible) drawAddButton(addUserBtn, 'Player');
 
   // Active drag pipes next, so boxes sit cleanly over the anchor ends.
   for (var k = 0; k < MAX_POINTERS; k++) {
@@ -1277,7 +1461,7 @@ function render(t) {
   }
 
   for (var a = 0; a < topCount; a++) drawTopBox(topBoxes[a]);
-  for (var b2 = 0; b2 < BOTTOM_COUNT; b2++) drawPlayer(bottomBoxes[b2]);
+  for (var b2 = 0; b2 < bottomCount; b2++) drawPlayer(bottomBoxes[b2]);
 
   // Transfers last — bets and money in flight pass OVER the boxes. Finished ones
   // are retired here; by this point their arrival times have passed, so the
@@ -1289,9 +1473,30 @@ function render(t) {
     drawTransfer(tr);
   }
 
+  // The price ladder goes down LAST of the board layer. The outlines are fixed
+  // structure — money flying into a row must read as passing BEHIND the ladder
+  // and settling into it, not as sliding over the top of it.
+  // The one thing they must not cover is a hand LIFTED for name editing, which
+  // is the only case where a player box overlaps the outcomes: clip that rect
+  // out of the pass (outer rect + hand rect, evenodd = everything but the hand).
+  var lifted = null;
+  for (var lp = 0; lp < bottomCount; lp++) {
+    if (bottomBoxes[lp] === focusedBox) { lifted = bottomBoxes[lp]; break; }
+  }
+  if (lifted) {
+    ctx.save();
+    var ljx = shakeOffset(lifted.joltTime);
+    ctx.beginPath();
+    ctx.rect(0, 0, viewW, viewH);
+    ctx.rect(lifted.x + ljx, lifted.y, lifted.w, lifted.h);
+    ctx.clip('evenodd');
+  }
+  for (var ol = 0; ol < topCount; ol++) drawTopOutlines(topBoxes[ol]);
+  if (lifted) ctx.restore();
+
   if (resolving !== null) drawResolution();
 
-  for (var cw = 0; cw < BOTTOM_COUNT; cw++) drawCrown(bottomBoxes[cw]);
+  for (var cw = 0; cw < bottomCount; cw++) drawCrown(bottomBoxes[cw]);
   if (activeParticles > 0) drawParticles();
 
   // The resolve dialog is modal, so it goes in front of absolutely everything.
@@ -1667,12 +1872,24 @@ function drawOutcomeBox(b, x, y, w, h, focused, resolve) {
 
   // Only the big top boxes get a resolve button.
   if (resolve) {
-    ctx.fillStyle = '#ffffff';
-    // Below the title, above the bets. Just the emoji — no plate behind it. The
-    // hit rect is the whole square resolveBtnRect() describes, so it stays as
-    // easy to tap as it looks.
+    // Below the title, above the bets: a grey square outlined in black with the
+    // scales on it. The plate is exactly the square resolveBtnRect() describes,
+    // which is also the hit rect, so it is as easy to tap as it looks.
     resolveBtnRect(x, y, w, h);
-    var press = resolvePressed(b) ? 0.74 : 0.86;   // dips while held
+    var held = resolvePressed(b);
+    var plateR = Math.round(rbH * 0.18);
+    // The stroke is centred on the edge, so the plate is inset by half of it to
+    // keep the whole outline inside the square the hit test uses.
+    var sw = Math.max(1.5, rbH * RESOLVE_PLATE_STROKE);
+    roundRectPath(rbX + sw * 0.5, rbY + sw * 0.5, rbW - sw, rbH - sw, plateR);
+    ctx.fillStyle = held ? RESOLVE_PLATE_PRESSED : RESOLVE_PLATE;
+    ctx.fill();
+    ctx.lineWidth = sw;
+    ctx.strokeStyle = RESOLVE_PLATE_OUTLINE;
+    ctx.stroke();
+
+    ctx.fillStyle = '#ffffff';
+    var press = held ? 0.62 : 0.72;   // smaller than before: it now has to fit ON the plate
     ctx.font = Math.round(rbH * press) + 'px serif';
     ctx.fillText(RESOLVE_EMOJI, rbX + rbW * 0.5, rbY + rbH * 0.5);
   }
@@ -1720,25 +1937,108 @@ function resolveShrink(b) {
   return 1 - easeInOut(k > 1 ? 1 : k);
 }
 
-function drawTopBox(b) {
-  var jx = shakeOffset(b.joltTime);
-  var shrink = resolveShrink(b);
-  if (shrink <= 0.002) return;   // nothing left to draw
+// How big a NEW outcome has grown to. It expands from nothing over SPAWN_MS,
+// which is resolveShrink()'s vanishing act run forwards — the same easing, so
+// arriving and leaving are mirror images of each other.
+function spawnScale(b) {
+  if (b.spawnTime === 0) return 1;
+  var k = (nowMs - b.spawnTime) / SPAWN_MS;
+  if (k >= 1) return 1;
+  return easeInOut(k < 0 ? 0 : k);
+}
 
-  var transformed = (jx !== 0 || shrink !== 1);
-  if (transformed) {
-    ctx.save();
-    if (shrink !== 1) {          // scale about the box's own centre
-      var cx = b.x + b.w * 0.5, cy = b.y + b.h * 0.5;
-      ctx.translate(cx, cy);
-      ctx.scale(shrink, shrink);
-      ctx.translate(-cx, -cy);
-    }
-    if (jx !== 0) ctx.translate(jx, 0);
+// Maps a box's FINAL geometry onto wherever it currently is between its old
+// place and its new one — so everything drawn inside it (title, ladder,
+// percentage) travels as one piece without being laid out twice. The caller must
+// already have called ctx.save(). Does nothing once the move is over, or for a
+// box with nowhere to come from.
+function applyMorph(b) {
+  if (morphStart === 0 || b.mw <= 0 || b.w <= 0 || b.h <= 0) return;
+  var k = (nowMs - morphStart) / LAYOUT_MORPH_MS;
+  if (k >= 1) return;
+  var e = easeInOut(k < 0 ? 0 : k);
+  var ix = b.mx + (b.x - b.mx) * e, iy = b.my + (b.y - b.my) * e;
+  var iw = b.mw + (b.w - b.mw) * e, ih = b.mh + (b.h - b.mh) * e;
+  ctx.translate(ix, iy);
+  ctx.scale(iw / b.w, ih / b.h);
+  ctx.translate(-b.x, -b.y);
+}
+
+// Every transform an outcome is drawn under: it is rearranging (morph), it has
+// just appeared (spawn), it is being resolved away (shrink), or a finger has
+// just entered it (jolt). Returns false if there is nothing left worth drawing —
+// callers that get TRUE back must ctx.restore().
+//
+// Everything inside is drawn at the box's FINAL geometry and mapped into place by
+// the morph, rather than being laid out twice; that is what keeps the ladder, the
+// title and the percentage moving as one piece with their box.
+function pushTopTransform(b) {
+  var scale = resolveShrink(b) * spawnScale(b);
+  if (scale <= 0.002) return false;
+
+  ctx.save();
+  // Morph first, so the scale below is about the centre of where the box is
+  // being DRAWN, not where it has already been moved to.
+  applyMorph(b);
+
+  if (scale !== 1) {             // about the box's own centre
+    var cx = b.x + b.w * 0.5, cy = b.y + b.h * 0.5;
+    ctx.translate(cx, cy);
+    ctx.scale(scale, scale);
+    ctx.translate(-cx, -cy);
   }
+
+  var jx = shakeOffset(b.joltTime);
+  if (jx !== 0) ctx.translate(jx, 0);
+  return true;
+}
+
+function drawTopBox(b) {
+  if (!pushTopTransform(b)) return;
   drawOutcomeBox(b, b.x, b.y, b.w, b.h, b === focusedBox, true);
   drawBetColumn(b);
-  if (transformed) ctx.restore();
+  drawImpliedPercent(b);
+  ctx.restore();
+}
+
+// The probability the market currently implies for this outcome, shown to the
+// LEFT of the bet grid and level with the row it comes from.
+//
+// The price of a level IS the implied chance: `getBetPriceContinuous(i)` in
+// manual.js, as a fraction. The level that counts is the most expensive one
+// anybody has actually paid for — the lowest-index row holding money — because
+// buying always takes the cheapest row left, so purchases fill the ladder upward
+// and the top paid row is the market's current mark. Before anyone has bought,
+// there is no such row and the market has made no claim at all, so it reads 0%
+// — the price of the cheapest level is what the FIRST buyer would pay, which is
+// an offer, not an implied chance.
+//
+// Rounded to a whole percent.
+function drawImpliedPercent(b) {
+  if (unitH <= 0.5) return;
+
+  var lvl = -1;
+  for (var i = 0; i < numBetLevels; i++) { if (b.moneyAt[i] > 0) { lvl = i; break; } }
+  // Nothing bought: 0%, sat level with the bottom row — the rung the first
+  // purchase will take, and the bottom of the ladder is where 0 belongs.
+  var pct = lvl < 0 ? 0 : Math.round(100 * getBetPriceContinuous(lvl));
+  var row = lvl < 0 ? numBetLevels - 1 : lvl;
+
+  var x0 = gridStartX(b.x, b.w);
+  var right = x0 - unitGap * 2;              // sits just clear of the grid
+  var avail = right - (b.x + b.w * PERCENT_INSET);
+  if (avail < 6) return;                     // no room — better nothing than clipped
+
+  // Sized to the space it has: "100%" is four characters at roughly 0.55em each.
+  var size = Math.min(unitH * PERCENT_SIZE, avail / 2.2);
+  if (size < 6) return;
+
+  betCellPos(b, row, 0);
+  ctx.font = Math.round(size) + 'px sans-serif';
+  ctx.fillStyle = b.betColor;
+  ctx.textAlign = 'right';
+  ctx.fillText(pct + '%', right, gy + unitH * 0.5);
+  ctx.textAlign = 'center';                  // render() draws everything else centred
 }
 
 // The bets (white squares) and, in front of them, the betBox outlines. Row `i`
@@ -1790,10 +2090,25 @@ function drawBetColumn(b) {
     }
   }
 
-  // betBox outlines, in front — these stay put
+  // NOTE: the outlines are NOT drawn here. They go down in a late pass from
+  // render(), after the transfers — see drawBetOutlines().
+}
+
+// The betBox outlines: the price ladder itself. Drawn in a LATE pass so that
+// nothing which moves can cover them — a square in flight passes BEHIND the
+// ladder, not over it. They are the board's fixed structure and stay put.
+function drawBetOutlines(b) {
+  if (unitH <= 0.5 || unitW <= 0.5 || b.betCols <= 0) return;
+
+  var g = unitGap;
+  var stepX = unitW + g, stepY = unitH + g;
+  var cellR = Math.min(unitH * 0.25, 3);
+  var y0 = b.y + b.h * bodyTopFrac + g;   // same origin as the bets they frame
+  var x0 = gridStartX(b.x, b.w);
+
   ctx.strokeStyle = BETBOX_COLOR;
   ctx.lineWidth = Math.max(1, unitH * BETBOX_STROKE_FRAC);
-  for (var i = 0; i < rows; i++) {
+  for (var i = 0; i < numBetLevels; i++) {
     var price = b.betPrices[i];
     var y = y0 + i * stepY;
     for (var cc = 0; cc < price; cc++) {  // left-justified to the bet grid's edge
@@ -1801,6 +2116,15 @@ function drawBetColumn(b) {
       ctx.stroke();
     }
   }
+}
+
+// The outline pass for one outcome, under the same transform drawTopBox uses, so
+// the ladder stays welded to its box while it shakes, expands in, moves aside or
+// shrinks away.
+function drawTopOutlines(b) {
+  if (!pushTopTransform(b)) return;
+  drawBetOutlines(b);
+  ctx.restore();
 }
 
 // A player: a large rect holding scaled-down mirrors of the top outcomes (top
@@ -1923,23 +2247,26 @@ function drawMoneyGrid(p) {
   }
 }
 
-function drawAddButton() {
-  var radius = Math.round(addBtn.h * 0.18);
-  roundRectPath(addBtn.x, addBtn.y, addBtn.w, addBtn.h, radius);
+function drawAddButton(btn, label) {
+  ctx.save();
+  applyMorph(btn);   // slides along with the outcomes while they rearrange
+  var radius = Math.round(btn.h * 0.18);
+  roundRectPath(btn.x, btn.y, btn.w, btn.h, radius);
   ctx.fillStyle = '#26262e';
   ctx.fill();
   ctx.lineWidth = 2;
   ctx.strokeStyle = '#5a6a88';
   ctx.stroke();
 
-  var cx = addBtn.x + addBtn.w * 0.5;
+  var cx = btn.x + btn.w * 0.5;
   ctx.fillStyle = '#ffffff';
-  ctx.font = Math.round(addBtn.h * 0.34) + 'px sans-serif';
-  ctx.fillText('+', cx, addBtn.y + addBtn.h * 0.3);
-  var small = Math.round(addBtn.h * 0.13);
+  ctx.font = Math.round(btn.h * 0.34) + 'px sans-serif';
+  ctx.fillText('+', cx, btn.y + btn.h * 0.3);
+  var small = Math.round(btn.h * 0.13);
   ctx.font = small + 'px sans-serif';
-  ctx.fillText('Add', cx, addBtn.y + addBtn.h * 0.62);
-  ctx.fillText('Outcome', cx, addBtn.y + addBtn.h * 0.62 + small * 1.2);
+  ctx.fillText('Add', cx, btn.y + btn.h * 0.62);
+  ctx.fillText(label, cx, btn.y + btn.h * 0.62 + small * 1.2);
+  ctx.restore();
 }
 
 // ---------------------------------------------------------------------------
@@ -1965,27 +2292,51 @@ function rectDist2(r, px, py) {
 function playerAt(px, py) {
   var zoneTop = Infinity;
   var i;
-  for (i = 0; i < BOTTOM_COUNT; i++) {
+  for (i = 0; i < bottomCount; i++) {
     if (bottomBoxes[i].y < zoneTop) zoneTop = bottomBoxes[i].y;
   }
   if (py < zoneTop) return null;
 
   var best = null, bestD = Infinity;
-  for (i = 0; i < BOTTOM_COUNT; i++) {
+  for (i = 0; i < bottomCount; i++) {
     var d = rectDist2(bottomBoxes[i], px, py);
     if (d < bestD) { bestD = d; best = bottomBoxes[i]; }
   }
   return best;
 }
 
-// Box in the row OPPOSITE the drag source that (px,py) selects, or null. Outcomes
-// must be hit directly; players only have to be the nearest one in their zone.
-function boxInOppositeRow(sourceIsTop, px, py) {
-  if (sourceIsTop) return playerAt(px, py);
-  for (var j = 0; j < topCount; j++) {
-    if (inRect(topBoxes[j], px, py)) return topBoxes[j];
+// The outcome a pipe coming UP from a hand selects, or null. It ROUNDS TO THE
+// NEAREST: once the finger is above the bottom edge of the outcome row, that
+// whole area belongs to the outcomes and the pipe attaches to whichever one it is
+// closest to, so it can never be left dangling in the gap between two boxes.
+// Below that edge nothing is selected and the pipe stays unattached, which is
+// what makes it possible to drag out of a hand and back without committing.
+// The bottom edge is the LOWEST one: the outcomes wrap onto several rows on a
+// phone, and rectDist2 picks correctly across rows.
+function outcomeAt(px, py) {
+  var zoneBottom = -Infinity;
+  var i;
+  for (i = 0; i < topCount; i++) {
+    var b = topBoxes[i];
+    if (b.y + b.h > zoneBottom) zoneBottom = b.y + b.h;
   }
-  return null;
+  if (py > zoneBottom) return null;
+
+  var best = null, bestD = Infinity;
+  for (i = 0; i < topCount; i++) {
+    var d = rectDist2(topBoxes[i], px, py);
+    if (d < bestD) { bestD = d; best = topBoxes[i]; }
+  }
+  return best;
+}
+
+// Box in the row OPPOSITE the drag source that (px,py) selects, or null. Neither
+// row has to be hit exactly: each is a zone (below the tallest hand / above the
+// lowest outcome edge) in which the nearest box wins. Note this is about drag
+// TARGETS only — starting a drag on an outcome still needs a direct hit, which is
+// onPointerDown's business.
+function boxInOppositeRow(sourceIsTop, px, py) {
+  return sourceIsTop ? playerAt(px, py) : outcomeAt(px, py);
 }
 
 // ---------------------------------------------------------------------------
@@ -2020,12 +2371,37 @@ function onInput() {
 
 function addOutcome() {
   if (topCount >= MAX_TOP) return;
-  topBoxes[topCount].text = 'Outcome ' + (topCount + 1);
+  beginTopMorph();                    // where the existing outcomes are coming FROM
+  var fresh = topBoxes[topCount];
+  resetOutcome(fresh);                // the slot may be one a resolution freed
+  fresh.text = 'Outcome ' + (topCount + 1);   // resetOutcome clears text
   topCount++;
   layout();
+  // The new box expands from nothing, mirroring the way a resolved one vanishes.
+  // It has no previous geometry to morph from — resetOutcome cleared mw — so it
+  // simply appears at its final place and grows there.
+  fresh.spawnTime = now();
+  startTopAnim();
   updateCrowns();   // there is something to play for again — crowns come off
   needsRender = true;
-  playBlip(880);
+  playAppear();
+}
+
+// Bring another player into the game. Their slot is preallocated like an
+// outcome's, so this only has to hand it a fresh stake and clear any holdings
+// left from a previous life.
+function addUser() {
+  if (bottomCount >= MAX_BOTTOM) return;
+  var p = bottomBoxes[bottomCount];
+  p.money = MONEY_PER_PLAYER;
+  p.text = 'Player ' + (bottomCount + 1);
+  p.crownTime = 0;
+  for (var oi = 0; oi < MAX_TOP; oi++) p.ownedCount[oi] = 0;
+  bottomCount++;
+  layout();
+  updateCrowns();   // a new player changes who is winning
+  needsRender = true;
+  playBlip(760);
 }
 
 // ---------------------------------------------------------------------------
@@ -2181,12 +2557,22 @@ function onPointerDown(pointerId, px, py) {
   // that is in the middle of vanishing.
   if (resolving !== null) return;
 
-  // Resolve buttons sit on top of their outcome, so they are tested first —
+  // HIT ORDER FOLLOWS DRAW ORDER, topmost first. Players are drawn after the
+  // outcomes, so a direct hit on a hand beats anything underneath it — which
+  // only matters when a hand has been LIFTED for name editing, since it can then
+  // overlap the outcomes and their resolve buttons.
+  var src = null, srcIsTop = false;
+  var i;
+  for (i = 0; i < bottomCount; i++) {
+    if (inRect(bottomBoxes[i], px, py)) { src = bottomBoxes[i]; break; }
+  }
+
+  // Resolve buttons sit on top of their outcome, so they are tested before it —
   // otherwise the box underneath would claim the touch and start a pipe. Pressing
   // one does NOT open the dialog; it only arms it. The dialog opens on release,
   // and only if the finger is still on the button, so a stray touch or a drag
   // that happens to start there cannot trigger a resolution.
-  for (var rb = 0; rb < topCount; rb++) {
+  for (var rb = 0; !src && rb < topCount; rb++) {
     var tb = topBoxes[rb];
     if (overResolveBtn(tb, px, py)) {
       var rdr = acquireDrag(pointerId);
@@ -2196,26 +2582,40 @@ function onPointerDown(pointerId, px, py) {
         rdr.startX = px; rdr.startY = py;
         rdr.curX = px; rdr.curY = py;
       }
+      playTick();        // the button is part of the outcome box — same acknowledgement
       needsRender = true;
       return;
     }
   }
 
-  if (addBtn.visible && inRect(addBtn, px, py)) {
-    addOutcome();
-    return;
+  if (!src) {
+    for (i = 0; i < topCount; i++) {
+      if (inRect(topBoxes[i], px, py)) {
+        src = topBoxes[i]; srcIsTop = true;
+        playTick();      // touching an outcome is acknowledged at once, not on release
+        break;
+      }
+    }
   }
 
-  var src = null, srcIsTop = false;
-  for (var i = 0; i < topCount; i++) {
-    if (inRect(topBoxes[i], px, py)) { src = topBoxes[i]; srcIsTop = true; break; }
-  }
-  // Starting a drag is as forgiving as landing one: anywhere in the players'
-  // zone begins a drag from the nearest player.
+  // The add buttons are drawn UNDERNEATH everything, so they are tested last of
+  // the direct hits — a lifted hand sits over them and must win.
   if (!src) {
-    src = playerAt(px, py);
-    srcIsTop = false;
+    if (addBtn.visible && inRect(addBtn, px, py)) {
+      if (focusedBox) focusBox(null);   // pressing a control also accepts an edit
+      addOutcome();
+      return;
+    }
+    if (addUserBtn.visible && inRect(addUserBtn, px, py)) {
+      if (focusedBox) focusBox(null);
+      addUser();
+      return;
+    }
   }
+
+  // Landing a drag is forgiving, and so is starting one: anywhere else in the
+  // players' zone begins a drag from the nearest hand.
+  if (!src) src = playerAt(px, py);
   if (!src) { focusBox(null); return; }
 
   var dr = acquireDrag(pointerId);
@@ -2302,12 +2702,18 @@ function onPointerUp(pointerId, px, py) {
     playBlip(660);
   } else if (!dr.moved) {
     // A tap on a player edits their NAME, but only if it landed on the name
-    // field — the rest of the hand is drag surface.
+    // field — the rest of the hand is drag surface. A tap anywhere else DISMISSES
+    // whatever was being edited, accepting the text and dropping the keyboard.
+    // That matters most while a hand is lifted for editing, because the lift
+    // makes playerAt()'s zone cover most of the screen, so taps that read as
+    // "on the background" arrive here rather than as a miss.
     playerNameRect(dr.sourceBox);
     if (dr.startX >= pnX && dr.startX <= pnX + pnW &&
         dr.startY >= pnY && dr.startY <= pnY + pnH) {
       focusBox(dr.sourceBox);
       playBlip(660);
+    } else if (focusedBox) {
+      focusBox(null);
     }
   }
 
@@ -2318,6 +2724,16 @@ function onPointerUp(pointerId, px, py) {
 // ---------------------------------------------------------------------------
 // Resize & main loop
 // ---------------------------------------------------------------------------
+
+// How much of the viewport the on-screen keyboard is covering right now. Cheap,
+// and only called on visualViewport events / resize — never per frame.
+function updateKeyboardInset() {
+  var vv = window.visualViewport;
+  var inset = 0;
+  if (vv) inset = viewH - (vv.height + vv.offsetTop);
+  keyboardInset = inset > KEYBOARD_MIN_INSET ? inset : 0;
+  needsRender = true;
+}
 
 function resize() {
   dpr = window.devicePixelRatio || 1;
@@ -2338,7 +2754,12 @@ function resize() {
   bgGradient.addColorStop(0, BG_TOP);
   bgGradient.addColorStop(1, BG_BOTTOM);
 
+  // Any rearrangement in progress is abandoned: the geometry it was travelling
+  // FROM belongs to the old viewport, so finishing the move would slide the
+  // boxes in from wherever they used to be on a screen that no longer exists.
+  morphStart = 0;
   layout();
+  updateKeyboardInset();
   needsRender = true;
 }
 
@@ -2346,7 +2767,7 @@ function frame() {
   var t = now();
   if (needsRender || activeDragCount > 0 || activeTransferCount > 0 ||
       resolving !== null || activeParticles > 0 || t < crownUntil ||
-      t < joltUntil) render(t);
+      t < joltUntil || t < topAnimUntil) render(t);
   requestAnimationFrame(frame);
 }
 
@@ -2377,6 +2798,12 @@ input.addEventListener('blur', function () {
 
 window.addEventListener('resize', resize);
 window.addEventListener('orientationchange', resize);
+
+// The keyboard opening/closing shows up here, not as a window resize.
+if (window.visualViewport) {
+  window.visualViewport.addEventListener('resize', updateKeyboardInset);
+  window.visualViewport.addEventListener('scroll', updateKeyboardInset);
+}
 
 resize();
 requestAnimationFrame(frame);
