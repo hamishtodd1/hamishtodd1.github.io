@@ -434,8 +434,15 @@ function deriveBetColor(hex, againstLum) {
 // OUTWARD, so BETBOX_STROKE_FRAC must stay under BET_GAP_RATIO or neighbouring
 // outlines will touch.
 var BETBOX_STROKE_FRAC = 0.28; // outline thickness ÷ cell
-var PERCENT_SIZE = 3.2;        // implied-percentage font size ÷ cell height
-var PERCENT_INSET = 0.04;      // its left margin ÷ box width
+// The implied-percentage tag: a white callout with a black outline and an arrow
+// pointing at the rung of the ladder the number comes from.
+var PERCENT_SIZE = 6.4;        // font size ÷ cell height — the ceiling, when there is room
+var PERCENT_INSET = 0.02;      // its left margin ÷ box width
+var PERCENT_PAD = 0.30;        // padding inside the white box ÷ font size
+var PERCENT_ARROW = 0.55;      // arrow length ÷ font size
+var PERCENT_ARROW_HALF = 0.34; // half the arrow's base ÷ font size
+var PERCENT_CHAR_W = 0.56;     // digit width ÷ font size — measuring per frame would allocate
+var PERCENT_MIN_SIZE = 6;      // below this it is skipped: an illegible tag is worse than none
 // Bet boxes and money boxes are ALWAYS the same size — this fraction of the cell,
 // applied to both. At 1 they fill the cell exactly, so a betBox outline frames
 // its bet and a coin is the same box wherever it is. Lowering it insets both
@@ -735,18 +742,27 @@ function playSell() {
   osc.stop(t + 0.27);
 }
 
-// A finger landing on an outcome: the shortest possible acknowledgement that the
-// touch registered. Deliberately FLAT (no sweep) and quiet, because the sound
-// that carries the meaning is the one on RELEASE — judging, renaming, or a trade
-// going through — and this must be long gone by then rather than still ringing
-// under it. 30ms at a third of the gain of everything else.
-function playTick() {
+// A finger landing on a box: the shortest possible acknowledgement that the touch
+// registered. Deliberately FLAT (no sweep) and quiet, because the sound that
+// carries the meaning is the one on RELEASE — judging, renaming, or a trade going
+// through — and this must be long gone by then rather than still ringing under
+// it. 30ms at a third of the gain of everything else.
+// The same tick marks a pipe CONNECTING to a box mid-drag — same character,
+// because it is the same kind of event (something registered).
+//
+// PITCH FOLLOWS THE KIND OF BOX, not the phase of the gesture: outcomes tick low,
+// hands tick a fifth higher. So a drag reads as an interval in the direction it
+// travels — outcome → hand rises, hand → outcome falls — and the sound tells you
+// which way round the trade is going before anything has happened.
+var TICK_OUTCOME_HZ = 1000;
+var TICK_PLAYER_HZ = 1500;
+function playTick(freq) {
   if (!audioCtx) return;
   var osc = audioCtx.createOscillator();
   var gain = audioCtx.createGain();
   var t = audioCtx.currentTime;
   osc.type = 'triangle';
-  osc.frequency.value = 1000;
+  osc.frequency.value = freq;
   gain.gain.setValueAtTime(0.0001, t);
   gain.gain.exponentialRampToValueAtTime(0.08, t + 0.004);
   gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.03);
@@ -1136,8 +1152,10 @@ function updateCrowns() {
   needsRender = true;
 }
 
+// Crowns only ever appear once every outcome has been resolved away, so there is
+// nothing above the hands to collide with — they can afford to be big.
 function crownSize(p) {
-  return Math.min(p.w * 0.22, p.h * 0.2, 64);
+  return Math.min(p.w * 0.72, p.h * 0.64, 208);
 }
 
 // Centre of a player's crown, just above their box. Into gx/gy.
@@ -1431,6 +1449,14 @@ function roundRectPath(x, y, w, h, r) {
   ctx.arcTo(x, y + h, x, y, r);
   ctx.arcTo(x, y, x + w, y, r);
   ctx.closePath();
+}
+
+// Shake a box and keep the loop awake for as long as it lasts. Used both when a
+// pipe reaches a box and when a finger first lands on one — the same feedback for
+// the same fact, that this box is now the one in play.
+function joltBox(b) {
+  b.joltTime = now();
+  joltUntil = b.joltTime + JOLT_MS;
 }
 
 function shakeOffset(joltTime) {
@@ -2101,8 +2127,32 @@ function drawTopBox(b) {
   ctx.restore();
 }
 
-// The probability the market currently implies for this outcome, shown to the
-// LEFT of the bet grid and level with the row it comes from.
+// A rounded box with an arrow on its RIGHT side, whose tip is at (tipX, tipY).
+// One continuous path, so filling and stroking it gives a single silhouette with
+// no seam where the arrow meets the box.
+function calloutPath(x, y, w, h, r, tipX, tipY, half) {
+  var right = x + w;
+  if (half > h * 0.5 - r) half = h * 0.5 - r;
+  if (half < 1) half = 1;
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(right - r, y);
+  ctx.arcTo(right, y, right, y + r, r);
+  ctx.lineTo(right, tipY - half);
+  ctx.lineTo(tipX, tipY);                    // the point
+  ctx.lineTo(right, tipY + half);
+  ctx.lineTo(right, y + h - r);
+  ctx.arcTo(right, y + h, right - r, y + h, r);
+  ctx.lineTo(x + r, y + h);
+  ctx.arcTo(x, y + h, x, y + h - r, r);
+  ctx.lineTo(x, y + r);
+  ctx.arcTo(x, y, x + r, y, r);
+  ctx.closePath();
+}
+
+// The probability the market currently implies for this outcome: a white callout
+// to the LEFT of the bet grid, outlined in black like every other white field,
+// with an arrow pointing at the rung the number comes from.
 //
 // The price of a level IS the implied chance: `getBetPriceContinuous(i)` in
 // manual.js, as a fraction. The level that counts is the most expensive one
@@ -2113,32 +2163,63 @@ function drawTopBox(b) {
 // — the price of the cheapest level is what the FIRST buyer would pay, which is
 // an offer, not an implied chance.
 //
+// WHERE IT POINTS is the boundary itself, not a row: the gap between the cheapest
+// unsold bet and the most expensive sold one, which is the top edge of the money
+// block. With nothing sold that boundary is below the whole ladder; with
+// everything sold it is above it. That line is the market — everything above it
+// is still for sale, everything below it has been bought.
+//
 // Rounded to a whole percent.
 function drawImpliedPercent(b) {
   if (unitH <= 0.5) return;
 
   var lvl = -1;
   for (var i = 0; i < numBetLevels; i++) { if (b.moneyAt[i] > 0) { lvl = i; break; } }
-  // Nothing bought: 0%, sat level with the bottom row — the rung the first
-  // purchase will take, and the bottom of the ladder is where 0 belongs.
   var pct = lvl < 0 ? 0 : Math.round(100 * getBetPriceContinuous(lvl));
-  var row = lvl < 0 ? numBetLevels - 1 : lvl;
 
-  var x0 = gridStartX(b.x, b.w);
-  var right = x0 - unitGap * 2;              // sits just clear of the grid
-  var avail = right - (b.x + b.w * PERCENT_INSET);
-  if (avail < 6) return;                     // no room — better nothing than clipped
+  // The arrow's tip: the middle of the gap between the two rows it separates.
+  var tipX = gridStartX(b.x, b.w);
+  var tipY;
+  if (lvl < 0) { betCellPos(b, numBetLevels - 1, 0); tipY = gy + unitH + unitGap * 0.5; }
+  else { betCellPos(b, lvl, 0); tipY = gy - unitGap * 0.5; }
 
-  // Sized to the space it has: "100%" is four characters at roughly 0.55em each.
-  var size = Math.min(unitH * PERCENT_SIZE, avail / 2.2);
-  if (size < 6) return;
+  var text = pct + '%';
+  var left = b.x + b.w * PERCENT_INSET;
+  var avail = tipX - left;
+  if (avail < PERCENT_MIN_SIZE) return;
 
-  betCellPos(b, row, 0);
+  // Everything scales off the font size, so solve for the largest one whose box
+  // plus arrow still fits the space left of the grid. Text width is estimated
+  // rather than measured: measureText allocates, and this runs every frame.
+  var per = PERCENT_CHAR_W * text.length + 2 * PERCENT_PAD + PERCENT_ARROW;
+  var size = Math.min(unitH * PERCENT_SIZE, avail / per);
+  if (size < PERCENT_MIN_SIZE) return;       // no room — better nothing than illegible
+
+  var tw = size * PERCENT_CHAR_W * text.length;
+  var boxW = tw + 2 * size * PERCENT_PAD;
+  var boxH = size + 2 * size * PERCENT_PAD;
+  var boxX = tipX - size * PERCENT_ARROW - boxW;
+  var boxY = tipY - boxH * 0.5;
+
+  // Kept inside the box vertically: at the very top or bottom of the ladder the
+  // callout would otherwise hang out of the outcome. The arrow stays on the
+  // boundary either way, so it can end up near one end of the callout.
+  var lo = b.y + b.h * bodyTopFrac, hi = b.y + b.h * 0.94;
+  if (boxY < lo) boxY = lo;
+  if (boxY + boxH > hi) boxY = hi - boxH;
+
+  var sw = fieldStrokeW(boxH);
+  calloutPath(boxX, boxY, boxW, boxH, Math.min(boxH * 0.28, size * 0.4),
+              tipX, tipY, size * PERCENT_ARROW_HALF);
+  ctx.fillStyle = '#ffffff';
+  ctx.fill();
+  ctx.lineWidth = sw;
+  ctx.strokeStyle = FIELD_OUTLINE;
+  ctx.stroke();
+
   ctx.font = Math.round(size) + 'px sans-serif';
-  ctx.fillStyle = b.betColor;
-  ctx.textAlign = 'right';
-  ctx.fillText(pct + '%', right, gy + unitH * 0.5);
-  ctx.textAlign = 'center';                  // render() draws everything else centred
+  ctx.fillStyle = '#1a1a1a';
+  ctx.fillText(text, boxX + boxW * 0.5, boxY + boxH * 0.5);
 }
 
 // The bets (white squares) and, in front of them, the betBox outlines. Row `i`
@@ -2686,7 +2767,9 @@ function onPointerDown(pointerId, px, py) {
         rdr.startX = px; rdr.startY = py;
         rdr.curX = px; rdr.curY = py;
       }
-      playTick();        // the button is part of the outcome box — same acknowledgement
+      // The button is part of the outcome box, so it gets the same acknowledgement.
+      playTick(TICK_OUTCOME_HZ);
+      joltBox(tb);
       needsRender = true;
       return;
     }
@@ -2720,8 +2803,10 @@ function onPointerDown(pointerId, px, py) {
 
   // Landing on a box of either kind is acknowledged AT ONCE, not on release —
   // the release belongs to whatever the gesture turned out to mean. A miss (no
-  // box at all) stays silent.
-  playTick();
+  // box at all) stays silent and still. The box shakes exactly as it does when a
+  // pipe reaches it, so "you have hold of this one" looks the same either way.
+  playTick(srcIsTop ? TICK_OUTCOME_HZ : TICK_PLAYER_HZ);
+  joltBox(src);
 
   var dr = acquireDrag(pointerId);
   if (!dr) return;
@@ -2769,8 +2854,10 @@ function onPointerMove(pointerId, px, py) {
     if (t !== dr.target) {
       dr.target = t;
       if (t) {
-        t.joltTime = now();
-        joltUntil = t.joltTime + JOLT_MS;
+        joltBox(t);
+        // The pipe has taken hold. The target is whatever the source is not, so
+        // the pair of ticks spells out the direction: down for a sale, up for a buy.
+        playTick(dr.sourceIsTop ? TICK_PLAYER_HZ : TICK_OUTCOME_HZ);
         if (navigator.vibrate) navigator.vibrate(15);
       }
     }
