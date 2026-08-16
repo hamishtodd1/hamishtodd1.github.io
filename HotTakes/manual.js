@@ -1,6 +1,6 @@
 'use strict';
 
-var numBetLevels = 24;
+var numBetLevels = 16; //24 is good for having singular examples at top and bottom
 
 // Bet and money boxes are RECTANGLES. Their height is whatever the layout
 // derives; this is their width as a proportion of that height. 1 = square.
