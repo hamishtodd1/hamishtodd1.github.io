@@ -32,7 +32,7 @@ function initHands()
 	function loadControllerModel(i)
 	{
 		let controllerFilename = "data/external_controller01_" + (i===LEFT_CONTROLLER_INDEX?"left":"right") + ".obj"
-		var vive = true
+		var vive = false
 		if(vive)
 		{
 			controllerFilename = "data/vr_controller_vive_1_5.obj"

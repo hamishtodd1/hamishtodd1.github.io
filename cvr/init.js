@@ -197,6 +197,7 @@ function init()
 	setCurrentHeadPositionAsCenter() //wanna be accessible from behind the panel?
 
 	renderer.xr.enabled = true;
+	renderer.xr.setReferenceSpaceType('local') //head starts at origin, which is what the scene layout assumes
 	document.body.appendChild(VRButton.createButton(renderer))
 
 	// socket.onopen = function()
